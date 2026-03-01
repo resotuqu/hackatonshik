@@ -12,6 +12,7 @@
     "sail": false,
     "skills": [
         "livewire-development",
-        "pest-testing"
+        "pest-testing",
+        "tailwindcss-development"
     ]
 }
