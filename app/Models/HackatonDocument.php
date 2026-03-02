@@ -20,6 +20,7 @@ class HackatonDocument extends Model
         return $this->HasMany(UserHackatonDocument::class);
     }
 
+
     protected $fillable = [
         'hackaton_id',
         'name',

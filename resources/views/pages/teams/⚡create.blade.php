@@ -105,7 +105,7 @@ class extends Component {
             'user_id' => \Illuminate\Support\Facades\Auth::user()->id,
             'title' => $this->title,
             'description' => $this->description,
-            'image_url' => '/uploads/' . $photo,
+            'image_url' => $photo,
             'hackaton_id' => $this->hackaton_id,
             'is_public' => $this->is_public,
         ]);
@@ -133,6 +133,8 @@ class extends Component {
                 ]));
             }
         }
+
+        $this->redirect('/profile/teams');
 
     }
 

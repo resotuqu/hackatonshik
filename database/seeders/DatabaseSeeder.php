@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-//        $this->call(HackatonSeeder::class);
+        $this->call(HackatonSeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(SkillSeeder::class);
     }

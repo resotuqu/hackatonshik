@@ -92,7 +92,7 @@ class extends Component {
             @foreach($this->teams as $team)
                 <div class="bg-slate-600 flex flex-col px-4 py-2 rounded-sm text-white">
                     <div class="bg-white">
-                        <img src="{{$team->image_url}}" class="object-contain w-full h-32 rounded-sm" alt="">
+                        <img src="/uploads/{{$team->image_url}}" class="object-contain w-full h-32 rounded-sm" alt="">
                     </div>
                     <div class="mt-2 space-y-2">
                         <p>{{$team->title}}</p>

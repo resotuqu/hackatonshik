@@ -2,13 +2,14 @@
 
 use App\Models\Hackaton;
 use App\Models\Team;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-new #[Layout('layouts::app', ['title' => 'Создание команды'])]
+new #[Layout('layouts::app', ['title' => 'Изменение команды'])]
 class extends Component {
 
     use WithFileUploads;
@@ -104,7 +105,7 @@ class extends Component {
 
         // Team
         $team = Team::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::user()->id,
+            'user_id' => Auth::user()->id,
             'title' => $this->title,
             'description' => $this->description,
             'image_url' => '/uploads/' . $photo,
