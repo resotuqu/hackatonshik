@@ -9,4 +9,14 @@ class TeamRoleSkill extends Model
 {
     /** @use HasFactory<\Database\Factories\TeamRoleSkillFactory> */
     use HasFactory;
+
+    protected $table = 'team_role_skills';
+
+    public function skill() {
+        return $this->belongsTo(Skill::class);
+    }
+
+    public function teamRole() {
+        return $this->belongsTo(TeamRole::class);
+    }
 }

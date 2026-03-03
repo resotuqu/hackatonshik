@@ -15,7 +15,7 @@ class TeamRole extends Model
     use HasFactory;
 
     public function skills(): BelongsToMany {
-        return $this->belongsToMany(Skill::class, 'team_role_skills');
+        return $this->belongsToMany(Skill::class, 'team_role_skills',);
     }
 
     public function team(): BelongsTo {

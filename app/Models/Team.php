@@ -25,6 +25,10 @@ class Team extends Model
         return $this->hasMany(TeamRole::class);
     }
 
+    public function emptyRoles(): int {
+        return $this->hasMany(TeamRole::class)->whereNull('user_id')->count();
+    }
+
     public function user() : BelongsTo {
         return $this->belongsTo(User::class);
     }

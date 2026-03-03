@@ -23,8 +23,7 @@ class extends Component {
     #[Validate(['description' => 'required'], message: ['description.required' => 'Описание должно быть заполнено'])]
     public string $description = '';
 
-    #[Validate(['photo' => ['required', 'image', 'max:4096']], message: [
-        'photo.required' => 'Изображение обязательно',
+    #[Validate(['photo' => ['sometimes', 'max:4096']], message: [
         'photo.image' => 'Файл должен быть валидным изображением',
         'photo.max' => 'Размер изображения не может быть больше 4 Мбайт'
     ])]
@@ -101,39 +100,43 @@ class extends Component {
     {
         $this->validate();
 
-        $photo = $this->photo->storePublicly(path: 'team_photos', options: 'public');
-
-        // Team
-        $team = Team::create([
-            'user_id' => Auth::user()->id,
-            'title' => $this->title,
+        $data = [
+            'title'       => $this->title,
             'description' => $this->description,
-            'image_url' => '/uploads/' . $photo,
             'hackaton_id' => $this->hackaton_id,
-            'is_public' => $this->is_public,
-        ]);
+            'is_public'   => $this->is_public,
+        ];
 
+        if ($this->photo) {
+            $path = $this->photo->storePublicly('team_photos', 'public');
+            $data['image_url'] = $path;
+        }
+
+        $this->team->update($data);
+
+
+        $this->team->socialLinks()->delete();
         //Social Links Link
         foreach ($this->socialLinks as $socialLink) {
-            $team->socialLinks()->create([
+            $this->team->socialLinks()->create([
                 'name' => $socialLink['name'],
                 'url' => $socialLink['url'],
             ]);
         }
 
+        $this->team->roles()->delete();
         //Roles
         foreach ($this->roles as $role) {
-            $role = $team->roles()->create([
+            $newRole = $this->team->roles()->create([
                 'title' => $role['title'],
                 'description' => $role['description'],
-                'team_id' => $team->id,
+                'team_id' => $this->team->id,
                 'role_id' => $role['role'],
                 'user_id' => null,
             ]);
-            foreach ($role['skills'] as $skill) {
-                $role->skills()->attach(\App\Models\Skill::create([
-                    'name' => $skill->name
-                ]));
+
+            if (!empty($role['skills'])) {
+                $newRole->skills()->sync($role['skills']);
             }
         }
 
@@ -144,8 +147,20 @@ class extends Component {
     public function hackatons()
     {
         $hackatons = Hackaton::query()->where('is_public', '=', '1')->get();
-        $this->hackaton_id = $hackatons[0]->id;
-        return $hackatons;
+
+        $hackatons_array = [
+            [
+                'name' => 'Выберите хакатон'
+            ]
+        ];
+        foreach ($hackatons as $hackaton) {
+            $hackatons_array[] = [
+                'id' => $hackaton->id,
+                'name' => $hackaton->title,
+            ];
+        }
+
+        return $hackatons_array;
     }
 
     #[Computed]
@@ -177,23 +192,23 @@ class extends Component {
             ];
         }
         foreach ($team->roles as $role) {
-            $skills = [];
-            foreach ($role->skills as $skill) {
-                $skills[] = [
-                    'id' => uniqid(),
-                    'name' => $skill->name,
-                ];
-            }
+            $skillIds = $role->skills->pluck('id')->toArray();
 
             $this->roles[] = [
                 'id' => uniqid(),
                 'title' => $role->title,
-                'skills' => $skills,
+                'skills' => $skillIds,
                 'description' => $role->description,
                 'role' => $role->role_id,
             ];
         }
     }
+
+    public $config = [
+        'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
+        'uploadImage' => false,
+    ];
+
 
 
 };
@@ -201,161 +216,90 @@ class extends Component {
 
 <div>
 
-    <x-livewire-form-layout submit-button-title="Сохранить изменения" title="Изменение команды">
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    </head>
+
+    <x-mary-card title="Изменение команды" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+    <x-maryform  class="">
         {{--    Title    --}}
-        <x-livewire-form-input label="Заголовок" name="title" type="text" model="title"/>
+        <x-mary-input label="Заголовок" wire:model="title"/>
 
         {{--    Description    --}}
-        <div class="flex flex-col mt-4 w-full">
-            <label for="description" class="text-white">Описание</label>
-            <textarea id="description" wire:model="description"
-                      class="bg-white rounded-sm py-2 mt-2">{{old('description', '')}}</textarea>
-            @error('description')
-            <p class="mt-2 text-red-500">{{$message}}</p>
-            @enderror
-        </div>
+        <x-marymarkdown wire:model="description" label="Описание"/>
 
         {{--    Photo    --}}
-        <x-livewire-form-input label="Фотография" name="photo" type="file" model="photo"/>
-        @if ($photo)
-            <img class="w-auto object-contain h-64 mt-2" src="{{ $photo->temporaryUrl() }}">
-        @endif
+        <x-maryfile label="Фотография" wire:model="photo"/>
 
         {{--    HackatonId    --}}
-        <div class="flex flex-col mt-4 w-full">
-            <label for="hackaton_id" class="text-white">Хакатон</label>
-            <select id="hackaton_id" wire:model="hackaton_id" class="bg-white rounded-sm py-2 mt-2">
-                <option disabled value="">Выберите хакатон...</option>
-
-                @foreach($this->hackatons as $hackaton)
-                    {{--@foreach($hackatons as $hackaton)--}}
-                    <option value="{{$hackaton->id}}">{{$hackaton->title}}</option>
-                @endforeach
-            </select>
-            @error('hackaton_id')
-            <p class="mt-2 text-red-500">{{$message}}</p>
-            @enderror
-        </div>
+        <x-maryselect label="Хакатон" :options="$this->hackatons" wire:model="hackaton_id" />
 
         {{--SocialLinks--}}
-        <div class="flex flex-col mt-4 w-full">
-            <label for="roles" class="text-white">Социальные ссылки</label>
-            <div class="space-y-2">
+        <div class="flex flex-col card">
+
+            <x-mary-button wire:click="addSocialLink" label="Добавить социальную ссылку" />
+
+            <div class="space-y-2 mt-4">
                 @foreach($socialLinks as $index => $socialLink)
-                    <div class="bg-slate-800 rounded-sm py-2 px-4 text-white"
-                         wire:key="socialLink-{{ $socialLink['id'] }}">
-                        <div class="flex flex-row space-x-4 items-center">
-                            <button type="button" wire:click="removeSocialLink({{ $index }})"
-                                    class="px-4 py-2 bg-red-500 hover:bg-red-400 rounded-sm cursor-pointer">
-                                Удалить
-                            </button>
-                        </div>
+                    <x-mary-card class="bg-slate-400" wire:key="socialLink-{{ $socialLink['id'] }}" title="Социальная ссылка">
+                        <x-mary-button class="btn-error" wire:click="removeSocialLink({{ $index }})">
+                            Удалить
+                        </x-mary-button>
 
                         <div>
-                            <div class="text-black">
-                                {{--Title--}}
-                                <x-livewire-form-input model="socialLinks.{{$index}}.name"
-                                                       name="socialLinks.{{$index}}.name"
-                                                       label="Название" type="text"/>
-                                {{--Url--}}
-                                <x-livewire-form-input model="socialLinks.{{$index}}.url"
-                                                       name="socialLinks.{{$index}}.url"
-                                                       label="Ссылка" type="text"/>
-                            </div>
-
+                            <x-mary-input wire:model="socialLinks.{{$index}}.name" label="Название социальной ссылки" />
+                            <x-mary-input wire:model="socialLinks.{{$index}}.url" label="Ссылка" />
                         </div>
-                    </div>
+                    </x-mary-card>
                 @endforeach
             </div>
 
-            {{--NewSocialLinkButton--}}
-            <div>
-                <button type="button"
-                        class="px-4 mt-4 py-2 bg-blue-500 hover:bg-blue-400 rounded-sm cursor-pointer text-white"
-                        wire:click="addSocialLink">
-                    Добавить роль
-                </button>
-            </div>
         </div>
 
         {{--    Roles    --}}
         <div class="flex flex-col mt-4 w-full">
-            <label for="roles" class="text-white">Роли</label>
-            <div class="space-y-2">
+
+            <x-mary-button class="btn" wire:click="addRole" label="Добавить роль" />
+
+            <div class="space-y-2 mt-4">
                 @foreach($roles as $index => $role)
-                    <div class="bg-slate-800 rounded-sm py-2 px-4 text-white" wire:key="role-{{ $role['id'] }}">
+                    <x-mary-card title="Роль" class="bg-slate-400" wire:key="role-{{ $role['id'] }}">
                         <div class="flex flex-row space-x-4 items-center">
-                            <button type="button" wire:click="removeRole({{ $index }})"
-                                    class="px-4 py-2 bg-red-500 hover:bg-red-400 rounded-sm cursor-pointer">
-                                Удалить
-                            </button>
+                            <x-mary-button wire:click="removeRole({{ $index }})" label="Удалить" class="btn-error"/>
                         </div>
 
                         <div>
                             <div class="text-black">
-
-
                                 {{--Title--}}
-                                <x-livewire-form-input model="roles.{{$index}}.title" name="roles.{{$index}}.title"
-                                                       label="Название" type="text"/>
+                                <x-mary-input wire:model="roles.{{$index}}.title" label="Название"/>
 
                                 {{--Description--}}
-                                <div class="flex flex-col mt-4 w-full">
-                                    <label for="roles.{{$index}}.description" class="text-white">Описание</label>
-                                    <textarea id="description.{{$index}}.description"
-                                              wire:model="roles.{{$index}}.description"
-                                              class="bg-white rounded-sm py-2 mt-2">{{old('roles.' . $index . '.description', '')}}</textarea>
-                                    @error('roles.' . $index . '.description')
-                                    <p class="mt-2 text-red-500">{{$message}}</p>
-                                    @enderror
-                                </div>
-
+                                <x-marymarkdown disk="public" folder="team_markdown" wire:model="roles.{{$index}}.description" label="Описание" :config="$this->config" />
 
                                 {{--Role--}}
-                                <div class="flex flex-col mt-4 w-full">
-                                    <label for="roles.{{$index}}.role" class="text-white">Категория роли</label>
-                                    <select id="roles.{{$index}}.role" wire:model="roles.{{$index}}.role"
-                                            class="bg-white rounded-sm py-2 mt-2">
-                                        <option disabled value="">Выберите роль...</option>
-                                        @foreach($this->rolesData as $role)
-                                            <option value="{{$role->id}}">{{$role->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('roles.' . $index . '.role')
-                                    <p class="mt-2 text-red-500">{{$message}}</p>
-                                    @enderror
-                                </div>
+                                <x-maryselect label="Категория роли" wire:model="roles.{{$index}}.role" :options="$this->rolesData" />
 
                                 {{--Skills--}}
-                                <div class="flex flex-col mt-4 w-full">
-                                    <label for="roles.{{$index}}.skills" class="text-white">Навыки роли</label>
-                                    <select multiple id="roles.{{$index}}.skills" wire:model="roles.{{$index}}.skills"
-                                            class="bg-white rounded-sm py-2 mt-2">
-                                        <option disabled value="">Выберите навыки...</option>
-                                        @foreach($this->skillsData as $skill)
-                                            <option value="{{$skill->id}}">{{$skill->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('roles.' . $index . '.skills')
-                                    <p class="mt-2 text-red-500">{{$message}}</p>
-                                    @enderror
-                                </div>
-
+                                <x-marychoices-offline
+                                    label="Навыки роли"
+                                    wire:model="roles.{{$index}}.skills"
+                                    :options="$this->skillsData"
+                                    placeholder="Навыки..."
+                                    clearable
+                                    searchable />
 
                             </div>
-
                         </div>
-                    </div>
+                    </x-mary-card>
                 @endforeach
             </div>
-            <div>
-                <button type="button"
-                        class="px-4 mt-4 py-2 bg-blue-500 hover:bg-blue-400 rounded-sm cursor-pointer text-white"
-                        wire:click="addRole">
-                    Добавить роль
-                </button>
-            </div>
+
         </div>
 
-    </x-livewire-form-layout>
+        <x-slot:actions>
+            <x-mary-button wire:click="save" label="Сохранить измененения" class="btn-primary" />
+        </x-slot:actions>
+    </x-maryform>
+    </x-mary-card>
 </div>
