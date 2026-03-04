@@ -242,7 +242,7 @@ class extends Component {
 
             <div class="space-y-2 mt-4">
                 @foreach($socialLinks as $index => $socialLink)
-                    <x-mary-card class="bg-slate-400" wire:key="socialLink-{{ $socialLink['id'] }}" title="Социальная ссылка">
+                    <x-mary-card class="bg-base-200" wire:key="socialLink-{{ $socialLink['id'] }}" title="Социальная ссылка">
                         <x-mary-button class="btn-error" wire:click="removeSocialLink({{ $index }})">
                             Удалить
                         </x-mary-button>
@@ -264,7 +264,7 @@ class extends Component {
 
             <div class="space-y-2 mt-4">
                 @foreach($roles as $index => $role)
-                    <x-mary-card title="Роль" class="bg-slate-400" wire:key="role-{{ $role['id'] }}">
+                    <x-mary-card title="Роль" class="bg-base-200" wire:key="role-{{ $role['id'] }}">
                         <div class="flex flex-row space-x-4 items-center">
                             <x-mary-button wire:click="removeRole({{ $index }})" label="Удалить" class="btn-error"/>
                         </div>

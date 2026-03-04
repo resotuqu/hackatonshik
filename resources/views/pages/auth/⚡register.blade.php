@@ -47,19 +47,18 @@ new #[Layout('layouts::app', ['title' => 'Регистрация'])]class extend
 
 <div>
 
-    <x-form wire:submit="save" class="justify-self-center w-full md:w-1/2">
-        <x-header title="Регистрация" separator/>
-        <x-input label="Фамилия, Имя, Отчество" wire:model="fio" placeholder="Владимир" hint="Введите ваше фио"/>
-        <p>{{$fio}}</p>
-        <x-datetime label="Дата рождения" hint="Введите вашу дату рождения" wire:model="date_of_birth"/>
-        <x-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com"
+    <x-maryform wire:submit="save" class="justify-self-center w-full md:w-1/2">
+        <x-mary-header title="Регистрация" separator/>
+        <x-mary-input label="Фамилия, Имя, Отчество" wire:model="fio" placeholder="Владимир" hint="Введите ваше фио"/>
+        <x-marydatetime label="Дата рождения" hint="Введите вашу дату рождения" wire:model="date_of_birth"/>
+        <x-mary-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com"
                  hint="Введите вашу электронную почту"/>
-        <x-input label="Псевдоним" wire:model="nickname" placeholder="vova_vlad_123" hint="Введите ваш псевдоним"/>
-        <x-password label="Пароль" wire:model="password"/>
-        <x-password label="Подтверждение пароля" wire:model="password_confirmation"/>
-        <x-input label="Контактный номер телефона" wire:model="phone" prefix="+"/>
+        <x-mary-input label="Псевдоним" wire:model="nickname" placeholder="vova_vlad_123" hint="Введите ваш псевдоним"/>
+        <x-marypassword label="Пароль" wire:model="password"/>
+        <x-marypassword label="Подтверждение пароля" wire:model="password_confirmation"/>
+        <x-mary-input label="Контактный номер телефона" wire:model="phone" prefix="+"/>
         <x-slot:actions>
-            <x-button class="btn-primary" label="Зарегистрироваться" type="submit"/>
+            <x-marybutton class="btn-primary" label="Зарегистрироваться" type="submit"/>
         </x-slot:actions>
-    </x-form>
+    </x-maryform>
 </div>

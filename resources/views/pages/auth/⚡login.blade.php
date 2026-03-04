@@ -31,14 +31,13 @@ class extends Component {
 ?>
 
 <div>
-    <x-form wire:submit="save" class="justify-self-center w-full md:w-1/2">
-        <x-header title="Авторизация" separator/>
-        <x-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com"
-                 hint="Введите вашу электронную почту"/>
-        <x-password label="Пароль" wire:model="password"/>
-        <x-toggle label="Запомнить меня" wire:model="remember"/>
+    <x-maryform wire:submit="save" class="justify-self-center w-full md:w-1/2">
+        <x-mary-header title="Авторизация" separator/>
+        <x-mary-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com" hint="Введите вашу электронную почту"/>
+        <x-marypassword label="Пароль" wire:model="password"/>
+        <x-marytoggle label="Запомнить меня" wire:model="remember"/>
         <x-slot:actions>
-            <x-button class="btn-primary" label="Авторизироваться" type="submit"/>
+            <x-mary-button class="btn-primary" label="Авторизироваться" type="submit"/>
         </x-slot:actions>
-    </x-form>
+    </x-maryform>
 </div>

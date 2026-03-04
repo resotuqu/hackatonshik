@@ -8,9 +8,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-new #[Layout('layouts::app', ['title' => 'Создание команды'])]
-class extends Component {
-
+new #[Layout('layouts::app', ['title' => 'Создание команды'])] class extends Component {
     use WithFileUploads;
 
     //----------------------------------------------------------------
@@ -20,11 +18,16 @@ class extends Component {
     #[Validate(['description' => 'required'], message: ['description.required' => 'Описание должно быть заполнено'])]
     public string $description = '';
 
-    #[Validate(['photo' => ['required', 'image', 'max:4096']], message: [
-        'photo.required' => 'Изображение обязательно',
-        'photo.image' => 'Файл должен быть валидным изображением',
-        'photo.max' => 'Размер изображения не может быть больше 4 Мбайт'
-    ])]
+    #[
+        Validate(
+            ['photo' => ['required', 'image', 'max:4096']],
+            message: [
+                'photo.required' => 'Изображение обязательно',
+                'photo.image' => 'Файл должен быть валидным изображением',
+                'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
+            ],
+        ),
+    ]
     public $photo;
 
     #[Validate(['required', 'exists:hackatons,id'])]
@@ -33,19 +36,23 @@ class extends Component {
     public bool $is_public = true;
 
     //----------------------------------------------------------------
-    #[Validate([
-        'roles.*.title' => ['required', 'min:3'],
-        'roles.*.description' => ['required', 'max:255'],
-        'roles.*.role' => ['required', 'exists:roles,id'],
-    ],
-        message: [
-            'roles.*.title.required' => 'Название роли обязательно для заполнения',
-            'roles.*.title.min' => 'Название роли должно содержать минимум 3 символа',
-            'roles.*.description.required' => 'Описание роли обязательно',
-            'roles.*.description.max' => 'Длина описания роли не может быть больше 255 символов',
-            'roles.*.role.required' => 'Категория роли должна быть выбрана',
-            'roles.*.role.exists' => 'ОШИБКА 19755. Напишите по этому поводу в техподдержку',
-        ])]
+    #[
+        Validate(
+            [
+                'roles.*.title' => ['required', 'min:3'],
+                'roles.*.description' => ['required', 'max:255'],
+                'roles.*.role' => ['required', 'exists:roles,id'],
+            ],
+            message: [
+                'roles.*.title.required' => 'Название роли обязательно для заполнения',
+                'roles.*.title.min' => 'Название роли должно содержать минимум 3 символа',
+                'roles.*.description.required' => 'Описание роли обязательно',
+                'roles.*.description.max' => 'Длина описания роли не может быть больше 255 символов',
+                'roles.*.role.required' => 'Категория роли должна быть выбрана',
+                'roles.*.role.exists' => 'ОШИБКА 19755. Напишите по этому поводу в техподдержку',
+            ],
+        ),
+    ]
     public $roles = [];
 
     public function addRole(): void
@@ -66,15 +73,19 @@ class extends Component {
     }
 
     //----------------------------------------------------------------
-    #[Validate(rule: [
-        'socialLinks.*.name' => ['required', 'min:2'],
-        'socialLinks.*.url' => ['required'],
-    ], message: [
-        'socialLinks.*.name.required' => 'Имя обязательно',
-        'socialLinks.*.name.min' => 'Длина имени должна быть не менее 2 символов',
-        'socialLinks.*.url.required' => 'Ссылка обязательна',
-
-    ])]
+    #[
+        Validate(
+            rule: [
+                'socialLinks.*.name' => ['required', 'min:2'],
+                'socialLinks.*.url' => ['required'],
+            ],
+            message: [
+                'socialLinks.*.name.required' => 'Имя обязательно',
+                'socialLinks.*.name.min' => 'Длина имени должна быть не менее 2 символов',
+                'socialLinks.*.url.required' => 'Ссылка обязательна',
+            ],
+        ),
+    ]
     public $socialLinks = [];
 
     public function addSocialLink()
@@ -128,14 +139,15 @@ class extends Component {
                 'user_id' => null,
             ]);
             foreach ($role['skills'] as $skill) {
-                $role->skills()->attach(\App\Models\Skill::create([
-                    'name' => $skill->name
-                ]));
+                $role->skills()->attach(
+                    \App\Models\Skill::create([
+                        'name' => $skill->name,
+                    ]),
+                );
             }
         }
 
         $this->redirect('/profile/teams');
-
     }
 
     //----------------------------------------------------------------
@@ -146,8 +158,8 @@ class extends Component {
 
         $hackatons_array = [
             [
-                'name' => 'Выберите хакатон'
-            ]
+                'name' => 'Выберите хакатон',
+            ],
         ];
         foreach ($hackatons as $hackaton) {
             $hackatons_array[] = [
@@ -164,7 +176,7 @@ class extends Component {
     {
         $roles = [];
         $roles[] = [
-            'name' => 'Выберите категорию роли'
+            'name' => 'Выберите категорию роли',
         ];
         foreach (\App\Models\Role::all() as $role) {
             $roles[] = [
@@ -183,7 +195,6 @@ class extends Component {
 
     //----------------------------------------------------------------
 
-
     public function mount()
     {
         $this->addRole();
@@ -194,48 +205,50 @@ class extends Component {
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
         'uploadImage' => false,
     ];
-
 };
 ?>
 
 <div>
+
     <head>
         <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
         <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     </head>
-        <x-form wire:submit="save" class="w-full md:w-1/2 justify-self-center">
-            <x-header title="Создание команды" separator />
+    <x-mary-card title="Изменение команды" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+        <x-maryform wire:submit="save" class="">
 
             {{--    Title    --}}
             <x-mary-input wire:model="title" label="Заголовок" />
 
             {{--    Description    --}}
-            <x-markdown  wire:model="description" label="Описание" :config="$this->config" />
+            <x-marymarkdown wire:model="description" label="Описание" :config="$this->config" />
 
             {{--    Photo    --}}
-            <x-file label="Обложка команды" wire:model="photo" accept="image/png, image/jpeg, image/webp" />
+            <x-maryfile label="Обложка команды" wire:model="photo" accept="image/png, image/jpeg, image/webp" />
 
 
             {{--    HackatonId    --}}
-            <x-select label="Хакатон" wire:model="hackaton_id" :options="$this->hackatons" />
+            <x-maryselect label="Хакатон" wire:model="hackaton_id" :options="$this->hackatons" />
 
-            {{--SocialLinks--}}
+            {{-- SocialLinks --}}
             <div class="flex flex-col card">
 
-                <x-button wire:click="addSocialLink" label="Добавить социальную ссылку" />
+                <x-mary-button wire:click="addSocialLink" label="Добавить социальную ссылку" />
 
                 <div class="space-y-2 mt-4">
-                    @foreach($socialLinks as $index => $socialLink)
-                        <x-card class="bg-slate-400" wire:key="socialLink-{{ $socialLink['id'] }}" title="Социальная ссылка">
-                            <x-button class="btn-error" wire:click="removeSocialLink({{ $index }})">
+                    @foreach ($socialLinks as $index => $socialLink)
+                        <x-mary-card class="bg-base-200" wire:key="socialLink-{{ $socialLink['id'] }}"
+                            title="Социальная ссылка">
+                            <x-marybutton class="btn-error" wire:click="removeSocialLink({{ $index }})">
                                 Удалить
-                            </x-button>
+                            </x-marybutton>
 
                             <div>
-                                <x-mary-input wire:model="socialLinks.{{$index}}.name" label="Название социальной ссылки" />
-                                <x-mary-input wire:model="socialLinks.{{$index}}.url" label="Ссылка" />
+                                <x-mary-input wire:model="socialLinks.{{ $index }}.name"
+                                    label="Название социальной ссылки" />
+                                <x-mary-input wire:model="socialLinks.{{ $index }}.url" label="Ссылка" />
                             </div>
-                        </x-card>
+                        </x-mary-card>
                     @endforeach
                 </div>
 
@@ -246,48 +259,49 @@ class extends Component {
             <div class="flex flex-col mt-4 w-full">
 
 
-                <x-button class="btn" wire:click="addRole" label="Добавить роль" />
+                <x-marybutton class="btn" wire:click="addRole" label="Добавить роль" />
 
 
                 <div class="space-y-2 mt-4">
-                    @foreach($roles as $index => $role)
-                        <x-card title="Роль" class="bg-slate-400" wire:key="role-{{ $role['id'] }}">
+                    @foreach ($roles as $index => $role)
+                        <x-marycard title="Роль" class="bg-base-200" wire:key="role-{{ $role['id'] }}">
                             <div class="flex flex-row space-x-4 items-center">
-                                <x-button wire:click="removeRole({{ $index }})" label="Удалить" class="btn-error"/>
+                                <x-marybutton wire:click="removeRole({{ $index }})" label="Удалить"
+                                    class="btn-error" />
                             </div>
 
                             <div>
                                 <div class="text-black">
-                                    {{--Title--}}
-                                    <x-mary-input wire:model="roles.{{$index}}.title" label="Название"/>
+                                    {{-- Title --}}
+                                    <x-mary-input wire:model="roles.{{ $index }}.title" label="Название" />
 
-                                    {{--Description--}}
-                                    <x-markdown disk="public" folder="team_markdown" wire:model="roles.{{$index}}.description" label="Описание" :config="$this->config" />
+                                    {{-- Description --}}
+                                    <x-marymarkdown disk="public" folder="team_markdown"
+                                        wire:model="roles.{{ $index }}.description" label="Описание"
+                                        :config="$this->config" />
 
-                                    {{--Role--}}
-                                    <x-select label="Категория роли" wire:model="roles.{{$index}}.role" :options="$this->rolesData" />
+                                    {{-- Role --}}
+                                    <x-maryselect label="Категория роли" wire:model="roles.{{ $index }}.role"
+                                        :options="$this->rolesData" />
 
-                                    {{--Skills--}}
-                                    <x-choices-offline
-                                        label="Навыки роли"
-                                        wire:model="roles.{{$index}}.skills"
-                                        :options="$this->skillsData"
-                                        placeholder="Навыки..."
-                                        clearable
-                                        searchable />
+                                    {{-- Skills --}}
+                                    <x-marychoices-offline label="Навыки роли"
+                                        wire:model="roles.{{ $index }}.skills" :options="$this->skillsData"
+                                        placeholder="Навыки..." clearable searchable />
 
                                 </div>
                             </div>
-                        </x-card>
+                        </x-marycard>
                     @endforeach
                 </div>
 
             </div>
 
             <x-slot:actions>
-                <x-button type="submit" label="Создать команду" class="btn-primary" />
+                <x-marybutton type="submit" label="Создать команду" class="btn-primary" />
             </x-slot:actions>
 
-        </x-form>
+        </x-maryform>
+    </x-mary-card>
 
 </div>
