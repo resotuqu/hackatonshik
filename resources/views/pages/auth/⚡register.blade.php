@@ -4,7 +4,11 @@ use Laravel\Fortify\Http\Responses\RegisterResponse;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-new #[Layout('layouts::app', ['title' => 'Регистрация'])]class extends Component {
+new #[Layout('layouts::app', ['title' => 'Регистрация'])]
+class extends Component {
+
+    use \Mary\Traits\Toast;
+
     public $fio = '';
     public $date_of_birth = '';
     public $email = '';
@@ -26,7 +30,12 @@ new #[Layout('layouts::app', ['title' => 'Регистрация'])]class extend
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->error('Ошибка заполнения полей !', position: 'toast-center toast-top');
+            throw $e;
+        }
 
         $user = \App\Models\User::create([
             'fio' => $this->fio,
@@ -40,19 +49,21 @@ new #[Layout('layouts::app', ['title' => 'Регистрация'])]class extend
         Auth::login($user);
         session()->regenerate();
 
+        $this->success('Успешная регистрация !', position: 'toast-center toast-top');
+
         return app(RegisterResponse::class);
     }
 };
 ?>
 
 <div>
-
+    <x-marytoast/>
     <x-maryform wire:submit="save" class="justify-self-center w-full md:w-1/2">
         <x-mary-header title="Регистрация" separator/>
         <x-mary-input label="Фамилия, Имя, Отчество" wire:model="fio" placeholder="Владимир" hint="Введите ваше фио"/>
         <x-marydatetime label="Дата рождения" hint="Введите вашу дату рождения" wire:model="date_of_birth"/>
         <x-mary-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com"
-                 hint="Введите вашу электронную почту"/>
+                      hint="Введите вашу электронную почту"/>
         <x-mary-input label="Псевдоним" wire:model="nickname" placeholder="vova_vlad_123" hint="Введите ваш псевдоним"/>
         <x-marypassword label="Пароль" wire:model="password"/>
         <x-marypassword label="Подтверждение пароля" wire:model="password_confirmation"/>

@@ -17,8 +17,7 @@ new class extends Component
 };
 ?>
 
-<div class="px-4 py-4 bg-slate-400 rounded-sm">
-    <p>Наименование: {{$hackatonDocument->name}}</p>
-    <p>Описание: {{$hackatonDocument->description}}</p>
-    <button wire:click="download" class="bg-blue-400 text-white">Скачать</button>
-</div>
+<x-marycard title="{{$hackatonDocument->name}}" class="card card-border">
+    <x-markdown>{{$hackatonDocument->description}}</x-markdown>
+    <x-marybutton wire:click="download" class="btn-primary mt-2">Скачать</x-marybutton>
+</x-marycard>

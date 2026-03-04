@@ -31,9 +31,8 @@ class extends Component {
 ?>
 
 <div>
-    <x-mary-card class="card card-border">
         <div class="flex flex-row gap-2">
-            <x-mary-card class="card card-border w-full">
+            <x-mary-card class="card card-border h-fit w-full">
                 <img src="/uploads/{{$team->image_url}}" alt="">
             </x-mary-card>
             <x-mary-card class="card card-border card-body w-full max-h-full overflow-y-auto">
@@ -121,7 +120,5 @@ class extends Component {
 
             </x-mary-card>
         </div>
-
-    </x-mary-card>
 
 </div>

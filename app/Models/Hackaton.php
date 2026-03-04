@@ -17,8 +17,16 @@ class Hackaton extends Model
     }
 
 
-    public function participantsCount() {
+    public function teamsCount() {
         return $this->teams()->count();
+    }
+
+    public function participantsCount() {
+        $count = 0;
+        foreach ($this->teams() as $team) {
+            $count += $team->participantsCount();
+        }
+        return $count;
     }
 
     public function user(): BelongsTo {

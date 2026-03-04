@@ -37,44 +37,42 @@ class extends Component {
 
 <div class="flex flex-row h-full justify-between gap-2">
 
-    <div class="w-1/3 min-h-full bg-slate-600 px-4 py-6 text-white rounded-sm">
+    <x-marycard class="card card-border w-1/3 h-fit">
         <h5 class="text-2xl">Фильтрация</h5>
-        <form wire:submit="search" class="text-black">
+        <x-maryform wire:submit="search">
             @csrf
-            <x-livewire-form-input type="text" label="Наименование" name="q" model="q"/>
+            <x-mary-input label="Наименование" wire:model="q"/>
 
-            <x-livewire-form-input type="date" model="start_at" name="start_at" label="Начало от"  />
+            <x-marydatetime wire:model="start_at" label="Начало от"  />
 
-            <div class="mt-4 flex flex-row space-x-2">
-                <button type="submit"
-                        class="px-4 py-2 text-white bg-blue-500 hover:bg-blue-400 rounded-sm cursor-pointer">Искать
-                </button>
-
-
-                <button type="button"
-                        class="px-4 py-2 text-white bg-red-500 hover:bg-red-400 rounded-sm cursor-pointer">
-                    <a href="/hackatons">Сбросить</a></button>
-            </div>
-        </form>
-    </div>
+            <x-slot:actions>
+                <x-mary-button type="submit" class="btn-primary">Искать</x-mary-button>
+                <a href="/hackatons"><x-mary-button label="Сбросить" class="btn-secondary"></x-mary-button></a>
+            </x-slot:actions>
+        </x-maryform>
+    </x-marycard>
 
     <div class="w-2/3">
         <div class="grid grid-cols-2 gap-4">
             @foreach($this->hackatons as $hackaton)
-                <div class="bg-slate-600 flex flex-col px-4 py-2 rounded-sm text-white">
+                <x-marycard class="card card-border">
                     <div class="bg-white">
                         <img src="/uploads/{{$hackaton->image_url}}" class="object-contain w-full h-56 rounded-sm" alt="">
                     </div>
                     <div class="mt-2 space-y-2">
-                        <p>{{$hackaton->title}}</p>
-                        <div class="bg-slate-500 px-2 py-2 rounded-sm">
+                        <p class="card-title">{{$hackaton->title}}</p>
+                        <x-mary-card class="card card-border bg-base-200">
                             <p>Принимает участие: {{$hackaton->participantsCount()}} команд</p>
                             <p>Даты проведения:
                                 {{$hackaton->start_at }} &DownLeftVectorBar; {{$hackaton->end_at}}</p>
-                        </div>
+                        </x-mary-card>
                     </div>
-                    <a href="/hackatons/{{$hackaton->id}}">Подробнее</a>
-                </div>
+
+                    <x-slot:actions>
+                        <a href="/hackatons/{{$hackaton->id}}"><x-mary-button class="btn-primary" label="Подробнее"/></a>
+                    </x-slot:actions>
+
+                </x-marycard>
             @endforeach
         </div>
         {{$this->hackatons->links(data: ['scrollTo' => false])}}

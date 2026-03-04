@@ -17,23 +17,37 @@ class extends Component {
 };
 ?>
 
-<div class="flex flex-row">
-    <div class="w-1/2 justify-center items-center justify-items-center">
-        <img class="w-128" src="/uploads/{{$hackaton->image_url}}" alt="">
-    </div>
-    <div>
-        <div>
-            <h5>{{$hackaton->title}}</h5>
-            <p>{{$hackaton->description}}</p>
-            <p>Даты проведения: с {{$hackaton->start_at}} по {{$hackaton->end_at}}</p>
-            <p>Всего команд: {{$hackaton->participantsCount()}}</p>
-        </div>
+<div class="flex flex-row gap-2">
+    <x-mary-card class="w-1/2 card card-border h-fit">
+        <img class="w-lg justify-self-center" src="/uploads/{{$hackaton->image_url}}" alt="">
+    </x-mary-card>
+    <x-mary-card class="w-1/2 card card-border">
+        <div class="space-y-4">
+            <h5 class="card-title">{{$hackaton->title}}</h5>
 
-        {{--Documents--}}
-        <div class="bg-slate-600 text-white py-4 px-2 space-y-4 rounded-sm">
-            @foreach($hackaton->documents as $document)
-                <livewire:document-download :hackaton-document="$document" />
-            @endforeach
+            <div>
+                <x-marybadge class="badge-soft" value="Всего команд: {{$hackaton->teamsCount()}}" />
+                <x-marybadge class="badge-soft" value="Всего участников: {{$hackaton->participantsCount()}}" />
+            </div>
+
+            {{--Description--}}
+            <x-mary-card class="card card-border" title="Описание">
+                <x-markdown>{{$hackaton->description}}</x-markdown>
+            </x-mary-card>
+
+            <x-mary-card title="Даты" class="card card-border">
+                <p>Даты проведения: с {{$hackaton->start_at}} по {{$hackaton->end_at}}</p>
+            </x-mary-card>
+
+
+
+
+            {{--Documents--}}
+            <x-marycard title="Файлы" class="card card-border">
+                @foreach($hackaton->documents as $document)
+                    <livewire:document-download :hackaton-document="$document" />
+                @endforeach
+            </x-marycard>
         </div>
-    </div>
+    </x-mary-card>
 </div>

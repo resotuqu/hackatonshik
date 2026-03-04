@@ -62,7 +62,7 @@ class extends Component {
 
 <div class="flex flex-row h-full justify-between gap-2">
 
-    <x-mary-card class="w-1/3 min-h-full card card-border">
+    <x-mary-card class="w-1/3 h-fit card card-border">
         <h5 class="text-2xl">Фильтрация</h5>
         <x-maryform wire:submit="search">
 
@@ -75,10 +75,10 @@ class extends Component {
             {{--HackatonStartFrom--}}
             <x-marydatetime wire:model="start_from" label="Начало от"  />
 
-            <div class="mt-4 flex flex-row space-x-2">
-                <x-mary-button type="submit" class="btn-secondary">Искать</x-mary-button>
-                <a href="/teams"><x-mary-button type="button" class="btn-error">Сбросить</x-mary-button></a>
-            </div>
+            <x-slot:actions>
+                <x-mary-button type="submit" class="btn-primary">Искать</x-mary-button>
+                <a href="/teams"><x-mary-button type="button" class="btn-secondary">Сбросить</x-mary-button></a>
+            </x-slot:actions>
 
         </x-maryform>
     </x-mary-card>
@@ -86,11 +86,14 @@ class extends Component {
     <div class="w-2/3">
         <div class="grid grid-cols-2 gap-4">
             @foreach($this->teams as $team)
-                <x-mary-card title="{{$team->title}}" class="card card-border">
-                    <x-slot:figure>
+                <x-mary-card class="card card-border">
+                    <div class="bg-white">
                         <img src="/uploads/{{$team->image_url}}" class="object-contain w-full h-32 rounded-sm" alt="">
-                    </x-slot:figure>
-                    <x-mary-card class="card card-border bg-base-300">
+                    </div>
+
+                    <p class="card-title">{{$team->title}}</p>
+
+                    <x-mary-card class="card card-border bg-base-200">
                         <p>Пользователь: {{$team->user->nickname}}</p>
                         <p>{{$team->hackaton->title}}</p>
                         <p>Даты проведения:

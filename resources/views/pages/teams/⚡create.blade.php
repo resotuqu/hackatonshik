@@ -131,20 +131,18 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
 
         //Roles
         foreach ($this->roles as $role) {
-            $role = $team->roles()->create([
+            $newRole = $team->roles()->create([
                 'title' => $role['title'],
                 'description' => $role['description'],
                 'team_id' => $team->id,
                 'role_id' => $role['role'],
                 'user_id' => null,
             ]);
-            foreach ($role['skills'] as $skill) {
-                $role->skills()->attach(
-                    \App\Models\Skill::create([
-                        'name' => $skill->name,
-                    ]),
-                );
+
+            if (!empty($role['skills'])) {
+                $newRole->skills()->sync($role['skills']);
             }
+
         }
 
         $this->redirect('/profile/teams');

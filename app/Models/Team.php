@@ -33,6 +33,10 @@ class Team extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function participantsCount() {
+        return $this->roles()->where('user_id', '!=', null)->count();
+    }
+
 
     protected $fillable = [
         'user_id',

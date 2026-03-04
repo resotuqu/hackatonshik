@@ -12,7 +12,7 @@ use Livewire\WithFileUploads;
 new #[Layout('layouts::app', ['title' => 'Создание хакатона'])]
 class extends Component {
 
-    use WithFileUploads;
+    use WithFileUploads, \Mary\Traits\Toast;
 
     //----------------------------------------------------------------
     #[Validate(['title' => 'required'], message: ['title.required' => 'Заголовок должен быть заполнен'])]
@@ -91,7 +91,12 @@ class extends Component {
 //        dd($this->hackatonDocuments[0]['file_url']->storePublicly('hackaton_documents', options: 'public'));
 //        dd($this->hackatonDocuments);
 
-        $this->validate();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->error('Ошибка заполнения полей !', position: 'toast-center toast-top');
+            throw $e;
+        }
 
         $photo = $this->photo->storePublicly(path: 'hackaton_photos', options: 'public');
 
@@ -115,7 +120,11 @@ class extends Component {
             ]);
         }
 
+        $this->success('Хакатон создан !', position: 'toast-center toast-top');
         $this->redirect('/profile/hackatons');
+
+
+
 
 
 
@@ -123,115 +132,102 @@ class extends Component {
 
     //----------------------------------------------------------------
 
+    public $documentTypes = [
+        ['id' => 0, 'name' => 'Информационный документ', 'hint' => 'Положение о проведении, регламент и т.д.'],
+        ['id' => 1, 'name' => 'Заполняемый документ', 'hint' => 'Согласие на обработку персональных данных и т.д.'],
+    ];
 
     public function mount()
     {
     }
 
-
+    public $config = [
+        'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
+        'uploadImage' => false,
+    ];
 };
+
 ?>
 
 <div>
+    <x-marytoast/>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    </head>
+    <x-marycard title="Создание хакатона" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+        <x-maryform>
+            {{--    Title    --}}
+            <x-mary-input label="Заголовок" wire:model="title"/>
 
-    <x-livewire-form-layout submit-button-title="Создать хакатон" title="Создание хакатона">
-        {{--    Title    --}}
-        <x-livewire-form-input label="Заголовок" name="title" type="text" model="title"/>
+            {{--    Description    --}}
+            <x-marymarkdown wire:model="description" :config="$this->config"/>
 
-        {{--    Description    --}}
-        <div class="flex flex-col mt-4 w-full">
-            <label for="description" class="text-white">Описание</label>
-            <textarea id="description" wire:model="description"
-                      class="bg-white rounded-sm py-2 mt-2">{{old('description', '')}}</textarea>
-            @error('description')
-            <p class="mt-2 text-red-500">{{$message}}</p>
-            @enderror
-        </div>
+            {{--    Photo    --}}
+            <x-maryfile label="Фотография" wire:model="photo"/>
+            @if ($photo)
+                <img class="w-auto object-contain h-64 mt-2" src="{{ $photo->temporaryUrl() }}" alt="">
+            @endif
 
-        {{--    Photo    --}}
-        <x-livewire-form-input label="Фотография" name="photo" type="file" model="photo"/>
-        @if ($photo)
-            <img class="w-auto object-contain h-64 mt-2" src="{{ $photo->temporaryUrl() }}" alt="">
-        @endif
+            {{--    StartAt    --}}
+            <x-marydatetime label="Дата начала" wire:model="start_at"/>
 
-        {{--    StartAt    --}}
-        <x-livewire-form-input label="Дата начала" name="start_at" type="date" model="start_at"/>
+            {{--    EndAt    --}}
+            <x-marydatetime lavel="Дата конца" wire:model="end_at"/>
 
-        {{--    EndAt    --}}
-        <x-livewire-form-input label="Дата конца" name="end_at" type="date" model="end_at"/>
+            {{--    Documents    --}}
+            <div class="flex flex-col mt-4 w-full">
 
-        {{--    Documents    --}}
-        <div class="flex flex-col mt-4 w-full">
-            <label for="hackatonDocuments" class="text-white">Документы</label>
-            <div class="space-y-2">
-                @foreach($hackatonDocuments as $index => $hackatonDocument)
-                    <div class="bg-slate-800 rounded-sm py-2 px-4 text-white"
-                         wire:key="hackatonDocument-{{ $hackatonDocument['id'] }}">
-                        <div class="flex flex-row space-x-4 items-center">
-                            <button type="button" wire:click="removeHackatonDocument({{ $index }})"
-                                    class="px-4 py-2 bg-red-500 hover:bg-red-400 rounded-sm cursor-pointer">
-                                Удалить
-                            </button>
-                        </div>
+                <x-marybutton type="button"
+                              class="btn-primary"
+                              wire:click="addHackatonDocument">
+                    Добавить документ
+                </x-marybutton>
 
-                        <div>
-                            <div class="text-black">
-
-
-                                {{--Title--}}
-                                <x-livewire-form-input model="hackatonDocuments.{{$index}}.name"
-                                                       name="hackatonDocuments.{{$index}}.name"
-                                                       label="Название" type="text"/>
-
-                                {{--Description--}}
-                                <div class="flex flex-col mt-4 w-full">
-                                    <label for="hackatonDocuments.{{$index}}.description"
-                                           class="text-white">Описание</label>
-                                    <textarea id="hackatonDocuments.{{$index}}.description"
-                                              wire:model="hackatonDocuments.{{$index}}.description"
-                                              class="bg-white rounded-sm py-2 mt-2">{{old('hackatonDocuments.' . $index . '.description', '')}}</textarea>
-                                    @error('hackatonDocuments.' . $index . '.description')
-                                    <p class="mt-2 text-red-500">{{$message}}</p>
-                                    @enderror
-                                </div>
-
-                                {{--File--}}
-                                <x-livewire-form-input type="file" model="hackatonDocuments.{{$index}}.file_url"
-                                                       name="hackatonDocuments.{{$index}}.file_url"
-                                                       label="Файл документа"/>
-
-                                {{--FillingByTeamMember--}}
-                                <div class="flex flex-col mt-4 w-full">
-                                    <p class="text-white mb-2">Тип документа</p>
-                                    <label for="hackatonDocuments.{{$index}}.info" class="text-white">Информационный
-                                        документ</label>
-                                    <input id="hackatonDocuments.{{$index}}.info" value="0" type="radio"
-                                           wire:model="hackatonDocuments.{{$index}}.filling_by_team_member"/>
-                                    <label for="hackatonDocuments.{{$index}}.blueprint" class="text-white">Заполняется
-                                        участником</label>
-                                    <input id="hackatonDocuments.{{$index}}.blueprint" value="1" type="radio"
-                                           wire:model="hackatonDocuments.{{$index}}.filling_by_team_member"/>
-                                    @error('hackatonDocuments.' . $index . '.filling_by_team_member')
-                                    <p class="mt-2 text-red-500">{{$message}}</p>
-                                    @enderror
-                                </div>
-
-
+                <div class="space-y-2 mt-4">
+                    @foreach($hackatonDocuments as $index => $hackatonDocument)
+                        <x-marycard class="bg-base-200"
+                                    wire:key="hackatonDocument-{{ $hackatonDocument['id'] }}">
+                            <div class="flex flex-row space-x-4 items-center">
+                                <x-marybutton type="button" wire:click="removeHackatonDocument({{ $index }})"
+                                              class="btn-error">
+                                    Удалить
+                                </x-marybutton>
                             </div>
 
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            <div>
-                <button type="button"
-                        class="px-4 mt-4 py-2 bg-blue-500 hover:bg-blue-400 rounded-sm cursor-pointer text-white"
-                        wire:click="addHackatonDocument">
-                    Добавить документ
-                </button>
-            </div>
-        </div>
+                            <div>
+                                <div class="text-black">
 
 
-    </x-livewire-form-layout>
+                                    {{--Title--}}
+                                    <x-mary-input wire:model="hackatonDocuments.{{$index}}.name" label="Название"/>
+
+                                    {{--Description--}}
+                                    <x-marymarkdown label="Описание"
+                                                    wire:model="hackatonDocuments.{{$index}}.description"
+                                                    :config="$this->config"/>
+
+                                    {{--File--}}
+                                    <x-maryfile wire:model="hackatonDocuments.{{$index}}.file_url"/>
+
+                                    {{--FillingByTeamMember--}}
+                                    <x-maryradio label="Выберите тип документа"
+                                                 wire:model="hackatonDocuments.{{$index}}.filling_by_team_member"
+                                                 :options="$documentTypes" inline/>
+
+                                </div>
+
+                            </div>
+                        </x-marycard>
+                    @endforeach
+                </div>
+
+            </div>
+
+            <x-slot:actions>
+                <x-marybutton label="Создать хакатон" wire:click="save"/>
+            </x-slot:actions>
+
+        </x-maryform>
+    </x-marycard>
 </div>

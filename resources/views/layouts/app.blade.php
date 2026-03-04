@@ -49,13 +49,16 @@
                             <li><a href="/profile/teams">Мои команды</a></li>
                             <li><a href="/teams/create">Создать команду</a></li>
                             <li><a href="/profile">Профиль</a></li>
-                            <li><form class="w-full" method="post" action="/logout">@csrf<button class="w-max" type="submit" href="/logout">Выйти</button></form></li>
                         @elseif(Auth::user()->role == 'partner')
-
+                            <li><a href="/profile/hackatons">Мои хакатоны</a></li>
+                            <li><a href="/hackatons/create">Создать хакатон</a></li>
+                            <li><a href="/profile">Профиль</a></li>
                         @else
 
 
                         @endif
+
+                        <li class="w-full"><form class="w-full" method="post" action="/logout">@csrf<button class="w-full" type="submit" href="/logout">Выйти</button></form></li>
 
                     @else
                         <li><a href="/register">Зарегистрироваться</a></li>
