@@ -21,7 +21,11 @@ class extends Component {
     }
 
     public function editHackaton($id) {
-        return redirect('/hackaton/' . $id . '/edit');
+        return redirect('/hackatons/' . $id . '/edit');
+    }
+
+    public function participantsHackaton($id) {
+        return redirect('/profile/hackatons/' . $id . '/participants');
     }
 };
 ?>
@@ -29,12 +33,12 @@ class extends Component {
 <div class="">
     <h3 class="text-3xl text-center">Ваши хакатоны</h3>
 
-    <div class="grid grid-cols-3 gap-4 mt-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         @forelse($this->hackatons as $hackaton)
             <x-marycard class="card card-border">
-                <div class="bg-white">
-                    <img src="/uploads/{{$hackaton->image_url}}" class="object-contain w-full h-56 rounded-sm" alt="">
-                </div>
+               <div class="overflow-hidden rounded-xl bg-base-200 aspect-[16/9]">
+                        <img src="/uploads/{{$hackaton->image_url}}" class="w-full h-full object-cover" alt="{{$hackaton->title}}">
+                    </div>
                 <div class="mt-2 space-y-2">
                     <p class="card-title">{{$hackaton->title}}</p>
                     <x-mary-card class="card card-border bg-base-200">
@@ -46,6 +50,7 @@ class extends Component {
 
                 <x-slot:actions>
                     <x-marybutton class="btn-primary" label="Изменить" wire:click="editHackaton({{$hackaton->id}})" />
+                    <x-marybutton class="btn-secondary" label="Участники" wire:click="participantsHackaton({{$hackaton->id}})" />
                     <x-marybutton class="btn-error" label="Удалить" wire:click="deleteHackaton({{$hackaton->id}})" />
                 </x-slot:actions>
 

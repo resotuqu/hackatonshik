@@ -22,17 +22,17 @@
 
 <body>
 
-<header class="flex flex-row justify-between px-6 py-4 bg-blue-500">
+<header class="flex flex-col gap-3 md:flex-row md:items-center justify-between px-3 sm:px-6 py-4 bg-blue-500">
     <div>
         <a class="text-white uppercase font-medium" href="/">Хакатонщик</a>
     </div>
-    <div class="flex flex-row space-x-4">
+    <div class="flex flex-wrap gap-3 sm:gap-4">
         <a class="text-white font-regular" href="/teams">Команды</a>
         <a class="text-white font-regular" href="/hackatons">Хакатоны</a>
         <a class="text-white font-regular" href="/news">Новости</a>
         <a class="text-white font-regular" href="/about">О нас</a>
     </div>
-    <div class="flex flex-row space-x-2 text-white">
+    <div class="flex flex-wrap gap-2 text-white">
         @auth
             <a href="/profile">{{Auth::user()->email}}</a>
             <form action="/logout" method="post">@csrf
@@ -57,11 +57,11 @@
     </div>
 </header>
 
-<main class="min-h-screen py-4 px-6">
+<main class="min-h-screen py-4 px-3 sm:px-6">
     {{$slot}}
 </main>
 
-<footer class="flex flex-row justify-between px-6 py-4 bg-blue-600 text-white">
+<footer class="flex flex-col gap-4 md:flex-row justify-between px-3 sm:px-6 py-4 bg-blue-600 text-white">
     <div>&copy;Хакатонщик 2026. Все права защищены</div>
     <div class="flex flex-col">
         <a class="text-white font-regular" href="/">Главная</a>

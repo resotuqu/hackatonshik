@@ -14,24 +14,25 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
     }
 
-    public function hackatons(): HasMany {
+    public function hackatons(): HasMany
+    {
         return $this->hasMany(Hackaton::class);
     }
 
-    public function teamRoles(): HasMany {
+    public function teamRoles(): HasMany
+    {
         return $this->hasMany(TeamRole::class);
     }
 
-    public function userDocuments(): HasMany {
+    public function userDocuments(): HasMany
+    {
         return $this->hasMany(UserHackatonDocument::class);
     }
-
 
     /**
      * The attributes that are mass assignable.
@@ -42,6 +43,7 @@ class User extends Authenticatable
         'fio',
         'date_of_birth',
         'email',
+        'description',
         'nickname',
         'email_verified_at',
         'password',

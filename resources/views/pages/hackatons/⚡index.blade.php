@@ -35,16 +35,14 @@ class extends Component {
 }
 ?>
 
-<div class="flex flex-row h-full justify-between gap-2">
+<div class="flex flex-col lg:flex-row h-full justify-between gap-4">
 
-    <x-marycard class="card card-border w-1/3 h-fit">
+    <x-marycard class="card card-border w-full lg:w-1/3 h-fit">
         <h5 class="text-2xl">Фильтрация</h5>
         <x-maryform wire:submit="search">
             @csrf
-            <x-mary-input label="Наименование" wire:model="q"/>
-
+            <x-mary-input label="Наименование" placeholder="Введите название..." wire:model="q"/>
             <x-marydatetime wire:model="start_at" label="Начало от"  />
-
             <x-slot:actions>
                 <x-mary-button type="submit" class="btn-primary">Искать</x-mary-button>
                 <a href="/hackatons"><x-mary-button label="Сбросить" class="btn-secondary"></x-mary-button></a>
@@ -52,12 +50,12 @@ class extends Component {
         </x-maryform>
     </x-marycard>
 
-    <div class="w-2/3">
-        <div class="grid grid-cols-2 gap-4">
+    <div class="w-full lg:w-2/3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             @foreach($this->hackatons as $hackaton)
                 <x-marycard class="card card-border">
-                    <div class="bg-white">
-                        <img src="/uploads/{{$hackaton->image_url}}" class="object-contain w-full h-56 rounded-sm" alt="">
+                    <div class="overflow-hidden rounded-xl bg-base-200 aspect-[16/9]">
+                        <img src="/uploads/{{$hackaton->image_url}}" class="w-full h-full object-cover" alt="{{$hackaton->title}}">
                     </div>
                     <div class="mt-2 space-y-2">
                         <p class="card-title">{{$hackaton->title}}</p>

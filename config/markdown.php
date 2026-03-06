@@ -36,12 +36,10 @@ return [
      */
     'commonmark_options' => [
         'renderer' => [
-            'renderer' => [
-                'block_separator' => "  \n",
-                'inner_separator' => "  \n",
-                'soft_break'      => "\n<br />",
-            ],
-        ]
+            'block_separator' => "  \n",
+            'inner_separator' => "  \n",
+            'soft_break' => "\n<br />",
+        ],
     ],
 
     /*

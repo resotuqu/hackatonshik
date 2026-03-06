@@ -41,7 +41,7 @@ class extends Component {
 
 <div>
     <x-marytoast />
-    <x-maryform wire:submit="save" class="justify-self-center w-full md:w-1/2">
+    <x-maryform wire:submit="save" class="justify-self-center w-full lg:w-1/2">
         <x-mary-header title="Авторизация" separator/>
         <x-mary-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com" hint="Введите вашу электронную почту"/>
         <x-marypassword label="Пароль" wire:model="password"/>

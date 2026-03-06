@@ -151,11 +151,7 @@ class extends Component {
 
 <div>
     <x-marytoast/>
-    <head>
-        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-    </head>
-    <x-marycard title="Создание хакатона" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+    <x-marycard title="Создание хакатона" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100">
         <x-maryform>
             {{--    Title    --}}
             <x-mary-input label="Заголовок" wire:model="title"/>
@@ -168,6 +164,8 @@ class extends Component {
             @if ($photo)
                 <img class="w-auto object-contain h-64 mt-2" src="{{ $photo->temporaryUrl() }}" alt="">
             @endif
+
+
 
             {{--    StartAt    --}}
             <x-marydatetime label="Дата начала" wire:model="start_at"/>
@@ -188,7 +186,7 @@ class extends Component {
                     @foreach($hackatonDocuments as $index => $hackatonDocument)
                         <x-marycard class="bg-base-200"
                                     wire:key="hackatonDocument-{{ $hackatonDocument['id'] }}">
-                            <div class="flex flex-row space-x-4 items-center">
+                            <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
                                 <x-marybutton type="button" wire:click="removeHackatonDocument({{ $index }})"
                                               class="btn-error">
                                     Удалить

@@ -58,7 +58,7 @@ class extends Component {
 
 <div>
     <x-marytoast/>
-    <x-maryform wire:submit="save" class="justify-self-center w-full md:w-1/2">
+    <x-maryform wire:submit="save" class="justify-self-center w-full lg:w-1/2">
         <x-mary-header title="Регистрация" separator/>
         <x-mary-input label="Фамилия, Имя, Отчество" wire:model="fio" placeholder="Владимир" hint="Введите ваше фио"/>
         <x-marydatetime label="Дата рождения" hint="Введите вашу дату рождения" wire:model="date_of_birth"/>

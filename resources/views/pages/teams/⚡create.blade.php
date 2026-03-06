@@ -207,12 +207,7 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
 ?>
 
 <div>
-
-    <head>
-        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-    </head>
-    <x-mary-card title="Создание команды" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Создание команды" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100">
         <x-maryform wire:submit="save" class="">
 
             {{--    Title    --}}
@@ -263,7 +258,7 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
                 <div class="space-y-2 mt-4">
                     @foreach ($roles as $index => $role)
                         <x-marycard title="Роль" class="bg-base-200" wire:key="role-{{ $role['id'] }}">
-                            <div class="flex flex-row space-x-4 items-center">
+                            <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
                                 <x-marybutton wire:click="removeRole({{ $index }})" label="Удалить"
                                     class="btn-error" />
                             </div>

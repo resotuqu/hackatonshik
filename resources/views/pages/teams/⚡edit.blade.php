@@ -54,15 +54,21 @@ class extends Component {
     {
         $this->roles[] = [
             'id' => uniqid(),
+            'db_id' => null,
             'title' => '',
             'skills' => [],
             'description' => '',
             'role' => '',
+            'is_occupied' => false,
         ];
     }
 
     public function removeRole($index): void
     {
+        if (($this->roles[$index]['is_occupied'] ?? false) === true) {
+            return;
+        }
+
         unset($this->roles[$index]);
         $this->roles = array_values($this->roles);
     }
@@ -83,6 +89,7 @@ class extends Component {
     {
         $this->socialLinks[] = [
             'id' => uniqid(),
+            'db_id' => null,
             'name' => '',
             'url' => '',
         ];
@@ -114,19 +121,50 @@ class extends Component {
 
         $this->team->update($data);
 
-
-        $this->team->socialLinks()->delete();
-        //Social Links Link
+        $savedSocialLinkIds = [];
         foreach ($this->socialLinks as $socialLink) {
-            $this->team->socialLinks()->create([
+            $existingSocialLinkId = $socialLink['db_id'] ?? null;
+            if (!empty($existingSocialLinkId)) {
+                $existingSocialLink = $this->team->socialLinks()->whereKey($existingSocialLinkId)->first();
+                if ($existingSocialLink) {
+                    $existingSocialLink->update([
+                        'name' => $socialLink['name'],
+                        'url' => $socialLink['url'],
+                    ]);
+                    $savedSocialLinkIds[] = $existingSocialLink->id;
+                    continue;
+                }
+            }
+
+            $newSocialLink = $this->team->socialLinks()->create([
                 'name' => $socialLink['name'],
                 'url' => $socialLink['url'],
             ]);
+            $savedSocialLinkIds[] = $newSocialLink->id;
         }
 
-        $this->team->roles()->delete();
-        //Roles
+        $socialLinksToDelete = $this->team->socialLinks();
+        if (!empty($savedSocialLinkIds)) {
+            $socialLinksToDelete->whereNotIn('id', $savedSocialLinkIds);
+        }
+        $socialLinksToDelete->delete();
+
+        $teamRolesById = $this->team->roles()->with('skills')->get()->keyBy('id');
+        $savedRoleIds = [];
         foreach ($this->roles as $role) {
+            $existingRoleId = $role['db_id'] ?? null;
+            if (!empty($existingRoleId) && $teamRolesById->has($existingRoleId)) {
+                $existingRole = $teamRolesById->get($existingRoleId);
+                $existingRole->update([
+                    'title' => $role['title'],
+                    'description' => $role['description'],
+                    'role_id' => $role['role'],
+                ]);
+                $existingRole->skills()->sync($role['skills'] ?? []);
+                $savedRoleIds[] = $existingRole->id;
+                continue;
+            }
+
             $newRole = $this->team->roles()->create([
                 'title' => $role['title'],
                 'description' => $role['description'],
@@ -134,11 +172,15 @@ class extends Component {
                 'role_id' => $role['role'],
                 'user_id' => null,
             ]);
-
-            if (!empty($role['skills'])) {
-                $newRole->skills()->sync($role['skills']);
-            }
+            $newRole->skills()->sync($role['skills'] ?? []);
+            $savedRoleIds[] = $newRole->id;
         }
+
+        $rolesToDelete = $this->team->roles()->whereNull('user_id');
+        if (!empty($savedRoleIds)) {
+            $rolesToDelete->whereNotIn('id', $savedRoleIds);
+        }
+        $rolesToDelete->delete();
 
     }
 
@@ -187,6 +229,7 @@ class extends Component {
         foreach ($team->socialLinks as $socialLink) {
             $this->socialLinks[] = [
                 'id' => uniqid(),
+                'db_id' => $socialLink->id,
                 'name' => $socialLink->name,
                 'url' => $socialLink->url,
             ];
@@ -196,10 +239,12 @@ class extends Component {
 
             $this->roles[] = [
                 'id' => uniqid(),
+                'db_id' => $role->id,
                 'title' => $role->title,
                 'skills' => $skillIds,
                 'description' => $role->description,
                 'role' => $role->role_id,
+                'is_occupied' => $role->user_id !== null,
             ];
         }
     }
@@ -215,18 +260,14 @@ class extends Component {
 
 <div>
 
-    <head>
-        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-    </head>
 
-    <x-mary-card title="Изменение команды" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Изменение команды" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100">
     <x-maryform  class="">
         {{--    Title    --}}
         <x-mary-input label="Заголовок" wire:model="title"/>
 
         {{--    Description    --}}
-        <x-marymarkdown wire:model="description" label="Описание"/>
+        <x-marymarkdown wire:model="description" :config="$config" label="Описание"/>
 
         {{--    Photo    --}}
         <x-maryfile label="Фотография" wire:model="photo"/>
@@ -264,8 +305,17 @@ class extends Component {
             <div class="space-y-2 mt-4">
                 @foreach($roles as $index => $role)
                     <x-mary-card title="Роль" class="bg-base-200" wire:key="role-{{ $role['id'] }}">
-                        <div class="flex flex-row space-x-4 items-center">
-                            <x-mary-button wire:click="removeRole({{ $index }})" label="Удалить" class="btn-error"/>
+                        <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
+                            @if($role['is_occupied'] ?? false)
+                                <x-marybadge value="Роль занята" class="badge-error text-white" />
+                            @endif
+
+                            <x-mary-button
+                                wire:click="removeRole({{ $index }})"
+                                label="Удалить"
+                                class="btn-error"
+                                :disabled="$role['is_occupied'] ?? false"
+                            />
                         </div>
 
                         <div>

@@ -8,7 +8,7 @@ new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'О нас'])] cla
 };
 ?>
 
-<div class="w-2/3 m-auto space-y-12 mt-12">
+<div class="w-full lg:w-2/3 m-auto space-y-8 sm:space-y-12 mt-8 sm:mt-12">
     <div>
 {{--        <h1 class="text-3xl font-bold">Филип, бросай портвейн! Магратея ждет людей!</h1>--}}
         <h1 class="text-3xl font-bold">О нас</h1>
@@ -42,7 +42,7 @@ new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'О нас'])] cla
     </x-marycard>
 
     <x-marycard title="Таймлайн" class="card card-border">
-            <ul class="timeline m-auto justify-self-center">
+            <ul class="timeline timeline-vertical lg:timeline-horizontal m-auto justify-self-center">
                 <li>
                     <div class="timeline-start">1945</div>
                     <div class="timeline-middle">

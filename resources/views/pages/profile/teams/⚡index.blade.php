@@ -7,7 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\Computed;
 
 new #[Layout('layouts::app', ['title' => 'Мои команды'])]
-class extends Component {
+    class extends Component {
 
     use \Mary\Traits\Toast;
 
@@ -27,7 +27,8 @@ class extends Component {
         $this->deleteTeamModal = true;
     }
 
-    public function deleteTeam() {
+    public function deleteTeam()
+    {
         $team = Team::find($this->deleteTeamId);
         $team->delete();
         $this->deleteTeamId = null;
@@ -36,7 +37,8 @@ class extends Component {
 
 
 
-    public function editTeam($id) {
+    public function editTeam($id)
+    {
         return redirect('/teams/' . $id . '/edit');
     }
 
@@ -56,16 +58,17 @@ class extends Component {
         </x-slot:actions>
     </x-mary-modal>
 
-    <div class="grid grid-cols-3 gap-4 mt-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         @forelse($this->teams as $team)
             <x-mary-card title="{{$team->title}}" class="card card-border">
-                <x-slot:figure>
-                    <img src="/uploads/{{$team->image_url}}" class="object-contain w-full h-32 rounded-sm" alt="">
-                </x-slot:figure>
+                <div class="overflow-hidden rounded-xl bg-base-200 aspect-[16/9]">
+                    <img src="/uploads/{{$team->image_url}}" class="w-full h-full object-cover" alt="{{$team->title}}">
+                </div>
                 <x-mary-card class="card card-border bg-base-300">
                     <p>{{$team->hackaton->title}}</p>
                     <p>Даты проведения:
-                        {{$team->hackaton->start_at }} &DownLeftVectorBar; {{$team->hackaton->end_at}}</p>
+                        {{$team->hackaton->start_at }} &DownLeftVectorBar; {{$team->hackaton->end_at}}
+                    </p>
                 </x-mary-card>
 
                 <div class="mt-2">

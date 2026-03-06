@@ -17,11 +17,11 @@ class extends Component {
 };
 ?>
 
-<div class="flex flex-row gap-2">
-    <x-mary-card class="w-1/2 card card-border h-fit">
-        <img class="w-lg justify-self-center" src="/uploads/{{$hackaton->image_url}}" alt="">
+<div class="flex flex-col lg:flex-row gap-4">
+    <x-mary-card class="w-full lg:w-1/2 card card-border h-fit">
+        <img class="w-full justify-self-center" src="/uploads/{{$hackaton->image_url}}" alt="">
     </x-mary-card>
-    <x-mary-card class="w-1/2 card card-border">
+    <x-mary-card class="w-full lg:w-1/2 card card-border">
         <div class="space-y-4">
             <h5 class="card-title">{{$hackaton->title}}</h5>
 
