@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::livewire('/', 'pages::index')->name('home');
 
+Route::livewire('/about', 'pages::about.index');
+
 Route::livewire('/login', 'pages::auth.login');
 Route::livewire('/register', 'pages::auth.register');
 

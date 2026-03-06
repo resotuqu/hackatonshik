@@ -53,22 +53,59 @@
     @apply text-lg font-bold mb-3
 }
 
-h1 {
-    font-size: 2.25rem;
+.EasyMDEContainer a {
+    @apply text-primary underline
 }
 
-h2 {
-    font-size: 1.5rem;
+
+
+
+
+.markdownContainer h1 {
+    @apply text-4xl font-bold mb-5
 }
 
-h3 {
-    font-size: 1.25rem;
+.markdownContainer h2 {
+    @apply text-2xl font-bold mb-3
 }
 
-h4 {
-    font-size: 1.125rem;
+.markdownContainer h3 {
+    @apply text-lg font-bold mb-3
 }
 
-h5 {
-    font-size: 1rem;
+.markdownContainer h4 {
+    @apply text-base font-bold mb-2
 }
+
+.markdownContainer h5 {
+    @apply text-sm font-bold mb-1
+}
+
+.markdownContainer i {
+    @apply text-primary
+}
+
+.markdownContainer a {
+    @apply text-neutral underline
+}
+
+
+/*h1 {*/
+/*    font-size: 2.25rem;*/
+/*}*/
+
+/*h2 {*/
+/*    font-size: 1.5rem;*/
+/*}*/
+
+/*h3 {*/
+/*    font-size: 1.25rem;*/
+/*}*/
+
+/*h4 {*/
+/*    font-size: 1.125rem;*/
+/*}*/
+
+/*h5 {*/
+/*    font-size: 1rem;*/
+/*}*/
