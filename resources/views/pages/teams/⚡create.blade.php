@@ -212,7 +212,7 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
         <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
         <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     </head>
-    <x-mary-card title="Изменение команды" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Создание команды" class="w-full md:w-1/2 justify-self-center card card-border bg-base-100">
         <x-maryform wire:submit="save" class="">
 
             {{--    Title    --}}
