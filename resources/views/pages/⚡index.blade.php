@@ -1,10 +1,13 @@
 <?php
 
+
 use Livewire\Component;
 
 new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'Главная'])] class extends Component {
     //
 };
+
+
 ?>
 
 <div class="">

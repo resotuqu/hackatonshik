@@ -51,3 +51,33 @@ Route::get('/auth/yandex/callback', function () {
 
     return redirect('/dashboard');
 });
+
+Route::get('/auth/vk/redirect', function () {
+    return Socialite::driver('vkontakte')->stateless()->redirect();
+});
+
+Route::get('/auth/vk/callback', function () {
+    $vkDriver = Socialite::driver('vkontakte')->stateless();
+
+    if (request()->filled('device_id')) {
+        $vkDriver->with([
+            'device_id' => request('device_id'),
+        ]);
+    }
+
+    $vkUser = $vkDriver->user();
+    dd($vkUser);
+
+    $user = User::updateOrCreate([
+        'github_id' => $githubUser->id,
+    ], [
+        'name' => $githubUser->name,
+        'email' => $githubUser->email,
+        'github_token' => $githubUser->token,
+        'github_refresh_token' => $githubUser->refreshToken,
+    ]);
+
+    Auth::login($user);
+
+    return redirect('/dashboard');
+});

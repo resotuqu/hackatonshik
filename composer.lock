@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d15b7ffa047378aa187d329b193fea8",
+    "content-hash": "412a7b3390d5073907a6098d88f8349a",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4634,6 +4634,56 @@
                 "source": "https://github.com/socialiteproviders/manager"
             },
             "time": "2026-03-18T22:13:24+00:00"
+        },
+        {
+            "name": "socialiteproviders/vkontakte",
+            "version": "5.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SocialiteProviders/VKontakte.git",
+                "reference": "306a746967d1712c4414c405cd359fe27193f1d1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SocialiteProviders/VKontakte/zipball/306a746967d1712c4414c405cd359fe27193f1d1",
+                "reference": "306a746967d1712c4414c405cd359fe27193f1d1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^8.0",
+                "socialiteproviders/manager": "^4.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SocialiteProviders\\VKontakte\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brian Faust",
+                    "email": "hello@brianfaust.de"
+                }
+            ],
+            "description": "VKontakte OAuth2 Provider for Laravel Socialite",
+            "keywords": [
+                "laravel",
+                "oauth",
+                "provider",
+                "socialite",
+                "vkontakte"
+            ],
+            "support": {
+                "docs": "https://socialiteproviders.com/vkontakte",
+                "issues": "https://github.com/socialiteproviders/providers/issues",
+                "source": "https://github.com/socialiteproviders/providers"
+            },
+            "time": "2025-09-08T22:08:36+00:00"
         },
         {
             "name": "socialiteproviders/yandex",
@@ -11201,5 +11251,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

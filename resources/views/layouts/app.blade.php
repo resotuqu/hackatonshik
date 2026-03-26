@@ -63,11 +63,11 @@
                     <ul tabindex="-1"
                         class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                         @auth
-                            @if(Auth::user()->role == 'user')
+                            @if(Auth::user()->role === 'user')
                                 <li><a href="/profile/teams">Мои команды</a></li>
                                 <li><a href="/teams/create">Создать команду</a></li>
                                 <li><a href="/profile">Профиль</a></li>
-                            @elseif(Auth::user()->role == 'partner')
+                            @elseif(Auth::user()->role === 'partner')
                                 <li><a href="/profile/hackatons">Мои хакатоны</a></li>
                                 <li><a href="/hackatons/create">Создать хакатон</a></li>
                                 <li><a href="/profile">Профиль</a></li>

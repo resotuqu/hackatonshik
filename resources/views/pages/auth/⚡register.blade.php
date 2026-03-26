@@ -1,6 +1,6 @@
 <?php
 
-use Laravel\Fortify\Http\Responses\RegisterResponse;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -51,7 +51,7 @@ class extends Component {
 
         $this->success('Успешная регистрация !', position: 'toast-center toast-top');
 
-        return app(RegisterResponse::class);
+        return $this->redirect('/');
     }
 };
 ?>

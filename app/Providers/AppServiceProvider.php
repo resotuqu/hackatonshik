@@ -27,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('yandex', \SocialiteProviders\Yandex\Provider::class);
+            $event->extendSocialite('vkontakte', \SocialiteProviders\VKontakte\Provider::class);
+
         });
     }
 
