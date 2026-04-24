@@ -24,6 +24,8 @@ class StoreHackatonAnnouncementRequest extends FormRequest
             'is_draft' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
             'template_key' => ['nullable', 'string', 'in:deadline,start,results'],
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 }

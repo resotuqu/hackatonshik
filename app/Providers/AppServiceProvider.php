@@ -50,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(HackatonCaseSubmission::class, HackatonCaseSubmissionPolicy::class);
         Gate::policy(HackatonAnnouncement::class, HackatonAnnouncementPolicy::class);
         Gate::policy(HackatonCertificate::class, HackatonCertificatePolicy::class);
+        Gate::define('access-admin', fn ($user): bool => $user->isAdmin());
     }
 
     /**

@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\HackatonAnnouncement;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class HackatonAnnouncementPublished extends Notification
+class HackatonAnnouncementPublished extends Notification implements ShouldQueue
 {
     use Queueable;
 

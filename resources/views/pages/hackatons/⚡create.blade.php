@@ -28,6 +28,12 @@ class extends Component {
     ])]
     public $photo;
 
+    #[Validate(['galleryPhotos.*' => ['nullable', 'image', 'max:5120']], message: [
+        'galleryPhotos.*.image' => 'Каждый файл галереи должен быть изображением',
+        'galleryPhotos.*.max' => 'Каждое изображение в галерее не может быть больше 5 МБ',
+    ])]
+    public array $galleryPhotos = [];
+
     #[Validate([
         'start_at' => ['required', 'date', 'after:now']
     ], message: [
@@ -117,6 +123,13 @@ class extends Component {
                 'description' => $hackatonDocument['description'],
                 'file_url' => $file,
                 'filling_by_team_member' => $hackatonDocument['filling_by_team_member'],
+            ]);
+        }
+
+        foreach ($this->galleryPhotos as $index => $galleryPhoto) {
+            $hackaton->images()->create([
+                'path' => $galleryPhoto->storePublicly(path: 'hackaton_gallery', options: 'public'),
+                'sort_order' => $index,
             ]);
         }
 
@@ -224,6 +237,21 @@ class extends Component {
                     @if ($photo)
                         <div class="rounded-xl border border-base-300 bg-base-200 p-2">
                             <img class="w-full object-contain h-64 rounded-lg" src="{{ $photo->temporaryUrl() }}" alt="Превью обложки хакатона">
+                        </div>
+                    @endif
+                    <div class="space-y-2">
+                        <label class="label p-0">
+                            <span class="label-text">Фотографии хакатона (галерея)</span>
+                        </label>
+                        <input type="file" wire:model="galleryPhotos" multiple accept="image/*" class="file-input file-input-bordered w-full" />
+                        <p class="text-xs text-base-content/70">Можно загрузить несколько фото для слайдера на странице хакатона.</p>
+                    </div>
+                    @if (!empty($galleryPhotos))
+                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            @foreach ($galleryPhotos as $galleryPhoto)
+                                <img src="{{ $galleryPhoto->temporaryUrl() }}" alt="Превью фотографии хакатона"
+                                     class="h-24 w-full rounded-lg object-cover border border-base-300">
+                            @endforeach
                         </div>
                     @endif
                 </div>

@@ -4,9 +4,15 @@
 
 @section('slot')
     @php
-        $hackatonImage = filled($hackaton->image_url)
-            ? (str_starts_with($hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/' . $hackaton->image_url))
-            : null;
+        $hackatonGalleryImages = $hackaton->images;
+        if ($hackatonGalleryImages->isEmpty() && filled($hackaton->image_url)) {
+            $hackatonGalleryImages = collect([
+                (object) [
+                    'path' => $hackaton->image_url,
+                    'alt' => $hackaton->title,
+                ],
+            ]);
+        }
         $fieldTypeLabels = [
             'text' => 'Короткий текст',
             'url' => 'Ссылка',
@@ -28,6 +34,13 @@
             'deadline' => 'Напоминание о дедлайне',
             'results' => 'Публикация результатов',
         ];
+        $modals = [
+            'announcement_create' => 'organizer-announcement-create-modal',
+            'case_create' => 'organizer-case-create-modal',
+            'judge_invite' => 'organizer-judge-invite-modal',
+            'judge_assign' => 'organizer-judge-assign-modal',
+            'certificate_upload' => 'organizer-certificate-upload-modal',
+        ];
         $issuedCertificatesByUser = $hackaton->certificates->groupBy('user_id');
         $nextStepTitle = 'Авторизуйтесь';
         $nextStepHint = 'Войдите в аккаунт, чтобы подавать заявки и отправлять решения кейсов.';
@@ -36,13 +49,16 @@
             if ($isOrganizer) {
                 $nextStepTitle = 'Управляйте хакатоном';
                 $nextStepHint = 'Публикуйте анонсы и кейсы, а затем рассматривайте заявки команд.';
+            } elseif ($isAssignedJudge) {
+                $nextStepTitle = 'Оценивайте решения';
+                $nextStepHint = 'Вы назначены судьей: используйте блок кейсов для выставления оценок и комментариев.';
             } elseif ($availableTeams->isEmpty()) {
                 $nextStepTitle = 'Создайте команду';
                 $nextStepHint = 'Без команды нельзя подать заявку на участие в хакатоне.';
             } elseif ($teamsWithoutApplication->isNotEmpty()) {
                 $nextStepTitle = 'Подайте заявку команды';
                 $nextStepHint = 'Выберите команду и отправьте заявку на участие прямо на этой странице.';
-            } elseif ($myApplicationsByTeam->where('status', \App\Enums\ApplicationStatus::accepted())->isNotEmpty()) {
+            } elseif ($myApplicationsByTeam->where('status', \App\Enums\ApplicationStatus::ACCEPTED)->isNotEmpty()) {
                 $nextStepTitle = 'Отправьте решение кейса';
                 $nextStepHint = 'Команда допущена: перейдите к блоку кейсов и отправьте ответы.';
             } else {
@@ -63,13 +79,13 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 card bg-base-100 border border-base-200 shadow-sm">
-                <figure class="aspect-video bg-base-200">
-                    @if ($hackatonImage)
-                        <img src="{{ $hackatonImage }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}">
-                    @else
-                        <div class="flex h-full w-full items-center justify-center text-base-content/60">Изображение хакатона отсутствует</div>
-                    @endif
-                </figure>
+                <div class="p-4 pb-0">
+                    <x-image-carousel
+                        carousel-id="hackaton-hero-carousel"
+                        :items="$hackatonGalleryImages"
+                        aspect-class="aspect-video"
+                        empty-text="Изображения хакатона отсутствуют" />
+                </div>
                 <div class="card-body">
                     <h1 class="card-title text-3xl">{{ $hackaton->title }}</h1>
                     <div class="prose max-w-none prose-sm sm:prose-base">
@@ -79,19 +95,37 @@
             </div>
 
             <div class="card bg-base-100 border border-base-200 shadow-sm">
-                <div class="card-body space-y-3">
+                <div class="card-body space-y-4">
                     <h2 class="card-title text-lg">Информация о хакатоне</h2>
-                    <div class="alert alert-info items-start">
-                        <div>
-                            <p class="font-semibold">Ваш следующий шаг: {{ $nextStepTitle }}</p>
-                            <p class="text-sm">{{ $nextStepHint }}</p>
+                    <div class="rounded-xl border border-primary/20 bg-primary/10 p-4">
+                        <p class="text-xs uppercase tracking-wide text-primary/80">Ваш следующий шаг</p>
+                        <p class="mt-1 font-semibold">{{ $nextStepTitle }}</p>
+                        <p class="mt-1 text-sm text-base-content/80">{{ $nextStepHint }}</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-2 text-sm">
+                        <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
+                            <span class="text-base-content/70">Организатор</span>
+                            <span class="font-medium">{{ $hackaton->user->nickname ?? $hackaton->user->name ?? $hackaton->user->email }}</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
+                            <span class="text-base-content/70">Старт</span>
+                            <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }}</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
+                            <span class="text-base-content/70">Финиш</span>
+                            <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}</span>
                         </div>
                     </div>
-                    <p class="text-sm">Организатор: <span class="font-medium">{{ $hackaton->user->nickname ?? $hackaton->user->name ?? $hackaton->user->email }}</span></p>
-                    <p class="text-sm">Начало: <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }}</span></p>
-                    <p class="text-sm">Конец: <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}</span></p>
-                    <p class="text-sm">Команд: <span class="font-medium">{{ $teamsCount }}</span></p>
-                    <p class="text-sm">Участников: <span class="font-medium">{{ $participantsCount }}</span></p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="rounded-xl border border-base-300 p-3 text-center">
+                            <p class="text-xs text-base-content/70">Команд</p>
+                            <p class="text-2xl font-semibold">{{ $teamsCount }}</p>
+                        </div>
+                        <div class="rounded-xl border border-base-300 p-3 text-center">
+                            <p class="text-xs text-base-content/70">Участников</p>
+                            <p class="text-2xl font-semibold">{{ $participantsCount }}</p>
+                        </div>
+                    </div>
 
                     @auth
                         @if ($hackaton->user_id !== auth()->id())
@@ -181,8 +215,43 @@
 
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-3">
                     <h2 class="card-title text-xl">Анонсы</h2>
+                    @if($isOrganizer)
+                        <x-organizer-action-modal
+                            :modal-id="$modals['announcement_create']"
+                            button-label="Новый анонс"
+                            title="Опубликовать анонс"
+                            description="Подготовьте текст анонса и при необходимости запланируйте публикацию.">
+                            <form method="POST" enctype="multipart/form-data" action="{{ route('hackatons.announcements.store', $hackaton) }}" class="space-y-3">
+                                @csrf
+                                <input type="hidden" name="_open_modal" value="{{ $modals['announcement_create'] }}">
+                                <input name="title" class="input input-bordered w-full" placeholder="Заголовок анонса" required autofocus>
+                                <textarea name="body" class="textarea textarea-bordered w-full" rows="4" placeholder="Текст анонса" required></textarea>
+                                <div class="space-y-2">
+                                    <label class="label p-0">
+                                        <span class="label-text">Изображения анонса</span>
+                                    </label>
+                                    <input name="images[]" type="file" multiple accept="image/*" class="file-input file-input-bordered w-full">
+                                    <p class="text-xs text-base-content/70">Можно загрузить несколько изображений (до 10 файлов).</p>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                    <select name="template_key" class="select select-bordered">
+                                        <option value="">Без шаблона</option>
+                                        @foreach($announcementTemplates as $templateKey => $templateName)
+                                            <option value="{{ $templateKey }}">{{ $templateName }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input name="published_at" type="datetime-local" class="input input-bordered">
+                                    <label class="label cursor-pointer justify-start gap-2">
+                                        <input type="checkbox" name="is_draft" value="1" class="checkbox checkbox-sm">
+                                        <span class="label-text">Сохранить как черновик</span>
+                                    </label>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Сохранить анонс</button>
+                            </form>
+                        </x-organizer-action-modal>
+                    @endif
                 </div>
 
                 @if($hackaton->announcements->isEmpty())
@@ -215,33 +284,18 @@
                                 <div class="prose max-w-none prose-sm mt-2">
                                     {!! \Illuminate\Support\Str::markdown($announcement->body) !!}
                                 </div>
+                                @if ($announcement->images->isNotEmpty())
+                                    <div class="mt-3">
+                                        <x-image-carousel
+                                            :carousel-id="'announcement-carousel-'.$announcement->id"
+                                            :items="$announcement->images"
+                                            aspect-class="aspect-[16/9]"
+                                            empty-text="Изображения отсутствуют" />
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>
-                @endif
-
-                @if($isOrganizer)
-                    <div class="divider"></div>
-                    <form method="POST" action="{{ route('hackatons.announcements.store', $hackaton) }}" class="space-y-3">
-                        @csrf
-                        <h3 class="font-semibold">Опубликовать анонс</h3>
-                        <input name="title" class="input input-bordered w-full" placeholder="Заголовок анонса" required>
-                        <textarea name="body" class="textarea textarea-bordered w-full" rows="4" placeholder="Текст анонса" required></textarea>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <select name="template_key" class="select select-bordered">
-                                <option value="">Без шаблона</option>
-                                @foreach($announcementTemplates as $templateKey => $templateName)
-                                    <option value="{{ $templateKey }}">{{ $templateName }}</option>
-                                @endforeach
-                            </select>
-                            <input name="published_at" type="datetime-local" class="input input-bordered">
-                            <label class="label cursor-pointer justify-start gap-2">
-                                <input type="checkbox" name="is_draft" value="1" class="checkbox checkbox-sm">
-                                <span class="label-text">Сохранить как черновик</span>
-                            </label>
-                        </div>
-                        <button class="btn btn-primary btn-sm">Сохранить анонс</button>
-                    </form>
                 @endif
             </div>
         </div>
@@ -388,7 +442,7 @@
                                         @endif
                                     @endauth
 
-                                    @if($isOrganizer && $case->submissions->isNotEmpty())
+                                    @if(($isOrganizer || $isAssignedJudge) && $case->submissions->isNotEmpty())
                                         <div class="rounded-xl border border-base-300 p-3 space-y-3">
                                             <p class="font-medium">Оценивание решений</p>
                                             @foreach($case->submissions as $submission)
@@ -412,22 +466,30 @@
 
                                     @if($isOrganizer)
                                         <div class="divider my-1"></div>
-                                        <form method="POST" action="{{ route('hackatons.cases.fields.store', [$hackaton, $case]) }}"
-                                            class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                            @csrf
-                                            <input name="label" class="input input-bordered" placeholder="Название поля" required>
-                                            <select name="type" class="select select-bordered" required>
-                                                <option value="text">Короткий текст</option>
-                                                <option value="url">Ссылка</option>
-                                                <option value="textarea">Большой текст</option>
-                                                <option value="file">Файл</option>
-                                            </select>
-                                            <label class="label cursor-pointer justify-start gap-2">
-                                                <input type="checkbox" name="is_required" value="1" class="checkbox checkbox-sm">
-                                                <span class="label-text">Обязательное поле</span>
-                                            </label>
-                                            <button class="btn btn-sm btn-outline md:col-span-2">Добавить поле</button>
-                                        </form>
+                                        <x-organizer-action-modal
+                                            :modal-id="'organizer-case-field-create-modal-'.$case->id"
+                                            button-label="Добавить поле"
+                                            button-class="btn btn-sm btn-outline"
+                                            title="Добавить поле к кейсу"
+                                            :description="'Кейс: '.$case->title">
+                                            <form method="POST" action="{{ route('hackatons.cases.fields.store', [$hackaton, $case]) }}"
+                                                class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                                @csrf
+                                                <input type="hidden" name="_open_modal" value="{{ 'organizer-case-field-create-modal-'.$case->id }}">
+                                                <input name="label" class="input input-bordered" placeholder="Название поля" required autofocus>
+                                                <select name="type" class="select select-bordered" required>
+                                                    <option value="text">Короткий текст</option>
+                                                    <option value="url">Ссылка</option>
+                                                    <option value="textarea">Большой текст</option>
+                                                    <option value="file">Файл</option>
+                                                </select>
+                                                <label class="label cursor-pointer justify-start gap-2">
+                                                    <input type="checkbox" name="is_required" value="1" class="checkbox checkbox-sm">
+                                                    <span class="label-text">Обязательное поле</span>
+                                                </label>
+                                                <button class="btn btn-sm btn-outline md:col-span-2">Добавить поле</button>
+                                            </form>
+                                        </x-organizer-action-modal>
                                     @endif
                                 </div>
                             @endif
@@ -443,8 +505,8 @@
             </div>
         @endguest
 
-        @if($isOrganizer)
-            <div class="divider">Для организатора</div>
+        @if($isOrganizer || $isAssignedJudge)
+            <div class="divider">{{ $isOrganizer ? 'Для организатора' : 'Для судьи' }}</div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="card bg-base-100 border border-base-200 shadow-sm">
@@ -501,50 +563,145 @@
                 </div>
             </div>
 
-            <div class="card bg-base-100 border border-base-200 shadow-sm">
-                <div class="card-body space-y-4">
-                    <h2 class="card-title text-xl">Управление кейсами</h2>
+            @if($isOrganizer)
+                <div class="card bg-base-100 border border-base-200 shadow-sm">
+                    <div class="card-body space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <h2 class="card-title text-xl">Судьи хакатона</h2>
+                            <div class="flex flex-wrap gap-2">
+                                <x-organizer-action-modal
+                                    :modal-id="$modals['judge_invite']"
+                                    button-label="Пригласить судью"
+                                    title="Приглашение судьи по email">
+                                    <form method="POST" action="{{ route('hackatons.judges.invite', $hackaton) }}" class="space-y-3">
+                                        @csrf
+                                        <input type="hidden" name="_open_modal" value="{{ $modals['judge_invite'] }}">
+                                        <input name="email" type="email" class="input input-bordered w-full" placeholder="email судьи для приглашения" required autofocus>
+                                        <button class="btn btn-primary btn-sm">Отправить инвайт</button>
+                                    </form>
+                                </x-organizer-action-modal>
 
-                    <form method="POST" action="{{ route('hackatons.cases.store', $hackaton) }}" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @csrf
-                        <input name="title" class="input input-bordered" placeholder="Название кейса" required>
-                        <label class="label cursor-pointer justify-start gap-2">
-                            <input type="checkbox" name="is_published" value="1" class="checkbox checkbox-sm">
-                            <span class="label-text">Опубликовать сразу</span>
-                        </label>
-                        <input name="publish_at" type="datetime-local" class="input input-bordered" placeholder="Дата публикации">
-                        <input name="deadline_at" type="datetime-local" class="input input-bordered" placeholder="Дедлайн">
-                        <textarea name="description" rows="3" class="textarea textarea-bordered md:col-span-2"
-                            placeholder="Описание кейса"></textarea>
-                        <button class="btn btn-primary btn-sm md:col-span-2">Добавить кейс</button>
-                    </form>
+                                <x-organizer-action-modal
+                                    :modal-id="$modals['judge_assign']"
+                                    button-label="Назначить судью"
+                                    button-class="btn btn-outline btn-sm"
+                                    title="Назначение зарегистрированного судьи">
+                                    <form method="POST" action="{{ route('hackatons.judges.assign', $hackaton) }}" class="space-y-3">
+                                        @csrf
+                                        <input type="hidden" name="_open_modal" value="{{ $modals['judge_assign'] }}">
+                                        <select name="user_id" class="select select-bordered w-full" required autofocus>
+                                            <option value="">Выберите зарегистрированного судью</option>
+                                            @foreach($judgeCandidates as $candidate)
+                                                <option value="{{ $candidate->id }}">{{ $candidate->fio }} ({{ $candidate->email }})</option>
+                                            @endforeach
+                                        </select>
+                                        <button class="btn btn-outline btn-sm">Назначить</button>
+                                    </form>
+                                </x-organizer-action-modal>
+                            </div>
+                        </div>
+                        @if($hackaton->judges->isNotEmpty())
+                            <div class="overflow-x-auto">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Судья</th>
+                                            <th>Email</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($hackaton->judges as $judge)
+                                            <tr>
+                                                <td>{{ $judge->fio }}</td>
+                                                <td>{{ $judge->email }}</td>
+                                                <td class="text-right">
+                                                    <form method="POST" action="{{ route('hackatons.judges.unassign', [$hackaton, $judge]) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="btn btn-xs btn-error">Снять</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                        @if($pendingJudgeInvitations->isNotEmpty())
+                            <div class="space-y-1">
+                                <p class="text-sm font-medium">Ожидают подтверждения</p>
+                                @foreach($pendingJudgeInvitations as $invite)
+                                    <p class="text-xs text-base-content/70">{{ $invite->invited_email }} - {{ route('judges.invitations.accept', $invite->token) }}</p>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            </div>
+
+                <div class="card bg-base-100 border border-base-200 shadow-sm">
+                    <div class="card-body space-y-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <h2 class="card-title text-xl">Управление кейсами</h2>
+                            <x-organizer-action-modal
+                                :modal-id="$modals['case_create']"
+                                button-label="Новый кейс"
+                                title="Создание нового кейса"
+                                description="Заполните параметры публикации и дедлайна.">
+                                <form method="POST" action="{{ route('hackatons.cases.store', $hackaton) }}" class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                    @csrf
+                                    <input type="hidden" name="_open_modal" value="{{ $modals['case_create'] }}">
+                                    <input name="title" class="input input-bordered" placeholder="Название кейса" required autofocus>
+                                    <label class="label cursor-pointer justify-start gap-2">
+                                        <input type="checkbox" name="is_published" value="1" class="checkbox checkbox-sm">
+                                        <span class="label-text">Опубликовать сразу</span>
+                                    </label>
+                                    <input name="publish_at" type="datetime-local" class="input input-bordered" placeholder="Дата публикации">
+                                    <input name="deadline_at" type="datetime-local" class="input input-bordered" placeholder="Дедлайн">
+                                    <textarea name="description" rows="3" class="textarea textarea-bordered md:col-span-2"
+                                        placeholder="Описание кейса"></textarea>
+                                    <button class="btn btn-primary btn-sm md:col-span-2">Добавить кейс</button>
+                                </form>
+                            </x-organizer-action-modal>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body space-y-4">
-                    <h2 class="card-title text-xl">Сертификаты участников</h2>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="card-title text-xl">Сертификаты участников</h2>
+                        @if($participantUsers->isNotEmpty())
+                            <x-organizer-action-modal
+                                :modal-id="$modals['certificate_upload']"
+                                button-label="Загрузить сертификат"
+                                title="Загрузка сертификата"
+                                description="Выберите одного или нескольких участников и загрузите файл сертификата.">
+                                <form method="POST" enctype="multipart/form-data" action="{{ route('hackatons.certificates.store', $hackaton) }}"
+                                    class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                    @csrf
+                                    <input type="hidden" name="_open_modal" value="{{ $modals['certificate_upload'] }}">
+                                    <select name="user_ids[]" class="select select-bordered md:col-span-2" multiple required autofocus>
+                                        @foreach($participantUsers as $participant)
+                                            <option value="{{ $participant->id }}">
+                                                {{ $participant->fio ?? $participant->nickname ?? $participant->email }}
+                                                @if($issuedCertificatesByUser->has($participant->id))
+                                                    (уже выдано: {{ $issuedCertificatesByUser->get($participant->id)->count() }})
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input name="title" class="input input-bordered" placeholder="Название сертификата" required>
+                                    <input name="issued_at" type="date" class="input input-bordered">
+                                    <input name="file" type="file" class="file-input file-input-bordered md:col-span-2" required>
+                                    <button class="btn btn-primary btn-sm md:col-span-2">Загрузить сертификат</button>
+                                </form>
+                            </x-organizer-action-modal>
+                        @endif
+                    </div>
                     @if($participantUsers->isEmpty())
                         <p class="text-base-content/60">Пока нет участников для выдачи сертификатов.</p>
-                    @else
-                        <form method="POST" enctype="multipart/form-data" action="{{ route('hackatons.certificates.store', $hackaton) }}"
-                            class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            @csrf
-                            <select name="user_ids[]" class="select select-bordered" multiple required>
-                                @foreach($participantUsers as $participant)
-                                    <option value="{{ $participant->id }}">
-                                        {{ $participant->fio ?? $participant->nickname ?? $participant->email }}
-                                        @if($issuedCertificatesByUser->has($participant->id))
-                                            (уже выдано: {{ $issuedCertificatesByUser->get($participant->id)->count() }})
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            <input name="title" class="input input-bordered" placeholder="Название сертификата" required>
-                            <input name="issued_at" type="date" class="input input-bordered">
-                            <input name="file" type="file" class="file-input file-input-bordered" required>
-                            <button class="btn btn-primary btn-sm md:col-span-2">Загрузить сертификат</button>
-                        </form>
                     @endif
 
                     @if($hackaton->certificates->isNotEmpty())
@@ -671,4 +828,65 @@
             </div>
         @endif
     </div>
+
+    <script>
+        (function () {
+            const carousels = document.querySelectorAll('[data-image-carousel]');
+
+            carousels.forEach((carousel) => {
+                const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
+                const prevButton = carousel.querySelector('[data-carousel-prev]');
+                const nextButton = carousel.querySelector('[data-carousel-next]');
+                const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+
+                if (slides.length <= 1) {
+                    return;
+                }
+
+                let currentIndex = 0;
+
+                const render = (nextIndex) => {
+                    const normalizedIndex = (nextIndex + slides.length) % slides.length;
+                    currentIndex = normalizedIndex;
+
+                    slides.forEach((slide, slideIndex) => {
+                        slide.classList.toggle('hidden', slideIndex !== currentIndex);
+                    });
+
+                    dots.forEach((dot, dotIndex) => {
+                        dot.classList.toggle('bg-base-100', dotIndex === currentIndex);
+                        dot.classList.toggle('bg-base-100/40', dotIndex !== currentIndex);
+                    });
+                };
+
+                prevButton?.addEventListener('click', () => render(currentIndex - 1));
+                nextButton?.addEventListener('click', () => render(currentIndex + 1));
+
+                dots.forEach((dot, dotIndex) => {
+                    dot.addEventListener('click', () => render(dotIndex));
+                });
+            });
+        })();
+    </script>
+
+    @if ($errors->any() && filled(old('_open_modal')))
+        <script>
+            (function () {
+                const modalId = @json(old('_open_modal'));
+                const modalToggle = document.getElementById(modalId);
+
+                if (!modalToggle) {
+                    return;
+                }
+
+                modalToggle.checked = true;
+
+                window.requestAnimationFrame(() => {
+                    const modal = modalToggle.closest('.inline-block');
+                    const firstField = modal?.querySelector('input:not([type="hidden"]), textarea, select');
+                    firstField?.focus();
+                });
+            })();
+        </script>
+    @endif
 @endsection

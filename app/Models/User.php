@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -50,6 +51,28 @@ class User extends Authenticatable
         return $this->hasMany(HackatonCertificate::class);
     }
 
+    public function judgeAssignments(): HasMany
+    {
+        return $this->hasMany(HackatonJudge::class);
+    }
+
+    public function judgedHackatons(): BelongsToMany
+    {
+        return $this->belongsToMany(Hackaton::class, 'hackaton_judges')
+            ->withPivot(['assigned_by', 'assigned_at'])
+            ->withTimestamps();
+    }
+
+    public function sentJudgeInvitations(): HasMany
+    {
+        return $this->hasMany(JudgeInvitation::class, 'invited_by');
+    }
+
+    public function receivedJudgeInvitations(): HasMany
+    {
+        return $this->hasMany(JudgeInvitation::class, 'invited_user_id');
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -64,6 +87,9 @@ class User extends Authenticatable
         'password',
         'phone',
         'role',
+        'is_profile_public',
+        'show_email_on_profile',
+        'show_phone_on_profile',
     ];
 
     /**
@@ -86,6 +112,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_profile_public' => 'boolean',
+            'show_email_on_profile' => 'boolean',
+            'show_phone_on_profile' => 'boolean',
         ];
     }
 
@@ -99,5 +128,25 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isOrganizer(): bool
+    {
+        return $this->role === 'partner';
+    }
+
+    public function isJudge(): bool
+    {
+        return $this->role === 'judge';
+    }
+
+    public function isParticipant(): bool
+    {
+        return $this->role === 'user';
     }
 }

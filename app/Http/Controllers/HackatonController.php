@@ -7,7 +7,7 @@ use App\Models\HackatonCaseSubmission;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class HackatonController extends Controller
@@ -15,8 +15,10 @@ class HackatonController extends Controller
     public function show(Hackaton $hackaton): View
     {
         $isOrganizer = Auth::check() && (int) $hackaton->user_id === (int) Auth::id();
+        $isAssignedJudge = Auth::check() && $hackaton->judges()->where('users.id', Auth::id())->exists();
         $hackaton->loadShowRelations();
         $hackaton->setRelation('announcements', $hackaton->announcements()
+            ->with('images')
             ->when(! $isOrganizer, fn (Builder $query) => $query
                 ->where('is_draft', false)
                 ->whereNotNull('published_at')
@@ -80,8 +82,23 @@ class HackatonController extends Controller
             ->sortByDesc('total_score')
             ->values();
 
+        $judgeCandidates = $isOrganizer
+            ? User::query()
+                ->where('role', 'judge')
+                ->orderBy('fio')
+                ->get(['id', 'fio', 'email', 'nickname'])
+            : collect();
+
+        $pendingJudgeInvitations = $isOrganizer
+            ? $hackaton->judgeInvitations()
+                ->where('status', 'pending')
+                ->latest()
+                ->get()
+            : collect();
+
         return view('pages.hackatons.show', compact(
             'hackaton',
+            'isAssignedJudge',
             'availableTeams',
             'submitterTeams',
             'participantUsers',
@@ -90,6 +107,8 @@ class HackatonController extends Controller
             'submissions',
             'metrics',
             'leaderboard',
+            'judgeCandidates',
+            'pendingJudgeInvitations',
         ));
     }
 

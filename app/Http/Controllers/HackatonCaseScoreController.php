@@ -7,13 +7,15 @@ use App\Models\Hackaton;
 use App\Models\HackatonCaseScore;
 use App\Models\HackatonCaseSubmission;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 
 class HackatonCaseScoreController extends Controller
 {
     public function store(StoreHackatonCaseScoreRequest $request, Hackaton $hackaton): RedirectResponse
     {
-        if ((int) $hackaton->user_id !== (int) $request->user()->id) {
+        $isOrganizer = (int) $hackaton->user_id === (int) $request->user()->id;
+        $isJudge = $hackaton->judges()->where('users.id', $request->user()->id)->exists();
+
+        if (! $isOrganizer && ! $isJudge) {
             abort(403);
         }
 
@@ -23,7 +25,6 @@ class HackatonCaseScoreController extends Controller
             ->findOrFail($validated['hackaton_case_submission_id']);
 
         abort_unless((int) $submission->case->hackaton_id === (int) $hackaton->id, 404);
-        Gate::authorize('update', $submission->case);
 
         HackatonCaseScore::query()->updateOrCreate(
             ['hackaton_case_submission_id' => $submission->id],

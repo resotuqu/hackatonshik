@@ -2,12 +2,14 @@
 
 use App\Models\Hackaton;
 use App\Models\HackatonAnnouncement;
+use App\Models\HackatonAnnouncementImage;
 use App\Models\HackatonApplication;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseField;
 use App\Models\HackatonCaseScore;
 use App\Models\HackatonCaseSubmission;
 use App\Models\HackatonCertificate;
+use App\Models\HackatonImage;
 use App\Models\Team;
 use App\Models\TeamRole;
 use App\Models\User;
@@ -15,6 +17,16 @@ use App\Notifications\HackatonAnnouncementPublished;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+
+test('hackaton show page renders without participant collection type errors', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    $response = $this->get(route('hackatons.show', $hackaton));
+
+    $response->assertOk();
+    $response->assertViewIs('pages.hackatons.show');
+});
 
 test('organizer can create a case for own hackaton', function () {
     $organizer = User::factory()->partner()->create();
@@ -125,6 +137,46 @@ test('announcement publication notifies hackaton participants', function () {
         [$participant],
         HackatonAnnouncementPublished::class
     );
+});
+
+test('organizer can upload announcement image gallery', function () {
+    Storage::fake('public');
+
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    $response = $this
+        ->actingAs($organizer)
+        ->post(route('hackatons.announcements.store', $hackaton), [
+            'title' => 'Визуальный апдейт',
+            'body' => 'Добавили галерею изображений.',
+            'images' => [
+                UploadedFile::fake()->image('a1.png'),
+                UploadedFile::fake()->image('a2.png'),
+            ],
+        ]);
+
+    $response->assertRedirect();
+
+    $announcement = HackatonAnnouncement::query()->latest()->first();
+    expect($announcement)->not->toBeNull();
+    expect(HackatonAnnouncementImage::query()->where('hackaton_announcement_id', $announcement->id)->count())->toBe(2);
+});
+
+test('hackaton show page renders gallery carousel', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+    HackatonImage::query()->create([
+        'hackaton_id' => $hackaton->id,
+        'path' => 'hackaton_gallery/sample.png',
+        'sort_order' => 0,
+    ]);
+
+    $response = $this->get(route('hackatons.show', $hackaton));
+
+    $response->assertOk();
+    $response->assertSee('data-image-carousel', false);
+    $response->assertSee('hackaton_gallery/sample.png');
 });
 
 test('organizer can bulk accept pending applications', function () {

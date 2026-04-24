@@ -25,6 +25,14 @@ class extends Component {
     ])]
     public $photo;
 
+    #[Validate(['galleryPhotos.*' => ['nullable', 'image', 'max:5120']], message: [
+        'galleryPhotos.*.image' => 'Каждый файл галереи должен быть изображением',
+        'galleryPhotos.*.max' => 'Каждое изображение в галерее не может быть больше 5 МБ',
+    ])]
+    public array $galleryPhotos = [];
+
+    public array $imagesToDelete = [];
+
     #[Validate([
         'start_at' => ['required', 'date'],
     ], message: [
@@ -72,7 +80,7 @@ class extends Component {
             return;
         }
 
-        $this->hackaton = $hackaton;
+        $this->hackaton = $hackaton->load('images');
         $this->title = $hackaton->title;
         $this->description = $hackaton->description;
         $this->start_at = $hackaton->start_at;
@@ -109,6 +117,13 @@ class extends Component {
     {
         unset($this->hackatonDocuments[$index]);
         $this->hackatonDocuments = array_values($this->hackatonDocuments);
+    }
+
+    public function markImageForDelete(int $imageId): void
+    {
+        if (!in_array($imageId, $this->imagesToDelete, true)) {
+            $this->imagesToDelete[] = $imageId;
+        }
     }
 
     public function save(): void
@@ -186,6 +201,18 @@ class extends Component {
             $documentsToDelete->whereNotIn('id', $savedDocumentIds);
         }
         $documentsToDelete->delete();
+
+        if (!empty($this->imagesToDelete)) {
+            $this->hackaton->images()->whereIn('id', $this->imagesToDelete)->delete();
+        }
+
+        $sortOrder = (int) $this->hackaton->images()->max('sort_order') + 1;
+        foreach ($this->galleryPhotos as $galleryPhoto) {
+            $this->hackaton->images()->create([
+                'path' => $galleryPhoto->storePublicly(path: 'hackaton_gallery', options: 'public'),
+                'sort_order' => $sortOrder++,
+            ]);
+        }
 
         $this->success('Хакатон обновлён !', position: 'toast-center toast-top');
         $this->redirect('/profile/hackatons');
@@ -274,6 +301,42 @@ class extends Component {
                     @elseif(!empty($hackaton->image_url))
                         <div class="rounded-xl border border-base-300 bg-base-200 p-2">
                             <img class="w-full object-contain h-64 rounded-lg" src="{{ asset('storage/' . $hackaton->image_url) }}" alt="Текущая обложка хакатона">
+                        </div>
+                    @endif
+                    <div class="space-y-2">
+                        <label class="label p-0">
+                            <span class="label-text">Добавить фото в галерею</span>
+                        </label>
+                        <input type="file" wire:model="galleryPhotos" multiple accept="image/*" class="file-input file-input-bordered w-full" />
+                        <p class="text-xs text-base-content/70">Новые фото добавятся в конец галереи.</p>
+                    </div>
+                    @if (!empty($galleryPhotos))
+                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            @foreach ($galleryPhotos as $galleryPhoto)
+                                <img src="{{ $galleryPhoto->temporaryUrl() }}" alt="Превью новой фотографии хакатона"
+                                     class="h-24 w-full rounded-lg object-cover border border-base-300">
+                            @endforeach
+                        </div>
+                    @endif
+                    @php
+                        $activeImages = $hackaton->images->reject(fn ($image) => in_array($image->id, $imagesToDelete, true));
+                    @endphp
+                    @if ($activeImages->isNotEmpty())
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium">Текущая галерея</p>
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                @foreach ($activeImages as $galleryImage)
+                                    <div class="relative">
+                                        <img src="{{ asset('storage/' . $galleryImage->path) }}" alt="Фото хакатона"
+                                             class="h-24 w-full rounded-lg object-cover border border-base-300">
+                                        <button type="button"
+                                                wire:click="markImageForDelete({{ $galleryImage->id }})"
+                                                class="btn btn-xs btn-error absolute right-1 top-1">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>

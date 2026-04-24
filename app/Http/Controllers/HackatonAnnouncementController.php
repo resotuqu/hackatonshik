@@ -43,6 +43,14 @@ class HackatonAnnouncementController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
+        $images = $request->file('images', []);
+        foreach ($images as $index => $image) {
+            $announcement->images()->create([
+                'path' => $image->storePublicly('hackaton_announcements', 'public'),
+                'sort_order' => $index,
+            ]);
+        }
+
         $participants = User::query()
             ->where('id', '!=', $hackaton->user_id)
             ->where(function (Builder $query) use ($hackaton): void {

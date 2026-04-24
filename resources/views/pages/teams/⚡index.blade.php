@@ -1,53 +1,59 @@
 <?php
 
+use App\Enums\ApplicationStatus;
 use App\Models\Hackaton;
+use App\Models\ListAnalyticsEvent;
 use App\Models\Role;
+use App\Models\SavedListFilter;
 use App\Models\Skill;
 use App\Models\Team;
+use App\Models\TeamApplication;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 
 new #[Layout('layouts::app', ['title' => "Команды"])]
 class extends Component {
     use \Livewire\WithPagination;
-    use \Livewire\WithoutUrlPagination;
 
     #[Computed]
     public function hackatons()
     {
-        $hackatons = [];
-        $hackatons[] = [
-            'id' => '0',
-            'name' => 'Любой',
-        ];
-        foreach (Hackaton::query()
-                     ->where('is_public', '=', '1')
-                     ->get() as $hackaton) {
-            $hackatons[] = [
-                'id' => $hackaton->id,
-                'name' => $hackaton->title,
-            ];
-        }
-        return $hackatons;
+        return Cache::remember('teams-filter-hackatons', now()->addMinutes(10), function () {
+            $hackatons = [['id' => '0', 'name' => 'Любой']];
+            foreach (Hackaton::query()->where('is_public', true)->orderBy('title')->get(['id', 'title']) as $hackaton) {
+                $hackatons[] = [
+                    'id' => (string) $hackaton->id,
+                    'name' => $hackaton->title,
+                ];
+            }
+
+            return $hackatons;
+        });
     }
 
     #[Computed]
     public function teams()
     {
         return Team::query()
-            ->with(['user', 'hackaton', 'roles'])
+            ->select(['id', 'user_id', 'title', 'image_url', 'hackaton_id'])
+            ->with(['user:id,nickname', 'hackaton:id,title,start_at,end_at', 'roles:id,team_id,role_id,user_id', 'roles.role:id,name'])
+            ->withCount('roles')
+            ->withCount(['roles as empty_roles_count' => fn ($query) => $query->whereNull('user_id')])
             ->whereHas('roles', function ($query) {
                 $query->whereNull('user_id');
             })
-            ->when($this->q != '', function ($query) {
+            ->when($this->q !== '', function ($query) {
                 $query->where('title', 'like', '%' . $this->q . '%');
             })
-            ->when($this->hackaton_id != '0', function ($query) {
+            ->when($this->hackaton_id !== '0', function ($query) {
                 $query->where('teams.hackaton_id', '=', $this->hackaton_id);
             })
-            ->when($this->role_id != '0', function ($query) {
+            ->when($this->role_id !== '0', function ($query) {
                 $query->whereHas('roles', function ($q) {
                     $q->where('role_id', '=', $this->role_id);
                 });
@@ -57,56 +63,199 @@ class extends Component {
                     $q->whereIn('skills.id', $this->skills);
                 });
             })
-            ->when($this->start_from != '', function ($query) {
+            ->when($this->start_from !== '', function ($query) {
                 $query->whereHas('hackaton', function($q) {
                     $q->where('start_at', '>=', $this->start_from);
                 });
             })
-            ->orderBy('id', 'desc')
+            ->when($this->sort === 'start_soonest', fn ($query) => $query->join('hackatons', 'hackatons.id', '=', 'teams.hackaton_id')->orderBy('hackatons.start_at')->select('teams.*'))
+            ->when($this->sort === 'newest', fn ($query) => $query->orderByDesc('id'))
             ->paginate(6);
     }
 
     #[Computed]
     public function skillsData()
     {
-        return Skill::query()->orderBy('name')->get();
+        return Cache::remember('teams-filter-skills', now()->addMinutes(10), fn () => Skill::query()->orderBy('name')->get());
     }
 
     #[Computed]
     public function rolesData()
     {
-        $roles = [];
-        $roles[] = [
-            'id' => '0',
-            'name' => 'Любая',
-        ];
-        foreach (Role::query()->orderBy('name')->get() as $role) {
-            $roles[] = [
-                'id' => $role->id,
-                'name' => $role->name,
-            ];
+        return Cache::remember('teams-filter-roles', now()->addMinutes(10), function () {
+            $roles = [['id' => '0', 'name' => 'Любая']];
+            foreach (Role::query()->orderBy('name')->get(['id', 'name']) as $role) {
+                $roles[] = [
+                    'id' => (string) $role->id,
+                    'name' => $role->name,
+                ];
+            }
+
+            return $roles;
+        });
+    }
+
+    #[Computed]
+    public function savedFilters()
+    {
+        if (! Auth::check()) {
+            return collect();
         }
-        return $roles;
+
+        return SavedListFilter::query()
+            ->where('user_id', Auth::id())
+            ->where('list_key', 'teams')
+            ->latest()
+            ->limit(2)
+            ->get();
+    }
+
+    public function mount(): void
+    {
+        $this->trackListEvent('list_view');
     }
 
     public function search()
     {
         $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
     }
 
     public function clearFilters(): void
     {
-        $this->reset(['q', 'hackaton_id', 'role_id', 'skills', 'start_from']);
+        $this->reset(['q', 'hackaton_id', 'role_id', 'skills', 'start_from', 'sort']);
         $this->hackaton_id = '0';
         $this->role_id = '0';
+        $this->sort = 'newest';
         $this->resetPage();
     }
 
-    public $q = '';
-    public $hackaton_id = '0';
-    public $role_id = '0';
-    public $skills = [];
-    public $start_from;
+    public function quickApplyTeam(int $teamId): void
+    {
+        if (! Auth::check()) {
+            return;
+        }
+
+        if (Auth::user()?->isOrganizer()) {
+            session()->flash('warning', 'Организатор не может подавать заявки в команды.');
+
+            return;
+        }
+
+        $team = Team::query()->with('roles')->find($teamId);
+        if (! $team || $team->user_id === Auth::id()) {
+            return;
+        }
+
+        $role = $team->roles->firstWhere('user_id', null);
+        if (! $role) {
+            return;
+        }
+
+        $application = TeamApplication::query()->firstOrNew([
+            'user_id' => Auth::id(),
+            'team_role_id' => $role->id,
+        ]);
+        $application->fill([
+            'status' => ApplicationStatus::PENDING,
+            'message' => null,
+            'reviewed_at' => null,
+            'reviewed_by' => null,
+        ]);
+        $application->save();
+
+        $this->trackListEvent('quick_apply_click', ['team_id' => $teamId, 'team_role_id' => $role->id]);
+        session()->flash('success', 'Быстрый отклик отправлен.');
+    }
+
+    public function openTeam(int $teamId)
+    {
+        $this->trackListEvent('card_open', ['team_id' => $teamId]);
+
+        return redirect()->route('teams.show', ['team' => $teamId]);
+    }
+
+    public function saveCurrentFilter(): void
+    {
+        if (! Auth::check() || trim($this->saved_filter_name) === '') {
+            return;
+        }
+
+        SavedListFilter::query()->updateOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'list_key' => 'teams',
+                'name' => trim($this->saved_filter_name),
+            ],
+            ['filters' => $this->currentFilters()]
+        );
+
+        $this->saved_filter_name = '';
+    }
+
+    public function applySavedFilter(int $id): void
+    {
+        $filter = SavedListFilter::query()
+            ->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('list_key', 'teams')
+            ->first();
+
+        if (! $filter) {
+            return;
+        }
+
+        $payload = $filter->filters ?? [];
+        $this->q = (string) ($payload['q'] ?? '');
+        $this->hackaton_id = (string) ($payload['hackaton_id'] ?? '0');
+        $this->role_id = (string) ($payload['role_id'] ?? '0');
+        $this->skills = (array) ($payload['skills'] ?? []);
+        $this->start_from = (string) ($payload['start_from'] ?? '');
+        $this->sort = (string) ($payload['sort'] ?? 'newest');
+        $this->search();
+    }
+
+    private function currentFilters(): array
+    {
+        return [
+            'q' => $this->q,
+            'hackaton_id' => $this->hackaton_id,
+            'role_id' => $this->role_id,
+            'skills' => $this->skills,
+            'start_from' => $this->start_from,
+            'sort' => $this->sort,
+        ];
+    }
+
+    private function trackListEvent(string $eventName, array $payload = []): void
+    {
+        ListAnalyticsEvent::query()->create([
+            'user_id' => Auth::id(),
+            'list_key' => 'teams',
+            'event_name' => $eventName,
+            'payload' => $payload,
+        ]);
+    }
+
+    #[Url(as: 'q')]
+    public string $q = '';
+
+    #[Url(as: 'hackaton_id')]
+    public string $hackaton_id = '0';
+
+    #[Url(as: 'role_id')]
+    public string $role_id = '0';
+
+    #[Url(as: 'skills')]
+    public array $skills = [];
+
+    #[Url(as: 'start_from')]
+    public string $start_from = '';
+
+    #[Url(as: 'sort')]
+    public string $sort = 'newest';
+
+    public string $saved_filter_name = '';
 }
 ?>
 
@@ -136,6 +285,10 @@ class extends Component {
 
             {{--HackatonStartFrom--}}
             <x-marydatetime wire:model="start_from" label="Начало от"  />
+            <x-maryselect wire:model="sort" :options="[
+                ['id' => 'newest', 'name' => 'Сначала новые'],
+                ['id' => 'start_soonest', 'name' => 'Ближайший старт'],
+            ]" label="Сортировка" />
 
             <x-slot:actions>
                 <x-mary-button type="submit" class="btn-primary" wire:loading.attr="disabled" wire:target="search">Искать</x-mary-button>
@@ -147,7 +300,7 @@ class extends Component {
     
     <div class="lg:col-span-2 space-y-4">
         @php
-            $hasFilters = filled($q) || $hackaton_id !== '0' || $role_id !== '0' || !empty($skills) || filled($start_from);
+            $hasFilters = filled($q) || $hackaton_id !== '0' || $role_id !== '0' || !empty($skills) || filled($start_from) || $sort !== 'newest';
         @endphp
 
         @if ($hasFilters)
@@ -186,12 +339,33 @@ class extends Component {
             </div>
         @endif
 
-        <div wire:loading.flex wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,nextPage,previousPage,gotoPage,setPage"
+        @if(auth()->check())
+            <div class="card card-border bg-base-100">
+                <div class="card-body p-4">
+                    <p class="text-sm font-medium">Сохраненные фильтры</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        @forelse($this->savedFilters as $savedFilter)
+                            <x-mary-button class="btn-xs btn-outline" wire:click="applySavedFilter({{ $savedFilter->id }})">
+                                {{ $savedFilter->name }}
+                            </x-mary-button>
+                        @empty
+                            <p class="text-sm text-base-content/60">Пока нет сохраненных фильтров.</p>
+                        @endforelse
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <x-mary-input wire:model="saved_filter_name" placeholder="Название фильтра" />
+                        <x-mary-button class="btn-sm btn-primary" wire:click="saveCurrentFilter">Сохранить</x-mary-button>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <div wire:loading.flex wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,nextPage,previousPage,gotoPage,setPage"
             class="items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-100 px-6 py-10 text-base-content/70">
             Загружаем команды...
         </div>
 
-        <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,nextPage,previousPage,gotoPage,setPage">
+        <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,nextPage,previousPage,gotoPage,setPage">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @forelse($this->teams as $team)
                     <x-mary-card class="card card-border" wire:key="team-card-{{ $team->id }}">
@@ -219,12 +393,23 @@ class extends Component {
                         </x-mary-card>
 
                         <div class="mt-2">
-                            <x-marybadge value="Количество ролей: {{$team->roles->count()}}" class="badge-neutral" />
-                            <x-marybadge value="Свободно ролей: {{$team->emptyRoles()}}" class="badge-neutral" />
+                            <x-marybadge value="Количество ролей: {{$team->roles_count}}" class="badge-neutral" />
+                            <x-marybadge value="Свободно ролей: {{$team->empty_roles_count}}" class="badge-neutral" />
+                            @php
+                                $requiredRoles = $team->roles->whereNull('user_id')->pluck('role.name')->filter()->take(2)->implode(', ');
+                            @endphp
+                            @if ($requiredRoles !== '')
+                                <x-marybadge value="Нужны роли: {{$requiredRoles}}" class="badge-primary" />
+                            @endif
                         </div>
 
                         <x-slot:actions>
-                            <a href="{{ route('teams.show', $team) }}"><x-mary-button label="Подробнее" class="btn-primary" /></a>
+                            <x-mary-button label="Подробнее" class="btn-primary" wire:click="openTeam({{ $team->id }})" />
+                            @auth
+                                @if(!auth()->user()->isOrganizer())
+                                    <x-mary-button label="Откликнуться" class="btn-secondary" wire:click="quickApplyTeam({{ $team->id }})" />
+                                @endif
+                            @endauth
                         </x-slot:actions>
 
                     </x-mary-card>
@@ -235,6 +420,14 @@ class extends Component {
                             <p class="text-base-content/70">
                                 Попробуйте изменить параметры поиска или сбросить фильтры.
                             </p>
+                            <div class="flex gap-2 mt-2">
+                                <x-mary-button class="btn-outline btn-sm" wire:click="$set('hackaton_id', '0'); $set('role_id', '0'); search();">
+                                    Показать все публичные
+                                </x-mary-button>
+                                <x-mary-button class="btn-outline btn-sm" wire:click="$set('sort', 'start_soonest'); search();">
+                                    Ближайший старт
+                                </x-mary-button>
+                            </div>
                             <x-mary-button class="btn-primary btn-sm mt-2" wire:click="clearFilters">
                                 Сбросить фильтры
                             </x-mary-button>

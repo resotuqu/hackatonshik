@@ -3,7 +3,7 @@
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 new #[Layout('layouts::app', ['title' => 'Админ-панель'])]
 class extends Component {
@@ -18,26 +18,16 @@ class extends Component {
     public string $password_confirmation = '';
     public ?string $description = null;
 
-    public function mount()
-    {
-        if (Session::get('admin_panel_auth') !== true) {
-            $this->redirect('/admin/login');
-        }
-    }
-
     public function logout(): void
     {
-        Session::forget('admin_panel_auth');
-        $this->redirect('/admin/login');
+        Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
+        $this->redirect('/login');
     }
 
     public function savePartner(): void
     {
-        if (Session::get('admin_panel_auth') !== true) {
-            $this->redirect('/admin/login');
-            return;
-        }
-
         $this->validate([
             'fio' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date'],
@@ -81,9 +71,9 @@ class extends Component {
     <x-marytoast />
 
     <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
-        {{-- <x-slot:menu>
+        <x-slot:menu>
             <x-mary-button label="Выйти" class="btn-secondary" wire:click="logout" />
-        </x-slot:menu> --}}
+        </x-slot:menu>
 
         <x-maryform wire:submit="savePartner">
 

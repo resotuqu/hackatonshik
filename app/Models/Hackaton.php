@@ -6,6 +6,7 @@ use Database\Factories\HackatonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Hackaton extends Model
@@ -24,7 +25,10 @@ class Hackaton extends Model
         'cases.submissions.answers',
         'cases.submissions.score',
         'announcements.author',
+        'announcements.images',
         'certificates.user',
+        'judges',
+        'images',
     ];
 
     public function teams(): HasMany
@@ -78,6 +82,33 @@ class Hackaton extends Model
     public function certificates(): HasMany
     {
         return $this->hasMany(HackatonCertificate::class)->latest('issued_at');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(HackatonImage::class)->orderBy('sort_order');
+    }
+
+    public function judgeAssignments(): HasMany
+    {
+        return $this->hasMany(HackatonJudge::class);
+    }
+
+    public function judges(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'hackaton_judges')
+            ->withPivot(['assigned_by', 'assigned_at'])
+            ->withTimestamps();
+    }
+
+    public function judgeInvitations(): HasMany
+    {
+        return $this->hasMany(JudgeInvitation::class)->latest();
+    }
+
+    public function isJudge(User $user): bool
+    {
+        return $this->judges()->where('users.id', $user->id)->exists();
     }
 
     public function loadShowRelations(): self

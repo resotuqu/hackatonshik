@@ -19,6 +19,7 @@ class TeamApplicationController extends Controller
 {
     public function store(StoreTeamApplicationRequest $request): RedirectResponse
     {
+        Gate::authorize('create', TeamApplication::class);
         $validated = $request->validated();
         $roleId = (int) $validated['team_role_id'];
         TeamRole::query()->findOrFail($roleId);

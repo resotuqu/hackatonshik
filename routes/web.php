@@ -8,6 +8,8 @@ use App\Http\Controllers\HackatonCaseScoreController;
 use App\Http\Controllers\HackatonCaseSubmissionController;
 use App\Http\Controllers\HackatonCertificateController;
 use App\Http\Controllers\HackatonController;
+use App\Http\Controllers\JudgeManagementController;
+use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
 use App\Models\User;
@@ -27,32 +29,34 @@ Route::livewire('/cookie-policy', 'pages::cookie-policy.index');
 
 Route::livewire('/login', 'pages::auth.login');
 Route::livewire('/register', 'pages::auth.register');
-Route::livewire('/profile', 'pages::profile.index');
-Route::livewire('/admin', 'pages::admin.index');
-Route::livewire('/admin/login', 'pages::admin.login');
+Route::livewire('/profile', 'pages::profile.index')->middleware('auth');
+Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'can:access-admin']);
+Route::get('/u/{user:nickname}', [PublicProfileController::class, 'show'])->name('profile.public.show');
 
 Route::livewire('/teams', 'pages::teams.index');
-Route::livewire('/teams/create', 'pages::teams.create');
+Route::livewire('/teams/create', 'pages::teams.create')->middleware('auth');
 // Route::livewire('/teams/{team}', 'pages::teams.show');
 // Route::livewire('/teams/{team}/edit', 'pages::teams.edit');
-Route::livewire('/profile/teams', 'pages::profile.teams.index');
+Route::livewire('/profile/teams', 'pages::profile.teams.index')->middleware('auth');
 
 Route::livewire('/hackatons', 'pages::hackatons.index');
-Route::livewire('/hackatons/create', 'pages::hackatons.create');
+Route::livewire('/hackatons/create', 'pages::hackatons.create')->middleware('auth');
 // Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show');
 // Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit');
-Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index');
-Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants');
-Route::livewire('/profile/certificates', 'pages::profile.certificates.index');
+Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index')->middleware('auth');
+Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants')->middleware('auth');
+Route::livewire('/profile/certificates', 'pages::profile.certificates.index')->middleware('auth');
 
 Route::get('/teams/{team}', [TeamController::class, 'show'])
     ->name('teams.show');
 Route::livewire('/teams/{team}/edit', 'pages::teams.edit')
+    ->middleware('auth')
     ->name('teams.edit');
 
 Route::get('/hackatons/{hackaton}', [HackatonController::class, 'show'])
     ->name('hackatons.show');
 Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit')
+    ->middleware('auth')
     ->name('hackatons.edit');
 
 Route::get('/auth/yandex/redirect', function () {
@@ -107,4 +111,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/hackatons/{hackaton}/certificates', [HackatonCertificateController::class, 'store'])->name('hackatons.certificates.store');
     Route::delete('/hackatons/{hackaton}/certificates/{certificate}', [HackatonCertificateController::class, 'destroy'])->name('hackatons.certificates.destroy');
     Route::get('/certificates/{certificate}/download', [HackatonCertificateController::class, 'download'])->name('certificates.download');
+
+    Route::post('/hackatons/{hackaton}/judges/invite', [JudgeManagementController::class, 'invite'])->name('hackatons.judges.invite');
+    Route::post('/hackatons/{hackaton}/judges/assign', [JudgeManagementController::class, 'assign'])->name('hackatons.judges.assign');
+    Route::delete('/hackatons/{hackaton}/judges/{judge}', [JudgeManagementController::class, 'unassign'])->name('hackatons.judges.unassign');
+    Route::get('/judge-invitations/{token}/accept', [JudgeManagementController::class, 'accept'])->name('judges.invitations.accept');
 });

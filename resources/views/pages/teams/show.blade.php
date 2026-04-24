@@ -84,7 +84,9 @@
                                         $myApplication = $myApplicationsByRole->get($role->id);
                                     @endphp
 
-                                    @if ($myApplication)
+                                    @if (auth()->user()->isOrganizer())
+                                        <span class="badge badge-warning">Организаторы не могут откликаться</span>
+                                    @elseif ($myApplication)
                                         <div class="flex flex-col items-end gap-2">
                                             <span class="badge badge-{{ $myApplication->status->isAccepted() ? 'success' : ($myApplication->status->isRejected() ? 'error' : 'warning') }}">
                                                 Заявка: {{ $myApplication->status->label() }}

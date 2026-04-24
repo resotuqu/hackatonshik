@@ -4,6 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="@yield('meta_description', 'Платформа для команд, хакатонов и совместных проектов.')">
+    <link rel="canonical" href="@yield('canonical_url', url()->current())">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="@yield('og_title', trim($__env->yieldContent('title', config('app.name'))))">
+    <meta property="og:description" content="@yield('og_description', $__env->yieldContent('meta_description', 'Платформа для команд, хакатонов и совместных проектов.'))">
+    <meta property="og:url" content="@yield('canonical_url', url()->current())">
     <title>
         @isset($title)
             {{ $title }}
@@ -143,8 +149,13 @@
                         @elseif (Auth::user()->role === 'partner')
                             <li><a href="/profile/hackatons" class="{{ request()->is('profile/hackatons*') ? 'active' : '' }}">Мои хакатоны</a></li>
                             <li><a href="/hackatons/create" class="{{ request()->is('hackatons/create') ? 'active' : '' }}">Создать хакатон</a></li>
+                        @elseif (Auth::user()->role === 'judge')
+                            <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}">Назначенные хакатоны</a></li>
+                        @elseif (Auth::user()->role === 'admin')
+                            <li><a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}">Админ-панель</a></li>
                         @endif
                         <li><a href="/profile" class="{{ request()->is('profile') ? 'active' : '' }}">Профиль</a></li>
+                        <li><a href="{{ route('profile.public.show', ['user' => Auth::user()->nickname]) }}" class="{{ request()->is('u/*') ? 'active' : '' }}">Публичный профиль</a></li>
                         <li><a href="/profile/certificates" class="{{ request()->is('profile/certificates*') ? 'active' : '' }}">Сертификаты</a></li>
                     @else
                         <li><a href="/login" class="font-medium {{ request()->is('login') ? 'active' : '' }}">Авторизироваться</a></li>

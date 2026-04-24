@@ -11,7 +11,7 @@ class TeamApplicationPolicy
 {
     public function create(User $user): bool
     {
-        return true; // любой авторизованный пользователь может подать заявку
+        return ! $user->isOrganizer();
     }
 
     public function update(User $user, TeamApplication $application): bool

@@ -36,6 +36,12 @@ class StoreTeamApplicationRequest extends FormRequest
                     return;
                 }
 
+                if ($user->isOrganizer()) {
+                    $validator->errors()->add('team_role_id', 'Организатор не может подавать заявки в команды.');
+
+                    return;
+                }
+
                 $teamRole = TeamRole::query()
                     ->with('team')
                     ->find($teamRoleId);

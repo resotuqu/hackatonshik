@@ -24,6 +24,9 @@ class extends Component {
     public string $current_password = '';
     public string $new_password = '';
     public string $new_password_confirmation = '';
+    public bool $is_profile_public = true;
+    public bool $show_email_on_profile = false;
+    public bool $show_phone_on_profile = false;
 
     public function mount()
     {
@@ -34,10 +37,15 @@ class extends Component {
         $user = Auth::user();
         $this->fio = $user->fio;
         $this->nickname = $user->nickname;
-        $this->role = $user->role == 'user' ? 'Участник' : ($user->role == 'partner' ? 'Партнёр' : 'Администратор');
+        $this->role = $user->role == 'user'
+            ? 'Участник'
+            : ($user->role == 'partner' ? 'Партнёр' : ($user->role == 'judge' ? 'Судья' : 'Администратор'));
         $this->date_of_birth = $user->date_of_birth;
         $this->email = $user->email;
         $this->description = $user->description;
+        $this->is_profile_public = (bool) $user->is_profile_public;
+        $this->show_email_on_profile = (bool) $user->show_email_on_profile;
+        $this->show_phone_on_profile = (bool) $user->show_phone_on_profile;
     }
 
     public function save(): void
@@ -58,6 +66,9 @@ class extends Component {
             'date_of_birth' => ['required', 'date', 'before:today'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'description' => ['nullable', 'string', 'max:2000'],
+            'is_profile_public' => ['boolean'],
+            'show_email_on_profile' => ['boolean'],
+            'show_phone_on_profile' => ['boolean'],
             'current_password' => [$requiresPasswordConfirmation ? 'required' : 'nullable', 'string'],
             'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [
@@ -85,6 +96,9 @@ class extends Component {
             'date_of_birth' => $this->date_of_birth,
             'email' => $this->email,
             'description' => $this->description,
+            'is_profile_public' => $this->is_profile_public,
+            'show_email_on_profile' => $this->show_email_on_profile,
+            'show_phone_on_profile' => $this->show_phone_on_profile,
         ];
 
         if ($this->new_password !== '') {
@@ -141,6 +155,15 @@ class extends Component {
             <x-mary-input label="Электронная почта" wire:model="email" placeholder="example@mail.com" />
 
             <x-marymarkdown wire:model="description" label="Описание" :config="$this->config" />
+            <div class="rounded-xl border border-base-300 p-4 space-y-2">
+                <p class="text-sm font-medium">Настройки публичного профиля</p>
+                <x-marytoggle label="Профиль виден всем" wire:model="is_profile_public" />
+                <x-marytoggle label="Показывать email в публичном профиле" wire:model="show_email_on_profile" />
+                <x-marytoggle label="Показывать телефон в публичном профиле" wire:model="show_phone_on_profile" />
+                <a class="link link-primary text-sm" href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener">
+                    Открыть публичный профиль
+                </a>
+            </div>
 
             <x-marypassword label="Текущий пароль (нужен только при смене почты или пароля)" wire:model="current_password" />
             <x-marypassword label="Новый пароль" wire:model="new_password" />

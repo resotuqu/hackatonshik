@@ -104,21 +104,24 @@ class HackatonApplicationController extends Controller
         /** @var User $reviewer */
         $reviewer = $request->user();
 
-        $applications = HackatonApplication::query()
-            ->where('hackaton_id', $hackaton->id)
-            ->whereIn('id', $applicationIds)
-            ->where('status', ApplicationStatus::PENDING)
-            ->get();
+        DB::transaction(function () use ($hackaton, $applicationIds, $status, $reviewer): void {
+            $applications = HackatonApplication::query()
+                ->where('hackaton_id', $hackaton->id)
+                ->whereIn('id', $applicationIds)
+                ->where('status', ApplicationStatus::PENDING)
+                ->lockForUpdate()
+                ->get();
 
-        foreach ($applications as $application) {
-            if ($status === ApplicationStatus::ACCEPTED->value) {
-                $this->acceptApplication($application, $reviewer);
+            foreach ($applications as $application) {
+                if ($status === ApplicationStatus::ACCEPTED->value) {
+                    $this->acceptApplication($application, $reviewer);
 
-                continue;
+                    continue;
+                }
+
+                $application->markAsRejected($reviewer);
             }
-
-            $application->markAsRejected($reviewer);
-        }
+        });
 
         return back()->with('success', 'Групповая модерация выполнена.');
     }
