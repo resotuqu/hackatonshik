@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "lint": "eslint resources/js"
     },
     "dependencies": {
         "autoprefixer": "^10.4.20",
@@ -20,8 +21,11 @@
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "devDependencies": {
+        "@eslint/js": "^9.36.0",
         "@tailwindcss/vite": "^4.2.1",
         "daisyui": "^5.5.19",
+        "eslint": "^9.36.0",
+        "globals": "^16.4.0",
         "tailwindcss": "^4.2.1"
     }
 }

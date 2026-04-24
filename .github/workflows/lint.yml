@@ -28,6 +28,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
@@ -39,6 +45,12 @@ jobs:
 
       - name: Run Pint
         run: composer lint
+
+      - name: Run PHPStan
+        run: composer analyse
+
+      - name: Run ESLint
+        run: npm run lint
 
       # - name: Commit Changes
       #   uses: stefanzweifel/git-auto-commit-action@v7

@@ -1,0 +1,13 @@
+.git
+.github
+.env
+.env.*
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+storage/logs
+tests
+node_modules
+public/build  # если собираешь в builder
+*.md
+docker-compose.yml
