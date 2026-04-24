@@ -193,40 +193,120 @@ class extends Component {
 };
 ?>
 
-<div>
+<div class="mx-auto w-full max-w-6xl space-y-4">
     <x-marytoast />
+    @php
+        $hasFilledDocument = collect($hackatonDocuments)->contains(function ($document) {
+            $hasDocumentType = array_key_exists('filling_by_team_member', $document)
+                && $document['filling_by_team_member'] !== ''
+                && $document['filling_by_team_member'] !== null;
+            $hasFile = !empty($document['file_url']) || filled($document['existing_file_url'] ?? null);
 
-    <x-marycard title="Изменение хакатона" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100">
-        <x-maryform wire:submit="save">
-            <x-mary-input label="Заголовок" wire:model="title" />
+            return filled($document['name'] ?? null)
+                && filled($document['description'] ?? null)
+                && $hasFile
+                && $hasDocumentType;
+        });
+        $hasPhoto = !empty($photo) || filled($hackaton->image_url ?? null);
 
-            <x-marymarkdown wire:model="description" :config="$this->config" />
+        $progressSteps = [
+            filled($title),
+            filled($description),
+            $hasPhoto,
+            filled($start_at),
+            filled($end_at),
+            $hasFilledDocument,
+        ];
+        $completedSteps = collect($progressSteps)->filter()->count();
+        $totalSteps = count($progressSteps);
+        $progressPercent = (int) round(($completedSteps / max($totalSteps, 1)) * 100);
+    @endphp
 
-            <x-maryfile label="Фотография" hint="Необязательно: загружайте только если хотите заменить" wire:model="photo" />
-            @if ($photo)
-                <img class="w-auto object-contain h-64 mt-2" src="{{ $photo->temporaryUrl() }}" alt="">
-            @elseif(!empty($hackaton->image_url))
-                <img class="w-auto object-contain h-64 mt-2" src="/uploads/{{ $hackaton->image_url }}" alt="">
-            @endif
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/profile/hackatons">Мои хакатоны</a></li>
+            <li class="opacity-70">Редактирование хакатона</li>
+        </ul>
+    </div>
 
-            <x-marydatetime label="Дата начала" wire:model="start_at" />
-            <x-marydatetime lavel="Дата конца" wire:model="end_at" />
+    <x-marycard class="card card-border bg-base-100">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold">Редактирование хакатона</h1>
+                <p class="text-sm text-base-content/70">
+                    Обновите описание, даты, обложку и список документов.
+                </p>
+            </div>
+            <x-marybadge class="badge-neutral" value="{{ $hackaton->title }}" />
+        </div>
+    </x-marycard>
 
-            <div class="flex flex-col mt-4 w-full">
-                <x-marybutton type="button" class="btn-primary" wire:click="addHackatonDocument">
-                    Добавить документ
-                </x-marybutton>
+    <x-marycard class="card card-border bg-base-100">
+        <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-medium">Прогресс заполнения</p>
+                <span class="text-sm text-base-content/70">{{ $completedSteps }}/{{ $totalSteps }}</span>
+            </div>
+            <progress class="progress progress-primary w-full" value="{{ $progressPercent }}" max="100"></progress>
+            <p class="text-xs text-base-content/70">{{ $progressPercent }}% заполнено</p>
+        </div>
+    </x-marycard>
 
-                <div class="space-y-2 mt-4">
+    <x-marycard class="w-full justify-self-center card card-border bg-base-100">
+        <x-maryform wire:submit="save" class="space-y-6">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                    <h2 class="text-lg font-semibold">Основная информация</h2>
+                    <x-mary-input label="Название хакатона" wire:model="title" />
+                    <x-marymarkdown wire:model="description" :config="$this->config" label="Описание хакатона" />
+                    <x-marydatetime label="Дата начала" wire:model="start_at" />
+                    <x-marydatetime label="Дата конца" wire:model="end_at" />
+                </div>
+
+                <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                    <h2 class="text-lg font-semibold">Обложка</h2>
+                    <x-maryfile label="Обложка хакатона" hint="Загрузите файл только если хотите заменить" wire:model="photo" />
+                    @if ($photo)
+                        <div class="rounded-xl border border-base-300 bg-base-200 p-2">
+                            <img class="w-full object-contain h-64 rounded-lg" src="{{ $photo->temporaryUrl() }}" alt="Превью обложки хакатона">
+                        </div>
+                    @elseif(!empty($hackaton->image_url))
+                        <div class="rounded-xl border border-base-300 bg-base-200 p-2">
+                            <img class="w-full object-contain h-64 rounded-lg" src="{{ asset('storage/' . $hackaton->image_url) }}" alt="Текущая обложка хакатона">
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold">Документы хакатона</h2>
+                        <p class="text-sm text-base-content/70">Редактируйте существующие документы и добавляйте новые.</p>
+                    </div>
+                    <x-marybutton type="button" class="btn-primary btn-sm" wire:click="addHackatonDocument">
+                        Добавить документ
+                    </x-marybutton>
+                </div>
+
+                @if (empty($hackatonDocuments))
+                    <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
+                        Пока нет документов.
+                    </div>
+                @endif
+
+                <div class="space-y-3">
                     @foreach($hackatonDocuments as $index => $hackatonDocument)
                         <x-marycard class="bg-base-200" wire:key="hackatonDocument-{{ $hackatonDocument['id'] }}">
-                            <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
-                                <x-marybutton type="button" wire:click="removeHackatonDocument({{ $index }})" class="btn-error">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <x-marybadge class="badge-neutral" value="Документ #{{ $index + 1 }}" />
+                                <x-marybutton type="button" wire:click="removeHackatonDocument({{ $index }})" class="btn-error btn-sm">
                                     Удалить
                                 </x-marybutton>
                             </div>
 
-                            <div class="text-black">
+                            <div class="mt-3 space-y-3">
                                 <x-mary-input wire:model="hackatonDocuments.{{$index}}.name" label="Название" />
 
                                 <x-marymarkdown
@@ -235,10 +315,16 @@ class extends Component {
                                     :config="$this->config"
                                 />
 
-                                <x-maryfile wire:model="hackatonDocuments.{{$index}}.file_url" />
+                                <x-maryfile wire:model="hackatonDocuments.{{$index}}.file_url" label="Новый файл (необязательно)" />
+
+                                @if (!empty($hackatonDocument['existing_file_url']))
+                                    <a class="link link-primary text-sm" href="{{ asset('storage/' . $hackatonDocument['existing_file_url']) }}" target="_blank" rel="noopener noreferrer">
+                                        Открыть текущий файл
+                                    </a>
+                                @endif
 
                                 <x-maryradio
-                                    label="Выберите тип документа"
+                                    label="Тип документа"
                                     wire:model="hackatonDocuments.{{$index}}.filling_by_team_member"
                                     :options="$documentTypes"
                                     inline
@@ -250,7 +336,11 @@ class extends Component {
             </div>
 
             <x-slot:actions>
-                <x-marybutton label="Сохранить изменения" type="submit" class="btn-primary" />
+                <a href="/profile/hackatons">
+                    <x-marybutton type="button" label="Отмена" class="btn-ghost" />
+                </a>
+                <x-marybutton label="Сохранить изменения" type="submit" class="btn-primary" spinner="save"
+                    wire:loading.attr="disabled" />
             </x-slot:actions>
         </x-maryform>
     </x-marycard>

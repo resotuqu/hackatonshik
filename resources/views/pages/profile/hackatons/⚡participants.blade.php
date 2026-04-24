@@ -151,6 +151,15 @@ class extends Component {
 
 <div>
     <x-mary-card class="card card-border bg-base-100">
+        <div class="text-sm breadcrumbs mb-4">
+            <ul>
+                <li><a href="/">Главная</a></li>
+                <li><a href="/profile">Профиль</a></li>
+                <li><a href="/profile/hackatons">Мои хакатоны</a></li>
+                <li class="opacity-70">Участники</li>
+            </ul>
+        </div>
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
                 <h3 class="text-2xl font-bold">Участники хакатона</h3>

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -48,12 +49,23 @@ class extends Component {
             return;
         }
 
+        $emailChanged = $this->email !== $user->email;
+        $isChangingPassword = $this->new_password !== '';
+        $requiresPasswordConfirmation = $emailChanged || $isChangingPassword;
+
         $this->validate([
+            'fio' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\-]+(?:\s+[\p{L}\-]+){1,2}$/u'],
+            'date_of_birth' => ['required', 'date', 'before:today'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'description' => ['nullable', 'string', 'max:2000'],
-            'current_password' => ['required', 'string'],
+            'current_password' => [$requiresPasswordConfirmation ? 'required' : 'nullable', 'string'],
             'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [
+            'fio.required' => 'ФИО обязательно для заполнения.',
+            'fio.regex' => 'Укажите ФИО в формате "Фамилия Имя" или "Фамилия Имя Отчество".',
+            'date_of_birth.required' => 'Дата рождения обязательна.',
+            'date_of_birth.date' => 'Введите корректную дату рождения.',
+            'date_of_birth.before' => 'Дата рождения должна быть в прошлом.',
             'email.required' => 'Электронная почта обязательна.',
             'email.email' => 'Введите корректный email.',
             'email.unique' => 'Этот email уже используется.',
@@ -63,12 +75,14 @@ class extends Component {
             'new_password.confirmed' => 'Подтверждение нового пароля не совпадает.',
         ]);
 
-        if (!Hash::check($this->current_password, $user->password)) {
+        if ($requiresPasswordConfirmation && !Hash::check($this->current_password, $user->password)) {
             $this->addError('current_password', 'Текущий пароль указан неверно.');
             return;
         }
 
         $payload = [
+            'fio' => $this->fio,
+            'date_of_birth' => $this->date_of_birth,
             'email' => $this->email,
             'description' => $this->description,
         ];
@@ -85,28 +99,50 @@ class extends Component {
 
         $this->success('Профиль успешно обновлён.', position: 'toast-center toast-top');
     }
+
+    #[Computed]
+    public function certificates()
+    {
+        return Auth::user()?->certificates()->with('hackaton')->latest('issued_at')->get() ?? collect();
+    }
+
+    #[Computed]
+    public function recentAnnouncements()
+    {
+        return Auth::user()?->notifications()->latest()->limit(5)->get() ?? collect();
+    }
 };
 ?>
 
-<div>
+<div class="mx-auto w-full max-w-6xl space-y-4">
     <x-marytoast />
 
-    <x-mary-card title="Данные профиля" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100 mb-4">
-        <div class="grid grid-cols-1 gap-3">
-            <x-mary-input label="ФИО" :value="$fio" readonly />
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li class="opacity-70">Профиль</li>
+        </ul>
+    </div>
+
+    <x-mary-card title="Профиль" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
+        <x-maryform wire:submit="save">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <x-mary-input
+                    label="ФИО"
+                    wire:model="fio"
+                    placeholder="Иванов Иван Иванович"
+                    hint="Формат: Фамилия Имя или Фамилия Имя Отчество"
+                />
+                <x-mary-input label="Дата рождения" type="date" wire:model="date_of_birth" />
+            </div>
+
             <x-mary-input label="Никнейм" :value="$nickname" readonly />
             <x-mary-input label="Роль" :value="$role" readonly />
-            <x-mary-input label="Дата рождения" :value="$date_of_birth" readonly />
-        </div>
-    </x-mary-card>
-
-    <x-mary-card title="Профиль" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100">
-        <x-maryform wire:submit="save">
             <x-mary-input label="Электронная почта" wire:model="email" placeholder="example@mail.com" />
 
             <x-marymarkdown wire:model="description" label="Описание" :config="$this->config" />
 
-            <x-marypassword label="Текущий пароль (для подтверждения)" wire:model="current_password" />
+            <x-marypassword label="Текущий пароль (нужен только при смене почты или пароля)" wire:model="current_password" />
             <x-marypassword label="Новый пароль" wire:model="new_password" />
             <x-marypassword label="Подтверждение нового пароля" wire:model="new_password_confirmation" />
 
@@ -114,5 +150,52 @@ class extends Component {
                 <x-mary-button label="Сохранить" class="btn-primary" type="submit" />
             </x-slot:actions>
         </x-maryform>
+    </x-mary-card>
+
+    <x-mary-card title="Мои сертификаты" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
+        @if($this->certificates->isEmpty())
+            <p class="text-sm text-base-content/70">У вас пока нет загруженных сертификатов.</p>
+        @else
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Хакатон</th>
+                            <th>Сертификат</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($this->certificates as $certificate)
+                            <tr>
+                                <td>{{ $certificate->hackaton->title }}</td>
+                                <td>{{ $certificate->title }}</td>
+                                <td>{{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</td>
+                                <td class="text-right">
+                                    <a href="{{ route('certificates.download', $certificate) }}" class="btn btn-xs btn-outline">Скачать</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </x-mary-card>
+
+    <x-mary-card title="Последние анонсы" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
+        @if($this->recentAnnouncements->isEmpty())
+            <p class="text-sm text-base-content/70">Новых уведомлений пока нет.</p>
+        @else
+            <div class="space-y-2">
+                @foreach($this->recentAnnouncements as $notification)
+                    <div class="rounded-lg border border-base-300 p-3">
+                        <p class="font-medium">{{ data_get($notification->data, 'title', 'Анонс') }}</p>
+                        <p class="text-xs text-base-content/70">{{ $notification->created_at?->format('d.m.Y H:i') }}</p>
+                        <a class="link link-primary text-sm" href="{{ data_get($notification->data, 'url', '/hackatons') }}">Открыть хакатон</a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </x-mary-card>
 </div>

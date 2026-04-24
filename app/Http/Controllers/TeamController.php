@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTeamRequest;
 use App\Http\Requests\UpdateTeamRequest;
 use App\Models\Team;
+use App\Models\TeamRole;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class TeamController extends Controller
 {
@@ -32,12 +35,32 @@ class TeamController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Team $team)
     {
-        //
+        $team->loadShowRelations();
+
+        return view('pages.teams.show', compact('team'));
+    }
+
+    public function destroyParticipant(Team $team, TeamRole $teamRole): RedirectResponse
+    {
+        if (Auth::id() !== $team->user_id) {
+            abort(403);
+        }
+
+        if ($teamRole->team_id !== $team->id) {
+            abort(404);
+        }
+
+        if ($teamRole->user_id === null) {
+            return back()->with('warning', 'В этой роли нет участника.');
+        }
+
+        $teamRole->update([
+            'user_id' => null,
+        ]);
+
+        return back()->with('success', 'Участник удален из команды.');
     }
 
     /**

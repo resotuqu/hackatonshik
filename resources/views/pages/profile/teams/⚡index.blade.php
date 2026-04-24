@@ -2,6 +2,7 @@
 
 use App\Models\Team;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
@@ -46,6 +47,14 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
 ?>
 
 <div class="">
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/profile">Профиль</a></li>
+            <li class="opacity-70">Мои команды</li>
+        </ul>
+    </div>
+
     <h3 class="text-3xl text-center">Ваши команды</h3>
 
 
@@ -61,13 +70,14 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         @forelse($this->teams as $team)
             <x-mary-card title="{{$team->title}}" class="card card-border">
-                <div class="overflow-hidden rounded-xl bg-base-200 aspect-[16/9]">
+                <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
                     <img src="/uploads/{{$team->image_url}}" class="w-full h-full object-cover" alt="{{$team->title}}">
                 </div>
                 <x-mary-card class="card card-border bg-base-300">
                     <p>{{$team->hackaton->title}}</p>
                     <p>Даты проведения:
-                        {{$team->hackaton->start_at }} &DownLeftVectorBar; {{$team->hackaton->end_at}}
+                        {{ Carbon::parse($team->hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
+                        {{ Carbon::parse($team->hackaton->end_at)->format('d.m.Y H:i') }}
                     </p>
                 </x-mary-card>
 
@@ -77,6 +87,9 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
                 </div>
 
                 <x-slot:actions>
+                    <a href="/teams/{{$team->id}}">
+                        <x-mary-button label="Просмотреть" class="btn-ghost" />
+                    </a>
                     <x-mary-button label="Изменить" class="btn-primary" wire:click="editTeam({{$team->id}})" />
                     <x-mary-button label="Удалить" class="btn-secondary" wire:click="showDeleteTeamModal({{$team->id}})" />
                 </x-slot:actions>

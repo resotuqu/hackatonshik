@@ -2,10 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Hackaton;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Team>
+ * @extends Factory<Team>
  */
 class TeamFactory extends Factory
 {
@@ -17,7 +20,12 @@ class TeamFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::factory(),
+            'title' => fake()->company(),
+            'description' => fake()->sentence(10),
+            'image_url' => 'team_photos/default.png',
+            'hackaton_id' => Hackaton::factory(),
+            'is_public' => true,
         ];
     }
 }

@@ -2,10 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
+use App\Models\Team;
+use App\Models\TeamRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TeamRole>
+ * @extends Factory<TeamRole>
  */
 class TeamRoleFactory extends Factory
 {
@@ -17,7 +20,11 @@ class TeamRoleFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'title' => fake()->jobTitle(),
+            'description' => fake()->sentence(8),
+            'team_id' => Team::factory(),
+            'role_id' => Role::factory(),
+            'user_id' => null,
         ];
     }
 }

@@ -206,95 +206,164 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
 };
 ?>
 
-<div>
-    <x-mary-card title="Создание команды" class="w-full lg:w-1/2 justify-self-center card card-border bg-base-100">
-        <x-maryform wire:submit="save" class="">
+<div class="mx-auto w-full max-w-6xl space-y-4">
+    @php
+        $hasFilledRole = collect($roles)->contains(
+            fn ($role) => filled($role['title'] ?? null)
+                && filled($role['description'] ?? null)
+                && filled($role['role'] ?? null)
+        );
 
-            {{--    Title    --}}
-            <x-mary-input wire:model="title" label="Заголовок" />
+        $progressSteps = [
+            filled($title),
+            filled($description),
+            !empty($photo),
+            filled($hackaton_id),
+            $hasFilledRole,
+        ];
+        $completedSteps = collect($progressSteps)->filter()->count();
+        $totalSteps = count($progressSteps);
+        $progressPercent = (int) round(($completedSteps / max($totalSteps, 1)) * 100);
+    @endphp
 
-            {{--    Description    --}}
-            <x-marymarkdown wire:model="description" label="Описание" :config="$this->config" />
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/profile/teams">Мои команды</a></li>
+            <li class="opacity-70">Создание команды</li>
+        </ul>
+    </div>
 
-            {{--    Photo    --}}
-            <x-maryfile label="Обложка команды" wire:model="photo" accept="image/png, image/jpeg, image/webp" />
+    <x-mary-card class="card card-border bg-base-100">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold">Создание команды</h1>
+                <p class="text-sm text-base-content/70">
+                    Заполните профиль команды, добавьте роли и ссылки на ваши ресурсы.
+                </p>
+            </div>
+            <x-marybadge class="badge-primary" value="Шаг 1 из 1" />
+        </div>
+    </x-mary-card>
 
+    <x-mary-card class="card card-border bg-base-100">
+        <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-medium">Прогресс заполнения</p>
+                <span class="text-sm text-base-content/70">{{ $completedSteps }}/{{ $totalSteps }}</span>
+            </div>
+            <progress class="progress progress-primary w-full" value="{{ $progressPercent }}" max="100"></progress>
+            <p class="text-xs text-base-content/70">{{ $progressPercent }}% заполнено</p>
+        </div>
+    </x-mary-card>
 
-            {{--    HackatonId    --}}
-            <x-maryselect label="Хакатон" wire:model="hackaton_id" :options="$this->hackatons" />
+    <x-mary-card class="w-full justify-self-center card card-border bg-base-100">
+        <x-maryform wire:submit="save" class="space-y-6">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                    <h2 class="text-lg font-semibold">Основная информация</h2>
+                    <x-mary-input wire:model="title" label="Название команды" placeholder="Например, Team Phoenix" />
+                    <x-marymarkdown wire:model="description" label="Описание команды" :config="$this->config" />
+                </div>
 
-            {{-- SocialLinks --}}
-            <div class="flex flex-col card">
+                <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                    <h2 class="text-lg font-semibold">Обложка и хакатон</h2>
+                    <x-maryfile label="Обложка команды" wire:model="photo" accept="image/png, image/jpeg, image/webp"
+                        hint="PNG/JPEG/WebP, до 4 МБ" />
+                    @if ($photo)
+                        <div class="rounded-xl border border-base-300 bg-base-200 p-2">
+                            <img class="w-full object-contain h-64 rounded-lg"
+                                src="{{ $photo->temporaryUrl() }}" alt="Превью обложки команды">
+                        </div>
+                    @endif
 
-                <x-mary-button wire:click="addSocialLink" label="Добавить социальную ссылку" />
+                    <x-maryselect label="Хакатон" wire:model="hackaton_id" :options="$this->hackatons" />
+                </div>
+            </div>
 
-                <div class="space-y-2 mt-4">
+            <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold">Социальные ссылки</h2>
+                        <p class="text-sm text-base-content/70">Добавьте контакты, чтобы участники могли быстро связаться с вами.</p>
+                    </div>
+                    <x-mary-button type="button" wire:click="addSocialLink" label="Добавить ссылку" class="btn-primary btn-sm" />
+                </div>
+
+                @if (empty($socialLinks))
+                    <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
+                        Пока нет социальных ссылок.
+                    </div>
+                @endif
+
+                <div class="space-y-3">
                     @foreach ($socialLinks as $index => $socialLink)
-                        <x-mary-card class="bg-base-200" wire:key="socialLink-{{ $socialLink['id'] }}"
-                            title="Социальная ссылка">
-                            <x-marybutton class="btn-error" wire:click="removeSocialLink({{ $index }})">
-                                Удалить
-                            </x-marybutton>
+                        <x-mary-card class="bg-base-200" wire:key="socialLink-{{ $socialLink['id'] }}">
+                            <div class="flex items-center justify-between gap-2">
+                                <x-marybadge class="badge-neutral" value="Ссылка #{{ $index + 1 }}" />
+                                <x-marybutton type="button" class="btn-error btn-sm" wire:click="removeSocialLink({{ $index }})">
+                                    Удалить
+                                </x-marybutton>
+                            </div>
 
-                            <div>
+                            <div class="mt-3 grid grid-cols-1 gap-3">
                                 <x-mary-input wire:model="socialLinks.{{ $index }}.name"
-                                    label="Название социальной ссылки" />
-                                <x-mary-input wire:model="socialLinks.{{ $index }}.url" label="Ссылка" />
+                                    label="Название" placeholder="Например, Telegram" />
+                                <x-mary-input wire:model="socialLinks.{{ $index }}.url" label="Ссылка"
+                                    placeholder="https://..." />
                             </div>
                         </x-mary-card>
                     @endforeach
                 </div>
-
-
             </div>
 
-            {{--    Roles    --}}
-            <div class="flex flex-col mt-4 w-full">
+            <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold">Роли в команде</h2>
+                        <p class="text-sm text-base-content/70">Добавьте роли, на которые будут подавать заявки участники.</p>
+                    </div>
+                    <x-marybutton type="button" class="btn-primary btn-sm" wire:click="addRole" label="Добавить роль" />
+                </div>
 
+                @if (empty($roles))
+                    <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
+                        Пока нет ролей. Добавьте хотя бы одну роль для набора участников.
+                    </div>
+                @endif
 
-                <x-marybutton class="btn" wire:click="addRole" label="Добавить роль" />
-
-
-                <div class="space-y-2 mt-4">
+                <div class="space-y-3">
                     @foreach ($roles as $index => $role)
-                        <x-marycard title="Роль" class="bg-base-200" wire:key="role-{{ $role['id'] }}">
-                            <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
-                                <x-marybutton wire:click="removeRole({{ $index }})" label="Удалить"
-                                    class="btn-error" />
+                        <x-marycard class="bg-base-200" wire:key="role-{{ $role['id'] }}">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <x-marybadge class="badge-neutral" value="Роль #{{ $index + 1 }}" />
+                                <x-marybutton type="button" wire:click="removeRole({{ $index }})" label="Удалить"
+                                    class="btn-error btn-sm" />
                             </div>
 
-                            <div>
-                                <div class="text-black">
-                                    {{-- Title --}}
-                                    <x-mary-input wire:model="roles.{{ $index }}.title" label="Название" />
-
-                                    {{-- Description --}}
-                                    <x-marymarkdown disk="public" folder="team_markdown"
-                                        wire:model="roles.{{ $index }}.description" label="Описание"
-                                        :config="$this->config" />
-
-                                    {{-- Role --}}
-                                    <x-maryselect label="Категория роли" wire:model="roles.{{ $index }}.role"
-                                        :options="$this->rolesData" />
-
-                                    {{-- Skills --}}
-                                    <x-marychoices-offline label="Навыки роли"
-                                        wire:model="roles.{{ $index }}.skills" :options="$this->skillsData"
-                                        placeholder="Навыки..." clearable searchable />
-
-                                </div>
+                            <div class="mt-3 space-y-3">
+                                <x-mary-input wire:model="roles.{{ $index }}.title" label="Название роли" />
+                                <x-marymarkdown disk="public" folder="team_markdown"
+                                    wire:model="roles.{{ $index }}.description" label="Описание роли"
+                                    :config="$this->config" />
+                                <x-maryselect label="Категория роли" wire:model="roles.{{ $index }}.role"
+                                    :options="$this->rolesData" />
+                                <x-marychoices-offline label="Навыки роли"
+                                    wire:model="roles.{{ $index }}.skills" :options="$this->skillsData"
+                                    placeholder="Навыки..." clearable searchable />
                             </div>
                         </x-marycard>
                     @endforeach
                 </div>
-
             </div>
 
             <x-slot:actions>
-                <x-marybutton type="submit" label="Создать команду" class="btn-primary" />
+                <a href="/profile/teams">
+                    <x-marybutton type="button" label="Отмена" class="btn-ghost" />
+                </a>
+                <x-marybutton type="submit" label="Создать команду" class="btn-primary" spinner="save"
+                    wire:loading.attr="disabled" />
             </x-slot:actions>
-
         </x-maryform>
     </x-mary-card>
-
 </div>

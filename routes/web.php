@@ -1,6 +1,20 @@
 <?php
 
+use App\Http\Controllers\HackatonAnnouncementController;
+use App\Http\Controllers\HackatonApplicationController;
+use App\Http\Controllers\HackatonCaseController;
+use App\Http\Controllers\HackatonCaseFieldController;
+use App\Http\Controllers\HackatonCaseScoreController;
+use App\Http\Controllers\HackatonCaseSubmissionController;
+use App\Http\Controllers\HackatonCertificateController;
+use App\Http\Controllers\HackatonController;
+use App\Http\Controllers\TeamApplicationController;
+use App\Http\Controllers\TeamController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 Route::livewire('/', 'pages::index')->name('home');
@@ -19,16 +33,27 @@ Route::livewire('/admin/login', 'pages::admin.login');
 
 Route::livewire('/teams', 'pages::teams.index');
 Route::livewire('/teams/create', 'pages::teams.create');
-Route::livewire('/teams/{team}', 'pages::teams.show');
-Route::livewire('/teams/{team}/edit', 'pages::teams.edit');
+// Route::livewire('/teams/{team}', 'pages::teams.show');
+// Route::livewire('/teams/{team}/edit', 'pages::teams.edit');
 Route::livewire('/profile/teams', 'pages::profile.teams.index');
 
 Route::livewire('/hackatons', 'pages::hackatons.index');
 Route::livewire('/hackatons/create', 'pages::hackatons.create');
-Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit');
+// Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show');
+// Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit');
 Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index');
 Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants');
-Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show');
+Route::livewire('/profile/certificates', 'pages::profile.certificates.index');
+
+Route::get('/teams/{team}', [TeamController::class, 'show'])
+    ->name('teams.show');
+Route::livewire('/teams/{team}/edit', 'pages::teams.edit')
+    ->name('teams.edit');
+
+Route::get('/hackatons/{hackaton}', [HackatonController::class, 'show'])
+    ->name('hackatons.show');
+Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit')
+    ->name('hackatons.edit');
 
 Route::get('/auth/yandex/redirect', function () {
     return Socialite::driver('yandex')->redirect();
@@ -36,48 +61,50 @@ Route::get('/auth/yandex/redirect', function () {
 
 Route::get('/auth/yandex/callback', function () {
     $yandexUser = Socialite::driver('yandex')->user();
-    dd($yandexUser);
 
-    $user = User::updateOrCreate([
-        'github_id' => $githubUser->id,
-    ], [
-        'name' => $githubUser->name,
-        'email' => $githubUser->email,
-        'github_token' => $githubUser->token,
-        'github_refresh_token' => $githubUser->refreshToken,
-    ]);
+    $email = $yandexUser->getEmail() ?: "yandex_{$yandexUser->getId()}@oauth.local";
+    $name = $yandexUser->getName() ?: $yandexUser->getNickname() ?: 'Пользователь Яндекс';
 
-    Auth::login($user);
-
-    return redirect('/dashboard');
-});
-
-Route::get('/auth/vk/redirect', function () {
-    return Socialite::driver('vkontakte')->stateless()->redirect();
-});
-
-Route::get('/auth/vk/callback', function () {
-    $vkDriver = Socialite::driver('vkontakte')->stateless();
-
-    if (request()->filled('device_id')) {
-        $vkDriver->with([
-            'device_id' => request('device_id'),
-        ]);
-    }
-
-    $vkUser = $vkDriver->user();
-    dd($vkUser);
-
-    $user = User::updateOrCreate([
-        'github_id' => $githubUser->id,
-    ], [
-        'name' => $githubUser->name,
-        'email' => $githubUser->email,
-        'github_token' => $githubUser->token,
-        'github_refresh_token' => $githubUser->refreshToken,
-    ]);
+    $user = User::firstOrCreate(
+        ['email' => $email],
+        [
+            'fio' => $name,
+            'nickname' => 'yandex_'.Str::lower(Str::random(10)),
+            'date_of_birth' => now()->subYears(18)->toDateString(),
+            'phone' => '+70000000000',
+            'password' => Hash::make(Str::random(40)),
+        ],
+    );
 
     Auth::login($user);
 
-    return redirect('/dashboard');
+    return redirect()->route('home');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::delete('/teams/{team}/roles/{teamRole}/participant', [TeamController::class, 'destroyParticipant'])
+        ->name('teams.participants.destroy');
+
+    Route::post('/team-applications', [TeamApplicationController::class, 'store'])->name('team.applications.store');
+    Route::patch('/team-applications/{application}', [TeamApplicationController::class, 'update'])->name('team.applications.update');
+    Route::delete('/team-applications/{application}', [TeamApplicationController::class, 'destroy'])->name('team.applications.destroy');
+
+    Route::post('/hackaton-applications', [HackatonApplicationController::class, 'store'])->name('hackaton.applications.store');
+    Route::patch('/hackaton-applications/{application}', [HackatonApplicationController::class, 'update'])->name('hackaton.applications.update');
+    Route::patch('/hackatons/{hackaton}/applications/bulk', [HackatonApplicationController::class, 'bulkUpdate'])->name('hackaton.applications.bulk-update');
+    Route::delete('/hackaton-applications/{application}', [HackatonApplicationController::class, 'destroy'])->name('hackaton.applications.destroy');
+
+    Route::post('/hackatons/{hackaton}/cases', [HackatonCaseController::class, 'store'])->name('hackatons.cases.store');
+    Route::delete('/hackatons/{hackaton}/cases/{case}', [HackatonCaseController::class, 'destroy'])->name('hackatons.cases.destroy');
+    Route::post('/hackatons/{hackaton}/cases/{case}/fields', [HackatonCaseFieldController::class, 'store'])->name('hackatons.cases.fields.store');
+    Route::delete('/hackatons/{hackaton}/cases/{case}/fields/{field}', [HackatonCaseFieldController::class, 'destroy'])->name('hackatons.cases.fields.destroy');
+    Route::post('/hackatons/{hackaton}/cases/{case}/submissions', [HackatonCaseSubmissionController::class, 'store'])->name('hackatons.cases.submissions.store');
+    Route::post('/hackatons/{hackaton}/scores', [HackatonCaseScoreController::class, 'store'])->name('hackatons.scores.store');
+
+    Route::post('/hackatons/{hackaton}/announcements', [HackatonAnnouncementController::class, 'store'])->name('hackatons.announcements.store');
+    Route::delete('/hackatons/{hackaton}/announcements/{announcement}', [HackatonAnnouncementController::class, 'destroy'])->name('hackatons.announcements.destroy');
+
+    Route::post('/hackatons/{hackaton}/certificates', [HackatonCertificateController::class, 'store'])->name('hackatons.certificates.store');
+    Route::delete('/hackatons/{hackaton}/certificates/{certificate}', [HackatonCertificateController::class, 'destroy'])->name('hackatons.certificates.destroy');
+    Route::get('/certificates/{certificate}/download', [HackatonCertificateController::class, 'download'])->name('certificates.download');
 });

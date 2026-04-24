@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +12,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     public function teams(): HasMany
@@ -34,6 +35,21 @@ class User extends Authenticatable
         return $this->hasMany(UserHackatonDocument::class);
     }
 
+    public function teamApplications(): HasMany
+    {
+        return $this->hasMany(TeamApplication::class);
+    }
+
+    public function caseSubmissions(): HasMany
+    {
+        return $this->hasMany(HackatonCaseSubmission::class);
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(HackatonCertificate::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -45,11 +61,9 @@ class User extends Authenticatable
         'email',
         'description',
         'nickname',
-        'email_verified_at',
         'password',
         'phone',
         'role',
-        'remember_token',
     ];
 
     /**
@@ -80,7 +94,7 @@ class User extends Authenticatable
      */
     public function initials(): string
     {
-        return Str::of($this->name)
+        return Str::of($this->fio)
             ->explode(' ')
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))

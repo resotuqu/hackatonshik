@@ -2,6 +2,7 @@
 
 use App\Models\Team;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
@@ -15,9 +16,25 @@ class extends Component {
         return \App\Models\Hackaton::query()->where('user_id', '=', Auth::user()->id)->get();
     }
 
-    public function deleteHackaton($id) {
-        $team = \App\Models\Hackaton::find($id);
-        $team->delete();
+    public bool $deleteHackatonModal = false;
+    public ?int $deleteHackatonId = null;
+
+    public function showDeleteHackatonModal(int $hackatonId): void
+    {
+        $this->deleteHackatonId = $hackatonId;
+        $this->deleteHackatonModal = true;
+    }
+
+    public function deleteHackaton(): void
+    {
+        if ($this->deleteHackatonId === null) {
+            return;
+        }
+
+        $hackaton = \App\Models\Hackaton::find($this->deleteHackatonId);
+        $hackaton?->delete();
+        $this->deleteHackatonId = null;
+        $this->deleteHackatonModal = false;
     }
 
     public function editHackaton($id) {
@@ -31,12 +48,29 @@ class extends Component {
 ?>
 
 <div class="">
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/profile">Профиль</a></li>
+            <li class="opacity-70">Мои хакатоны</li>
+        </ul>
+    </div>
+
     <h3 class="text-3xl text-center">Ваши хакатоны</h3>
+
+    <x-mary-modal wire:model="deleteHackatonModal" title="Подтверждение удаления" class="backdrop-blur">
+        Вы действительно хотите удалить хакатон? Это действие нельзя отменить.
+
+        <x-slot:actions>
+            <x-mary-button class="btn-error" label="Удалить" wire:click="deleteHackaton" />
+            <x-mary-button label="Отмена" @click="$wire.deleteHackatonModal = false" />
+        </x-slot:actions>
+    </x-mary-modal>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         @forelse($this->hackatons as $hackaton)
             <x-marycard class="card card-border">
-               <div class="overflow-hidden rounded-xl bg-base-200 aspect-[16/9]">
+               <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
                         <img src="/uploads/{{$hackaton->image_url}}" class="w-full h-full object-cover" alt="{{$hackaton->title}}">
                     </div>
                 <div class="mt-2 space-y-2">
@@ -44,14 +78,18 @@ class extends Component {
                     <x-mary-card class="card card-border bg-base-200">
                         <p>Принимает участие: {{$hackaton->participantsCount()}} команд</p>
                         <p>Даты проведения:
-                            {{$hackaton->start_at }} &DownLeftVectorBar; {{$hackaton->end_at}}</p>
+                            {{ Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
+                            {{ Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}</p>
                     </x-mary-card>
                 </div>
 
                 <x-slot:actions>
+                    <a href="/hackatons/{{$hackaton->id}}">
+                        <x-marybutton class="btn-ghost" label="Просмотреть" />
+                    </a>
                     <x-marybutton class="btn-primary" label="Изменить" wire:click="editHackaton({{$hackaton->id}})" />
                     <x-marybutton class="btn-secondary" label="Участники" wire:click="participantsHackaton({{$hackaton->id}})" />
-                    <x-marybutton class="btn-error" label="Удалить" wire:click="deleteHackaton({{$hackaton->id}})" />
+                    <x-marybutton class="btn-error" label="Удалить" wire:click="showDeleteHackatonModal({{$hackaton->id}})" />
                 </x-slot:actions>
 
             </x-marycard>
