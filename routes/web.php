@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\HackatonAnnouncementController;
 use App\Http\Controllers\HackatonApplicationController;
 use App\Http\Controllers\HackatonCaseController;
@@ -9,15 +10,11 @@ use App\Http\Controllers\HackatonCaseSubmissionController;
 use App\Http\Controllers\HackatonCertificateController;
 use App\Http\Controllers\HackatonController;
 use App\Http\Controllers\JudgeManagementController;
+use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
-use Laravel\Socialite\Facades\Socialite;
 
 Route::livewire('/', 'pages::index')->name('home');
 
@@ -59,33 +56,16 @@ Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit')
     ->middleware('auth')
     ->name('hackatons.edit');
 
-Route::get('/auth/yandex/redirect', function () {
-    return Socialite::driver('yandex')->redirect();
-});
-
-Route::get('/auth/yandex/callback', function () {
-    $yandexUser = Socialite::driver('yandex')->user();
-
-    $email = $yandexUser->getEmail() ?: "yandex_{$yandexUser->getId()}@oauth.local";
-    $name = $yandexUser->getName() ?: $yandexUser->getNickname() ?: 'Пользователь Яндекс';
-
-    $user = User::firstOrCreate(
-        ['email' => $email],
-        [
-            'fio' => $name,
-            'nickname' => 'yandex_'.Str::lower(Str::random(10)),
-            'date_of_birth' => now()->subYears(18)->toDateString(),
-            'phone' => '+70000000000',
-            'password' => Hash::make(Str::random(40)),
-        ],
-    );
-
-    Auth::login($user);
-
-    return redirect()->route('home');
-});
+Route::get('/auth/yandex/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'yandex');
+Route::get('/auth/yandex/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'yandex');
+Route::get('/auth/vk/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'vk');
+Route::get('/auth/vk/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'vk');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
+    Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
+    Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
+
     Route::delete('/teams/{team}/roles/{teamRole}/participant', [TeamController::class, 'destroyParticipant'])
         ->name('teams.participants.destroy');
 

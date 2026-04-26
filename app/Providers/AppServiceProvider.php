@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\VKontakte\Provider as VkontakteProvider;
 use SocialiteProviders\Yandex\Provider;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('yandex', Provider::class);
+            $event->extendSocialite('vkontakte', VkontakteProvider::class);
         });
 
         Gate::policy(TeamApplication::class, TeamApplicationPolicy::class);

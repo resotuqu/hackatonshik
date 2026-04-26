@@ -49,9 +49,9 @@ class extends Component {
         Auth::login($user);
         session()->regenerate();
 
-        $this->success('Успешная регистрация !', position: 'toast-center toast-top');
+        $this->success('Успешная регистрация. Подтвердите телефон по SMS.', position: 'toast-center toast-top');
 
-        return $this->redirect('/');
+        return $this->redirect(route('phone.verify.notice'));
     }
 };
 ?>
@@ -92,6 +92,9 @@ class extends Component {
             <x-slot:actions class="w-full">
                 <x-marybutton class="btn-primary w-full" label="Зарегистрироваться" type="submit" />
             </x-slot:actions>
+            <a href="/auth/vk/redirect" class="btn btn-outline w-full mt-2">
+                Войти или зарегистрироваться через VK
+            </a>
         </x-maryform>
     </div>
 </div>

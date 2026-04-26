@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'nickname' => fake()->name(),
             'password' => static::$password ??= Hash::make('password'),
             'phone' => fake()->phoneNumber(),
+            'phone_verified_at' => now(),
             'role' => 'user',
             'is_profile_public' => true,
             'show_email_on_profile' => false,

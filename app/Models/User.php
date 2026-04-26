@@ -90,6 +90,7 @@ class User extends Authenticatable
         'is_profile_public',
         'show_email_on_profile',
         'show_phone_on_profile',
+        'phone_verified_at',
     ];
 
     /**
@@ -115,6 +116,7 @@ class User extends Authenticatable
             'is_profile_public' => 'boolean',
             'show_email_on_profile' => 'boolean',
             'show_phone_on_profile' => 'boolean',
+            'phone_verified_at' => 'datetime',
         ];
     }
 

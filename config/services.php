@@ -41,4 +41,16 @@ return [
         'redirect' => env('YANDEX_REDIRECT_URI'),
     ],
 
+    'vkontakte' => [
+        'client_id' => env('VK_CLIENT_ID'),
+        'client_secret' => env('VK_CLIENT_SECRET'),
+        'redirect' => env('VK_REDIRECT_URI'),
+    ],
+
+    'plusofon' => [
+        'api_url' => env('PLUSOFON_API_URL'),
+        'token' => env('PLUSOFON_API_TOKEN'),
+        'sender' => env('PLUSOFON_SENDER'),
+    ],
+
 ];

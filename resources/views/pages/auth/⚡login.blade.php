@@ -103,67 +103,9 @@ class extends Component {
                     Войти через Яндекс ID
                 </span>
             </a>
-
-            <div id="vkid-container" class="pt-1">
-                <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
-                <script type="text/javascript">
-                    if ('VKIDSDK' in window) {
-                        const VKID = window.VKIDSDK;
-                        const vkidContainer = document.getElementById('vkid-container');
-
-                        function removeVkHintText() {
-                            if (!vkidContainer) {
-                                return;
-                            }
-
-                            const hintsToRemove = [
-                                'или войти через vk id с использованием данных из сервиса',
-                                'войти через vk id с использованием данных из сервиса'
-                            ];
-
-                            vkidContainer.querySelectorAll('*').forEach((node) => {
-                                const text = (node.textContent || '').trim().toLowerCase();
-                                if (hintsToRemove.includes(text)) {
-                                    node.remove();
-                                }
-                            });
-                        }
-
-                        VKID.Config.init({
-                            app: 54507553,
-                            redirectUrl: `${window.location.origin}/auth/vk/callback`,
-                            responseMode: VKID.ConfigResponseMode.Callback,
-                            source: VKID.ConfigSource.LOWCODE,
-                            scope: '',
-                        });
-
-                        const oAuth = new VKID.OAuthList();
-
-                        oAuth.render({
-                            container: vkidContainer,
-                            oauthList: [
-                                'vkid'
-                            ]
-                        })
-                            .on(VKID.WidgetEvents.ERROR, vkidOnError)
-                            .on(VKID.OAuthListInternalEvents.LOGIN_SUCCESS, function (payload) {
-                                const code = payload.code;
-                                const deviceId = payload.device_id;
-                                const callbackUrl = `/auth/vk/callback?code=${encodeURIComponent(code)}&device_id=${encodeURIComponent(deviceId)}`;
-
-                                window.location.href = callbackUrl;
-                            });
-
-                        removeVkHintText();
-                        const vkidObserver = new MutationObserver(removeVkHintText);
-                        vkidObserver.observe(vkidContainer, { childList: true, subtree: true });
-
-                        function vkidOnError(error) {
-                            // Обработка ошибки
-                        }
-                    }
-                </script>
-            </div>
+            <a href="/auth/vk/redirect" class="btn btn-outline w-full">
+                Войти через VK ID
+            </a>
         </x-maryform>
     </div>
 </div>
