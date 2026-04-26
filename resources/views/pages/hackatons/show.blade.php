@@ -130,6 +130,9 @@
                     @auth
                         @if ($hackaton->user_id !== auth()->id())
                             <div class="divider my-1"></div>
+                            <a href="{{ route('profile.hackatons.hub', $hackaton) }}" class="btn btn-sm btn-outline w-full">
+                                Открыть мой кабинет участника
+                            </a>
                             @if ($myApplicationsByTeam->isNotEmpty())
                                 <div class="space-y-2">
                                     <p class="text-sm font-medium">Ваши заявки</p>
@@ -564,6 +567,18 @@
             </div>
 
             @if($isOrganizer)
+                <div class="card bg-base-100 border border-base-200 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl">Экспорт данных</h2>
+                        <p class="text-sm text-base-content/70">Скачайте команды, участников или архив подписанных документов.</p>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <a href="{{ route('hackatons.export.teams', $hackaton) }}" class="btn btn-sm btn-outline">Экспорт команд (CSV)</a>
+                            <a href="{{ route('hackatons.export.participants', $hackaton) }}" class="btn btn-sm btn-outline">Экспорт участников (CSV)</a>
+                            <a href="{{ route('hackatons.export.documents-zip', $hackaton) }}" class="btn btn-sm btn-primary">Документы (ZIP)</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card bg-base-100 border border-base-200 shadow-sm">
                     <div class="card-body space-y-4">
                         <div class="flex flex-wrap items-center justify-between gap-3">

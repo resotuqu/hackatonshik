@@ -153,6 +153,15 @@ class extends Component {
             <x-mary-input label="Никнейм" :value="$nickname" readonly />
             <x-mary-input label="Роль" :value="$role" readonly />
             <x-mary-input label="Электронная почта" wire:model="email" placeholder="example@mail.com" />
+            <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-sm font-medium">Подтверждение телефона</p>
+                @if (auth()->user()?->phone_verified_at)
+                    <p class="text-sm text-success">Телефон подтвержден: {{ auth()->user()->phone_verified_at->format('d.m.Y H:i') }}</p>
+                @else
+                    <p class="text-sm text-warning">Телефон пока не подтвержден.</p>
+                    <a class="link link-primary text-sm" href="{{ route('phone.verify.notice') }}">Подтвердить через SMS</a>
+                @endif
+            </div>
 
             <x-marymarkdown wire:model="description" label="Описание" :config="$this->config" />
             <div class="rounded-xl border border-base-300 p-4 space-y-2">

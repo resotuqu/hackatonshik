@@ -9,7 +9,10 @@ use App\Http\Controllers\HackatonCaseScoreController;
 use App\Http\Controllers\HackatonCaseSubmissionController;
 use App\Http\Controllers\HackatonCertificateController;
 use App\Http\Controllers\HackatonController;
+use App\Http\Controllers\HackatonExportController;
 use App\Http\Controllers\JudgeManagementController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ParticipantHackatonHubController;
 use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\TeamApplicationController;
@@ -43,6 +46,9 @@ Route::livewire('/hackatons/create', 'pages::hackatons.create')->middleware('aut
 Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index')->middleware('auth');
 Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants')->middleware('auth');
 Route::livewire('/profile/certificates', 'pages::profile.certificates.index')->middleware('auth');
+Route::get('/profile/hackatons/{hackaton}/hub', [ParticipantHackatonHubController::class, 'show'])
+    ->middleware('auth')
+    ->name('profile.hackatons.hub');
 
 Route::get('/teams/{team}', [TeamController::class, 'show'])
     ->name('teams.show');
@@ -65,6 +71,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
     Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
+
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     Route::delete('/teams/{team}/roles/{teamRole}/participant', [TeamController::class, 'destroyParticipant'])
         ->name('teams.participants.destroy');
@@ -91,6 +100,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/hackatons/{hackaton}/certificates', [HackatonCertificateController::class, 'store'])->name('hackatons.certificates.store');
     Route::delete('/hackatons/{hackaton}/certificates/{certificate}', [HackatonCertificateController::class, 'destroy'])->name('hackatons.certificates.destroy');
     Route::get('/certificates/{certificate}/download', [HackatonCertificateController::class, 'download'])->name('certificates.download');
+    Route::get('/hackatons/{hackaton}/export/teams', [HackatonExportController::class, 'teams'])->name('hackatons.export.teams');
+    Route::get('/hackatons/{hackaton}/export/participants', [HackatonExportController::class, 'participants'])->name('hackatons.export.participants');
+    Route::get('/hackatons/{hackaton}/export/documents-zip', [HackatonExportController::class, 'documentsZip'])->name('hackatons.export.documents-zip');
 
     Route::post('/hackatons/{hackaton}/judges/invite', [JudgeManagementController::class, 'invite'])->name('hackatons.judges.invite');
     Route::post('/hackatons/{hackaton}/judges/assign', [JudgeManagementController::class, 'assign'])->name('hackatons.judges.assign');

@@ -38,6 +38,7 @@ class HackatonAnnouncementPublished extends Notification implements ShouldQueue
             'hackaton_id' => $this->announcement->hackaton_id,
             'hackaton_title' => $this->announcement->hackaton->title,
             'title' => $this->announcement->title,
+            'message' => $this->announcement->body,
             'body' => $this->announcement->body,
             'published_at' => $this->announcement->published_at?->toIso8601String(),
             'url' => route('hackatons.show', $this->announcement->hackaton_id),

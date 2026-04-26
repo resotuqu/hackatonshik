@@ -69,29 +69,32 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         @forelse($this->teams as $team)
-            <x-mary-card title="{{$team->title}}" class="card card-border">
-                <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
-                    <img src="/uploads/{{$team->image_url}}" class="w-full h-full object-cover" alt="{{$team->title}}">
-                </div>
-                <x-mary-card class="card card-border bg-base-300">
-                    <p>{{$team->hackaton->title}}</p>
-                    <p>Даты проведения:
-                        {{ Carbon::parse($team->hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
-                        {{ Carbon::parse($team->hackaton->end_at)->format('d.m.Y H:i') }}
-                    </p>
-                </x-mary-card>
+            <x-mary-card title="{{ $team->title }}" class="card card-border h-full">
+                <div class="flex grow flex-col space-y-2">
+                    <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
+                        <img src="/uploads/{{ $team->image_url }}" class="w-full h-full object-cover" alt="{{ $team->title }}">
+                    </div>
+                    <x-mary-card class="card card-border bg-base-300">
+                        <p>{{ $team->hackaton->title }}</p>
+                        <p>
+                            Даты проведения:
+                            {{ Carbon::parse($team->hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
+                            {{ Carbon::parse($team->hackaton->end_at)->format('d.m.Y H:i') }}
+                        </p>
+                    </x-mary-card>
 
-                <div class="mt-2">
-                    <x-marybadge value="Количество ролей: {{$team->roles->count()}}" class="badge-neutral" />
-                    <x-marybadge value="Свободно ролей: {{$team->emptyRoles()}}" class="badge-neutral" />
+                    <div class="mt-1 flex flex-wrap gap-2">
+                        <x-marybadge value="Количество ролей: {{ $team->roles->count() }}" class="badge-neutral" />
+                        <x-marybadge value="Свободно ролей: {{ $team->emptyRoles() }}" class="badge-neutral" />
+                    </div>
                 </div>
 
-                <x-slot:actions>
-                    <a href="/teams/{{$team->id}}">
+                <x-slot:actions class="mt-auto pt-2">
+                    <a href="/teams/{{ $team->id }}">
                         <x-mary-button label="Просмотреть" class="btn-ghost" />
                     </a>
-                    <x-mary-button label="Изменить" class="btn-primary" wire:click="editTeam({{$team->id}})" />
-                    <x-mary-button label="Удалить" class="btn-secondary" wire:click="showDeleteTeamModal({{$team->id}})" />
+                    <x-mary-button label="Изменить" class="btn-primary" wire:click="editTeam({{ $team->id }})" />
+                    <x-mary-button label="Удалить" class="btn-secondary" wire:click="showDeleteTeamModal({{ $team->id }})" />
                 </x-slot:actions>
 
             </x-mary-card>

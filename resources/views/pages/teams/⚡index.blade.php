@@ -368,7 +368,7 @@ class extends Component {
         <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,nextPage,previousPage,gotoPage,setPage">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @forelse($this->teams as $team)
-                    <x-mary-card class="card card-border" wire:key="team-card-{{ $team->id }}">
+                    <x-mary-card class="card card-border h-full" wire:key="team-card-{{ $team->id }}">
                         @php
                             $teamImage = filled($team->image_url)
                                 ? (str_starts_with($team->image_url, 'http') ? $team->image_url : asset('storage/' . $team->image_url))
@@ -382,28 +382,41 @@ class extends Component {
                             @endif
                         </div>
 
-                        <p class="card-title mt-2">{{$team->title}}</p>
+                        <div class="mt-2 flex grow flex-col space-y-2">
+                            <p class="card-title">{{ $team->title }}</p>
 
-                        <x-mary-card class="card card-border bg-base-200">
-                            <p>Пользователь: {{$team->user->nickname}}</p>
-                            <p>{{$team->hackaton->title}}</p>
-                            <p>Даты проведения:
-                                {{ Carbon::parse($team->hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
-                                {{ Carbon::parse($team->hackaton->end_at)->format('d.m.Y H:i') }}</p>
-                        </x-mary-card>
+                            <x-mary-card class="card card-border bg-base-200">
+                                <p>Пользователь: {{ $team->user->nickname }}</p>
+                                <p>{{ $team->hackaton->title }}</p>
+                                <p>
+                                    Даты проведения:
+                                    {{ Carbon::parse($team->hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
+                                    {{ Carbon::parse($team->hackaton->end_at)->format('d.m.Y H:i') }}
+                                </p>
+                            </x-mary-card>
 
-                        <div class="mt-2">
-                            <x-marybadge value="Количество ролей: {{$team->roles_count}}" class="badge-neutral" />
-                            <x-marybadge value="Свободно ролей: {{$team->empty_roles_count}}" class="badge-neutral" />
-                            @php
-                                $requiredRoles = $team->roles->whereNull('user_id')->pluck('role.name')->filter()->take(2)->implode(', ');
-                            @endphp
-                            @if ($requiredRoles !== '')
-                                <x-marybadge value="Нужны роли: {{$requiredRoles}}" class="badge-primary" />
-                            @endif
+                            <div class="mt-1 flex flex-wrap gap-2">
+                                <x-marybadge value="Количество ролей: {{ $team->roles_count }}" class="badge-neutral" />
+                                <x-marybadge value="Свободно ролей: {{ $team->empty_roles_count }}" class="badge-neutral" />
+                                @php
+                                    $requiredRolesCollection = $team->roles
+                                        ->whereNull('user_id')
+                                        ->pluck('role.name')
+                                        ->filter()
+                                        ->values();
+                                    $requiredRolesPreview = $requiredRolesCollection->take(2)->implode(', ');
+                                    $requiredRolesOverflow = max($requiredRolesCollection->count() - 2, 0);
+                                @endphp
+                                @if ($requiredRolesPreview !== '')
+                                    <x-marybadge
+                                        value="Нужны роли: {{ $requiredRolesPreview }}{{ $requiredRolesOverflow > 0 ? ', +'.$requiredRolesOverflow : '' }}"
+                                        class="badge-primary h-auto max-w-full whitespace-normal wrap-break-word py-1 text-left leading-snug"
+                                    />
+                                @endif
+                            </div>
                         </div>
 
-                        <x-slot:actions>
+                        <x-slot:actions class="mt-auto pt-2">
                             <x-mary-button label="Подробнее" class="btn-primary" wire:click="openTeam({{ $team->id }})" />
                             @auth
                                 @if(!auth()->user()->isOrganizer())

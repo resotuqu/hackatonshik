@@ -69,6 +69,9 @@ class extends Component {
 
 <div>
     <x-marytoast />
+    @php
+        $roadmapItems = collect(config('product_backlog.hackatonshik', []))->sortBy('priority')->values();
+    @endphp
 
     <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
         <x-slot:menu>
@@ -90,5 +93,21 @@ class extends Component {
                 <x-mary-button label="Создать партнёра" class="btn-primary" type="submit" />
             </x-slot:actions>
         </x-maryform>
+    </x-mary-card>
+
+    <x-mary-card title="Приоритеты бэклога" class="mt-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+        <div class="space-y-2">
+            @forelse($roadmapItems as $item)
+                <div class="rounded-xl border border-base-300 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <p class="font-medium">P{{ $item['priority'] }}. {{ $item['title'] }}</p>
+                        <p class="text-xs text-base-content/70">Ключ: {{ $item['key'] }}</p>
+                    </div>
+                    <x-marybadge class="{{ $item['status'] === 'in_progress' ? 'badge-info' : 'badge-outline' }}" value="{{ $item['status'] }}" />
+                </div>
+            @empty
+                <p class="text-sm text-base-content/70">Бэклог пока не настроен.</p>
+            @endforelse
+        </div>
     </x-mary-card>
 </div>

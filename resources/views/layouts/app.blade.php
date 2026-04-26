@@ -113,6 +113,63 @@
                 <div class="flex items-center justify-between gap-2">
                     <a href="{{ route('home') }}" class="btn btn-ghost text-xl px-2">Хакатонщик</a>
                     @auth
+                        @php
+                            $unreadNotificationsCount = Auth::user()->unreadNotifications()->count();
+                            $recentNotifications = Auth::user()->notifications()->latest()->limit(5)->get();
+                        @endphp
+                        <div class="dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
+                                <div class="indicator">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0h6z" />
+                                    </svg>
+                                    @if($unreadNotificationsCount > 0)
+                                        <span class="badge badge-xs badge-error indicator-item">{{ min($unreadNotificationsCount, 9) }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div tabindex="-1" class="card card-compact dropdown-content bg-base-100 z-50 mt-3 w-80 border border-base-200 shadow-xl">
+                                <div class="card-body gap-2">
+                                    <div class="flex items-center justify-between">
+                                        <p class="font-medium">Уведомления</p>
+                                        @if($unreadNotificationsCount > 0)
+                                            <form method="POST" action="{{ route('notifications.read-all') }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-ghost btn-xs">Прочитать все</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                    @if($recentNotifications->isEmpty())
+                                        <p class="text-sm text-base-content/70">Пока нет уведомлений.</p>
+                                    @else
+                                        <div class="space-y-2">
+                                            @foreach($recentNotifications as $notification)
+                                                @php
+                                                    $notificationData = $notification->data ?? [];
+                                                    $notificationUrl = $notificationData['url'] ?? route('home');
+                                                    $notificationTitle = $notificationData['title'] ?? 'Новое уведомление';
+                                                    $notificationMessage = $notificationData['message'] ?? null;
+                                                @endphp
+                                                <div class="rounded-lg border border-base-200 p-2 {{ $notification->read_at ? 'opacity-80' : 'bg-base-200/40' }}">
+                                                    <a href="{{ $notificationUrl }}" class="block">
+                                                        <p class="text-sm font-medium">{{ $notificationTitle }}</p>
+                                                        @if(filled($notificationMessage))
+                                                            <p class="text-xs text-base-content/70">{{ $notificationMessage }}</p>
+                                                        @endif
+                                                    </a>
+                                                    @if($notification->read_at === null)
+                                                        <form method="POST" action="{{ route('notifications.read', $notification) }}" class="mt-1">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-ghost btn-xs px-1">Отметить прочитанным</button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                         <div class="dropdown dropdown-end">
                             <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                                 <div class="w-10 rounded-full">

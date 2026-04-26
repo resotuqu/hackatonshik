@@ -12,9 +12,11 @@ use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\Team;
 use App\Models\User;
+use App\Notifications\ApplicationStatusUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 
 class HackatonApplicationController extends Controller
 {
@@ -68,6 +70,8 @@ class HackatonApplicationController extends Controller
             ? 'Заявка команды принята.'
             : 'Заявка команды отклонена.';
 
+        $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+
         return back()->with('success', $flashMessage);
     }
 
@@ -116,13 +120,48 @@ class HackatonApplicationController extends Controller
                 if ($status === ApplicationStatus::ACCEPTED->value) {
                     $this->acceptApplication($application, $reviewer);
 
+                    $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+
                     continue;
                 }
 
                 $application->markAsRejected($reviewer);
+                $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
             }
         });
 
         return back()->with('success', 'Групповая модерация выполнена.');
+    }
+
+    private function notifyTeamAboutStatus(HackatonApplication $application): void
+    {
+        $team = $application->team()->with(['roles:id,team_id,user_id', 'roles.user:id,email'])->first();
+        $hackaton = $application->hackaton;
+
+        if (! $team || ! $hackaton) {
+            return;
+        }
+
+        $participantIds = $team->roles
+            ->pluck('user_id')
+            ->filter()
+            ->push($team->user_id)
+            ->unique()
+            ->values();
+
+        if ($participantIds->isEmpty()) {
+            return;
+        }
+
+        $users = User::query()->whereIn('id', $participantIds)->get();
+
+        if ($users->isEmpty()) {
+            return;
+        }
+
+        Notification::send(
+            $users,
+            new ApplicationStatusUpdated($hackaton, $team, $application->status)
+        );
     }
 }
