@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\ListAnalyticsEvent;
@@ -21,7 +22,7 @@ class extends Component {
     public function hackatons()
     {
         return Hackaton::query()
-            ->select(['id', 'title', 'image_url', 'start_at', 'end_at', 'is_public'])
+            ->select(['id', 'title', 'image_url', 'start_at', 'end_at', 'is_public', 'status'])
             ->withCount('teams')
             ->withCount(['teams as participants_count' => fn (Builder $query) => $query
                 ->join('team_roles', 'team_roles.team_id', '=', 'teams.id')
@@ -32,22 +33,7 @@ class extends Component {
             ->when($this->start_at !== '', function (Builder $query): void {
                 $query->where('start_at', '>=', $this->start_at);
             })
-            ->when($this->status !== 'all', function (Builder $query): void {
-                if ($this->status === 'upcoming') {
-                    $query->whereDate('start_at', '>', now());
-
-                    return;
-                }
-
-                if ($this->status === 'active') {
-                    $query->whereDate('start_at', '<=', now())
-                        ->whereDate('end_at', '>=', now());
-
-                    return;
-                }
-
-                $query->whereDate('end_at', '<', now());
-            })
+            ->when($this->status !== 'all', fn (Builder $query): Builder => $query->where('status', $this->status))
             ->when($this->public_only, fn (Builder $query) => $query->where('is_public', true))
             ->when($this->sort === 'start_soonest', fn (Builder $query) => $query->orderBy('start_at')->orderByDesc('id'))
             ->when($this->sort === 'newest', fn (Builder $query) => $query->orderByDesc('id'))
@@ -223,9 +209,13 @@ class extends Component {
             <x-marydatetime wire:model="start_at" label="Начало от"  />
             <x-maryselect label="Статус" wire:model="status" :options="[
                 ['id' => 'all', 'name' => 'Любой'],
-                ['id' => 'upcoming', 'name' => 'Скоро старт'],
-                ['id' => 'active', 'name' => 'Идет сейчас'],
-                ['id' => 'finished', 'name' => 'Завершен'],
+                ['id' => HackatonStatus::DRAFT->value, 'name' => HackatonStatus::DRAFT->label()],
+                ['id' => HackatonStatus::PUBLISHED->value, 'name' => HackatonStatus::PUBLISHED->label()],
+                ['id' => HackatonStatus::REGISTRATION_OPEN->value, 'name' => HackatonStatus::REGISTRATION_OPEN->label()],
+                ['id' => HackatonStatus::IN_PROGRESS->value, 'name' => HackatonStatus::IN_PROGRESS->label()],
+                ['id' => HackatonStatus::JUDGING->value, 'name' => HackatonStatus::JUDGING->label()],
+                ['id' => HackatonStatus::FINISHED->value, 'name' => HackatonStatus::FINISHED->label()],
+                ['id' => HackatonStatus::ARCHIVED->value, 'name' => HackatonStatus::ARCHIVED->label()],
             ]" />
             <x-maryselect label="Сортировка" wire:model="sort" :options="[
                 ['id' => 'newest', 'name' => 'Сначала новые'],
@@ -277,7 +267,7 @@ class extends Component {
                             <x-marybadge class="badge-primary" value="Начало от: {{ Carbon::parse($start_at)->format('d.m.Y H:i') }}" />
                         @endif
                         @if ($status !== 'all')
-                            <x-marybadge class="badge-primary" value="Статус: {{ $status }}" />
+                            <x-marybadge class="badge-primary" value="Статус: {{ str_replace('_', ' ', $status) }}" />
                         @endif
                         @if ($public_only)
                             <x-marybadge class="badge-primary" value="Только публичные" />
@@ -298,7 +288,7 @@ class extends Component {
         <div wire:loading.remove wire:target="search,clearFilters,q,start_at,status,sort,public_only,nextPage,previousPage,gotoPage,setPage">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @forelse($this->hackatons as $hackaton)
-                    <x-mary-card class="card card-border" wire:key="hackaton-card-{{ $hackaton->id }}">
+                    <x-mary-card class="card card-border h-full" wire:key="hackaton-card-{{ $hackaton->id }}">
                         @php
                             $hackatonImage = filled($hackaton->image_url)
                                 ? (str_starts_with($hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/' . $hackaton->image_url))
@@ -311,16 +301,13 @@ class extends Component {
                                 <div class="flex h-full w-full items-center justify-center text-base-content/60">Изображение хакатона отсутствует</div>
                             @endif
                         </div>
-                        <div class="mt-2 space-y-2">
+                        <div class="mt-2 flex grow flex-col space-y-2">
                             <p class="card-title">{{$hackaton->title}}</p>
                             <x-mary-card class="card card-border bg-base-200">
                                 <div class="flex flex-wrap gap-2 mb-2">
                                     <x-marybadge class="badge-neutral" value="Команд: {{ $hackaton->teams_count }}" />
                                     <x-marybadge class="badge-neutral" value="Участников: {{ $hackaton->participants_count }}" />
-                                    @php
-                                        $state = now()->lt($hackaton->start_at) ? 'upcoming' : (now()->gt($hackaton->end_at) ? 'finished' : 'active');
-                                    @endphp
-                                    <x-marybadge class="badge-primary" value="Статус: {{ $state }}" />
+                                    <x-marybadge class="badge-primary" value="Статус: {{ $hackaton->status->label() }}" />
                                 </div>
                                 <p>Даты проведения:
                                     {{ Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
@@ -328,7 +315,7 @@ class extends Component {
                             </x-mary-card>
                         </div>
 
-                        <x-slot:actions>
+                        <x-slot:actions class="mt-auto pt-2">
                             <x-mary-button class="btn-primary" wire:click="openHackaton({{ $hackaton->id }})" label="Подробнее"/>
                             @auth
                                 <x-mary-button class="btn-secondary" wire:click="quickApplyHackaton({{ $hackaton->id }})" label="Подать заявку"/>

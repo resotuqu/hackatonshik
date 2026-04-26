@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\HackatonStatus;
 use Database\Factories\HackatonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -118,6 +119,42 @@ class Hackaton extends Model
         return $this;
     }
 
+    public function syncStatusByTimeline(): bool
+    {
+        if ($this->status === HackatonStatus::ARCHIVED) {
+            return false;
+        }
+
+        $now = now();
+
+        $nextStatus = match (true) {
+            ! $this->is_public => HackatonStatus::DRAFT,
+            $now->lt($this->start_at) && $this->status === HackatonStatus::PUBLISHED => HackatonStatus::PUBLISHED,
+            $now->lt($this->start_at) => HackatonStatus::REGISTRATION_OPEN,
+            $now->between($this->start_at, $this->end_at) => HackatonStatus::IN_PROGRESS,
+            $now->gt($this->end_at) && $this->status === HackatonStatus::JUDGING => HackatonStatus::JUDGING,
+            default => HackatonStatus::FINISHED,
+        };
+
+        if ($this->status === $nextStatus) {
+            return false;
+        }
+
+        $this->update(['status' => $nextStatus]);
+
+        return true;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => HackatonStatus::class,
+            'is_public' => 'boolean',
+            'start_at' => 'datetime',
+            'end_at' => 'datetime',
+        ];
+    }
+
     protected $fillable = [
         'user_id',
         'title',
@@ -126,5 +163,6 @@ class Hackaton extends Model
         'start_at',
         'end_at',
         'is_public',
+        'status',
     ];
 }

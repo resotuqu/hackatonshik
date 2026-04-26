@@ -159,6 +159,7 @@ class extends Component {
         }
 
         $this->hackaton->update($data);
+        $this->hackaton->syncStatusByTimeline();
 
         $existingDocuments = $this->hackaton->documents()->get()->keyBy('id');
         $savedDocumentIds = [];

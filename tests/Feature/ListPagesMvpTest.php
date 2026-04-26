@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\ListAnalyticsEvent;
 use App\Models\Role;
@@ -17,18 +18,20 @@ test('hackatons page supports status filter and quick apply', function () {
         'start_at' => now()->addDays(5)->toDateString(),
         'end_at' => now()->addDays(7)->toDateString(),
         'is_public' => true,
+        'status' => HackatonStatus::REGISTRATION_OPEN,
     ]);
     Hackaton::factory()->create([
         'title' => 'Finished Hackaton',
         'start_at' => now()->subDays(10)->toDateString(),
         'end_at' => now()->subDays(5)->toDateString(),
         'is_public' => true,
+        'status' => HackatonStatus::FINISHED,
     ]);
     $ownedTeam = Team::factory()->for($user)->for($upcoming)->create();
 
     Livewire::actingAs($user)
         ->test('pages::hackatons.index')
-        ->set('status', 'upcoming')
+        ->set('status', HackatonStatus::REGISTRATION_OPEN->value)
         ->call('search')
         ->call('quickApplyHackaton', $upcoming->id)
         ->assertSee('Upcoming Hackaton')

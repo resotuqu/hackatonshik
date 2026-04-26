@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\Team;
 use Illuminate\Support\Facades\Auth;
@@ -113,7 +114,8 @@ class extends Component {
             'image_url' => $photo,
             'start_at' => $this->start_at,
             'end_at' => $this->end_at,
-            'is_public' => true,
+            'is_public' => $this->is_public,
+            'status' => $this->is_public ? HackatonStatus::REGISTRATION_OPEN : HackatonStatus::DRAFT,
         ]);
 
         foreach ($this->hackatonDocuments as $hackatonDocument) {
