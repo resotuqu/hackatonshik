@@ -17,12 +17,21 @@ use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
+use App\Models\NewsPost;
 use Illuminate\Support\Facades\Route;
 
 Route::livewire('/', 'pages::index')->name('home');
 
 Route::livewire('/about', 'pages::about.index');
 Route::livewire('/news', 'pages::news.index');
+Route::get('/news/rss', function () {
+    $posts = NewsPost::query()->published()->latest('published_at')->limit(20)->get();
+
+    return response()
+        ->view('pages.news.rss', ['posts' => $posts], 200)
+        ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
+});
+Route::livewire('/news/{post:slug}', 'pages::news.show')->name('news.show');
 Route::livewire('/contacts', 'pages::contacts.index');
 Route::livewire('/privacy-policy', 'pages::privacy-policy.index');
 Route::livewire('/cookie-policy', 'pages::cookie-policy.index');
@@ -33,13 +42,13 @@ Route::livewire('/profile', 'pages::profile.index')->middleware(['auth', 'verifi
 Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/u/{user:nickname}', [PublicProfileController::class, 'show'])->name('profile.public.show');
 
-Route::livewire('/teams', 'pages::teams.index');
+Route::livewire('/teams', 'pages::teams.index')->name('teams.index');
 Route::livewire('/teams/create', 'pages::teams.create')->middleware(['auth', 'verified']);
 // Route::livewire('/teams/{team}', 'pages::teams.show');
 // Route::livewire('/teams/{team}/edit', 'pages::teams.edit');
 Route::livewire('/profile/teams', 'pages::profile.teams.index')->middleware(['auth', 'verified']);
 
-Route::livewire('/hackatons', 'pages::hackatons.index');
+Route::livewire('/hackatons', 'pages::hackatons.index')->name('hackatons.index');
 Route::livewire('/hackatons/create', 'pages::hackatons.create')->middleware(['auth', 'verified']);
 // Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show');
 // Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit');
