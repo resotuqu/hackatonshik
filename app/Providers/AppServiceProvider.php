@@ -15,10 +15,13 @@ use App\Policies\HackatonCaseSubmissionPolicy;
 use App\Policies\HackatonCertificatePolicy;
 use App\Policies\TeamApplicationPolicy;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use SocialiteProviders\Manager\SocialiteWasCalled;
@@ -40,6 +43,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Must match `signed:relative` middleware: hash is built from the relative path. Prepend APP_URL so HTML mail
+        // clients do not resolve `/email/verify/...` against the mail catcher host (e.g. localhost:8025).
+        VerifyEmail::createUrlUsing(function ($notifiable): string {
+            $signedRelative = URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes((int) Config::get('auth.verification.expire', 60)),
+                [
+                    'id' => $notifiable->getKey(),
+                    'hash' => sha1($notifiable->getEmailForVerification()),
+                ],
+                false,
+            );
+
+            return rtrim((string) Config::get('app.url'), '/').$signedRelative;
+        });
+
         $this->configureDefaults();
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('yandex', Provider::class);
