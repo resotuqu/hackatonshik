@@ -4,56 +4,102 @@ use App\Models\Hackaton;
 use App\Models\Team;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 new #[Layout('layouts::app', ['title' => 'Создание команды'])] class extends Component {
     use WithFileUploads;
 
-    //----------------------------------------------------------------
-    #[Validate(['title' => 'required'], message: ['title.required' => 'Заголовок должен быть заполнен'])]
+    public int $step = 1;
+
+    public const int TOTAL_STEPS = 4;
+
     public string $title = '';
 
-    #[Validate(['description' => 'required'], message: ['description.required' => 'Описание должно быть заполнено'])]
     public string $description = '';
 
-    #[
-        Validate(
-            ['photo' => ['required', 'image', 'max:4096']],
-            message: [
-                'photo.required' => 'Изображение обязательно',
-                'photo.image' => 'Файл должен быть валидным изображением',
-                'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
-            ],
-        ),
-    ]
     public $photo;
 
-    #[Validate(['required', 'exists:hackatons,id'])]
     public $hackaton_id = null;
 
     public bool $is_public = true;
 
-    //----------------------------------------------------------------
-    #[
-        Validate(
-            [
+    public $roles = [];
+
+    public $socialLinks = [];
+
+    public $config = [
+        'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
+        'uploadImage' => false,
+    ];
+
+    /**
+     * @return array<string, list<string>|\Illuminate\Contracts\Validation\Rule|string>
+     */
+    protected function rulesForStep(int $step): array
+    {
+        return match ($step) {
+            1 => [
+                'title' => 'required',
+                'description' => 'required',
+            ],
+            2 => [
+                'photo' => ['required', 'image', 'max:4096'],
+                'hackaton_id' => ['required', 'exists:hackatons,id'],
+            ],
+            3 => [
+                'socialLinks.*.name' => ['required', 'min:2'],
+                'socialLinks.*.url' => ['required'],
+            ],
+            4 => [
+                'roles' => ['required', 'array', 'min:1'],
                 'roles.*.title' => ['required', 'min:3'],
                 'roles.*.description' => ['required', 'max:255'],
                 'roles.*.role' => ['required', 'exists:roles,id'],
             ],
-            message: [
-                'roles.*.title.required' => 'Название роли обязательно для заполнения',
-                'roles.*.title.min' => 'Название роли должно содержать минимум 3 символа',
-                'roles.*.description.required' => 'Описание роли обязательно',
-                'roles.*.description.max' => 'Длина описания роли не может быть больше 255 символов',
-                'roles.*.role.required' => 'Категория роли должна быть выбрана',
-                'roles.*.role.exists' => 'ОШИБКА 19755. Напишите по этому поводу в техподдержку',
-            ],
-        ),
-    ]
-    public $roles = [];
+            default => [],
+        };
+    }
+
+    /**
+     * @return array<string, list<string>|\Illuminate\Contracts\Validation\Rule|string>
+     */
+    protected function allRules(): array
+    {
+        return array_merge(
+            $this->rulesForStep(1),
+            $this->rulesForStep(2),
+            $this->rulesForStep(3),
+            $this->rulesForStep(4)
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationMessages(): array
+    {
+        return [
+            'title.required' => 'Заголовок должен быть заполнен',
+            'description.required' => 'Описание должно быть заполнено',
+            'photo.required' => 'Изображение обязательно',
+            'photo.image' => 'Файл должен быть валидным изображением',
+            'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
+            'hackaton_id.required' => 'Выберите хакатон',
+            'hackaton_id.exists' => 'Указанный хакатон не найден',
+            'roles.required' => 'Добавьте хотя бы одну роль',
+            'roles.min' => 'Добавьте хотя бы одну роль',
+            'roles.*.title.required' => 'Название роли обязательно для заполнения',
+            'roles.*.title.min' => 'Название роли должно содержать минимум 3 символа',
+            'roles.*.description.required' => 'Описание роли обязательно',
+            'roles.*.description.max' => 'Длина описания роли не может быть больше 255 символов',
+            'roles.*.role.required' => 'Категория роли должна быть выбрана',
+            'roles.*.role.exists' => 'ОШИБКА 19755. Напишите по этому поводу в техподдержку',
+            'socialLinks.*.name.required' => 'Имя обязательно',
+            'socialLinks.*.name.min' => 'Длина имени должна быть не менее 2 символов',
+            'socialLinks.*.url.required' => 'Ссылка обязательна',
+        ];
+    }
 
     public function addRole(): void
     {
@@ -72,23 +118,7 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
         $this->roles = array_values($this->roles);
     }
 
-    //----------------------------------------------------------------
-    #[
-        Validate(
-            rule: [
-                'socialLinks.*.name' => ['required', 'min:2'],
-                'socialLinks.*.url' => ['required'],
-            ],
-            message: [
-                'socialLinks.*.name.required' => 'Имя обязательно',
-                'socialLinks.*.name.min' => 'Длина имени должна быть не менее 2 символов',
-                'socialLinks.*.url.required' => 'Ссылка обязательна',
-            ],
-        ),
-    ]
-    public $socialLinks = [];
-
-    public function addSocialLink()
+    public function addSocialLink(): void
     {
         $this->socialLinks[] = [
             'id' => uniqid(),
@@ -97,21 +127,42 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
         ];
     }
 
-    public function removeSocialLink($index)
+    public function removeSocialLink($index): void
     {
         unset($this->socialLinks[$index]);
         $this->socialLinks = array_values($this->socialLinks);
     }
 
-    //----------------------------------------------------------------
-
-    public function save()
+    public function nextStep(): void
     {
-        $this->validate();
+        if ($this->step >= self::TOTAL_STEPS) {
+            return;
+        }
+
+        $this->validate($this->rulesForStep($this->step), $this->validationMessages());
+
+        $this->step++;
+    }
+
+    public function previousStep(): void
+    {
+        if ($this->step > 1) {
+            $this->step--;
+        }
+    }
+
+    public function save(): void
+    {
+        if ($this->step < self::TOTAL_STEPS) {
+            $this->nextStep();
+
+            return;
+        }
+
+        $this->validate($this->allRules(), $this->validationMessages());
 
         $photo = $this->photo->storePublicly(path: 'team_photos', options: 'public');
 
-        // Team
         $team = Team::create([
             'user_id' => \Illuminate\Support\Facades\Auth::user()->id,
             'title' => $this->title,
@@ -121,7 +172,6 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
             'is_public' => $this->is_public,
         ]);
 
-        //Social Links Link
         foreach ($this->socialLinks as $socialLink) {
             $team->socialLinks()->create([
                 'name' => $socialLink['name'],
@@ -129,7 +179,6 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
             ]);
         }
 
-        //Roles
         foreach ($this->roles as $role) {
             $newRole = $team->roles()->create([
                 'title' => $role['title'],
@@ -139,16 +188,14 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
                 'user_id' => null,
             ]);
 
-            if (!empty($role['skills'])) {
+            if (! empty($role['skills'])) {
                 $newRole->skills()->sync($role['skills']);
             }
-
         }
 
         $this->redirect('/profile/teams');
     }
 
-    //----------------------------------------------------------------
     #[Computed]
     public function hackatons()
     {
@@ -182,6 +229,7 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
                 'name' => $role->name,
             ];
         }
+
         return $roles;
     }
 
@@ -191,41 +239,15 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
         return \App\Models\Skill::all();
     }
 
-    //----------------------------------------------------------------
-
-    public function mount()
+    public function mount(): void
     {
         $this->addRole();
         $this->addSocialLink();
     }
-
-    public $config = [
-        'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
-        'uploadImage' => false,
-    ];
 };
 ?>
 
 <div class="mx-auto w-full max-w-6xl space-y-4">
-    @php
-        $hasFilledRole = collect($roles)->contains(
-            fn ($role) => filled($role['title'] ?? null)
-                && filled($role['description'] ?? null)
-                && filled($role['role'] ?? null)
-        );
-
-        $progressSteps = [
-            filled($title),
-            filled($description),
-            !empty($photo),
-            filled($hackaton_id),
-            $hasFilledRole,
-        ];
-        $completedSteps = collect($progressSteps)->filter()->count();
-        $totalSteps = count($progressSteps);
-        $progressPercent = (int) round(($completedSteps / max($totalSteps, 1)) * 100);
-    @endphp
-
     <div class="text-sm breadcrumbs">
         <ul>
             <li><a href="/">Главная</a></li>
@@ -242,127 +264,138 @@ new #[Layout('layouts::app', ['title' => 'Создание команды'])] cl
                     Заполните профиль команды, добавьте роли и ссылки на ваши ресурсы.
                 </p>
             </div>
-            <x-marybadge class="badge-primary" value="Шаг 1 из 1" />
+            <x-marybadge class="badge-primary" value="Шаг {{ $step }} из 4" />
         </div>
     </x-mary-card>
 
-    <x-mary-card class="card card-border bg-base-100">
-        <div class="space-y-2">
-            <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-medium">Прогресс заполнения</p>
-                <span class="text-sm text-base-content/70">{{ $completedSteps }}/{{ $totalSteps }}</span>
-            </div>
-            <progress class="progress progress-primary w-full" value="{{ $progressPercent }}" max="100"></progress>
-            <p class="text-xs text-base-content/70">{{ $progressPercent }}% заполнено</p>
-        </div>
-    </x-mary-card>
+    <x-mary-card class="card card-border bg-base-100 w-full justify-self-center">
+        <x-maryform wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}" class="space-y-6">
+            <ul class="steps steps-horizontal mb-2 w-full max-w-full flex-wrap justify-start gap-y-2 text-[0.65rem] sm:text-xs">
+                <li class="step {{ $step >= 1 ? 'step-primary' : '' }}">Основное</li>
+                <li class="step {{ $step >= 2 ? 'step-primary' : '' }}">Обложка</li>
+                <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">Ссылки</li>
+                <li class="step {{ $step >= 4 ? 'step-primary' : '' }}">Роли</li>
+            </ul>
 
-    <x-mary-card class="w-full justify-self-center card card-border bg-base-100">
-        <x-maryform wire:submit="save" class="space-y-6">
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            @if ($step === 1)
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
                     <h2 class="text-lg font-semibold">Основная информация</h2>
                     <x-mary-input wire:model="title" label="Название команды" placeholder="Например, Team Phoenix" />
                     <x-marymarkdown wire:model="description" label="Описание команды" :config="$this->config" />
                 </div>
+            @endif
 
+            @if ($step === 2)
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
                     <h2 class="text-lg font-semibold">Обложка и хакатон</h2>
                     <x-maryfile label="Обложка команды" wire:model="photo" accept="image/png, image/jpeg, image/webp"
                         hint="PNG/JPEG/WebP, до 4 МБ" />
                     @if ($photo)
                         <div class="rounded-xl border border-base-300 bg-base-200 p-2">
-                            <img class="w-full object-contain h-64 rounded-lg"
+                            <img class="h-64 w-full rounded-lg object-contain"
                                 src="{{ $photo->temporaryUrl() }}" alt="Превью обложки команды">
                         </div>
                     @endif
 
                     <x-maryselect label="Хакатон" wire:model="hackaton_id" :options="$this->hackatons" />
                 </div>
-            </div>
+            @endif
 
-            <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 class="text-lg font-semibold">Социальные ссылки</h2>
-                        <p class="text-sm text-base-content/70">Добавьте контакты, чтобы участники могли быстро связаться с вами.</p>
+            @if ($step === 3)
+                <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-semibold">Социальные ссылки</h2>
+                            <p class="text-sm text-base-content/70">Добавьте контакты, чтобы участники могли быстро связаться с вами.</p>
+                        </div>
+                        <x-mary-button type="button" wire:click="addSocialLink" label="Добавить ссылку" class="btn-primary btn-sm" />
                     </div>
-                    <x-mary-button type="button" wire:click="addSocialLink" label="Добавить ссылку" class="btn-primary btn-sm" />
-                </div>
 
-                @if (empty($socialLinks))
-                    <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
-                        Пока нет социальных ссылок.
+                    @if (empty($socialLinks))
+                        <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
+                            Пока нет социальных ссылок.
+                        </div>
+                    @endif
+
+                    <div class="space-y-3">
+                        @foreach ($socialLinks as $index => $socialLink)
+                            <x-mary-card class="bg-base-200" wire:key="socialLink-{{ $socialLink['id'] }}">
+                                <div class="flex items-center justify-between gap-2">
+                                    <x-marybadge class="badge-neutral" value="Ссылка #{{ $index + 1 }}" />
+                                    <x-marybutton type="button" class="btn-error btn-sm" wire:click="removeSocialLink({{ $index }})">
+                                        Удалить
+                                    </x-marybutton>
+                                </div>
+
+                                <div class="mt-3 grid grid-cols-1 gap-3">
+                                    <x-mary-input wire:model="socialLinks.{{ $index }}.name"
+                                        label="Название" placeholder="Например, Telegram" />
+                                    <x-mary-input wire:model="socialLinks.{{ $index }}.url" label="Ссылка"
+                                        placeholder="https://..." />
+                                </div>
+                            </x-mary-card>
+                        @endforeach
                     </div>
-                @endif
-
-                <div class="space-y-3">
-                    @foreach ($socialLinks as $index => $socialLink)
-                        <x-mary-card class="bg-base-200" wire:key="socialLink-{{ $socialLink['id'] }}">
-                            <div class="flex items-center justify-between gap-2">
-                                <x-marybadge class="badge-neutral" value="Ссылка #{{ $index + 1 }}" />
-                                <x-marybutton type="button" class="btn-error btn-sm" wire:click="removeSocialLink({{ $index }})">
-                                    Удалить
-                                </x-marybutton>
-                            </div>
-
-                            <div class="mt-3 grid grid-cols-1 gap-3">
-                                <x-mary-input wire:model="socialLinks.{{ $index }}.name"
-                                    label="Название" placeholder="Например, Telegram" />
-                                <x-mary-input wire:model="socialLinks.{{ $index }}.url" label="Ссылка"
-                                    placeholder="https://..." />
-                            </div>
-                        </x-mary-card>
-                    @endforeach
                 </div>
-            </div>
+            @endif
 
-            <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 class="text-lg font-semibold">Роли в команде</h2>
-                        <p class="text-sm text-base-content/70">Добавьте роли, на которые будут подавать заявки участники.</p>
+            @if ($step === 4)
+                <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-semibold">Роли в команде</h2>
+                            <p class="text-sm text-base-content/70">Добавьте роли, на которые будут подавать заявки участники.</p>
+                        </div>
+                        <x-marybutton type="button" class="btn-primary btn-sm" wire:click="addRole" label="Добавить роль" />
                     </div>
-                    <x-marybutton type="button" class="btn-primary btn-sm" wire:click="addRole" label="Добавить роль" />
-                </div>
 
-                @if (empty($roles))
-                    <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
-                        Пока нет ролей. Добавьте хотя бы одну роль для набора участников.
+                    @if (empty($roles))
+                        <div class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/70">
+                            Пока нет ролей. Добавьте хотя бы одну роль для набора участников.
+                        </div>
+                    @endif
+
+                    <div class="space-y-3">
+                        @foreach ($roles as $index => $role)
+                            <x-marycard class="bg-base-200" wire:key="role-{{ $role['id'] }}">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <x-marybadge class="badge-neutral" value="Роль #{{ $index + 1 }}" />
+                                    <x-marybutton type="button" wire:click="removeRole({{ $index }})" label="Удалить"
+                                        class="btn-error btn-sm" />
+                                </div>
+
+                                <div class="mt-3 space-y-3">
+                                    <x-mary-input wire:model="roles.{{ $index }}.title" label="Название роли" />
+                                    <x-marymarkdown disk="public" folder="team_markdown"
+                                        wire:model="roles.{{ $index }}.description" label="Описание роли"
+                                        :config="$this->config" />
+                                    <x-maryselect label="Категория роли" wire:model="roles.{{ $index }}.role"
+                                        :options="$this->rolesData" />
+                                    <x-marychoices-offline label="Навыки роли"
+                                        wire:model="roles.{{ $index }}.skills" :options="$this->skillsData"
+                                        placeholder="Навыки..." clearable searchable />
+                                </div>
+                            </x-marycard>
+                        @endforeach
                     </div>
-                @endif
-
-                <div class="space-y-3">
-                    @foreach ($roles as $index => $role)
-                        <x-marycard class="bg-base-200" wire:key="role-{{ $role['id'] }}">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <x-marybadge class="badge-neutral" value="Роль #{{ $index + 1 }}" />
-                                <x-marybutton type="button" wire:click="removeRole({{ $index }})" label="Удалить"
-                                    class="btn-error btn-sm" />
-                            </div>
-
-                            <div class="mt-3 space-y-3">
-                                <x-mary-input wire:model="roles.{{ $index }}.title" label="Название роли" />
-                                <x-marymarkdown disk="public" folder="team_markdown"
-                                    wire:model="roles.{{ $index }}.description" label="Описание роли"
-                                    :config="$this->config" />
-                                <x-maryselect label="Категория роли" wire:model="roles.{{ $index }}.role"
-                                    :options="$this->rolesData" />
-                                <x-marychoices-offline label="Навыки роли"
-                                    wire:model="roles.{{ $index }}.skills" :options="$this->skillsData"
-                                    placeholder="Навыки..." clearable searchable />
-                            </div>
-                        </x-marycard>
-                    @endforeach
                 </div>
-            </div>
+            @endif
 
-            <x-slot:actions>
-                <a href="/profile/teams">
+            <x-slot:actions class="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <a href="/profile/teams" wire:navigate>
                     <x-marybutton type="button" label="Отмена" class="btn-ghost" />
                 </a>
-                <x-marybutton type="submit" label="Создать команду" class="btn-primary" spinner="save"
-                    wire:loading.attr="disabled" />
+                <div class="flex w-full flex-col gap-2 sm:ml-auto sm:w-auto sm:flex-row">
+                    @if ($step > 1)
+                        <x-marybutton type="button" label="Назад" class="btn-outline" wire:click="previousStep" />
+                    @endif
+                    @if ($step < 4)
+                        <x-marybutton type="submit" label="Далее" class="btn-primary sm:min-w-40" />
+                    @else
+                        <x-marybutton type="submit" label="Создать команду" class="btn-primary sm:min-w-40" spinner="save"
+                            wire:loading.attr="disabled" />
+                    @endif
+                </div>
             </x-slot:actions>
         </x-maryform>
     </x-mary-card>
