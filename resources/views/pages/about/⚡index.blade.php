@@ -18,7 +18,7 @@ new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'О нас'])] cla
                     а организаторам — собирать сильные составы без хаоса в чатах и таблицах.
                 </p>
             </div>
-            <img src="/images/hackatonshik_transparent.png" class="mx-auto w-32 sm:mx-0 sm:w-40" alt="Логотип Хакатонщика">
+            <img src="/logo.svg" class="mx-auto h-auto w-32 sm:mx-0 sm:w-40" alt="Логотип Хакатонщика">
         </div>
     </section>
 

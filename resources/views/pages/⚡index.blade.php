@@ -13,8 +13,7 @@ new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'Главная'])
         <div class="hero-content text-center">
             <div class="w-full max-w-xl space-y-5">
                 <figure class="mx-auto max-w-52 rounded-2xl bg-base-200 p-3">
-                    <x-marybadge class="badge-warning mb-2" value="ХакатонКун" />
-                    <img src="/images/hackatonshik_transparent.png" alt="Логотип Хакатонщика" />
+                    <img src="/logo.svg" alt="Логотип Хакатонщика" class="h-auto w-full" />
                 </figure>
                 <h1 class="text-4xl font-bold sm:text-5xl">Путь участника и организатора в одном месте</h1>
                 <p class="text-base-content/80">

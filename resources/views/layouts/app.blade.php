@@ -17,9 +17,8 @@
             @yield('title', config('app.name'))
         @endisset
     </title>
-    <link rel="icon" href="/hackatonshik_transparent.png" sizes="any">
-    <link rel="icon" href="/hackatonshik.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/logo.svg">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     <script>
@@ -191,12 +190,8 @@
 
                 <ul class="menu mt-4 w-full gap-1" role="navigation" aria-label="Меню сайта">
                     <li class="menu-title"><span>Основное</span></li>
-                    <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Главная</a></li>
                     <li><a href="/teams" class="{{ request()->is('teams*') ? 'active' : '' }}">Команды</a></li>
                     <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}">Хакатоны</a></li>
-                    <li><a href="/about" class="{{ request()->is('about') ? 'active' : '' }}">О нас</a></li>
-                    <li><a href="/contacts" class="{{ request()->is('contacts') ? 'active' : '' }}">Контакты</a></li>
-                    <li><a href="/news" class="{{ request()->is('news*') ? 'active' : '' }}">Новости</a></li>
 
                     <li class="menu-title mt-3"><span>Мой кабинет</span></li>
                     @auth
@@ -212,16 +207,10 @@
                             <li><a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}">Админ-панель</a></li>
                         @endif
                         <li><a href="/profile" class="{{ request()->is('profile') ? 'active' : '' }}">Профиль</a></li>
-                        <li><a href="{{ route('profile.public.show', ['user' => Auth::user()->nickname]) }}" class="{{ request()->is('u/*') ? 'active' : '' }}">Публичный профиль</a></li>
-                        <li><a href="/profile/certificates" class="{{ request()->is('profile/certificates*') ? 'active' : '' }}">Сертификаты</a></li>
                     @else
                         <li><a href="/login" class="font-medium {{ request()->is('login') ? 'active' : '' }}">Авторизироваться</a></li>
                         <li><a href="/register" class="font-medium {{ request()->is('register') ? 'active' : '' }}">Зарегистрироваться</a></li>
                     @endauth
-
-                    <li class="menu-title mt-3"><span>Правовая информация</span></li>
-                    <li><a href="/privacy-policy" class="{{ request()->is('privacy-policy') ? 'active' : '' }}">Политика конфиденциальности</a></li>
-                    <li><a href="/cookie-policy" class="{{ request()->is('cookie-policy') ? 'active' : '' }}">Политика cookie</a></li>
 
                     <li class="menu-title mt-3"><span>Настройки</span></li>
                     <li>
