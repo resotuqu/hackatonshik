@@ -134,7 +134,7 @@
                                 Открыть мой кабинет участника
                             </a>
                             @if ($myApplicationsByTeam->isNotEmpty())
-                                <div class="space-y-2">
+                                <div id="participant-hackaton-applications" class="space-y-2">
                                     <p class="text-sm font-medium">Ваши заявки</p>
                                     @foreach ($myApplicationsByTeam as $myApplication)
                                         <div class="rounded-xl border border-base-300 p-2 text-sm">
@@ -303,7 +303,7 @@
             </div>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div id="hackaton-cases" class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body space-y-4">
                 <h2 class="card-title text-xl">Кейсы</h2>
 
@@ -756,7 +756,7 @@
         @endif
 
         @if($isOrganizer)
-            <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div id="organizer-team-applications" class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-xl">Заявки команд</h2>
                     <form method="GET" class="my-3 flex items-center gap-2">

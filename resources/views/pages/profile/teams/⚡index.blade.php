@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\ApplicationStatus;
 use App\Models\Team;
+use App\Models\TeamApplication;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\Attributes\Computed;
 
 new #[Layout('layouts::app', ['title' => 'Мои команды'])]
     class extends Component {
@@ -16,6 +18,20 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
     public function teams()
     {
         return Team::query()->where('user_id', '=', Auth::user()->id)->get();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, TeamApplication>
+     */
+    #[Computed]
+    public function pendingTeamRoleApplications()
+    {
+        return TeamApplication::query()
+            ->where('user_id', Auth::id())
+            ->where('status', ApplicationStatus::PENDING)
+            ->with(['teamRole.team.hackaton', 'teamRole.role'])
+            ->latest()
+            ->get();
     }
 
 
@@ -57,6 +73,41 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
 
     <h3 class="text-3xl text-center">Ваши команды</h3>
 
+    <section id="pending-team-role-applications" class="mx-auto mt-8 max-w-3xl rounded-xl border border-base-200 bg-base-100 p-4 shadow-sm" aria-labelledby="pending-apps-heading">
+        <h4 id="pending-apps-heading" class="text-lg font-semibold">Заявки на роли в командах</h4>
+        @if ($this->pendingTeamRoleApplications->isEmpty())
+            <p class="mt-2 text-sm text-base-content/70">Нет заявок на рассмотрении.</p>
+        @else
+            <ul class="mt-3 space-y-3">
+                @foreach ($this->pendingTeamRoleApplications as $application)
+                    @php
+                        $team = $application->teamRole?->team;
+                        $role = $application->teamRole?->role;
+                        $hackatonTitle = $team?->hackaton?->title;
+                    @endphp
+                    <li class="rounded-lg border border-base-200 p-3 text-sm">
+                        <p>
+                            <span class="text-base-content/70">Команда:</span>
+                            @if ($team)
+                                <a href="{{ url('/teams/'.$team->id) }}" class="link link-primary font-medium">{{ $team->title }}</a>
+                            @else
+                                <span class="font-medium">—</span>
+                            @endif
+                        </p>
+                        @if ($role)
+                            <p class="mt-1"><span class="text-base-content/70">Роль:</span> {{ $role->name }}</p>
+                        @elseif ($application->teamRole?->title)
+                            <p class="mt-1"><span class="text-base-content/70">Роль:</span> {{ $application->teamRole->title }}</p>
+                        @endif
+                        @if ($hackatonTitle)
+                            <p class="mt-1"><span class="text-base-content/70">Хакатон:</span> {{ $hackatonTitle }}</p>
+                        @endif
+                        <p class="mt-2"><span class="badge badge-warning badge-sm">{{ $application->status->label() }}</span></p>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
 
     <x-mary-modal wire:model="deleteTeamModal" title="Подтверждение" class="backdrop-blur">
         Вы действительно хотите удалить команду ?
