@@ -71,59 +71,73 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
 
 @guest
 <div class="mx-auto w-full max-w-7xl space-y-12">
-    <section id="start" class="hero min-h-[70vh] rounded-3xl bg-base-100 px-4 py-8 shadow-sm sm:min-h-[75vh]">
-        <div class="hero-content text-center">
-            <div class="w-full max-w-xl space-y-5">
-                <figure class="mx-auto max-w-52 rounded-2xl bg-base-200 p-3">
-                    <img src="/logo.svg" alt="Логотип Хакатонщика" class="h-auto w-full" />
-                </figure>
-                <h1 class="text-4xl font-bold sm:text-5xl">Путь участника и организатора в одном месте</h1>
-                <p class="text-base-content/80">
-                    Создавайте команды, подавайте заявки, решайте кейсы и получайте сертификаты без переписки в чатах и почте.
-                </p>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <a href="/register" class="btn btn-primary">Зарегистрироваться и начать</a>
-                    <a href="/login" class="btn btn-outline">У меня уже есть аккаунт</a>
+    <section
+        id="start"
+        class="relative overflow-hidden rounded-3xl border border-primary/20 bg-base-100 px-4 py-12 shadow-lg shadow-primary/5 sm:min-h-[75vh] sm:py-16"
+    >
+        <div
+            class="pointer-events-none absolute inset-0 opacity-90"
+            aria-hidden="true"
+            style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.18), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"
+        ></div>
+        <div class="hero relative min-h-[65vh] sm:min-h-[70vh]">
+            <div class="hero-content max-w-3xl text-center">
+                <div class="w-full space-y-6">
+                    <figure
+                        class="mx-auto max-w-56 rounded-2xl border border-base-200 bg-base-100/80 p-4 shadow-md backdrop-blur-sm sm:max-w-md"
+                    >
+                        <img src="/logo.svg" alt="Логотип Хакатонщика" class="h-auto w-full" />
+                    </figure>
+                    <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                        Путь участника и организатора в одном месте
+                    </h1>
+                    <p class="mx-auto max-w-xl text-lg text-base-content/80">
+                        Создавайте команды, подавайте заявки, решайте кейсы и получайте сертификаты без переписки в чатах и почте.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                        <a href="/register" class="btn btn-primary shadow-md shadow-primary/25">Зарегистрироваться и начать</a>
+                        <a href="/login" class="btn btn-outline border-primary/35">У меня уже есть аккаунт</a>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <section id="purpose" class="space-y-6">
-        <h2 class="text-center text-3xl font-bold">Как это работает</h2>
+        <h2 class="text-center font-display text-3xl font-bold">Как это работает</h2>
         <p class="mx-auto max-w-3xl text-center text-base-content/80">
             Четкая последовательность шагов помогает быстро понять, что делать дальше на каждом этапе.
         </p>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <x-marycard title="1. Создайте команду" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="1. Создайте команду" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
                 Соберите участников и распределите роли в пару кликов.
             </x-marycard>
 
-            <x-marycard title="2. Подайте заявку" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="2. Подайте заявку" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
                 Выберите хакатон и отправьте заявку от команды.
             </x-marycard>
 
-            <x-marycard title="3. Решайте кейсы" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="3. Решайте кейсы" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
                 Заполняйте поля кейса и загружайте материалы в одном месте.
             </x-marycard>
 
-            <x-marycard title="4. Получайте результаты" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="4. Получайте результаты" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
                 Следите за статусами, анонсами и сертификатами прямо в профиле.
             </x-marycard>
         </div>
     </section>
 
     <section class="space-y-6">
-        <h2 class="text-center text-3xl font-bold">Почему это удобно</h2>
+        <h2 class="text-center font-display text-3xl font-bold">Почему это удобно</h2>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <x-marycard title="Фильтрация под вас" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Фильтрация под вас" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
                 Найдите роль под свои возможности.
                 <x-slot:figure>
                     <img src="/images/pros-1.png" alt="Фильтрация ролей" />
                 </x-slot:figure>
             </x-marycard>
 
-            <x-marycard title="Удобство использования" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Удобство использования" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
                 Больше не надо отправлять документы на почту или в чат сотрудника.
                 <x-slot:figure>
                     <img src="/images/pros-3.png" alt="Удобство использования" />
@@ -141,7 +155,7 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
     aria-labelledby="dashboard-heading"
 >
     <header class="space-y-2">
-        <h1 id="dashboard-heading" class="text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
+        <h1 id="dashboard-heading" class="font-display text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
         <p class="text-base-content/80">
             Здравствуйте, {{ auth()->user()->fio }}.
         </p>

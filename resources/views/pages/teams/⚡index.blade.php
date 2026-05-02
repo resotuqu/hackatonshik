@@ -261,7 +261,7 @@ class extends Component {
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
 
-    <x-mary-card class="h-fit card card-border lg:col-span-1">
+    <x-mary-card class="card card-border border-base-300 h-fit shadow-sm transition-shadow duration-200 hover:border-primary/25 hover:shadow-md lg:col-span-1">
         <h5 class="text-2xl">Фильтрация</h5>
         <x-maryform wire:submit="search">
 
@@ -368,7 +368,7 @@ class extends Component {
         <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,nextPage,previousPage,gotoPage,setPage">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @forelse($this->teams as $team)
-                    <x-mary-card class="card card-border h-full" wire:key="team-card-{{ $team->id }}">
+                    <x-mary-card class="card card-border border-base-300 h-full shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-lg" wire:key="team-card-{{ $team->id }}">
                         @php
                             $teamImage = filled($team->image_url)
                                 ? (str_starts_with($team->image_url, 'http') ? $team->image_url : asset('storage/' . $team->image_url))

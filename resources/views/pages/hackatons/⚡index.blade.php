@@ -201,7 +201,7 @@ class extends Component {
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
 
-    <x-mary-card class="card card-border h-fit lg:col-span-1">
+    <x-mary-card class="card card-border border-base-300 h-fit shadow-sm transition-shadow duration-200 hover:border-primary/25 hover:shadow-md lg:col-span-1">
         <h5 class="text-2xl">Фильтрация</h5>
         <x-maryform wire:submit="search">
             @csrf
@@ -288,7 +288,7 @@ class extends Component {
         <div wire:loading.remove wire:target="search,clearFilters,q,start_at,status,sort,public_only,nextPage,previousPage,gotoPage,setPage">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @forelse($this->hackatons as $hackaton)
-                    <x-mary-card class="card card-border h-full" wire:key="hackaton-card-{{ $hackaton->id }}">
+                    <x-mary-card class="card card-border border-base-300 h-full shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-lg" wire:key="hackaton-card-{{ $hackaton->id }}">
                         @php
                             $hackatonImage = filled($hackaton->image_url)
                                 ? (str_starts_with($hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/' . $hackaton->image_url))

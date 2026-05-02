@@ -13,14 +13,14 @@ new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'Новости'])
 };
 ?>
 
-<div class="w-full lg:w-2/3 m-auto space-y-8 sm:space-y-12 mt-8 sm:mt-12">
-    <div>
-        <h1 class="text-3xl font-bold">Новости</h1>
-        <h3 class="font-medium">Актуальные события сервиса</h3>
-    </div>
+<div class="mx-auto mt-8 w-full space-y-8 sm:mt-12 sm:space-y-12 lg:w-2/3">
+    <header class="rounded-3xl border border-primary/15 bg-base-100 px-6 py-5 shadow-md shadow-primary/5 sm:px-8">
+        <h1 class="font-display text-3xl font-bold">Новости</h1>
+        <p class="mt-1 text-base-content/75">Актуальные события сервиса</p>
+    </header>
 
     <div class="justify-items-center">
-        <x-mary-card class="card card-border bg-base-100 w-full md:w-2/3 lg:w-1/2">
+        <x-mary-card class="card card-border border-base-300 w-full shadow-md transition-all duration-200 hover:border-primary/25 hover:shadow-lg md:w-2/3 lg:w-1/2">
             <h2 class="text-2xl font-semibold">Запуск сервиса</h2>
             <p class="opacity-80">Выпуск из альфа теста.</p>
 

@@ -20,13 +20,16 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/logo.svg">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600|space-grotesk:500,600,700" rel="stylesheet" />
     <script>
         (function () {
             const cookieName = 'theme';
             const cookieMatch = document.cookie.match(new RegExp('(?:^|; )' + cookieName + '=([^;]*)'));
             const savedTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
-            const theme = savedTheme === 'dark' ? 'dark' : 'cupcake';
+            const theme =
+                savedTheme === 'hackatonshik-light' || savedTheme === 'cupcake'
+                    ? 'hackatonshik-light'
+                    : 'hackatonshik';
 
             document.documentElement.setAttribute('data-theme', theme);
         })();
@@ -34,7 +37,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen overflow-x-hidden bg-base-300">
+<body class="min-h-screen overflow-x-hidden bg-base-300 font-sans antialiased">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:shadow">
         Перейти к основному контенту
     </a>
@@ -42,14 +45,14 @@
         <input id="main-nav-drawer" type="checkbox" class="drawer-toggle" />
 
         <div class="drawer-content flex min-h-screen flex-col">
-            <header class="navbar bg-base-100 shadow-sm px-3 sm:px-4 lg:hidden">
-                <div class="flex items-center gap-2">
-                    <label for="main-nav-drawer" class="btn btn-ghost btn-circle drawer-button" aria-label="Открыть меню">
+            <header class="navbar border-b border-base-200 bg-base-100/95 px-3 shadow-sm backdrop-blur-sm sm:px-4 lg:hidden">
+                <div class="flex min-w-0 flex-1 items-center gap-2">
+                    <label for="main-nav-drawer" class="btn btn-ghost btn-circle drawer-button shrink-0" aria-label="Открыть меню">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </label>
-                    <a href="{{ route('home') }}" class="btn btn-ghost text-xl">Хакатонщик</a>
+                    <x-app-brand class="min-h-0 min-w-0 border-0 p-0 hover:bg-transparent" img-class="h-7 w-auto max-w-[min(100%,11rem)] sm:h-8" />
                 </div>
             </header>
 
@@ -85,7 +88,7 @@
                 </div>
             </main>
 
-            <footer class="footer sm:footer-horizontal bg-base-200 text-base-content px-6 py-8 sm:px-10 sm:py-10 gap-6">
+            <footer class="footer sm:footer-horizontal mt-auto border-t border-primary/15 bg-base-200 text-base-content px-6 py-8 sm:px-10 sm:py-10 gap-6">
                 <nav>
                     <h6 class="footer-title">Основные страницы</h6>
                     <a href="/" class="link link-hover">Главная</a>
@@ -108,9 +111,9 @@
 
         <div class="drawer-side z-40">
             <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
-            <aside class="min-h-full w-72 bg-base-100 border-r border-base-200 flex flex-col p-4" aria-label="Основная навигация">
+            <aside class="flex min-h-full w-72 flex-col border-r border-base-200 bg-base-100 bg-gradient-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
                 <div class="flex items-center justify-between gap-2">
-                    <a href="{{ route('home') }}" class="btn btn-ghost text-xl px-2">Хакатонщик</a>
+                    <x-app-brand class="min-h-0 border-0 p-0 hover:bg-transparent" img-class="h-8 w-auto max-w-[12rem] sm:h-9" />
                     @auth
                         @php
                             $unreadNotificationsCount = Auth::user()->unreadNotifications()->count();
@@ -234,11 +237,14 @@
                 return;
             }
 
-            const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'cupcake';
-            toggle.checked = currentTheme === 'dark';
+            const currentTheme =
+                document.documentElement.getAttribute('data-theme') === 'hackatonshik-light'
+                    ? 'hackatonshik-light'
+                    : 'hackatonshik';
+            toggle.checked = currentTheme === 'hackatonshik';
 
             toggle.addEventListener('change', function () {
-                const nextTheme = this.checked ? 'dark' : 'cupcake';
+                const nextTheme = this.checked ? 'hackatonshik' : 'hackatonshik-light';
 
                 document.documentElement.setAttribute('data-theme', nextTheme);
                 document.cookie = cookieName + '=' + encodeURIComponent(nextTheme) + '; path=/; max-age=31536000; samesite=lax';
