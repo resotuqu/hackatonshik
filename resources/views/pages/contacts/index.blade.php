@@ -1,25 +1,95 @@
 <?php
 
+use App\Models\ContactMessage;
 use Livewire\Component;
 
 new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'Контакты'])] class extends Component {
+    use \Mary\Traits\Toast;
 
+    public string $name = '';
+
+    public string $email = '';
+
+    public string $subject = '';
+
+    public string $message = '';
+
+    public string $telegram = '';
+
+    public function send(): void
+    {
+        $this->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:120'],
+            'subject' => ['required', 'string', 'max:160'],
+            'message' => ['required', 'string', 'min:10', 'max:3000'],
+            'telegram' => ['nullable', 'string', 'max:80'],
+        ]);
+
+        ContactMessage::query()->create([
+            'name' => $this->name,
+            'email' => $this->email,
+            'subject' => $this->subject,
+            'message' => $this->message,
+            'telegram' => $this->telegram !== '' ? $this->telegram : null,
+            'ip_address' => request()->ip(),
+        ]);
+
+        $this->reset(['name', 'email', 'subject', 'message', 'telegram']);
+        $this->success('Спасибо! Мы получили ваше сообщение и скоро свяжемся с вами.', position: 'toast-center toast-top');
+    }
 };
 ?>
 
-<div class="mx-auto mt-8 w-full space-y-8 sm:mt-12 sm:space-y-12 lg:w-2/3">
-    <section class="rounded-3xl border border-primary/15 bg-base-100 p-6 shadow-md shadow-primary/5 sm:p-8">
-        <h1 class="font-display text-3xl font-bold">Контакты</h1>
-        <p class="mt-1 text-base-content/75">Свяжитесь с нами</p>
-        <div class="mt-6 space-y-3 text-base">
-            <p>
-                Адрес электронной почты:
-                <a class="link link-primary font-medium" href="mailto:sekhmych@yandex.ru">sekhmych@yandex.ru</a>
-            </p>
-            <p>
-                Телефон:
-                <a class="link link-primary font-medium" href="tel:+79248605316">+7 (924) 860-53-16</a>
-            </p>
-        </div>
+<div class="mx-auto mt-8 w-full max-w-6xl space-y-8 sm:mt-12 sm:space-y-12">
+    <x-marytoast />
+
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <article class="rounded-3xl border border-primary/15 bg-base-100 p-6 shadow-md shadow-primary/5 sm:p-8">
+            <h1 class="font-display text-3xl font-bold">Контакты</h1>
+            <p class="mt-1 text-base-content/75">Свяжитесь с нами удобным способом</p>
+            <div class="mt-6 space-y-3 text-base">
+                <p>
+                    Email:
+                    <a class="link link-primary font-medium" href="mailto:sekhmych@yandex.ru">sekhmych@yandex.ru</a>
+                </p>
+                <p>
+                    Телефон:
+                    <a class="link link-primary font-medium" href="tel:+79248605316">+7 (924) 860-53-16</a>
+                </p>
+                <p>
+                    Telegram:
+                    <a class="link link-primary font-medium" href="https://t.me/hackatonshik" target="_blank" rel="noopener noreferrer">@hackatonshik</a>
+                </p>
+            </div>
+        </article>
+
+        <x-mary-form wire:submit="send" class="card card-border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
+            <x-mary-header title="Форма обратной связи" separator />
+            <x-mary-input label="Ваше имя" wire:model="name" />
+            <x-mary-input label="Email" wire:model="email" />
+            <x-mary-input label="Тема" wire:model="subject" />
+            <x-mary-input label="Telegram (опционально)" wire:model="telegram" placeholder="@username" />
+            <x-mary-textarea label="Сообщение" wire:model="message" rows="5" />
+            <x-slot:actions>
+                <x-mary-button type="submit" label="Отправить сообщение" class="btn-primary" />
+            </x-slot:actions>
+        </x-mary-form>
     </section>
+
+    @if (filled(env('YANDEX_MAPS_EMBED_URL')) || filled(env('GOOGLE_MAPS_EMBED_URL')))
+        <section class="rounded-3xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
+            <h2 class="font-display text-2xl font-bold">Мы на карте</h2>
+            <div class="mt-4 overflow-hidden rounded-2xl border border-base-300">
+                <iframe
+                    src="{{ env('YANDEX_MAPS_EMBED_URL', env('GOOGLE_MAPS_EMBED_URL')) }}"
+                    title="Карта офиса Хакатонщика"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    class="h-[360px] w-full"
+                    allowfullscreen
+                ></iframe>
+            </div>
+        </section>
+    @endif
 </div>

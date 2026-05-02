@@ -1,12 +1,35 @@
 <?php
 
+use App\Enums\HackatonStatus;
+use App\Models\Hackaton;
+use App\Models\Team;
 use App\Models\User;
 use App\ViewModels\HomeDashboardData;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Component {
+    public string $heroQuery = '';
+
+    public string $heroSearchType = 'hackatons';
+
+    /** @var array<int, Hackaton> */
+    public array $featuredHackatons = [];
+
+    /** @var array<int, Team> */
+    public array $featuredTeams = [];
+
+    public int $publicActiveHackatonsCount = 0;
+
+    public int $publicParticipantsCount = 0;
+
+    public int $publicTeamsCount = 0;
+
+    /** @var list<array{path: string, alt: string}> */
+    public array $homeCarouselImages = [];
+
     public int $teamsCount = 0;
 
     public int $certificatesCount = 0;
@@ -52,6 +75,50 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
 
     public function mount(): void
     {
+        $this->homeCarouselImages = [
+            ['path' => url('/logo.svg'), 'alt' => 'Хакатонщик'],
+            ['path' => url('/hackatonshik.svg'), 'alt' => 'Платформа для хакатонов'],
+            ['path' => url('/logo.svg'), 'alt' => 'Сообщество участников'],
+        ];
+
+        $this->featuredHackatons = Hackaton::query()
+            ->where('is_public', true)
+            ->whereIn('status', [
+                HackatonStatus::PUBLISHED,
+                HackatonStatus::REGISTRATION_OPEN,
+                HackatonStatus::IN_PROGRESS,
+                HackatonStatus::JUDGING,
+            ])
+            ->latest('start_at')
+            ->limit(4)
+            ->get()
+            ->all();
+
+        $this->featuredTeams = Team::query()
+            ->with(['hackaton:id,title,status', 'roles:id,team_id,user_id'])
+            ->whereHas('hackaton', fn ($query) => $query->where('is_public', true))
+            ->latest('updated_at')
+            ->limit(4)
+            ->get()
+            ->all();
+
+        $totals = Cache::remember('home-public-totals', now()->addMinutes(10), function (): array {
+            $activeHackatons = Hackaton::query()
+                ->where('is_public', true)
+                ->whereIn('status', [HackatonStatus::REGISTRATION_OPEN, HackatonStatus::IN_PROGRESS, HackatonStatus::JUDGING])
+                ->get();
+
+            return [
+                'active_hackatons' => $activeHackatons->count(),
+                'participants' => $activeHackatons->sum(fn (Hackaton $hackaton) => $hackaton->participantsCount()),
+                'teams' => $activeHackatons->sum(fn (Hackaton $hackaton) => $hackaton->teamsCount()),
+            ];
+        });
+
+        $this->publicActiveHackatonsCount = (int) ($totals['active_hackatons'] ?? 0);
+        $this->publicParticipantsCount = (int) ($totals['participants'] ?? 0);
+        $this->publicTeamsCount = (int) ($totals['teams'] ?? 0);
+
         if (! Auth::check()) {
             return;
         }
@@ -65,86 +132,162 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
             $this->{$key} = $value;
         }
     }
+
+    public function heroSearch(): void
+    {
+        $query = trim($this->heroQuery);
+        $params = $query === '' ? [] : ['q' => $query];
+
+        if ($this->heroSearchType === 'teams') {
+            $this->redirect(route('teams.index', $params));
+
+            return;
+        }
+
+        $this->redirect(route('hackatons.index', $params));
+    }
 };
 
 ?>
 
 @guest
 <div class="mx-auto w-full max-w-7xl space-y-12">
-    <section
-        id="start"
-        class="relative overflow-hidden rounded-3xl border border-primary/20 bg-base-100 px-4 py-12 shadow-lg shadow-primary/5 sm:min-h-[75vh] sm:py-16"
-    >
-        <div
-            class="pointer-events-none absolute inset-0 opacity-90"
-            aria-hidden="true"
-            style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.18), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"
-        ></div>
-        <div class="hero relative min-h-[65vh] sm:min-h-[70vh]">
-            <div class="hero-content max-w-3xl text-center">
-                <div class="w-full space-y-6">
-                    <figure
-                        class="mx-auto max-w-56 rounded-2xl border border-base-200 bg-base-100/80 p-4 shadow-md backdrop-blur-sm sm:max-w-md"
-                    >
-                        <img src="/logo.svg" alt="Логотип Хакатонщика" class="h-auto w-full" />
-                    </figure>
-                    <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                        Путь участника и организатора в одном месте
-                    </h1>
-                    <p class="mx-auto max-w-xl text-lg text-base-content/80">
-                        Создавайте команды, подавайте заявки, решайте кейсы и получайте сертификаты без переписки в чатах и почте.
-                    </p>
-                    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
-                        <a href="/register" class="btn btn-primary shadow-md shadow-primary/25">Зарегистрироваться и начать</a>
-                        <a href="/login" class="btn btn-outline border-primary/35">У меня уже есть аккаунт</a>
-                    </div>
+    <section id="start" class="relative overflow-hidden rounded-3xl border border-primary/20 bg-base-100 px-4 py-12 shadow-lg shadow-primary/5 sm:py-16">
+        <div class="pointer-events-none absolute inset-0 opacity-90" aria-hidden="true" style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.18), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"></div>
+        <div class="relative space-y-8">
+            <div class="mx-auto max-w-4xl text-center">
+                <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                    Найдите команду. Запустите хакатон. Ведите всё в одном месте.
+                </h1>
+                <p class="mx-auto mt-4 max-w-2xl text-lg text-base-content/80">
+                    Хакатонщик соединяет участников, команды и организаторов: от первой заявки до финальной защиты и сертификатов.
+                </p>
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <a href="/teams" class="btn btn-primary btn-lg">Найти команду</a>
+                    <a href="/hackatons/create" class="btn btn-secondary btn-lg">Создать хакатон</a>
                 </div>
+            </div>
+
+            <form wire:submit="heroSearch" class="mx-auto w-full max-w-2xl rounded-2xl border border-base-300 bg-base-100/90 p-4 shadow-md backdrop-blur-sm">
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <x-mary-input
+                        wire:model.live.debounce.250ms="heroQuery"
+                        placeholder="Поиск хакатонов и команд"
+                        icon="o-magnifying-glass"
+                        class="w-full"
+                    />
+                    <x-maryselect
+                        wire:model.live="heroSearchType"
+                        :options="[
+                            ['id' => 'hackatons', 'name' => 'Хакатоны'],
+                            ['id' => 'teams', 'name' => 'Команды'],
+                        ]"
+                        class="w-full sm:max-w-48"
+                    />
+                    <x-mary-button label="Искать" class="btn-primary sm:min-w-28" type="submit" />
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="space-y-4">
+        <h2 class="font-display text-3xl font-bold">Активные хакатоны</h2>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            @forelse ($featuredHackatons as $hackaton)
+                <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <a href="{{ route('hackatons.show', $hackaton) }}" class="font-semibold link link-hover">{{ $hackaton->title }}</a>
+                        <span class="badge badge-primary badge-outline">{{ $hackaton->status?->label() }}</span>
+                    </div>
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <p class="rounded-lg bg-base-200 px-3 py-2">Команд: <span class="font-medium">{{ $hackaton->teamsCount() }}</span></p>
+                        <p class="rounded-lg bg-base-200 px-3 py-2">Участников: <span class="font-medium">{{ $hackaton->participantsCount() }}</span></p>
+                    </div>
+                </article>
+            @empty
+                <p class="text-base-content/70">Активные хакатоны скоро появятся.</p>
+            @endforelse
+        </div>
+    </section>
+
+    <section class="space-y-4">
+        <h2 class="font-display text-3xl font-bold">Популярные команды</h2>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            @forelse ($featuredTeams as $team)
+                <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+                    <a href="{{ route('teams.show', $team) }}" class="font-semibold link link-hover">{{ $team->title }}</a>
+                    <p class="mt-1 text-sm text-base-content/70">{{ $team->hackaton?->title }}</p>
+                    <p class="mt-3 text-sm">Участников в команде: <span class="font-medium">{{ $team->participantsCount() }}</span></p>
+                </article>
+            @empty
+                <p class="text-base-content/70">Публичные команды скоро появятся.</p>
+            @endforelse
+        </div>
+    </section>
+
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-6" x-data="{ active: 0, participants: 0, teams: 0 }" x-init="const animate=(key,target)=>{let current=0;const step=Math.max(1,Math.ceil(target/45));const timer=setInterval(()=>{current+=step;if(current>=target){current=target;clearInterval(timer);} if(key==='active'){active=current;} if(key==='participants'){participants=current;} if(key==='teams'){teams=current;}}, 24)}; animate('active', {{ $publicActiveHackatonsCount }}); animate('participants', {{ $publicParticipantsCount }}); animate('teams', {{ $publicTeamsCount }});">
+        <h2 class="font-display text-3xl font-bold">Платформа в цифрах</h2>
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="rounded-xl bg-base-200 p-4 text-center">
+                <p class="text-sm text-base-content/70">Активных хакатонов</p>
+                <p class="text-3xl font-bold tabular-nums" x-text="active"></p>
+            </div>
+            <div class="rounded-xl bg-base-200 p-4 text-center">
+                <p class="text-sm text-base-content/70">Участников</p>
+                <p class="text-3xl font-bold tabular-nums" x-text="participants"></p>
+            </div>
+            <div class="rounded-xl bg-base-200 p-4 text-center">
+                <p class="text-sm text-base-content/70">Команд</p>
+                <p class="text-3xl font-bold tabular-nums" x-text="teams"></p>
             </div>
         </div>
     </section>
 
-    <section id="purpose" class="space-y-6">
-        <h2 class="text-center font-display text-3xl font-bold">Как это работает</h2>
-        <p class="mx-auto max-w-3xl text-center text-base-content/80">
-            Четкая последовательность шагов помогает быстро понять, что делать дальше на каждом этапе.
-        </p>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <x-marycard title="1. Создайте команду" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
-                Соберите участников и распределите роли в пару кликов.
-            </x-marycard>
+    <livewire:home-how-it-works />
 
-            <x-marycard title="2. Подайте заявку" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
-                Выберите хакатон и отправьте заявку от команды.
-            </x-marycard>
-
-            <x-marycard title="3. Решайте кейсы" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
-                Заполняйте поля кейса и загружайте материалы в одном месте.
-            </x-marycard>
-
-            <x-marycard title="4. Получайте результаты" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
-                Следите за статусами, анонсами и сертификатами прямо в профиле.
-            </x-marycard>
-        </div>
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <article class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+            <h2 class="font-display text-2xl font-bold">Отзывы участников</h2>
+            <div class="mt-4 space-y-3">
+                <blockquote class="rounded-lg border border-base-300 bg-base-200/60 p-3 text-sm">«Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»</blockquote>
+                <blockquote class="rounded-lg border border-base-300 bg-base-200/60 p-3 text-sm">«Удобно следить за дедлайнами и анонсами без десятка чатов.»</blockquote>
+                <blockquote class="rounded-lg border border-base-300 bg-base-200/60 p-3 text-sm">«Организаторам стало проще модерировать команды и заявки.»</blockquote>
+            </div>
+        </article>
+        <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <x-image-carousel
+                carousel-id="home-hero-carousel"
+                :items="$homeCarouselImages"
+                aspect-class="aspect-[16/10]"
+                empty-text="Изображения появятся позже"
+            />
+        </article>
     </section>
 
-    <section class="space-y-6">
-        <h2 class="text-center font-display text-3xl font-bold">Почему это удобно</h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <x-marycard title="Фильтрация под вас" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
-                Найдите роль под свои возможности.
-                <x-slot:figure>
-                    <img src="/images/pros-1.png" alt="Фильтрация ролей" />
-                </x-slot:figure>
-            </x-marycard>
-
-            <x-marycard title="Удобство использования" class="card card-border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md">
-                Больше не надо отправлять документы на почту или в чат сотрудника.
-                <x-slot:figure>
-                    <img src="/images/pros-3.png" alt="Удобство использования" />
-                </x-slot:figure>
-            </x-marycard>
-        </div>
-    </section>
+    @php
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebSite',
+                    'name' => 'Хакатонщик',
+                    'url' => url('/'),
+                    'potentialAction' => [
+                        '@type' => 'SearchAction',
+                        'target' => url('/hackatons').'?q={search_term_string}',
+                        'query-input' => 'required name=search_term_string',
+                    ],
+                ],
+                [
+                    '@type' => 'Organization',
+                    'name' => 'Хакатонщик',
+                    'url' => url('/'),
+                    'logo' => url('/logo.svg'),
+                ],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 </div>
 @endguest
 
