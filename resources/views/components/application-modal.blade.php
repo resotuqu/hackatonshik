@@ -4,6 +4,8 @@
     'title' => 'Подать заявку',
     'action' => '',
     'teams' => collect(),
+    'triggerLabel' => 'Подать заявку',
+    'triggerClass' => 'btn btn-primary btn-sm',
 ])
 
 @php
@@ -11,7 +13,7 @@
 @endphp
 
 <div class="inline-block">
-    <label for="{{ $modalId }}" class="btn btn-primary btn-sm">Подать заявку</label>
+    <label for="{{ $modalId }}" class="{{ $triggerClass }}">{{ $triggerLabel }}</label>
     <input type="checkbox" id="{{ $modalId }}" class="modal-toggle" />
 
     <div class="modal modal-bottom sm:modal-middle" role="dialog">
