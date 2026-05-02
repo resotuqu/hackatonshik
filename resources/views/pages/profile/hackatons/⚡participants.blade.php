@@ -209,9 +209,9 @@ class extends Component {
                                                                 <div class="flex items-center justify-between gap-2 p-2 rounded-lg {{ $doc['uploaded'] ? 'bg-success/10' : 'bg-error/10' }}">
                                                                     <div class="flex items-center gap-2">
                                                                         @if($doc['uploaded'])
-                                                                            <x-mary-icon name="o-check-circle" class="text-success w-5 h-5" />
+                                                                            <x-app-icon icon="heroicons:check-circle" class="h-5 w-5 text-success" />
                                                                         @else
-                                                                            <x-mary-icon name="o-x-circle" class="text-error w-5 h-5" />
+                                                                            <x-app-icon icon="heroicons:x-circle" class="h-5 w-5 text-error" />
                                                                         @endif
                                                                         <span>{{ $doc['name'] }}</span>
                                                                     </div>

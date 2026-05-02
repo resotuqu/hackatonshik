@@ -48,9 +48,7 @@
             <header class="navbar border-b border-base-200 bg-base-100/95 px-3 shadow-sm backdrop-blur-sm sm:px-4 lg:hidden">
                 <div class="flex min-w-0 flex-1 items-center gap-2">
                     <label for="main-nav-drawer" class="btn btn-ghost btn-circle drawer-button shrink-0" aria-label="Открыть меню">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
+                        <x-app-icon icon="heroicons:bars-3" class="h-5 w-5" />
                     </label>
                     <x-app-brand class="min-h-0 min-w-0 border-0 p-0 hover:bg-transparent" img-class="h-7 w-auto max-w-[min(100%,11rem)] sm:h-8" />
                 </div>
@@ -122,9 +120,7 @@
                         <div class="dropdown dropdown-end">
                             <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
                                 <div class="indicator">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0h6z" />
-                                    </svg>
+                                    <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
                                     @if($unreadNotificationsCount > 0)
                                         <span class="badge badge-xs badge-error indicator-item">{{ min($unreadNotificationsCount, 9) }}</span>
                                     @endif
