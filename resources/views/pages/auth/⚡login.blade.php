@@ -103,7 +103,7 @@ class extends Component {
                     Войти через Яндекс ID
                 </span>
             </a>
-            <a href="/auth/vk/redirect" class="btn btn-outline w-full">
+            <a href="/auth/vk/redirect" class="btn btn-outline w-full border-[#2787F5] text-[#2787F5] hover:bg-[#2787F5] hover:text-white">
                 Войти через VK ID
             </a>
         </x-maryform>

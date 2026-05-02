@@ -175,7 +175,19 @@ class extends Component {
             @endif
 
             @if ($step === 3)
-                <x-marypassword label="Пароль" wire:model="password" />
+                <div x-data="{ password: @entangle('password').live }" class="space-y-2">
+                    <x-marypassword label="Пароль" wire:model="password" />
+                    <div class="space-y-1">
+                        <div class="h-2 w-full rounded-full bg-base-300">
+                            <div
+                                class="h-2 rounded-full transition-all"
+                                :class="password.length >= 12 ? 'bg-success' : (password.length >= 8 ? 'bg-warning' : 'bg-error')"
+                                :style="`width: ${Math.min(100, Math.max(15, password.length * 8))}%`"
+                            ></div>
+                        </div>
+                        <p class="text-xs text-base-content/70" x-text="password.length >= 12 ? 'Сильный пароль' : (password.length >= 8 ? 'Средний пароль' : 'Слабый пароль')"></p>
+                    </div>
+                </div>
                 <x-marypassword label="Подтверждение пароля" wire:model="password_confirmation" />
             @endif
 
@@ -193,9 +205,17 @@ class extends Component {
                     <x-marybutton class="btn-primary w-full sm:min-w-40" label="Зарегистрироваться" type="submit" />
                 @endif
             </x-slot:actions>
-            <a href="/auth/vk/redirect" class="btn btn-outline mt-2 w-full">
-                Войти или зарегистрироваться через VK
-            </a>
+            <div class="mt-2 grid gap-2">
+                <a href="/auth/yandex/redirect" class="block w-full rounded-xl bg-[#FC3F1D] px-4 py-3 text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#FC3F1D]/40">
+                    <span class="inline-flex w-full items-center justify-center gap-3 text-sm font-semibold">
+                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#FC3F1D]">Я</span>
+                        Войти или зарегистрироваться через Яндекс
+                    </span>
+                </a>
+                <a href="/auth/vk/redirect" class="btn btn-outline w-full">
+                    Войти или зарегистрироваться через VK
+                </a>
+            </div>
         </x-maryform>
     </div>
 </div>
