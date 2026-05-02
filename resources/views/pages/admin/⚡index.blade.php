@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Hackaton;
+use App\Models\ListAnalyticsEvent;
+use App\Models\Team;
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -17,6 +20,28 @@ class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
     public ?string $description = null;
+
+    public function dashboardStats(): array
+    {
+        return [
+            'users' => User::query()->count(),
+            'hackatons' => Hackaton::query()->count(),
+            'teams' => Team::query()->count(),
+            'list_events' => ListAnalyticsEvent::query()->count(),
+        ];
+    }
+
+    public function listEventBreakdown(): array
+    {
+        return ListAnalyticsEvent::query()
+            ->selectRaw('event_name, count(*) as total')
+            ->groupBy('event_name')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get()
+            ->map(fn ($row) => ['name' => (string) $row->event_name, 'total' => (int) $row->total])
+            ->all();
+    }
 
     public function logout(): void
     {
@@ -71,7 +96,49 @@ class extends Component {
     <x-marytoast />
     @php
         $roadmapItems = collect(config('product_backlog.hackatonshik', []))->sortBy('priority')->values();
+        $dashboardStats = $this->dashboardStats();
+        $listEventBreakdown = $this->listEventBreakdown();
+        $maxEventCount = max(array_column($listEventBreakdown, 'total') ?: [1]);
     @endphp
+
+    <x-mary-card title="Дашборд метрик" class="mb-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-xs text-base-content/70">Пользователи</p>
+                <p class="text-2xl font-semibold">{{ $dashboardStats['users'] }}</p>
+            </div>
+            <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-xs text-base-content/70">Хакатоны</p>
+                <p class="text-2xl font-semibold">{{ $dashboardStats['hackatons'] }}</p>
+            </div>
+            <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-xs text-base-content/70">Команды</p>
+                <p class="text-2xl font-semibold">{{ $dashboardStats['teams'] }}</p>
+            </div>
+            <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-xs text-base-content/70">Analytics events</p>
+                <p class="text-2xl font-semibold">{{ $dashboardStats['list_events'] }}</p>
+            </div>
+        </div>
+
+        <div class="mt-4 space-y-2">
+            <p class="text-sm font-medium">Топ действий в списках</p>
+            @foreach ($listEventBreakdown as $event)
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between text-xs">
+                        <span>{{ $event['name'] }}</span>
+                        <span>{{ $event['total'] }}</span>
+                    </div>
+                    <progress class="progress progress-primary w-full" value="{{ $event['total'] }}" max="{{ $maxEventCount }}"></progress>
+                </div>
+            @endforeach
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline" href="/hackatons">Хакатоны</a>
+            <a class="btn btn-sm btn-outline" href="/teams">Команды</a>
+            <a class="btn btn-sm btn-outline" href="/profile">Пользователи</a>
+        </div>
+    </x-mary-card>
 
     <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
         <x-slot:menu>
