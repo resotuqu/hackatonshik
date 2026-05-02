@@ -1,6 +1,6 @@
 @php use Illuminate\Support\Facades\Auth; @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="ru">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,7 @@
     <meta property="og:title" content="@yield('og_title', trim($__env->yieldContent('title', config('app.name'))))">
     <meta property="og:description" content="@yield('og_description', $__env->yieldContent('meta_description', 'Платформа для команд, хакатонов и совместных проектов.'))">
     <meta property="og:url" content="@yield('canonical_url', url()->current())">
+    <meta property="og:image" content="@yield('og_image', url('/logo.svg'))">
     <title>
         @isset($title)
             {{ $title }}
@@ -38,7 +39,7 @@
     @livewireStyles
 </head>
 <body class="min-h-screen overflow-x-hidden bg-base-300 font-sans antialiased">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:shadow">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:shadow">
         Перейти к основному контенту
     </a>
     <div class="drawer lg:drawer-open min-h-screen">
@@ -109,7 +110,7 @@
 
         <div class="drawer-side z-40">
             <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
-            <aside class="flex min-h-full w-72 flex-col border-r border-base-200 bg-base-100 bg-gradient-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
+            <aside class="flex min-h-full w-72 flex-col border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
                 <div class="flex items-center justify-between gap-2">
                     <x-app-brand class="min-h-0 border-0 p-0 hover:bg-transparent" img-class="h-8 w-auto max-w-[12rem] sm:h-9" />
                     @auth
@@ -171,7 +172,7 @@
                         <div class="dropdown dropdown-end">
                             <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                                 <div class="w-10 rounded-full">
-                                    <img alt="Аватар пользователя" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                                    <img alt="Аватар пользователя" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
                                 </div>
                             </div>
                             <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
@@ -189,26 +190,27 @@
 
                 <ul class="menu mt-4 w-full gap-1" role="navigation" aria-label="Меню сайта">
                     <li class="menu-title"><span>Основное</span></li>
-                    <li><a href="/teams" class="{{ request()->is('teams*') ? 'active' : '' }}">Команды</a></li>
-                    <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}">Хакатоны</a></li>
+                    <li><a href="/teams" class="{{ request()->is('teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-4 w-4" />Команды</a></li>
+                    <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:rocket-launch" class="h-4 w-4" />Хакатоны</a></li>
 
                     <li class="menu-title mt-3"><span>Мой кабинет</span></li>
                     @auth
                         @if (Auth::user()->role === 'user')
-                            <li><a href="/profile/teams" class="{{ request()->is('profile/teams*') ? 'active' : '' }}">Мои команды</a></li>
-                            <li><a href="/teams/create" class="{{ request()->is('teams/create') ? 'active' : '' }}">Создать команду</a></li>
+                            <li><a href="/profile/teams" class="{{ request()->is('profile/teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-4 w-4" />Мои команды</a></li>
+                            <li><a href="/teams/create" class="{{ request()->is('teams/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />Создать команду</a></li>
+                            <li><a href="/profile/certificates" class="{{ request()->is('profile/certificates') ? 'active' : '' }}"><x-app-icon icon="heroicons:academic-cap" class="h-4 w-4" />Сертификаты</a></li>
                         @elseif (Auth::user()->role === 'partner')
-                            <li><a href="/profile/hackatons" class="{{ request()->is('profile/hackatons*') ? 'active' : '' }}">Мои хакатоны</a></li>
-                            <li><a href="/hackatons/create" class="{{ request()->is('hackatons/create') ? 'active' : '' }}">Создать хакатон</a></li>
+                            <li><a href="/profile/hackatons" class="{{ request()->is('profile/hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:clipboard-document-list" class="h-4 w-4" />Мои хакатоны</a></li>
+                            <li><a href="/hackatons/create" class="{{ request()->is('hackatons/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />Создать хакатон</a></li>
                         @elseif (Auth::user()->role === 'judge')
-                            <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}">Назначенные хакатоны</a></li>
+                            <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:scale" class="h-4 w-4" />Назначенные хакатоны</a></li>
                         @elseif (Auth::user()->role === 'admin')
-                            <li><a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}">Админ-панель</a></li>
+                            <li><a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}"><x-app-icon icon="heroicons:chart-bar-square" class="h-4 w-4" />Админ-панель</a></li>
                         @endif
-                        <li><a href="/profile" class="{{ request()->is('profile') ? 'active' : '' }}">Профиль</a></li>
+                        <li><a href="/profile" class="{{ request()->is('profile') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-circle" class="h-4 w-4" />Профиль</a></li>
                     @else
-                        <li><a href="/login" class="font-medium {{ request()->is('login') ? 'active' : '' }}">Авторизироваться</a></li>
-                        <li><a href="/register" class="font-medium {{ request()->is('register') ? 'active' : '' }}">Зарегистрироваться</a></li>
+                        <li><a href="/login" class="font-medium {{ request()->is('login') ? 'active' : '' }}"><x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />Авторизироваться</a></li>
+                        <li><a href="/register" class="font-medium {{ request()->is('register') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-plus" class="h-4 w-4" />Зарегистрироваться</a></li>
                     @endauth
 
                     <li class="menu-title mt-3"><span>Настройки</span></li>
