@@ -5,6 +5,7 @@
 @section('canonical_url', route('profile.public.show', ['user' => $profileUser->nickname]))
 @section('og_title', $profileUser->fio.' - Публичный профиль')
 @section('og_description', 'Профиль с командами, хакатонами и активностью пользователя '.$profileUser->fio.'.')
+@section('og_image', $profileUser->avatar_path ? asset('storage/'.$profileUser->avatar_path) : url('/logo.svg'))
 
 @section('slot')
     <div class="mx-auto w-full max-w-6xl space-y-6">
@@ -19,6 +20,9 @@
                     @endif
                 </div>
                 <div class="flex flex-wrap gap-2">
+                    <button class="btn btn-sm btn-outline" type="button" onclick="if (navigator.share) { navigator.share({ title: '{{ $profileUser->fio }}', url: '{{ route('profile.public.show', ['user' => $profileUser->nickname]) }}' }); } else { navigator.clipboard.writeText('{{ route('profile.public.show', ['user' => $profileUser->nickname]) }}'); this.innerText='Ссылка скопирована'; }">
+                        Поделиться профилем
+                    </button>
                     @if ($profileUser->show_email_on_profile)
                         <a href="mailto:{{ $profileUser->email }}" class="btn btn-sm btn-primary">Email</a>
                     @endif
@@ -26,6 +30,24 @@
                         <a href="tel:{{ $profileUser->phone }}" class="btn btn-sm btn-outline">Телефон</a>
                     @endif
                 </div>
+            </div>
+        </section>
+
+        <section class="card border border-base-300 bg-base-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Навыки и роли</h2>
+                @php
+                    $skills = $profileUser->teamRoles->flatMap(fn ($role) => $role->skills->pluck('name'))->unique()->values();
+                @endphp
+                @if ($skills->isEmpty())
+                    <p class="text-sm text-base-content/70">Пользователь пока не добавил навыки.</p>
+                @else
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($skills as $skill)
+                            <span class="badge badge-ghost">{{ $skill }}</span>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </section>
 
@@ -81,6 +103,24 @@
                                     {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y') }}
                                 </p>
                             </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <section class="card border border-base-300 bg-base-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Сертификаты</h2>
+                @if ($profileUser->certificates->isEmpty())
+                    <p class="text-sm text-base-content/70">Сертификаты пока не опубликованы.</p>
+                @else
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        @foreach ($profileUser->certificates as $certificate)
+                            <div class="rounded-xl border border-base-300 p-3">
+                                <p class="font-medium">{{ $certificate->title }}</p>
+                                <p class="text-xs text-base-content/70">{{ $certificate->hackaton->title }}</p>
+                            </div>
                         @endforeach
                     </div>
                 @endif

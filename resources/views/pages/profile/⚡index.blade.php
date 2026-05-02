@@ -3,13 +3,14 @@
 use App\Services\ContactChangeService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 new #[Layout('layouts::app', ['title' => 'Профиль'])]
 class extends Component {
-    use \Mary\Traits\Toast;
+    use \Mary\Traits\Toast, WithFileUploads;
 
     public array $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
@@ -27,6 +28,8 @@ class extends Component {
     public bool $is_profile_public = true;
     public bool $show_email_on_profile = false;
     public bool $show_phone_on_profile = false;
+    public $avatar = null;
+    public ?string $avatar_path = null;
 
     public bool $phoneChangeModal = false;
 
@@ -65,6 +68,7 @@ class extends Component {
         $this->is_profile_public = (bool) $user->is_profile_public;
         $this->show_email_on_profile = (bool) $user->show_email_on_profile;
         $this->show_phone_on_profile = (bool) $user->show_phone_on_profile;
+        $this->avatar_path = $user->avatar_path;
     }
 
     public function openPhoneChangeModal(): void
@@ -307,6 +311,7 @@ class extends Component {
             'show_phone_on_profile' => ['boolean'],
             'current_password' => [$requiresPasswordConfirmation ? 'required' : 'nullable', 'string'],
             'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'avatar' => ['nullable', 'image', 'max:3072'],
         ], [
             'fio.required' => 'ФИО обязательно для заполнения.',
             'fio.regex' => 'Укажите ФИО в формате "Фамилия Имя" или "Фамилия Имя Отчество".',
@@ -317,6 +322,8 @@ class extends Component {
             'current_password.required' => 'Для смены пароля введите текущий пароль.',
             'new_password.min' => 'Новый пароль должен содержать минимум 8 символов.',
             'new_password.confirmed' => 'Подтверждение нового пароля не совпадает.',
+            'avatar.image' => 'Аватар должен быть изображением.',
+            'avatar.max' => 'Размер аватара не должен превышать 3 МБ.',
         ]);
 
         if ($requiresPasswordConfirmation && !Hash::check($this->current_password, $user->password)) {
@@ -337,11 +344,17 @@ class extends Component {
             $payload['password'] = $this->new_password;
         }
 
+        if ($this->avatar) {
+            $payload['avatar_path'] = $this->avatar->store('avatars', 'public');
+            $this->avatar_path = $payload['avatar_path'];
+        }
+
         $user->update($payload);
 
         $this->current_password = '';
         $this->new_password = '';
         $this->new_password_confirmation = '';
+        $this->avatar = null;
 
         $this->success('Профиль успешно обновлён.', position: 'toast-center toast-top');
     }
@@ -370,8 +383,31 @@ class extends Component {
         </ul>
     </div>
 
+    <div class="tabs tabs-boxed w-full max-w-3xl mx-auto">
+        <a class="tab tab-active">Личные данные</a>
+        <a class="tab" href="/profile/teams">Мои команды</a>
+        <a class="tab" href="/profile/hackatons">Мои хакатоны</a>
+        <a class="tab" href="/profile/certificates">Сертификаты</a>
+        <a class="tab">Настройки приватности</a>
+    </div>
+
     <x-mary-card title="Профиль" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
         <x-maryform wire:submit="save">
+            <div class="rounded-xl border border-base-300 p-4 space-y-3">
+                <p class="text-sm font-medium">Аватар профиля</p>
+                <div class="flex items-center gap-3">
+                    <div class="avatar">
+                        <div class="w-16 rounded-full border border-base-300">
+                            <img
+                                src="{{ $avatar ? $avatar->temporaryUrl() : ($avatar_path ? asset('storage/'.$avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->fio).'&background=random') }}"
+                                alt="Аватар пользователя"
+                            />
+                        </div>
+                    </div>
+                    <x-mary-input type="file" wire:model="avatar" accept="image/*" />
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <x-mary-input
                     label="ФИО"
@@ -404,6 +440,14 @@ class extends Component {
                 <a class="link link-primary text-sm" href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener">
                     Открыть публичный профиль
                 </a>
+                <div class="rounded-lg bg-base-200/60 p-3 text-sm">
+                    <p class="font-medium">Живое превью приватности</p>
+                    <p class="text-base-content/75">
+                        Профиль: {{ $is_profile_public ? 'публичный' : 'скрытый' }},
+                        email: {{ $show_email_on_profile ? 'виден' : 'скрыт' }},
+                        телефон: {{ $show_phone_on_profile ? 'виден' : 'скрыт' }}.
+                    </p>
+                </div>
             </div>
 
             <x-marypassword label="Текущий пароль (нужен только при смене пароля)" wire:model="current_password" />

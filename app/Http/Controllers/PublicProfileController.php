@@ -17,6 +17,9 @@ class PublicProfileController extends Controller
             'teams' => fn ($query) => $query->latest()->limit(6),
             'hackatons' => fn ($query) => $query->latest()->limit(6),
             'judgeAssignments.hackaton',
+            'certificates.hackaton',
+            'teamRoles.role',
+            'teamRoles.skills',
         ]);
 
         return view('pages.profile.public-show', [
