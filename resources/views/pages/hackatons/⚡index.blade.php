@@ -293,6 +293,12 @@ class extends Component {
                             $hackatonImage = filled($hackaton->image_url)
                                 ? (str_starts_with($hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/' . $hackaton->image_url))
                                 : null;
+                            $startTimestamp = Carbon::parse($hackaton->start_at)->timestamp;
+                            $endTimestamp = Carbon::parse($hackaton->end_at)->timestamp;
+                            $nowTimestamp = now()->timestamp;
+                            $progressPercent = $endTimestamp > $startTimestamp
+                                ? max(0, min(100, (int) round((($nowTimestamp - $startTimestamp) / ($endTimestamp - $startTimestamp)) * 100)))
+                                : 0;
                         @endphp
                         <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
                             @if ($hackatonImage)
@@ -312,6 +318,10 @@ class extends Component {
                                 <p>Даты проведения:
                                     {{ Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
                                     {{ Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}</p>
+                                <div class="mt-2">
+                                    <progress class="progress progress-primary w-full" value="{{ $progressPercent }}" max="100"></progress>
+                                    <p class="mt-1 text-xs text-base-content/70">Прогресс таймлайна: {{ $progressPercent }}%</p>
+                                </div>
                             </x-mary-card>
                         </div>
 

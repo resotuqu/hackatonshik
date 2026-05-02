@@ -77,6 +77,15 @@
             </ul>
         </div>
 
+        <div class="tabs tabs-boxed w-full overflow-x-auto">
+            <a href="#hackaton-description" class="tab">Описание</a>
+            <a href="#hackaton-cases" class="tab">Кейсы</a>
+            <a href="#hackaton-announcements" class="tab">Анонсы</a>
+            <a href="#hackaton-participants" class="tab">Участники</a>
+            <a href="#hackaton-judges" class="tab">Судьи</a>
+            <a href="#hackaton-documents" class="tab">Документы</a>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 card bg-base-100 border border-base-200 shadow-sm">
                 <div class="p-4 pb-0">

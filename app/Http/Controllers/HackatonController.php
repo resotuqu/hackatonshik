@@ -14,6 +14,7 @@ class HackatonController extends Controller
 {
     public function show(Hackaton $hackaton): View
     {
+        $hackaton->syncStatusByTimeline();
         $isOrganizer = Auth::check() && (int) $hackaton->user_id === (int) Auth::id();
         $isAssignedJudge = Auth::check() && $hackaton->judges()->where('users.id', Auth::id())->exists();
         $hackaton->loadShowRelations();
