@@ -34,10 +34,10 @@ class CreateNewUser implements CreatesNewUsers
             ],
             'nickname' => ['required', 'string', 'max:255', Rule::unique(User::class)],
             'password' => $this->passwordRules(),
-            'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class),],
+            'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'fio' => $input['fio'],
             'date_of_birth' => $input['date_of_birth'],
             'email' => $input['email'],
@@ -45,5 +45,9 @@ class CreateNewUser implements CreatesNewUsers
             'password' => Hash::make($input['password']),
             'phone' => $input['phone'],
         ]);
+
+        $user->sendEmailVerificationNotification();
+
+        return $user;
     }
 }

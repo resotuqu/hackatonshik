@@ -112,12 +112,14 @@ class extends Component {
             'password' => $this->password,
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         Auth::login($user);
         session()->regenerate();
 
-        $this->success('Успешная регистрация. Подтвердите телефон по SMS.', position: 'toast-center toast-top');
+        $this->success('Регистрация успешна. Проверьте почту и перейдите по ссылке для подтверждения e-mail.', position: 'toast-center toast-top');
 
-        return $this->redirect(route('phone.verify.notice'));
+        return $this->redirect(route('verification.notice'));
     }
 };
 ?>
@@ -159,6 +161,9 @@ class extends Component {
             </ul>
 
             @if ($step === 1)
+                <p class="text-xs text-base-content/60 mb-2 rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">
+                    Если вы закроете страницу до завершения регистрации, данные не сохранятся — позже нужно будет заполнить форму заново.
+                </p>
                 <x-mary-input label="Фамилия, Имя, Отчество" wire:model="fio" placeholder="Владимир" hint="Введите ваше фио" />
                 <x-marydatetime label="Дата рождения" hint="Введите вашу дату рождения" wire:model="date_of_birth" />
             @endif

@@ -29,37 +29,37 @@ Route::livewire('/cookie-policy', 'pages::cookie-policy.index');
 
 Route::livewire('/login', 'pages::auth.login');
 Route::livewire('/register', 'pages::auth.register');
-Route::livewire('/profile', 'pages::profile.index')->middleware('auth');
-Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'can:access-admin']);
+Route::livewire('/profile', 'pages::profile.index')->middleware(['auth', 'verified']);
+Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/u/{user:nickname}', [PublicProfileController::class, 'show'])->name('profile.public.show');
 
 Route::livewire('/teams', 'pages::teams.index');
-Route::livewire('/teams/create', 'pages::teams.create')->middleware('auth');
+Route::livewire('/teams/create', 'pages::teams.create')->middleware(['auth', 'verified']);
 // Route::livewire('/teams/{team}', 'pages::teams.show');
 // Route::livewire('/teams/{team}/edit', 'pages::teams.edit');
-Route::livewire('/profile/teams', 'pages::profile.teams.index')->middleware('auth');
+Route::livewire('/profile/teams', 'pages::profile.teams.index')->middleware(['auth', 'verified']);
 
 Route::livewire('/hackatons', 'pages::hackatons.index');
-Route::livewire('/hackatons/create', 'pages::hackatons.create')->middleware('auth');
+Route::livewire('/hackatons/create', 'pages::hackatons.create')->middleware(['auth', 'verified']);
 // Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show');
 // Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit');
-Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index')->middleware('auth');
-Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants')->middleware('auth');
-Route::livewire('/profile/certificates', 'pages::profile.certificates.index')->middleware('auth');
+Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index')->middleware(['auth', 'verified']);
+Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants')->middleware(['auth', 'verified']);
+Route::livewire('/profile/certificates', 'pages::profile.certificates.index')->middleware(['auth', 'verified']);
 Route::get('/profile/hackatons/{hackaton}/hub', [ParticipantHackatonHubController::class, 'show'])
-    ->middleware('auth')
+    ->middleware(['auth', 'verified'])
     ->name('profile.hackatons.hub');
 
 Route::get('/teams/{team}', [TeamController::class, 'show'])
     ->name('teams.show');
 Route::livewire('/teams/{team}/edit', 'pages::teams.edit')
-    ->middleware('auth')
+    ->middleware(['auth', 'verified'])
     ->name('teams.edit');
 
 Route::get('/hackatons/{hackaton}', [HackatonController::class, 'show'])
     ->name('hackatons.show');
 Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit')
-    ->middleware('auth')
+    ->middleware(['auth', 'verified'])
     ->name('hackatons.edit');
 
 Route::get('/auth/yandex/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'yandex');
@@ -67,7 +67,7 @@ Route::get('/auth/yandex/callback', [SocialAuthController::class, 'callback'])->
 Route::get('/auth/vk/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'vk');
 Route::get('/auth/vk/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'vk');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
     Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');

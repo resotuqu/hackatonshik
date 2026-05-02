@@ -25,13 +25,14 @@ test('registration wizard completes all steps and redirects to phone verificatio
         ->assertSet('step', 4)
         ->set('phone', $phone)
         ->call('save')
-        ->assertRedirect(route('phone.verify.notice'));
+        ->assertRedirect(route('verification.notice'));
 
     $user = User::query()->where('email', $email)->first();
 
     expect($user)->not->toBeNull()
         ->and($user->nickname)->toBe($nickname)
-        ->and($user->phone)->toBe($phone);
+        ->and($user->phone)->toBe($phone)
+        ->and($user->hasVerifiedEmail())->toBeFalse();
 
     expect(Auth::check())->toBeTrue()
         ->and(Auth::id())->toBe($user->id);

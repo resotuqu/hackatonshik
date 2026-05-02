@@ -50,6 +50,7 @@ class SocialAuthController extends Controller
                 'phone' => '+70000000000',
                 'password' => Hash::make(Str::random(40)),
                 'phone_verified_at' => null,
+                'email_verified_at' => now(),
             ],
         );
 
