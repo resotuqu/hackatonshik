@@ -48,7 +48,11 @@ class extends Component {
                 $query->whereNull('user_id');
             })
             ->when($this->q !== '', function ($query) {
-                $query->where('title', 'like', '%' . $this->q . '%');
+                $query->where(function ($subQuery) {
+                    $subQuery
+                        ->where('title', 'like', '%' . $this->q . '%')
+                        ->orWhereHas('roles.skills', fn ($skillsQuery) => $skillsQuery->where('skills.name', 'like', '%' . $this->q . '%'));
+                });
             })
             ->when($this->hackaton_id !== '0', function ($query) {
                 $query->where('teams.hackaton_id', '=', $this->hackaton_id);
@@ -62,6 +66,12 @@ class extends Component {
                 $query->whereHas('roles.skills', function ($q) {
                     $q->whereIn('skills.id', $this->skills);
                 });
+            })
+            ->when($this->team_size !== 'all', function ($query) {
+                $query->has('roles', '>=', (int) $this->team_size);
+            })
+            ->when($this->open_only, function ($query) {
+                $query->whereHas('roles', fn ($q) => $q->whereNull('user_id'));
             })
             ->when($this->start_from !== '', function ($query) {
                 $query->whereHas('hackaton', function($q) {
@@ -123,10 +133,12 @@ class extends Component {
 
     public function clearFilters(): void
     {
-        $this->reset(['q', 'hackaton_id', 'role_id', 'skills', 'start_from', 'sort']);
+        $this->reset(['q', 'hackaton_id', 'role_id', 'skills', 'start_from', 'sort', 'team_size', 'open_only']);
         $this->hackaton_id = '0';
         $this->role_id = '0';
         $this->sort = 'newest';
+        $this->team_size = 'all';
+        $this->open_only = false;
         $this->resetPage();
     }
 
@@ -212,6 +224,8 @@ class extends Component {
         $this->skills = (array) ($payload['skills'] ?? []);
         $this->start_from = (string) ($payload['start_from'] ?? '');
         $this->sort = (string) ($payload['sort'] ?? 'newest');
+        $this->team_size = (string) ($payload['team_size'] ?? 'all');
+        $this->open_only = (bool) ($payload['open_only'] ?? false);
         $this->search();
     }
 
@@ -224,6 +238,8 @@ class extends Component {
             'skills' => $this->skills,
             'start_from' => $this->start_from,
             'sort' => $this->sort,
+            'team_size' => $this->team_size,
+            'open_only' => $this->open_only,
         ];
     }
 
@@ -255,6 +271,15 @@ class extends Component {
     #[Url(as: 'sort')]
     public string $sort = 'newest';
 
+    #[Url(as: 'view')]
+    public string $view_mode = 'cards';
+
+    #[Url(as: 'team_size')]
+    public string $team_size = 'all';
+
+    #[Url(as: 'open_only')]
+    public bool $open_only = false;
+
     public string $saved_filter_name = '';
 }
 ?>
@@ -285,6 +310,13 @@ class extends Component {
 
             {{--HackatonStartFrom--}}
             <x-marydatetime wire:model="start_from" label="Начало от"  />
+            <x-maryselect wire:model="team_size" :options="[
+                ['id' => 'all', 'name' => 'Любой размер'],
+                ['id' => '2', 'name' => 'От 2 ролей'],
+                ['id' => '3', 'name' => 'От 3 ролей'],
+                ['id' => '5', 'name' => 'От 5 ролей'],
+            ]" label="Размер команды" />
+            <x-marytoggle label="Только открытые к вступлению" wire:model="open_only" />
             <x-maryselect wire:model="sort" :options="[
                 ['id' => 'newest', 'name' => 'Сначала новые'],
                 ['id' => 'start_soonest', 'name' => 'Ближайший старт'],
@@ -300,7 +332,7 @@ class extends Component {
     
     <div class="lg:col-span-2 space-y-4">
         @php
-            $hasFilters = filled($q) || $hackaton_id !== '0' || $role_id !== '0' || !empty($skills) || filled($start_from) || $sort !== 'newest';
+            $hasFilters = filled($q) || $hackaton_id !== '0' || $role_id !== '0' || !empty($skills) || filled($start_from) || $sort !== 'newest' || $team_size !== 'all' || $open_only;
         @endphp
 
         @if ($hasFilters)
@@ -331,6 +363,12 @@ class extends Component {
                         @if (filled($start_from))
                             <x-marybadge class="badge-primary" value="Начало от: {{ Carbon::parse($start_from)->format('d.m.Y H:i') }}" />
                         @endif
+                        @if ($team_size !== 'all')
+                            <x-marybadge class="badge-primary" value="Размер: от {{ $team_size }} ролей" />
+                        @endif
+                        @if ($open_only)
+                            <x-marybadge class="badge-primary" value="Открытые к вступлению" />
+                        @endif
                     </div>
                     <div class="mt-3">
                         <x-mary-button class="btn-sm btn-ghost" wire:click="clearFilters">Очистить все</x-mary-button>
@@ -360,12 +398,20 @@ class extends Component {
             </div>
         @endif
 
-        <div wire:loading.flex wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,nextPage,previousPage,gotoPage,setPage"
+        <div class="flex justify-end">
+            <div class="join">
+                <button type="button" class="btn btn-sm join-item {{ $view_mode === 'cards' ? 'btn-primary' : 'btn-outline' }}" wire:click="$set('view_mode', 'cards')">Карточки</button>
+                <button type="button" class="btn btn-sm join-item {{ $view_mode === 'table' ? 'btn-primary' : 'btn-outline' }}" wire:click="$set('view_mode', 'table')">Таблица</button>
+            </div>
+        </div>
+
+        <div wire:loading.flex wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,team_size,open_only,nextPage,previousPage,gotoPage,setPage"
             class="items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-100 px-6 py-10 text-base-content/70">
             Загружаем команды...
         </div>
 
-        <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,nextPage,previousPage,gotoPage,setPage">
+        <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,team_size,open_only,nextPage,previousPage,gotoPage,setPage">
+            @if ($view_mode === 'cards')
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @forelse($this->teams as $team)
                     <x-mary-card class="card card-border border-base-300 h-full shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-lg" wire:key="team-card-{{ $team->id }}">
@@ -448,6 +494,38 @@ class extends Component {
                     </div>
                 @endforelse
             </div>
+            @else
+                <div class="overflow-x-auto rounded-xl border border-base-300 bg-base-100">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Команда</th>
+                                <th>Хакатон</th>
+                                <th>Участники</th>
+                                <th>Свободные роли</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($this->teams as $team)
+                                <tr wire:key="team-row-{{ $team->id }}">
+                                    <td>{{ $team->title }}</td>
+                                    <td>{{ $team->hackaton->title }}</td>
+                                    <td>{{ $team->roles_count - $team->empty_roles_count }}</td>
+                                    <td>{{ $team->empty_roles_count }}</td>
+                                    <td class="text-right">
+                                        <a href="{{ route('teams.show', $team) }}" class="btn btn-xs btn-primary">Подробнее</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-base-content/70">Команды не найдены</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            @endif
             {{$this->teams->links(data: ['scrollTo' => false])}}
         </div>
     </div>
