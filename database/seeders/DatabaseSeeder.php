@@ -18,5 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(HackatonSeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(SkillSeeder::class);
+        $this->call(NewsPostSeeder::class);
     }
 }

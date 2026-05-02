@@ -91,6 +91,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'show_email_on_profile',
         'show_phone_on_profile',
         'phone_verified_at',
+        'avatar_path',
     ];
 
     /**
