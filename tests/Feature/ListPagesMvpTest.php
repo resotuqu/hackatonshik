@@ -44,6 +44,15 @@ test('hackatons page supports status filter and quick apply', function () {
         ->exists())->toBeTrue();
 });
 
+test('teams page shows cards only without removed filter controls', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::teams.index')
+        ->assertDontSee('Таблица')
+        ->assertDontSee('Только открытые к вступлению');
+});
+
 test('teams page quick apply creates pending application', function () {
     $owner = User::factory()->create();
     $applicant = User::factory()->create();
