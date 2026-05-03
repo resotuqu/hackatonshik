@@ -11,14 +11,55 @@ use App\Models\TeamApplication;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Component;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
-new #[Layout('layouts::app', ['title' => "Команды"])]
+new #[Layout('layouts::app', ['title' => 'Команды'])]
 class extends Component {
     use \Livewire\WithPagination;
+
+    #[Url(as: 'tab')]
+    public string $catalog_tab = 'open';
+
+    #[Url(as: 'open_only')]
+    public bool $only_open_roles = true;
+
+    #[Url(as: 'roles')]
+    public array $role_ids = [];
+
+    #[Url(as: 'q')]
+    public string $q = '';
+
+    #[Url(as: 'hackaton_id')]
+    public string $hackaton_id = '0';
+
+    #[Url(as: 'skills')]
+    public array $skills = [];
+
+    #[Url(as: 'start_from')]
+    public string $start_from = '';
+
+    #[Url(as: 'sort')]
+    public string $sort = 'newest';
+
+    #[Url(as: 'team_size')]
+    public string $team_size = 'all';
+
+    public string $saved_filter_name = '';
+
+    private function needsOpenRolesFilter(): bool
+    {
+        return $this->catalog_tab === 'open'
+            || ($this->catalog_tab === 'all' && $this->only_open_roles);
+    }
+
+    /** @return list<int> */
+    private function normalizedRoleIds(): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', $this->role_ids))));
+    }
 
     #[Computed]
     public function hackatons()
@@ -39,30 +80,42 @@ class extends Component {
     #[Computed]
     public function teams()
     {
+        $roleIdInts = $this->normalizedRoleIds();
+        $needsOpen = $this->needsOpenRolesFilter();
+
         return Team::query()
-            ->select(['id', 'user_id', 'title', 'image_url', 'hackaton_id'])
-            ->with(['user:id,nickname', 'hackaton:id,title,start_at,end_at', 'roles:id,team_id,role_id,user_id', 'roles.role:id,name'])
+            ->select(['id', 'user_id', 'title', 'description', 'image_url', 'cover_image', 'hackaton_id'])
+            ->where('teams.is_public', true)
+            ->with([
+                'user:id,nickname',
+                'hackaton:id,title,start_at,end_at',
+                'roles' => fn ($q) => $q
+                    ->select(['id', 'team_id', 'role_id', 'user_id'])
+                    ->with([
+                        'role:id,name',
+                        'skills:id,name',
+                        'user:id,fio,nickname,avatar_path',
+                    ]),
+            ])
             ->withCount('roles')
             ->withCount(['roles as empty_roles_count' => fn ($query) => $query->whereNull('user_id')])
-            ->whereHas('roles', function ($query) {
-                $query->whereNull('user_id');
-            })
+            ->when($needsOpen, fn ($q) => $q->whereHas('roles', fn ($r) => $r->whereNull('user_id')))
             ->when($this->q !== '', function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery
-                        ->where('title', 'like', '%' . $this->q . '%')
-                        ->orWhereHas('roles.skills', fn ($skillsQuery) => $skillsQuery->where('skills.name', 'like', '%' . $this->q . '%'));
+                        ->where('title', 'like', '%'.$this->q.'%')
+                        ->orWhere('description', 'like', '%'.$this->q.'%')
+                        ->orWhereHas('roles.skills', fn ($skillsQuery) => $skillsQuery->where('skills.name', 'like', '%'.$this->q.'%'));
                 });
             })
             ->when($this->hackaton_id !== '0', function ($query) {
                 $query->where('teams.hackaton_id', '=', $this->hackaton_id);
             })
-            ->when($this->role_id !== '0', function ($query) {
-                $query->whereHas('roles', function ($q) {
-                    $q->where('role_id', '=', $this->role_id);
-                });
-            })
-            ->when(!empty($this->skills), function ($query) {
+            ->when($roleIdInts !== [], fn ($query) => $query->whereHas(
+                'roles',
+                fn ($q) => $q->whereNull('user_id')->whereIn('role_id', $roleIdInts)
+            ))
+            ->when(! empty($this->skills), function ($query) {
                 $query->whereHas('roles.skills', function ($q) {
                     $q->whereIn('skills.id', $this->skills);
                 });
@@ -71,13 +124,13 @@ class extends Component {
                 $query->has('roles', '>=', (int) $this->team_size);
             })
             ->when($this->start_from !== '', function ($query) {
-                $query->whereHas('hackaton', function($q) {
+                $query->whereHas('hackaton', function ($q) {
                     $q->where('start_at', '>=', $this->start_from);
                 });
             })
             ->when($this->sort === 'start_soonest', fn ($query) => $query->join('hackatons', 'hackatons.id', '=', 'teams.hackaton_id')->orderBy('hackatons.start_at')->select('teams.*'))
             ->when($this->sort === 'newest', fn ($query) => $query->orderByDesc('id'))
-            ->paginate(6);
+            ->paginate(9);
     }
 
     #[Computed]
@@ -103,6 +156,12 @@ class extends Component {
     }
 
     #[Computed]
+    public function rolesForChips()
+    {
+        return Cache::remember('teams-filter-roles-chips', now()->addMinutes(10), fn () => Role::query()->orderBy('name')->get(['id', 'name']));
+    }
+
+    #[Computed]
     public function savedFilters()
     {
         if (! Auth::check()) {
@@ -122,7 +181,7 @@ class extends Component {
         $this->trackListEvent('list_view');
     }
 
-    public function search()
+    public function search(): void
     {
         $this->resetPage();
         $this->trackListEvent('filter_apply', $this->currentFilters());
@@ -130,12 +189,78 @@ class extends Component {
 
     public function clearFilters(): void
     {
-        $this->reset(['q', 'hackaton_id', 'role_id', 'skills', 'start_from', 'sort', 'team_size']);
+        $this->reset(['q', 'hackaton_id', 'skills', 'start_from', 'sort', 'team_size', 'role_ids', 'saved_filter_name']);
         $this->hackaton_id = '0';
-        $this->role_id = '0';
         $this->sort = 'newest';
         $this->team_size = 'all';
+        $this->catalog_tab = 'open';
+        $this->only_open_roles = true;
+        $this->role_ids = [];
         $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function setCatalogTab(string $tab): void
+    {
+        if (! in_array($tab, ['open', 'all'], true)) {
+            return;
+        }
+        $this->catalog_tab = $tab;
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function toggleRoleId(int $roleId): void
+    {
+        $ids = $this->normalizedRoleIds();
+        if (in_array($roleId, $ids, true)) {
+            $this->role_ids = array_values(array_diff($ids, [$roleId]));
+        } else {
+            $this->role_ids = array_values([...$ids, $roleId]);
+        }
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function updatedQ(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSkills(): void
+    {
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function updatedHackatonId(): void
+    {
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function updatedStartFrom(): void
+    {
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function updatedSort(): void
+    {
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function updatedTeamSize(): void
+    {
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
+    }
+
+    public function updatedOnlyOpenRoles(): void
+    {
+        $this->resetPage();
+        $this->trackListEvent('filter_apply', $this->currentFilters());
     }
 
     public function quickApplyTeam(int $teamId): void
@@ -216,11 +341,20 @@ class extends Component {
         $payload = $filter->filters ?? [];
         $this->q = (string) ($payload['q'] ?? '');
         $this->hackaton_id = (string) ($payload['hackaton_id'] ?? '0');
-        $this->role_id = (string) ($payload['role_id'] ?? '0');
         $this->skills = (array) ($payload['skills'] ?? []);
         $this->start_from = (string) ($payload['start_from'] ?? '');
         $this->sort = (string) ($payload['sort'] ?? 'newest');
         $this->team_size = (string) ($payload['team_size'] ?? 'all');
+        $this->catalog_tab = (string) ($payload['catalog_tab'] ?? 'open');
+        if (! in_array($this->catalog_tab, ['open', 'all'], true)) {
+            $this->catalog_tab = 'open';
+        }
+        $this->only_open_roles = (bool) ($payload['only_open_roles'] ?? true);
+        $this->role_ids = array_values(array_map('intval', (array) ($payload['role_ids'] ?? [])));
+        $legacyRole = (string) ($payload['role_id'] ?? '0');
+        if ($legacyRole !== '0' && $this->role_ids === []) {
+            $this->role_ids = [(int) $legacyRole];
+        }
         $this->search();
     }
 
@@ -229,11 +363,13 @@ class extends Component {
         return [
             'q' => $this->q,
             'hackaton_id' => $this->hackaton_id,
-            'role_id' => $this->role_id,
+            'role_ids' => $this->role_ids,
             'skills' => $this->skills,
             'start_from' => $this->start_from,
             'sort' => $this->sort,
             'team_size' => $this->team_size,
+            'catalog_tab' => $this->catalog_tab,
+            'only_open_roles' => $this->only_open_roles,
         ];
     }
 
@@ -246,232 +382,331 @@ class extends Component {
             'payload' => $payload,
         ]);
     }
-
-    #[Url(as: 'q')]
-    public string $q = '';
-
-    #[Url(as: 'hackaton_id')]
-    public string $hackaton_id = '0';
-
-    #[Url(as: 'role_id')]
-    public string $role_id = '0';
-
-    #[Url(as: 'skills')]
-    public array $skills = [];
-
-    #[Url(as: 'start_from')]
-    public string $start_from = '';
-
-    #[Url(as: 'sort')]
-    public string $sort = 'newest';
-
-    #[Url(as: 'team_size')]
-    public string $team_size = 'all';
-
-    public string $saved_filter_name = '';
 }
 ?>
 
-<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+@php
+    $roleIdInts = $this->normalizedRoleIds();
+    $hasFilters =
+        filled($q)
+        || $hackaton_id !== '0'
+        || $roleIdInts !== []
+        || ! empty($skills)
+        || filled($start_from)
+        || $sort !== 'newest'
+        || $team_size !== 'all'
+        || ($catalog_tab === 'all' && ! $only_open_roles);
+    $loadingTargets =
+        'search,clearFilters,setCatalogTab,toggleRoleId,saveCurrentFilter,applySavedFilter,q,hackaton_id,skills,start_from,sort,team_size,catalog_tab,only_open_roles,role_ids,nextPage,previousPage,gotoPage,setPage';
+@endphp
 
-    <x-mary-card class="card card-border border-base-300 h-fit shadow-sm transition-shadow duration-200 hover:border-primary/25 hover:shadow-md lg:col-span-1">
-        <h5 class="text-2xl">Фильтрация</h5>
-        <x-maryform wire:submit="search">
+<div class="space-y-8">
+    <header class="flex flex-col gap-6 border-b border-base-300/80 pb-8 md:flex-row md:items-end md:justify-between">
+        <div class="min-w-0 space-y-2">
+            @if ($catalog_tab === 'open')
+                <h1 class="font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl">Открытые команды</h1>
+                <p class="max-w-xl text-base text-base-content/70">Команды, которые сейчас ищут участников</p>
+            @else
+                <h1 class="font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl">Все команды</h1>
+                <p class="max-w-xl text-base text-base-content/70">Каталог публичных команд на платформе</p>
+            @endif
+            @php
+                $totalTeams = $this->teams->total();
+                $tc = $totalTeams % 100;
+                $tn = $totalTeams % 10;
+                $teamsWord = match (true) {
+                    $tc >= 11 && $tc <= 19 => 'команд',
+                    $tn === 1 => 'команда',
+                    $tn >= 2 && $tn <= 4 => 'команды',
+                    default => 'команд',
+                };
+            @endphp
+            <p class="text-sm font-medium tabular-nums text-base-content/60">
+                Найдено {{ $totalTeams }} {{ $teamsWord }}
+            </p>
+        </div>
+        <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+            <div
+                class="tabs tabs-boxed w-fit max-w-full gap-1 overflow-x-auto rounded-xl bg-base-200/80 p-1"
+                role="tablist"
+                aria-label="Режим каталога команд"
+            >
+                <button
+                    type="button"
+                    role="tab"
+                    class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'open' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
+                    aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
+                    wire:click="setCatalogTab('open')"
+                >
+                    Открытые
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'all' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
+                    aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
+                    wire:click="setCatalogTab('all')"
+                >
+                    Все команды
+                </button>
+            </div>
+            <a href="/teams/create" wire:navigate class="btn btn-primary">Создать свою команду</a>
+        </div>
+    </header>
 
-            {{--HackatonTitle--}}
-            <x-mary-input label="Наименование" placeholder="Введите название..." wire:model="q"/>
+    <section class="space-y-4" aria-label="Фильтры">
+        <div class="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-200/30 p-4 sm:p-5">
+            <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+                <label class="form-control w-full min-w-0 flex-1 lg:max-w-md">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Поиск</span></span>
+                    <input
+                        type="search"
+                        class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md"
+                        placeholder="Название или описание…"
+                        autocomplete="off"
+                        wire:model.live.debounce.300ms="q"
+                    />
+                </label>
 
-            {{--    HackatonId    --}}
-            <x-maryselect wire:model="hackaton_id" :options="$this->hackatons" label="Хакатон" />
+                @if ($catalog_tab === 'all')
+                    <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-base-300 bg-base-100 px-3 py-2 lg:shrink-0">
+                        <input
+                            type="checkbox"
+                            class="checkbox checkbox-primary checkbox-sm"
+                            wire:model.live="only_open_roles"
+                            aria-describedby="only-open-roles-hint"
+                        />
+                        <span class="label-text max-w-56 text-sm leading-snug" id="only-open-roles-hint">
+                            Только с открытыми ролями
+                        </span>
+                    </label>
+                @endif
+            </div>
 
-            {{-- Role --}}
-            <x-maryselect wire:model="role_id" :options="$this->rolesData" label="Роль" />
+            <div class="flex flex-col gap-2">
+                <span class="text-xs font-medium uppercase tracking-wide text-base-content/60">Роли</span>
+                <div class="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Фильтр по ролям">
+                    @foreach ($this->rolesForChips as $chipRole)
+                        @php $pressed = in_array($chipRole->id, $roleIdInts, true); @endphp
+                        <button
+                            type="button"
+                            class="btn btn-sm shrink-0 snap-start border-base-300 {{ $pressed ? 'btn-primary' : 'btn-ghost bg-base-100' }}"
+                            wire:click="toggleRoleId({{ $chipRole->id }})"
+                            aria-pressed="{{ $pressed ? 'true' : 'false' }}"
+                        >
+                            {{ $chipRole->name }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
 
-            {{-- Skills --}}
-            <x-marychoices-offline
-                label="Навыки"
-                wire:model="skills"
-                :options="$this->skillsData"
-                placeholder="Выберите навыки..."
-                clearable
-                searchable />
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <label class="form-control w-full min-w-0 sm:col-span-2 xl:col-span-2">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Размер команды</span></span>
+                    <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="team_size">
+                        <option value="all">Любой</option>
+                        <option value="2">От 2 ролей</option>
+                        <option value="3">От 3 ролей</option>
+                        <option value="5">От 5 ролей</option>
+                    </select>
+                </label>
+                <label class="form-control w-full min-w-0">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Сортировка</span></span>
+                    <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="sort">
+                        <option value="newest">Сначала новые</option>
+                        <option value="start_soonest">Ближайший старт</option>
+                    </select>
+                </label>
+                <div class="form-control w-full min-w-0 sm:col-span-2 xl:col-span-1">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Навыки</span></span>
+                    <x-marychoices-offline
+                        wire:model.live="skills"
+                        :options="$this->skillsData"
+                        placeholder="Выберите навыки…"
+                        clearable
+                        searchable
+                    />
+                </div>
+            </div>
 
-            {{--HackatonStartFrom--}}
-            <x-marydatetime wire:model="start_from" label="Начало от"  />
-            <x-maryselect wire:model="team_size" :options="[
-                ['id' => 'all', 'name' => 'Любой размер'],
-                ['id' => '2', 'name' => 'От 2 ролей'],
-                ['id' => '3', 'name' => 'От 3 ролей'],
-                ['id' => '5', 'name' => 'От 5 ролей'],
-            ]" label="Размер команды" />
-            <x-maryselect wire:model="sort" :options="[
-                ['id' => 'newest', 'name' => 'Сначала новые'],
-                ['id' => 'start_soonest', 'name' => 'Ближайший старт'],
-            ]" label="Сортировка" />
+            <details class="group rounded-xl border border-dashed border-base-300 bg-base-100/50 open:border-primary/20">
+                <summary class="cursor-pointer list-none px-3 py-2 text-sm font-medium text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+                    <span class="inline-flex items-center gap-2">
+                        <x-app-icon icon="heroicons:funnel" class="h-4 w-4" />
+                        Ещё фильтры
+                        <span class="text-base-content/50 group-open:rotate-180">▼</span>
+                    </span>
+                </summary>
+                <div class="grid grid-cols-1 gap-4 border-t border-base-300/60 p-4 sm:grid-cols-2">
+                    <label class="form-control w-full">
+                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Хакатон</span></span>
+                        <select class="select select-bordered select-sm w-full sm:select-md" wire:model.live="hackaton_id">
+                            @foreach ($this->hackatons as $opt)
+                                <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="form-control w-full">
+                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Начало хакатона от</span></span>
+                        <input type="datetime-local" class="input input-bordered input-sm w-full sm:input-md" wire:model.live="start_from" />
+                    </label>
+                </div>
+            </details>
 
-            <x-slot:actions>
-                <x-mary-button type="submit" class="btn-primary" wire:loading.attr="disabled" wire:target="search">Искать</x-mary-button>
-                <x-mary-button type="button" class="btn-secondary" wire:click="clearFilters" wire:loading.attr="disabled" wire:target="clearFilters">Сбросить</x-mary-button>
-            </x-slot:actions>
-
-        </x-maryform>
-    </x-mary-card>
-    
-    <div class="lg:col-span-2 space-y-4">
-        @php
-            $hasFilters = filled($q) || $hackaton_id !== '0' || $role_id !== '0' || !empty($skills) || filled($start_from) || $sort !== 'newest' || $team_size !== 'all';
-        @endphp
+            <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn btn-ghost btn-sm" wire:click="clearFilters">Сбросить фильтры</button>
+            </div>
+        </div>
 
         @if ($hasFilters)
-            <div class="card card-border bg-base-100">
+            <div class="card card-border border-base-300 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <p class="text-sm font-medium">Активные фильтры</p>
                     <div class="mt-2 flex flex-wrap gap-2">
                         @if (filled($q))
-                            <x-marybadge class="badge-primary" value="Наименование: {{ $q }}" />
+                            <span class="badge badge-primary badge-outline">{{ $q }}</span>
                         @endif
                         @if ($hackaton_id !== '0')
-                            @php
-                                $selectedHackaton = collect($this->hackatons)->firstWhere('id', $hackaton_id);
-                            @endphp
-                            <x-marybadge class="badge-primary" value="Хакатон: {{ $selectedHackaton['name'] ?? 'Выбран' }}" />
+                            @php $selectedHackaton = collect($this->hackatons)->firstWhere('id', $hackaton_id); @endphp
+                            <span class="badge badge-primary badge-outline">Хакатон: {{ $selectedHackaton['name'] ?? '' }}</span>
                         @endif
-                        @if ($role_id !== '0')
-                            @php
-                                $selectedRole = collect($this->rolesData)->firstWhere('id', $role_id);
-                            @endphp
-                            <x-marybadge class="badge-primary" value="Роль: {{ $selectedRole['name'] ?? 'Выбрана' }}" />
-                        @endif
-                        @if (!empty($skills))
-                            @foreach ($this->skillsData->whereIn('id', $skills) as $skill)
-                                <x-marybadge class="badge-primary" value="Навык: {{ $skill->name }}" />
-                            @endforeach
-                        @endif
+                        @foreach ($roleIdInts as $rid)
+                            @php $rn = $this->rolesForChips->firstWhere('id', $rid); @endphp
+                            @if ($rn)
+                                <span class="badge badge-primary badge-outline">Роль: {{ $rn->name }}</span>
+                            @endif
+                        @endforeach
+                        @foreach ($this->skillsData->whereIn('id', $skills) as $skill)
+                            <span class="badge badge-primary badge-outline">{{ $skill->name }}</span>
+                        @endforeach
                         @if (filled($start_from))
-                            <x-marybadge class="badge-primary" value="Начало от: {{ Carbon::parse($start_from)->format('d.m.Y H:i') }}" />
+                            <span class="badge badge-primary badge-outline">Старт от: {{ Carbon::parse($start_from)->format('d.m.Y H:i') }}</span>
                         @endif
                         @if ($team_size !== 'all')
-                            <x-marybadge class="badge-primary" value="Размер: от {{ $team_size }} ролей" />
+                            <span class="badge badge-primary badge-outline">Размер: от {{ $team_size }} ролей</span>
+                        @endif
+                        @if ($catalog_tab === 'all' && ! $only_open_roles)
+                            <span class="badge badge-secondary badge-outline">Включены команды без вакансий</span>
                         @endif
                     </div>
-                    <div class="mt-3">
-                        <x-mary-button class="btn-sm btn-ghost" wire:click="clearFilters">Очистить все</x-mary-button>
-                    </div>
                 </div>
             </div>
         @endif
 
-        @if(auth()->check())
-            <div class="card card-border bg-base-100">
-                <div class="card-body p-4">
-                    <p class="text-sm font-medium">Сохраненные фильтры</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @forelse($this->savedFilters as $savedFilter)
-                            <x-mary-button class="btn-xs btn-outline" wire:click="applySavedFilter({{ $savedFilter->id }})">
-                                {{ $savedFilter->name }}
-                            </x-mary-button>
-                        @empty
-                            <p class="text-sm text-base-content/60">Пока нет сохраненных фильтров.</p>
-                        @endforelse
+        @auth
+            <div class="card card-border border-base-300 bg-base-100 shadow-sm">
+                <div class="card-body gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end">
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <p class="text-sm font-medium">Сохранённые фильтры</p>
+                        <div class="flex flex-wrap gap-2">
+                            @forelse ($this->savedFilters as $savedFilter)
+                                <button
+                                    type="button"
+                                    class="btn btn-xs btn-outline"
+                                    wire:click="applySavedFilter({{ $savedFilter->id }})"
+                                >
+                                    {{ $savedFilter->name }}
+                                </button>
+                            @empty
+                                <p class="text-sm text-base-content/60">Пока нет сохранённых фильтров.</p>
+                            @endforelse
+                        </div>
                     </div>
-                    <div class="mt-3 flex gap-2">
-                        <x-mary-input wire:model="saved_filter_name" placeholder="Название фильтра" />
-                        <x-mary-button class="btn-sm btn-primary" wire:click="saveCurrentFilter">Сохранить</x-mary-button>
+                    <div class="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[16rem] sm:flex-row">
+                        <input
+                            type="text"
+                            class="input input-bordered input-sm w-full sm:flex-1"
+                            placeholder="Название набора"
+                            wire:model="saved_filter_name"
+                        />
+                        <button type="button" class="btn btn-primary btn-sm shrink-0" wire:click="saveCurrentFilter">Сохранить</button>
                     </div>
                 </div>
             </div>
-        @endif
+        @endauth
+    </section>
 
-        <div wire:loading.flex wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,team_size,nextPage,previousPage,gotoPage,setPage"
-            class="items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-100 px-6 py-10 text-base-content/70">
-            Загружаем команды...
-        </div>
-
-        <div wire:loading.remove wire:target="search,clearFilters,q,hackaton_id,role_id,skills,start_from,sort,team_size,nextPage,previousPage,gotoPage,setPage">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @forelse($this->teams as $team)
-                    <x-mary-card class="card card-border border-base-300 h-full shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-lg" wire:key="team-card-{{ $team->id }}">
-                        @php
-                            $teamImage = filled($team->image_url)
-                                ? (str_starts_with($team->image_url, 'http') ? $team->image_url : asset('storage/' . $team->image_url))
-                                : null;
-                        @endphp
-                        <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
-                            @if ($teamImage)
-                                <img src="{{ $teamImage }}" class="w-full h-full object-cover" alt="{{ $team->title }}">
-                            @else
-                                <div class="flex h-full w-full items-center justify-center text-base-content/60">Изображение команды отсутствует</div>
-                            @endif
-                        </div>
-
-                        <div class="mt-2 flex grow flex-col space-y-2">
-                            <p class="card-title">{{ $team->title }}</p>
-
-                            <x-mary-card class="card card-border bg-base-200">
-                                <p>Пользователь: {{ $team->user->nickname }}</p>
-                                <p>{{ $team->hackaton->title }}</p>
-                                <p>
-                                    Даты проведения:
-                                    {{ Carbon::parse($team->hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
-                                    {{ Carbon::parse($team->hackaton->end_at)->format('d.m.Y H:i') }}
-                                </p>
-                            </x-mary-card>
-
-                            <div class="mt-1 flex flex-wrap gap-2">
-                                <x-marybadge value="Количество ролей: {{ $team->roles_count }}" class="badge-neutral" />
-                                <x-marybadge value="Свободно ролей: {{ $team->empty_roles_count }}" class="badge-neutral" />
-                                @php
-                                    $requiredRolesCollection = $team->roles
-                                        ->whereNull('user_id')
-                                        ->pluck('role.name')
-                                        ->filter()
-                                        ->values();
-                                    $requiredRolesPreview = $requiredRolesCollection->take(2)->implode(', ');
-                                    $requiredRolesOverflow = max($requiredRolesCollection->count() - 2, 0);
-                                @endphp
-                                @if ($requiredRolesPreview !== '')
-                                    <x-marybadge
-                                        value="Нужны роли: {{ $requiredRolesPreview }}{{ $requiredRolesOverflow > 0 ? ', +'.$requiredRolesOverflow : '' }}"
-                                        class="badge-primary h-auto max-w-full whitespace-normal wrap-break-word py-1 text-left leading-snug"
-                                    />
-                                @endif
-                            </div>
-                        </div>
-
-                        <x-slot:actions class="mt-auto pt-2">
-                            <x-mary-button label="Подробнее" class="btn-primary" wire:click="openTeam({{ $team->id }})" />
-                            @auth
-                                @if(!auth()->user()->isOrganizer())
-                                    <x-mary-button label="Откликнуться" class="btn-secondary" wire:click="quickApplyTeam({{ $team->id }})" />
-                                @endif
-                            @endauth
-                        </x-slot:actions>
-
-                    </x-mary-card>
-                @empty
-                    <div class="sm:col-span-2 card card-border bg-base-100">
-                        <div class="card-body items-center text-center">
-                            <h3 class="card-title">Команды не найдены</h3>
-                            <p class="text-base-content/70">
-                                Попробуйте изменить параметры поиска или сбросить фильтры.
-                            </p>
-                            <div class="flex gap-2 mt-2">
-                                <x-mary-button class="btn-outline btn-sm" wire:click="$set('hackaton_id', '0'); $set('role_id', '0'); search();">
-                                    Показать все публичные
-                                </x-mary-button>
-                                <x-mary-button class="btn-outline btn-sm" wire:click="$set('sort', 'start_soonest'); search();">
-                                    Ближайший старт
-                                </x-mary-button>
-                            </div>
-                            <x-mary-button class="btn-primary btn-sm mt-2" wire:click="clearFilters">
-                                Сбросить фильтры
-                            </x-mary-button>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
-            {{$this->teams->links(data: ['scrollTo' => false])}}
-        </div>
+    <div wire:loading class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" wire:target="{{ $loadingTargets }}">
+        @foreach (range(1, 6) as $_)
+            <x-team-card-skeleton />
+        @endforeach
     </div>
 
+    <div wire:loading.remove wire:target="{{ $loadingTargets }}">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            @forelse ($this->teams as $team)
+                @php
+                    $vacantRoleNames = $team->roles
+                        ->whereNull('user_id')
+                        ->pluck('role.name')
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
+                    $skillTags = $team->roles
+                        ->whereNull('user_id')
+                        ->flatMap(fn ($r) => $r->skills)
+                        ->unique('id')
+                        ->take(5)
+                        ->pluck('name')
+                        ->filter()
+                        ->values()
+                        ->all();
+                    $canQuickApply =
+                        auth()->check()
+                        && ! auth()->user()->isOrganizer()
+                        && (int) $team->user_id !== auth()->id();
+                    $participantUsers = $team->roles
+                        ->filter(fn ($r) => $r->user_id && $r->relationLoaded('user') && $r->user)
+                        ->map(fn ($r) => $r->user)
+                        ->unique('id')
+                        ->values()
+                        ->take(4);
+                @endphp
+                <div wire:key="team-wrap-{{ $team->id }}">
+                    <x-team-card
+                        :team="$team"
+                        :can-quick-apply="$canQuickApply"
+                        :vacant-role-names="$vacantRoleNames"
+                        :skill-tags="$skillTags"
+                        :participant-users="$participantUsers"
+                    />
+                </div>
+            @empty
+                <div class="col-span-full">
+                    <div class="mx-auto flex max-w-lg flex-col items-center gap-6 rounded-3xl border border-base-300 bg-base-100 px-6 py-12 text-center shadow-sm">
+                        <div class="text-primary" aria-hidden="true">
+                            <svg class="h-40 w-full max-w-56" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="tg" x1="0" y1="0" x2="200" y2="160" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="currentColor" stop-opacity="0.35" />
+                                        <stop offset="1" stop-color="currentColor" stop-opacity="0.05" />
+                                    </linearGradient>
+                                </defs>
+                                <rect width="200" height="160" rx="16" fill="url(#tg)" />
+                                <path d="M20 40h160M20 80h160M20 120h160" stroke="currentColor" stroke-opacity="0.2" stroke-width="1" />
+                                <path d="M40 20v120M80 20v120M120 20v120M160 20v120" stroke="currentColor" stroke-opacity="0.15" stroke-width="1" />
+                                <circle cx="100" cy="78" r="28" stroke="currentColor" stroke-opacity="0.5" stroke-width="2" fill="none" />
+                                <path d="M88 78l8 8 16-16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="space-y-2">
+                            <h2 class="font-display text-xl font-semibold text-base-content">Пока ничего не нашлось</h2>
+                            <p class="text-sm leading-relaxed text-base-content/70">
+                                Измените фильтры или создайте свою команду — участники смогут откликнуться на вакансии.
+                            </p>
+                        </div>
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <a href="/teams/create" wire:navigate class="btn btn-primary">Создать команду</a>
+                            <button type="button" class="btn btn-outline" wire:click="clearFilters">Сбросить фильтры</button>
+                        </div>
+                    </div>
+                </div>
+            @endforelse
+        </div>
+
+        @if ($this->teams->isNotEmpty())
+            <div class="mt-6">{{ $this->teams->links(data: ['scrollTo' => false]) }}</div>
+        @endif
+    </div>
 </div>

@@ -44,13 +44,40 @@ test('hackatons page supports status filter and quick apply', function () {
         ->exists())->toBeTrue();
 });
 
-test('teams page shows cards only without removed filter controls', function () {
+test('teams page renders catalog hero and tabs', function () {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
         ->test('pages::teams.index')
-        ->assertDontSee('Таблица')
-        ->assertDontSee('Только открытые к вступлению');
+        ->assertSee('Открытые команды')
+        ->assertSee('Все команды')
+        ->assertSee('Найдено')
+        ->assertDontSee('Таблица');
+});
+
+test('teams catalog all tab shows full teams when open roles filter off', function () {
+    $viewer = User::factory()->create();
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $hackaton = Hackaton::factory()->create();
+    $team = Team::factory()->for($owner)->for($hackaton)->create([
+        'is_public' => true,
+        'title' => 'FullyStaffedUniqueXYZ',
+    ]);
+    $role = Role::factory()->create();
+    TeamRole::factory()->for($team)->for($role)->create(['user_id' => $member->id]);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::teams.index')
+        ->set('catalog_tab', 'all')
+        ->set('only_open_roles', false)
+        ->assertSee('FullyStaffedUniqueXYZ');
+
+    Livewire::actingAs($viewer)
+        ->test('pages::teams.index')
+        ->set('catalog_tab', 'all')
+        ->set('only_open_roles', true)
+        ->assertDontSee('FullyStaffedUniqueXYZ');
 });
 
 test('teams page quick apply creates pending application', function () {

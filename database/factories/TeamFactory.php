@@ -24,6 +24,7 @@ class TeamFactory extends Factory
             'title' => fake()->company(),
             'description' => fake()->sentence(10),
             'image_url' => 'team_photos/default.png',
+            'cover_image' => null,
             'hackaton_id' => Hackaton::factory(),
             'is_public' => true,
         ];
