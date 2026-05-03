@@ -14,6 +14,13 @@ test('guest sees marketing landing on home', function () {
     $response->assertOk();
     $response->assertSee('Найдите команду. Проведите хакатон.', false);
     $response->assertDontSee('Краткая сводка', false);
+    $response->assertDontSee('Популярные команды', false);
+    $response->assertSee('Активные хакатоны', false);
+    $response->assertSee('Платформа в цифрах', false);
+    $response->assertSee('Как это работает', false);
+    $response->assertSee('Отзывы участников', false);
+    $response->assertSee('Первые хакатоны уже скоро!', false);
+    $response->assertSee('Следите за обновлениями — скоро здесь появятся интересные события.', false);
 });
 
 test('authenticated participant sees dashboard summary on home', function () {

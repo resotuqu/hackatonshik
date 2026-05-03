@@ -3,6 +3,7 @@
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\Team;
+use App\Models\TeamRole;
 use App\Models\User;
 use App\ViewModels\HomeDashboardData;
 use Illuminate\Support\Facades\Auth;
@@ -14,17 +15,12 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
     /** @var array<int, Hackaton> */
     public array $featuredHackatons = [];
 
-    /** @var array<int, Team> */
-    public array $featuredTeams = [];
-
-    public int $publicActiveHackatonsCount = 0;
+    /** Публичные хакатоны (все статусы кроме черновика), включая завершённые и в архиве */
+    public int $publicHackatonsCount = 0;
 
     public int $publicParticipantsCount = 0;
 
     public int $publicTeamsCount = 0;
-
-    /** @var list<array{path: string, alt: string}> */
-    public array $homeCarouselImages = [];
 
     public int $teamsCount = 0;
 
@@ -71,13 +67,15 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
 
     public function mount(): void
     {
-        $this->homeCarouselImages = [
-            ['path' => url('/logo.svg'), 'alt' => 'Хакатонщик'],
-            ['path' => url('/hackatonshik.svg'), 'alt' => 'Платформа для хакатонов'],
-            ['path' => url('/logo.svg'), 'alt' => 'Сообщество участников'],
-        ];
-
         $this->featuredHackatons = Hackaton::query()
+            ->select('hackatons.*')
+            ->selectSub(function ($query) {
+                $query->from('team_roles')
+                    ->join('teams', 'teams.id', '=', 'team_roles.team_id')
+                    ->whereColumn('teams.hackaton_id', 'hackatons.id')
+                    ->whereNotNull('team_roles.user_id')
+                    ->selectRaw('count(*)');
+            }, 'participants_aggregate')
             ->where('is_public', true)
             ->whereIn('status', [
                 HackatonStatus::PUBLISHED,
@@ -85,33 +83,48 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
                 HackatonStatus::IN_PROGRESS,
                 HackatonStatus::JUDGING,
             ])
+            ->withCount('teams')
             ->latest('start_at')
             ->limit(4)
             ->get()
             ->all();
 
-        $this->featuredTeams = Team::query()
-            ->with(['hackaton:id,title,status', 'roles:id,team_id,user_id'])
-            ->whereHas('hackaton', fn ($query) => $query->where('is_public', true))
-            ->latest('updated_at')
-            ->limit(4)
-            ->get()
-            ->all();
-
-        $totals = Cache::remember('home-public-totals', now()->addMinutes(10), function (): array {
-            $activeHackatons = Hackaton::query()
+        // Все публичные события кроме черновика (в т.ч. завершённые и в архиве) + суммарно команды и участники по ним.
+        $totals = Cache::remember('home-public-totals-v3', now()->addMinutes(10), function (): array {
+            $hackatonsCount = Hackaton::query()
                 ->where('is_public', true)
-                ->whereIn('status', [HackatonStatus::REGISTRATION_OPEN, HackatonStatus::IN_PROGRESS, HackatonStatus::JUDGING])
-                ->get();
+                ->whereNot('status', HackatonStatus::DRAFT)
+                ->count();
+
+            $teamsCount = Team::query()
+                ->whereExists(function ($query): void {
+                    $query->selectRaw('1')
+                        ->from('hackatons')
+                        ->whereColumn('hackatons.id', 'teams.hackaton_id')
+                        ->where('hackatons.is_public', true)
+                        ->whereNot('hackatons.status', HackatonStatus::DRAFT);
+                })
+                ->count();
+
+            $participantsCount = TeamRole::query()
+                ->whereNotNull('user_id')
+                ->whereExists(function ($query): void {
+                    $query->from('teams')
+                        ->join('hackatons', 'hackatons.id', '=', 'teams.hackaton_id')
+                        ->whereColumn('teams.id', 'team_roles.team_id')
+                        ->where('hackatons.is_public', true)
+                        ->whereNot('hackatons.status', HackatonStatus::DRAFT);
+                })
+                ->count();
 
             return [
-                'active_hackatons' => $activeHackatons->count(),
-                'participants' => $activeHackatons->sum(fn (Hackaton $hackaton) => $hackaton->participantsCount()),
-                'teams' => $activeHackatons->sum(fn (Hackaton $hackaton) => $hackaton->teamsCount()),
+                'hackatons' => $hackatonsCount,
+                'participants' => $participantsCount,
+                'teams' => $teamsCount,
             ];
         });
 
-        $this->publicActiveHackatonsCount = (int) ($totals['active_hackatons'] ?? 0);
+        $this->publicHackatonsCount = (int) ($totals['hackatons'] ?? 0);
         $this->publicParticipantsCount = (int) ($totals['participants'] ?? 0);
         $this->publicTeamsCount = (int) ($totals['teams'] ?? 0);
 
@@ -133,98 +146,405 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
 ?>
 
 @guest
-<div class="mx-auto w-full max-w-7xl space-y-12">
-    <section id="start" class="relative overflow-hidden rounded-3xl border border-primary/20 bg-base-100 px-4 py-12 shadow-lg shadow-primary/5 sm:py-16">
-        <div class="pointer-events-none absolute inset-0 opacity-90" aria-hidden="true" style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.18), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"></div>
-        <div class="relative">
-            <div class="mx-auto max-w-4xl text-center">
-                <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+<div class="mx-auto w-full max-w-7xl space-y-20 sm:space-y-24 xl:space-y-28">
+    {{-- Hero --}}
+    <section
+        id="start"
+        class="relative min-h-[26rem] overflow-hidden rounded-3xl border border-primary/25 bg-base-100 shadow-xl shadow-primary/10 transition-all duration-700 ease-out sm:min-h-[30rem] lg:min-h-[70vh] lg:max-h-[min(90vh,56rem)]"
+        x-data="{ shown: false }"
+        x-init="requestAnimationFrame(() => { shown = true })"
+        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'"
+    >
+        <div class="pointer-events-none absolute inset-0 opacity-90" aria-hidden="true" style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.22), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"></div>
+        <div class="relative flex min-h-[inherit] flex-col gap-8 px-5 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
+            <div class="flex max-w-xl flex-1 flex-col justify-center lg:max-w-[min(36rem,50%)] lg:text-left">
+                <h1 class="font-display text-5xl font-bold leading-[1.06] tracking-tight sm:text-6xl lg:text-7xl">
                     Найдите команду. Проведите хакатон.
                 </h1>
-                <p class="mx-auto mt-4 max-w-2xl text-lg text-base-content/80">
-                    Хакатонщик помогает участникам, командам и организаторам на всём пути — от поиска единомышленников до финальной защиты и вручения сертификатов.
+                <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/85 sm:text-lg">
+                    Хакатонщик помогает участникам, командам и организаторам пройти весь путь — от поиска единомышленников до финальной защиты и вручения сертификатов.
                 </p>
-                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-                    <a href="/teams" class="btn btn-primary btn-lg">Найти команду</a>
-                    <a href="/hackatons/create" class="btn btn-secondary btn-lg">Создать хакатон</a>
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
+                    <a
+                        href="/hackatons/create"
+                        class="btn btn-secondary btn-lg order-1 text-base shadow-xl shadow-secondary/30 ring-2 ring-secondary/40 ring-offset-2 ring-offset-base-100 transition-transform hover:scale-[1.02] active:scale-[0.99] sm:text-lg sm:order-2"
+                    >
+                        Создать хакатон
+                    </a>
+                    <a href="/teams" class="btn btn-primary btn-lg order-2 btn-outline border-primary/50 sm:order-1">
+                        Найти команду
+                    </a>
+                </div>
+            </div>
+            <div class="relative flex max-w-[18rem] flex-1 shrink-0 items-center justify-center self-center sm:max-w-[20rem] lg:max-w-[min(24rem,40%)] lg:justify-end lg:scale-95">
+                <div class="relative aspect-square w-full max-w-full">
+                    <div class="absolute inset-6 rounded-[2rem] bg-gradient-to-br from-secondary/20 via-primary/12 to-base-300/70 blur-2xl" aria-hidden="true"></div>
+                    <div class="relative flex h-full w-full items-center justify-center rounded-3xl border border-base-300/80 bg-base-200/40 p-4 shadow-inner backdrop-blur-sm sm:p-5">
+                        <img
+                            src="{{ url('/hackatonshik.svg') }}"
+                            alt=""
+                            class="h-auto w-full max-h-[min(18rem,42vh)] object-contain drop-shadow-2xl sm:max-h-[min(20rem,48vh)] lg:max-h-[min(22rem,50vh)]"
+                            width="480"
+                            height="480"
+                            loading="eager"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="space-y-4">
-        <h2 class="font-display text-3xl font-bold">Активные хакатоны</h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    {{-- Активные хакатоны --}}
+    <section
+        class="space-y-8 transition-all duration-700 ease-out will-change-transform"
+        x-data="{ shown: false }"
+        x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' }); io.observe($el);"
+        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+    >
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">Активные хакатоны</h2>
+            <a href="/hackatons" class="btn btn-ghost btn-sm gap-2 sm:btn-md">
+                <x-app-icon icon="heroicons:arrow-right" class="h-4 w-4" />
+                Все хакатоны
+            </a>
+        </div>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             @forelse ($featuredHackatons as $hackaton)
-                <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-                    <div class="flex items-start justify-between gap-3">
-                        <a href="{{ route('hackatons.show', $hackaton) }}" class="font-semibold link link-hover">{{ $hackaton->title }}</a>
-                        <span class="badge badge-primary badge-outline">{{ $hackaton->status?->label() }}</span>
+                @php
+                    $hackatonImage = filled($hackaton->image_url)
+                        ? (str_starts_with((string) $hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/'.$hackaton->image_url))
+                        : null;
+                    $teamsTotal = (int) ($hackaton->teams_count ?? 0);
+                    $participantsTotal = (int) ($hackaton->participants_aggregate ?? 0);
+                @endphp
+                <x-mary-card class="card card-border border-base-300 h-full shadow-sm transition-all duration-200 hover:border-primary/35 hover:shadow-lg">
+                    <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
+                        @if ($hackatonImage)
+                            <img src="{{ $hackatonImage }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}" loading="lazy" />
+                        @else
+                            <div class="flex h-full min-h-[10rem] w-full flex-col items-center justify-center gap-2 px-4 text-center text-base-content/50">
+                                <x-app-icon icon="heroicons:photo" class="h-12 w-12 opacity-40" />
+                                <span class="text-sm">Изображение появится позже</span>
+                            </div>
+                        @endif
                     </div>
-                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                        <p class="rounded-lg bg-base-200 px-3 py-2">Команд: <span class="font-medium">{{ $hackaton->teamsCount() }}</span></p>
-                        <p class="rounded-lg bg-base-200 px-3 py-2">Участников: <span class="font-medium">{{ $hackaton->participantsCount() }}</span></p>
+                    <div class="mt-3 flex grow flex-col gap-3">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <a href="{{ route('hackatons.show', $hackaton) }}" class="card-title link-hover link text-lg leading-snug">{{ $hackaton->title }}</a>
+                            <span class="badge badge-primary badge-outline shrink-0">{{ $hackaton->status?->label() }}</span>
+                        </div>
+                        <p class="text-sm text-base-content/75">
+                            @if ($hackaton->start_at && $hackaton->end_at)
+                                {{ $hackaton->start_at->translatedFormat('d.m.Y H:i') }}
+                                —
+                                {{ $hackaton->end_at->translatedFormat('d.m.Y H:i') }}
+                            @endif
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="badge badge-neutral gap-1">
+                                <x-app-icon icon="heroicons:user-group" class="h-3.5 w-3.5" />
+                                Команд: {{ $teamsTotal }}
+                            </span>
+                            <span class="badge badge-neutral gap-1">
+                                <x-app-icon icon="heroicons:users" class="h-3.5 w-3.5" />
+                                Участников: {{ $participantsTotal }}
+                            </span>
+                        </div>
                     </div>
-                </article>
+                    <x-slot:actions class="mt-auto pt-2">
+                        <a href="{{ route('hackatons.show', $hackaton) }}" class="btn btn-primary btn-sm">Подробнее</a>
+                    </x-slot:actions>
+                </x-mary-card>
             @empty
-                <p class="text-base-content/70">Активные хакатоны скоро появятся.</p>
+                <div class="sm:col-span-2">
+                    <div class="card card-border border-base-300 border-dashed bg-base-100/80 bg-gradient-to-br from-base-200/80 to-base-100 shadow-sm">
+                        <div class="card-body flex flex-col items-center gap-6 px-6 py-14 text-center sm:flex-row sm:text-left">
+                            <div class="flex h-36 w-36 shrink-0 items-center justify-center rounded-3xl bg-secondary/10 ring-1 ring-secondary/25">
+                                <x-app-icon icon="heroicons:rocket-launch" class="h-16 w-16 text-secondary" label="Скоро новые хакатоны" />
+                            </div>
+                            <div class="max-w-lg space-y-4">
+                                <h3 class="font-display text-xl font-bold sm:text-2xl">Первые хакатоны уже скоро!</h3>
+                                <p class="text-base leading-relaxed text-base-content/75">Следите за обновлениями — скоро здесь появятся интересные события.</p>
+                                <a href="/hackatons" class="btn btn-secondary btn-lg mt-2 w-full shadow-md shadow-secondary/25 ring-2 ring-secondary/25 ring-offset-2 ring-offset-base-100 transition-transform hover:scale-[1.02] active:scale-[0.99] sm:mt-0 sm:w-auto">
+                                    Открыть каталог
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endforelse
         </div>
     </section>
 
-    <section class="space-y-4">
-        <h2 class="font-display text-3xl font-bold">Популярные команды</h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            @forelse ($featuredTeams as $team)
-                <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-                    <a href="{{ route('teams.show', $team) }}" class="font-semibold link link-hover">{{ $team->title }}</a>
-                    <p class="mt-1 text-sm text-base-content/70">{{ $team->hackaton?->title }}</p>
-                    <p class="mt-3 text-sm">Участников в команде: <span class="font-medium">{{ $team->participantsCount() }}</span></p>
-                </article>
-            @empty
-                <p class="text-base-content/70">Публичные команды скоро появятся.</p>
-            @endforelse
+    {{-- Платформа в цифрах --}}
+    <section
+        id="home-stats"
+        class="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm transition-all duration-700 ease-out will-change-transform sm:p-8"
+        x-data="{
+            reveal: false,
+            active: 0,
+            participants: 0,
+            teams: 0,
+            started: false,
+            start() {
+                const self = this;
+                const io = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            self.reveal = true;
+                            self.animate();
+                            io.disconnect();
+                        }
+                    });
+                }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+                io.observe(this.$el);
+            },
+            animate() {
+                if (this.started) {
+                    return;
+                }
+                this.started = true;
+                const root = this;
+                const run = (prop, target) => {
+                    let current = 0;
+                    const step = Math.max(1, Math.ceil(target / 45));
+                    const timer = setInterval(() => {
+                        current += step;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        root[prop] = current;
+                    }, 24);
+                };
+                run('active', {{ $publicHackatonsCount }});
+                run('participants', {{ $publicParticipantsCount }});
+                run('teams', {{ $publicTeamsCount }});
+            },
+        }"
+        x-init="start()"
+        :class="reveal ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+    >
+        <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">Платформа в цифрах</h2>
+        <p class="mt-2 max-w-2xl text-base-content/70">Учитываются все публичные хакатоны на платформе — текущие, предстоящие, завершённые и в архиве (кроме черновиков).</p>
+        <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+            <div
+                class="rounded-2xl border border-base-300/80 bg-base-200/50 p-6 text-center transition-all duration-500 ease-out hover:border-secondary/30 sm:p-7"
+                :class="reveal ? 'translate-y-0 opacity-100 delay-75' : 'translate-y-6 opacity-0'"
+            >
+                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+                    <x-app-icon icon="heroicons:trophy" class="h-10 w-10" label="Хакатоны на платформе" />
+                </div>
+                <p class="text-base font-semibold text-base-content/90">Хакатонов</p>
+                <p class="mt-3 text-5xl font-bold tabular-nums tracking-tight text-base-content sm:text-6xl" x-text="active"></p>
+            </div>
+            <div
+                class="rounded-2xl border border-base-300/80 bg-base-200/50 p-6 text-center transition-all duration-500 ease-out hover:border-secondary/30 sm:p-7"
+                :class="reveal ? 'translate-y-0 opacity-100 delay-150' : 'translate-y-6 opacity-0'"
+            >
+                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
+                    <x-app-icon icon="heroicons:users" class="h-10 w-10" label="Участники" />
+                </div>
+                <p class="text-base font-semibold text-base-content/90">Участников</p>
+                <p class="mt-3 text-5xl font-bold tabular-nums tracking-tight text-base-content sm:text-6xl" x-text="participants"></p>
+            </div>
+            <div
+                class="rounded-2xl border border-base-300/80 bg-base-200/50 p-6 text-center transition-all duration-500 ease-out hover:border-secondary/30 sm:p-7"
+                :class="reveal ? 'translate-y-0 opacity-100 delay-200' : 'translate-y-6 opacity-0'"
+            >
+                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-accent/15 text-accent">
+                    <x-app-icon icon="heroicons:user-group" class="h-10 w-10" label="Команды" />
+                </div>
+                <p class="text-base font-semibold text-base-content/90">Команд</p>
+                <p class="mt-3 text-5xl font-bold tabular-nums tracking-tight text-base-content sm:text-6xl" x-text="teams"></p>
+            </div>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-base-300 bg-base-100 p-6" x-data="{ active: 0, participants: 0, teams: 0 }" x-init="const animate=(key,target)=>{let current=0;const step=Math.max(1,Math.ceil(target/45));const timer=setInterval(()=>{current+=step;if(current>=target){current=target;clearInterval(timer);} if(key==='active'){active=current;} if(key==='participants'){participants=current;} if(key==='teams'){teams=current;}}, 24)}; animate('active', {{ $publicActiveHackatonsCount }}); animate('participants', {{ $publicParticipantsCount }}); animate('teams', {{ $publicTeamsCount }});">
-        <h2 class="font-display text-3xl font-bold">Платформа в цифрах</h2>
-        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="rounded-xl bg-base-200 p-4 text-center">
-                <p class="text-sm text-base-content/70">Активных хакатонов</p>
-                <p class="text-3xl font-bold tabular-nums" x-text="active"></p>
+    <div
+        class="transition-all duration-700 ease-out will-change-transform"
+        x-data="{ shown: false }"
+        x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.06 }); io.observe($el);"
+        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+    >
+        <livewire:home-how-it-works />
+    </div>
+
+    {{-- Отзывы: snap-карусель до lg, сетка на больших экранах --}}
+    <section
+        class="space-y-8 transition-all duration-700 ease-out will-change-transform"
+        x-data="{
+            shown: false,
+            tIdx: 0,
+            tPrev() { this.tIdx = (this.tIdx + 2) % 3 },
+            tNext() { this.tIdx = (this.tIdx + 1) % 3 },
+        }"
+        x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.08 }); io.observe($el);"
+        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+    >
+        <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">Отзывы участников</h2>
+
+        <div class="lg:hidden">
+            <div class="overflow-hidden rounded-3xl border border-base-300 bg-base-100/50 shadow-sm">
+                <div
+                    class="flex transition-transform duration-300 ease-out"
+                    :style="'transform: translateX(-' + (tIdx * 100) + '%)'"
+                >
+                    <article class="flex w-full shrink-0 flex-col p-7 sm:p-8">
+                        <div class="flex items-center gap-4">
+                            <img
+                                src="https://ui-avatars.com/api/?name=Анна+К.&background=a4f01d&color=16181d&size=160"
+                                alt=""
+                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                                width="64"
+                                height="64"
+                                loading="lazy"
+                            />
+                            <div>
+                                <p class="font-semibold leading-tight">Анна К.</p>
+                                <p class="text-xs text-base-content/60">Участница, продукт</p>
+                            </div>
+                        </div>
+                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                            «Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»
+                        </blockquote>
+                    </article>
+                    <article class="flex w-full shrink-0 flex-col p-7 sm:p-8">
+                        <div class="flex items-center gap-4">
+                            <img
+                                src="https://ui-avatars.com/api/?name=Михаил+Т.&background=5170ff&color=ffffff&size=160"
+                                alt=""
+                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                                width="64"
+                                height="64"
+                                loading="lazy"
+                            />
+                            <div>
+                                <p class="font-semibold leading-tight">Михаил Т.</p>
+                                <p class="text-xs text-base-content/60">Разработчик</p>
+                            </div>
+                        </div>
+                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                            «Удобно следить за дедлайнами и анонсами без десятка чатов.»
+                        </blockquote>
+                    </article>
+                    <article class="flex w-full shrink-0 flex-col p-7 sm:p-8">
+                        <div class="flex items-center gap-4">
+                            <img
+                                src="https://ui-avatars.com/api/?name=Елена+В.&background=374151&color=f3f4f6&size=160"
+                                alt=""
+                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                                width="64"
+                                height="64"
+                                loading="lazy"
+                            />
+                            <div>
+                                <p class="font-semibold leading-tight">Елена В.</p>
+                                <p class="text-xs text-base-content/60">Организатор</p>
+                            </div>
+                        </div>
+                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                            «Организаторам стало проще модерировать команды и заявки.»
+                        </blockquote>
+                    </article>
+                </div>
             </div>
-            <div class="rounded-xl bg-base-200 p-4 text-center">
-                <p class="text-sm text-base-content/70">Участников</p>
-                <p class="text-3xl font-bold tabular-nums" x-text="participants"></p>
+            <div class="mt-4 flex items-center justify-center gap-3">
+                <button type="button" class="btn btn-circle btn-ghost btn-sm border border-base-300" aria-label="Предыдущий отзыв" @click="tPrev()">
+                    <x-app-icon icon="heroicons:chevron-left" class="h-5 w-5" />
+                </button>
+                <div class="flex gap-2">
+                    <button type="button" class="h-2.5 w-2.5 rounded-full transition-colors" :class="tIdx === 0 ? 'bg-secondary' : 'bg-base-300'" aria-label="Отзыв 1" @click="tIdx = 0"></button>
+                    <button type="button" class="h-2.5 w-2.5 rounded-full transition-colors" :class="tIdx === 1 ? 'bg-secondary' : 'bg-base-300'" aria-label="Отзыв 2" @click="tIdx = 1"></button>
+                    <button type="button" class="h-2.5 w-2.5 rounded-full transition-colors" :class="tIdx === 2 ? 'bg-secondary' : 'bg-base-300'" aria-label="Отзыв 3" @click="tIdx = 2"></button>
+                </div>
+                <button type="button" class="btn btn-circle btn-ghost btn-sm border border-base-300" aria-label="Следующий отзыв" @click="tNext()">
+                    <x-app-icon icon="heroicons:chevron-right" class="h-5 w-5" />
+                </button>
             </div>
-            <div class="rounded-xl bg-base-200 p-4 text-center">
-                <p class="text-sm text-base-content/70">Команд</p>
-                <p class="text-3xl font-bold tabular-nums" x-text="teams"></p>
-            </div>
+        </div>
+
+        <div class="hidden gap-8 lg:grid lg:grid-cols-3">
+            <article class="flex flex-col rounded-3xl border border-base-300 bg-base-100 p-7 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md sm:p-8">
+                <div class="flex items-center gap-4">
+                    <img
+                        src="https://ui-avatars.com/api/?name=Анна+К.&background=a4f01d&color=16181d&size=160"
+                        alt=""
+                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                        width="64"
+                        height="64"
+                        loading="lazy"
+                    />
+                    <div>
+                        <p class="font-semibold leading-tight">Анна К.</p>
+                        <p class="text-xs text-base-content/60">Участница, продукт</p>
+                    </div>
+                </div>
+                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                    «Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»
+                </blockquote>
+            </article>
+            <article class="flex flex-col rounded-3xl border border-base-300 bg-base-100 p-7 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md sm:p-8">
+                <div class="flex items-center gap-4">
+                    <img
+                        src="https://ui-avatars.com/api/?name=Михаил+Т.&background=5170ff&color=ffffff&size=160"
+                        alt=""
+                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                        width="64"
+                        height="64"
+                        loading="lazy"
+                    />
+                    <div>
+                        <p class="font-semibold leading-tight">Михаил Т.</p>
+                        <p class="text-xs text-base-content/60">Разработчик</p>
+                    </div>
+                </div>
+                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                    «Удобно следить за дедлайнами и анонсами без десятка чатов.»
+                </blockquote>
+            </article>
+            <article class="flex flex-col rounded-3xl border border-base-300 bg-base-100 p-7 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md sm:p-8">
+                <div class="flex items-center gap-4">
+                    <img
+                        src="https://ui-avatars.com/api/?name=Елена+В.&background=374151&color=f3f4f6&size=160"
+                        alt=""
+                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                        width="64"
+                        height="64"
+                        loading="lazy"
+                    />
+                    <div>
+                        <p class="font-semibold leading-tight">Елена В.</p>
+                        <p class="text-xs text-base-content/60">Организатор</p>
+                    </div>
+                </div>
+                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                    «Организаторам стало проще модерировать команды и заявки.»
+                </blockquote>
+            </article>
         </div>
     </section>
 
-    <livewire:home-how-it-works />
-
-    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <article class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-            <h2 class="font-display text-2xl font-bold">Отзывы участников</h2>
-            <div class="mt-4 space-y-3">
-                <blockquote class="rounded-lg border border-base-300 bg-base-200/60 p-3 text-sm">«Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»</blockquote>
-                <blockquote class="rounded-lg border border-base-300 bg-base-200/60 p-3 text-sm">«Удобно следить за дедлайнами и анонсами без десятка чатов.»</blockquote>
-                <blockquote class="rounded-lg border border-base-300 bg-base-200/60 p-3 text-sm">«Организаторам стало проще модерировать команды и заявки.»</blockquote>
-            </div>
-        </article>
-        <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-            <x-image-carousel
-                carousel-id="home-hero-carousel"
-                :items="$homeCarouselImages"
-                aspect-class="aspect-[16/10]"
-                empty-text="Изображения появятся позже"
+    <div class="mt-14 flex justify-center border-t border-base-300/60 px-4 pb-2 pt-10 sm:mt-16 sm:pt-12">
+        <a href="{{ route('home') }}" class="block w-1/2 max-w-[50%] shrink-0" aria-label="Хакатонщик — на главную">
+            <img
+                src="{{ url('/logo_white.svg') }}"
+                onerror="this.onerror=null;this.src='{{ url('/logo.svg') }}';"
+                alt="Хакатонщик"
+                class="block h-auto w-full object-contain group-data-[theme=hackatonshik-light]:hidden"
+                loading="lazy"
+                decoding="async"
             />
-        </article>
-    </section>
+            <img
+                src="{{ url('/logo_black.svg') }}"
+                onerror="this.onerror=null;this.src='{{ url('/logo.svg') }}';"
+                alt="Хакатонщик"
+                class="hidden h-auto w-full object-contain group-data-[theme=hackatonshik-light]:block"
+                loading="lazy"
+                decoding="async"
+            />
+        </a>
+    </div>
 
     @php
         $schema = [
