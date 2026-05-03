@@ -36,7 +36,7 @@ Route::livewire('/contacts', 'pages::contacts.index');
 Route::livewire('/privacy-policy', 'pages::privacy-policy.index');
 Route::livewire('/cookie-policy', 'pages::cookie-policy.index');
 
-Route::livewire('/login', 'pages::auth.login');
+Route::livewire('/login', 'pages::auth.login')->name('login');
 Route::livewire('/register', 'pages::auth.register');
 Route::livewire('/profile', 'pages::profile.index')->middleware(['auth', 'verified']);
 Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'verified', 'can:access-admin']);
