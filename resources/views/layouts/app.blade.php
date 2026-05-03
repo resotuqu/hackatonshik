@@ -1,6 +1,6 @@
 @php use Illuminate\Support\Facades\Auth; @endphp
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="group">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
