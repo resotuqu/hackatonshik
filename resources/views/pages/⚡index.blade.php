@@ -11,10 +11,6 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Component {
-    public string $heroQuery = '';
-
-    public string $heroSearchType = 'hackatons';
-
     /** @var array<int, Hackaton> */
     public array $featuredHackatons = [];
 
@@ -132,20 +128,6 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
             $this->{$key} = $value;
         }
     }
-
-    public function heroSearch(): void
-    {
-        $query = trim($this->heroQuery);
-        $params = $query === '' ? [] : ['q' => $query];
-
-        if ($this->heroSearchType === 'teams') {
-            $this->redirect(route('teams.index', $params));
-
-            return;
-        }
-
-        $this->redirect(route('hackatons.index', $params));
-    }
 };
 
 ?>
@@ -154,39 +136,19 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
 <div class="mx-auto w-full max-w-7xl space-y-12">
     <section id="start" class="relative overflow-hidden rounded-3xl border border-primary/20 bg-base-100 px-4 py-12 shadow-lg shadow-primary/5 sm:py-16">
         <div class="pointer-events-none absolute inset-0 opacity-90" aria-hidden="true" style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.18), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"></div>
-        <div class="relative space-y-8">
+        <div class="relative">
             <div class="mx-auto max-w-4xl text-center">
                 <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                    Найдите команду. Запустите хакатон. Ведите всё в одном месте.
+                    Найдите команду. Проведите хакатон.
                 </h1>
                 <p class="mx-auto mt-4 max-w-2xl text-lg text-base-content/80">
-                    Хакатонщик соединяет участников, команды и организаторов: от первой заявки до финальной защиты и сертификатов.
+                    Хакатонщик помогает участникам, командам и организаторам на всём пути — от поиска единомышленников до финальной защиты и вручения сертификатов.
                 </p>
                 <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
                     <a href="/teams" class="btn btn-primary btn-lg">Найти команду</a>
                     <a href="/hackatons/create" class="btn btn-secondary btn-lg">Создать хакатон</a>
                 </div>
             </div>
-
-            <form wire:submit="heroSearch" class="mx-auto w-full max-w-2xl rounded-2xl border border-base-300 bg-base-100/90 p-4 shadow-md backdrop-blur-sm">
-                <div class="flex flex-col gap-3 sm:flex-row">
-                    <x-mary-input
-                        wire:model.live.debounce.250ms="heroQuery"
-                        placeholder="Поиск хакатонов и команд"
-                        icon="o-magnifying-glass"
-                        class="w-full"
-                    />
-                    <x-maryselect
-                        wire:model.live="heroSearchType"
-                        :options="[
-                            ['id' => 'hackatons', 'name' => 'Хакатоны'],
-                            ['id' => 'teams', 'name' => 'Команды'],
-                        ]"
-                        class="w-full sm:max-w-48"
-                    />
-                    <x-mary-button label="Искать" class="btn-primary sm:min-w-28" type="submit" />
-                </div>
-            </form>
         </div>
     </section>
 

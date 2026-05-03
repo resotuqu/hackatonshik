@@ -12,7 +12,7 @@ test('guest sees marketing landing on home', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Путь участника и организатора в одном месте', false);
+    $response->assertSee('Найдите команду. Проведите хакатон.', false);
     $response->assertDontSee('Краткая сводка', false);
 });
 
