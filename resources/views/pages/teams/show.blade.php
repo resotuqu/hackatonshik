@@ -32,6 +32,24 @@
             <span class="max-w-[min(100%,12rem)] truncate text-base-content/50 sm:max-w-md" title="{{ $team->title }}">{{ $team->title }}</span>
         </nav>
 
+        <div class="tabs tabs-boxed w-full overflow-x-auto" role="tablist" aria-label="Разделы команды" data-tab-list="team">
+            <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="team-panel-overview" data-tab-trigger="team" data-tab-value="overview">
+                Обзор
+            </button>
+            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="team-panel-roles" data-tab-trigger="team" data-tab-value="roles">
+                Роли
+            </button>
+            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="team-panel-members" data-tab-trigger="team" data-tab-value="members">
+                Состав
+            </button>
+            @if ($team->user_id === auth()->id())
+                <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="team-panel-applications" data-tab-trigger="team" data-tab-value="applications">
+                    Заявки
+                </button>
+            @endif
+        </div>
+
+        <section id="team-panel-overview" role="tabpanel" data-tab-panel="team" data-tab-value="overview">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="card overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm lg:col-span-2">
                 <figure class="aspect-video w-full bg-base-200">
@@ -48,7 +66,7 @@
                     <h1 class="card-title text-3xl">{{ $team->title }}</h1>
                     <div class="flex flex-wrap items-center gap-3">
                         @if ($canHeroApply)
-                            <a href="#team-open-roles" class="{{ $heroApplyBtn }}">Подать заявку</a>
+                            <a href="#team-tab-roles" class="{{ $heroApplyBtn }}">Подать заявку</a>
                         @endif
                         @guest
                             <a href="/login" class="btn btn-ghost btn-sm border border-base-300/80">Войти</a>
@@ -114,7 +132,9 @@
                 </div>
             </div>
         </div>
+        </section>
 
+        <section id="team-panel-roles" role="tabpanel" class="hidden" data-tab-panel="team" data-tab-value="roles">
         <div id="team-open-roles" class="scroll-mt-24">
             <div class="{{ $sectionCard }}">
                 <div class="card-body">
@@ -191,8 +211,9 @@
                 </div>
             </div>
         </div>
+        </section>
 
-        {{-- Участники: публичный grid --}}
+        <section id="team-panel-members" role="tabpanel" class="hidden" data-tab-panel="team" data-tab-value="members">
         <div class="{{ $sectionCard }}">
             <div class="card-body">
                 <h2 class="card-title text-xl">Участники</h2>
@@ -239,8 +260,10 @@
                 @endif
             </div>
         </div>
+        </section>
 
         @if ($team->user_id === auth()->id())
+            <section id="team-panel-applications" role="tabpanel" class="hidden" data-tab-panel="team" data-tab-value="applications">
             <div class="{{ $sectionCard }}">
                 <div class="card-body">
                     <h2 class="card-title text-xl">Заявки на вступление</h2>
@@ -307,6 +330,61 @@
                     @endif
                 </div>
             </div>
+            </section>
         @endif
     </div>
+
+    <script>
+        (function () {
+            const setupTabGroup = (groupName, fallbackTab) => {
+                const triggers = Array.from(document.querySelectorAll(`[data-tab-trigger="${groupName}"]`));
+                const panels = Array.from(document.querySelectorAll(`[data-tab-panel="${groupName}"]`));
+
+                if (triggers.length === 0 || panels.length === 0) {
+                    return;
+                }
+
+                const availableTabs = new Set(triggers.map((trigger) => trigger.dataset.tabValue));
+                const hash = window.location.hash;
+                const hashPrefix = `#${groupName}-tab-`;
+                const requestedTab = hash.startsWith(hashPrefix) ? hash.slice(hashPrefix.length) : null;
+                let activeTab = requestedTab && availableTabs.has(requestedTab) ? requestedTab : fallbackTab;
+
+                if (!availableTabs.has(activeTab)) {
+                    activeTab = triggers[0].dataset.tabValue;
+                }
+
+                const setActiveTab = (tabValue, replace = false) => {
+                    if (!availableTabs.has(tabValue)) {
+                        return;
+                    }
+
+                    triggers.forEach((trigger) => {
+                        const isActive = trigger.dataset.tabValue === tabValue;
+                        trigger.classList.toggle('tab-active', isActive);
+                        trigger.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    });
+
+                    panels.forEach((panel) => {
+                        panel.classList.toggle('hidden', panel.dataset.tabValue !== tabValue);
+                    });
+
+                    const nextHash = `${hashPrefix}${tabValue}`;
+                    if (replace) {
+                        history.replaceState(null, '', nextHash);
+                    } else {
+                        history.pushState(null, '', nextHash);
+                    }
+                };
+
+                triggers.forEach((trigger) => {
+                    trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
+                });
+
+                setActiveTab(activeTab, true);
+            };
+
+            setupTabGroup('team', 'overview');
+        })();
+    </script>
 @endsection

@@ -110,15 +110,15 @@
 
         <div class="drawer-side z-40">
             <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
-            <aside class="flex min-h-full w-72 flex-col border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
-                <div class="flex items-center justify-between gap-2">
+            <aside class="flex min-h-full w-72 flex-col overflow-x-visible border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
+                <div class="relative flex items-center justify-between gap-2">
                     <x-app-brand class="min-h-0 border-0 p-0 hover:bg-transparent" img-class="h-8 w-auto max-w-[12rem] sm:h-9" />
                     @auth
                         @php
                             $unreadNotificationsCount = Auth::user()->unreadNotifications()->count();
                             $recentNotifications = Auth::user()->notifications()->latest()->limit(5)->get();
                         @endphp
-                        <div class="dropdown dropdown-end">
+                        <div class="dropdown dropdown-end dropdown-bottom">
                             <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
                                 <div class="indicator">
                                     <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
@@ -127,7 +127,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <div tabindex="-1" class="card card-compact dropdown-content bg-base-100 z-50 mt-3 w-80 border border-base-200 shadow-xl">
+                            <div tabindex="-1" class="card card-compact dropdown-content z-50 mt-3 w-[min(20rem,calc(100vw-2rem))] max-w-[min(20rem,calc(100vw-2rem))] border border-base-200 bg-base-100 shadow-xl">
                                 <div class="card-body gap-2">
                                     <div class="flex items-center justify-between">
                                         <p class="font-medium">Уведомления</p>

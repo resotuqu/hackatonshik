@@ -77,15 +77,30 @@
             </ul>
         </div>
 
-        <div class="tabs tabs-boxed w-full overflow-x-auto">
-            <a href="#hackaton-description" class="tab">Описание</a>
-            <a href="#hackaton-cases" class="tab">Кейсы</a>
-            <a href="#hackaton-announcements" class="tab">Анонсы</a>
-            <a href="#hackaton-participants" class="tab">Участники</a>
-            <a href="#hackaton-judges" class="tab">Судьи</a>
-            <a href="#hackaton-documents" class="tab">Документы</a>
+        <div class="tabs tabs-boxed w-full overflow-x-auto" role="tablist" aria-label="Разделы хакатона" data-tab-list="hackaton">
+            <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="hackaton-panel-description" data-tab-trigger="hackaton" data-tab-value="description">
+                Описание
+            </button>
+            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-documents" data-tab-trigger="hackaton" data-tab-value="documents">
+                Документы
+            </button>
+            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-announcements" data-tab-trigger="hackaton" data-tab-value="announcements">
+                Анонсы
+            </button>
+            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-cases" data-tab-trigger="hackaton" data-tab-value="cases">
+                Кейсы
+            </button>
+            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-participants" data-tab-trigger="hackaton" data-tab-value="participants">
+                Участники
+            </button>
+            @if($isOrganizer || $isAssignedJudge)
+                <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-organization" data-tab-trigger="hackaton" data-tab-value="organization">
+                    Организация
+                </button>
+            @endif
         </div>
 
+        <section id="hackaton-panel-description" role="tabpanel" data-tab-panel="hackaton" data-tab-value="description">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 card bg-base-100 border border-base-200 shadow-sm">
                 <div class="p-4 pb-0">
@@ -196,9 +211,9 @@
                 </div>
             </div>
         </div>
+        </section>
 
-        <div class="divider">Для участников</div>
-
+        <section id="hackaton-panel-documents" role="tabpanel" class="hidden" data-tab-panel="hackaton" data-tab-value="documents">
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body">
                 <h2 class="card-title text-xl">Документы хакатона</h2>
@@ -224,7 +239,9 @@
                 @endif
             </div>
         </div>
+        </section>
 
+        <section id="hackaton-panel-announcements" role="tabpanel" class="hidden" data-tab-panel="hackaton" data-tab-value="announcements">
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body space-y-4">
                 <div class="flex items-center justify-between gap-3">
@@ -311,8 +328,10 @@
                 @endif
             </div>
         </div>
+        </section>
 
-        <div id="hackaton-cases" class="card bg-base-100 border border-base-200 shadow-sm">
+        <section id="hackaton-panel-cases" role="tabpanel" class="hidden space-y-4" data-tab-panel="hackaton" data-tab-value="cases">
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body space-y-4">
                 <h2 class="card-title text-xl">Кейсы</h2>
 
@@ -516,8 +535,10 @@
                 <span>Чтобы подать заявку на участие команды, <a class="link link-primary" href="/login">войдите в аккаунт</a>.</span>
             </div>
         @endguest
+        </section>
 
         @if($isOrganizer || $isAssignedJudge)
+            <section id="hackaton-panel-organization" role="tabpanel" class="hidden space-y-6" data-tab-panel="hackaton" data-tab-value="organization">
             <div class="divider">{{ $isOrganizer ? 'Для организатора' : 'Для судьи' }}</div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -762,10 +783,12 @@
                     @endif
                 </div>
             </div>
+            </section>
         @endif
 
-        @if($isOrganizer)
-            <div id="organizer-team-applications" class="card bg-base-100 border border-base-200 shadow-sm">
+        <section id="hackaton-panel-participants" role="tabpanel" class="hidden" data-tab-panel="hackaton" data-tab-value="participants">
+            @if($isOrganizer)
+            <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-xl">Заявки команд</h2>
                     <form method="GET" class="my-3 flex items-center gap-2">
@@ -850,11 +873,69 @@
                     @endif
                 </div>
             </div>
-        @endif
+            @else
+                <div class="card bg-base-100 border border-base-200 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl">Участники хакатона</h2>
+                        <p class="text-base-content/70">Статистика участников доступна в разделе «Описание». Для заявок вашей команды используйте карточку «Информация о хакатоне».</p>
+                    </div>
+                </div>
+            @endif
+        </section>
     </div>
 
     <script>
         (function () {
+            const setupTabGroup = (groupName, fallbackTab) => {
+                const triggers = Array.from(document.querySelectorAll(`[data-tab-trigger="${groupName}"]`));
+                const panels = Array.from(document.querySelectorAll(`[data-tab-panel="${groupName}"]`));
+
+                if (triggers.length === 0 || panels.length === 0) {
+                    return;
+                }
+
+                const availableTabs = new Set(triggers.map((trigger) => trigger.dataset.tabValue));
+                const hash = window.location.hash;
+                const hashPrefix = `#${groupName}-tab-`;
+                const requestedTab = hash.startsWith(hashPrefix) ? hash.slice(hashPrefix.length) : null;
+                let activeTab = requestedTab && availableTabs.has(requestedTab) ? requestedTab : fallbackTab;
+
+                if (!availableTabs.has(activeTab)) {
+                    activeTab = triggers[0].dataset.tabValue;
+                }
+
+                const setActiveTab = (tabValue, replace = false) => {
+                    if (!availableTabs.has(tabValue)) {
+                        return;
+                    }
+
+                    triggers.forEach((trigger) => {
+                        const isActive = trigger.dataset.tabValue === tabValue;
+                        trigger.classList.toggle('tab-active', isActive);
+                        trigger.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    });
+
+                    panels.forEach((panel) => {
+                        panel.classList.toggle('hidden', panel.dataset.tabValue !== tabValue);
+                    });
+
+                    const nextHash = `${hashPrefix}${tabValue}`;
+                    if (replace) {
+                        history.replaceState(null, '', nextHash);
+                    } else {
+                        history.pushState(null, '', nextHash);
+                    }
+                };
+
+                triggers.forEach((trigger) => {
+                    trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
+                });
+
+                setActiveTab(activeTab, true);
+            };
+
+            setupTabGroup('hackaton', 'description');
+
             const carousels = document.querySelectorAll('[data-image-carousel]');
 
             carousels.forEach((carousel) => {
