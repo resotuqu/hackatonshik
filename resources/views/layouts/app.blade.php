@@ -46,12 +46,18 @@
         <input id="main-nav-drawer" type="checkbox" class="drawer-toggle" />
 
         <div class="drawer-content flex min-h-screen flex-col">
-            <header class="navbar border-b border-base-200 bg-base-100/95 px-3 shadow-sm backdrop-blur-sm sm:px-4 lg:hidden">
-                <div class="flex min-w-0 flex-1 items-center gap-2">
+            <header class="navbar min-h-12 border-b border-base-200 bg-base-100/95 px-3 shadow-sm backdrop-blur-sm sm:min-h-14 sm:px-4 lg:hidden">
+                <div class="flex w-full min-w-0 flex-1 items-center gap-2">
                     <label for="main-nav-drawer" class="btn btn-ghost btn-circle drawer-button shrink-0" aria-label="Открыть меню">
                         <x-app-icon icon="heroicons:bars-3" class="h-5 w-5" />
                     </label>
-                    <x-app-brand class="min-h-0 min-w-0 border-0 p-0 hover:bg-transparent" img-class="h-7 w-auto max-w-[min(100%,11rem)] sm:h-8" />
+                    <div class="flex h-10 min-h-0 min-w-0 flex-1 items-stretch sm:h-11">
+                        <x-app-brand
+                            :wide="true"
+                            class="h-full min-h-0 min-w-0 border-0 p-0 hover:bg-transparent"
+                            img-class="h-full w-full object-cover object-left"
+                        />
+                    </div>
                 </div>
             </header>
 
@@ -111,79 +117,87 @@
         <div class="drawer-side z-40">
             <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
             <aside class="flex min-h-full w-72 flex-col overflow-x-visible border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
-                <div class="relative flex items-center justify-between gap-2">
-                    <x-app-brand class="min-h-0 border-0 p-0 hover:bg-transparent" img-class="h-8 w-auto max-w-[12rem] sm:h-9" />
+                <div class="relative flex shrink-0 flex-col gap-2">
+                    <div class="w-full">
+                        <x-app-brand
+                            :wide="true"
+                            class="min-h-0 border-0 p-0 hover:bg-transparent"
+                            img-class="h-auto w-full object-contain object-left"
+                        />
+                    </div>
                     @auth
                         @php
                             $unreadNotificationsCount = Auth::user()->unreadNotifications()->count();
                             $recentNotifications = Auth::user()->notifications()->latest()->limit(5)->get();
                         @endphp
-                        <div class="dropdown dropdown-end dropdown-bottom">
-                            <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
-                                <div class="indicator">
-                                    <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
-                                    @if($unreadNotificationsCount > 0)
-                                        <span class="badge badge-xs badge-error indicator-item">{{ min($unreadNotificationsCount, 9) }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div tabindex="-1" class="card card-compact dropdown-content z-50 mt-3 w-[min(20rem,calc(100vw-2rem))] max-w-[min(20rem,calc(100vw-2rem))] border border-base-200 bg-base-100 shadow-xl">
-                                <div class="card-body gap-2">
-                                    <div class="flex items-center justify-between">
-                                        <p class="font-medium">Уведомления</p>
+                        <div class="flex justify-end gap-2">
+                            <div class="dropdown dropdown-end dropdown-bottom">
+                                <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
+                                    <div class="indicator">
+                                        <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
                                         @if($unreadNotificationsCount > 0)
-                                            <form method="POST" action="{{ route('notifications.read-all') }}">
-                                                @csrf
-                                                <button type="submit" class="btn btn-ghost btn-xs">Прочитать все</button>
-                                            </form>
+                                            <span class="badge badge-xs badge-error indicator-item">{{ min($unreadNotificationsCount, 9) }}</span>
                                         @endif
                                     </div>
-                                    @if($recentNotifications->isEmpty())
-                                        <p class="text-sm text-base-content/70">Пока нет уведомлений.</p>
-                                    @else
-                                        <div class="space-y-2">
-                                            @foreach($recentNotifications as $notification)
-                                                @php
-                                                    $notificationData = $notification->data ?? [];
-                                                    $notificationUrl = $notificationData['url'] ?? route('home');
-                                                    $notificationTitle = $notificationData['title'] ?? 'Новое уведомление';
-                                                    $notificationMessage = $notificationData['message'] ?? null;
-                                                @endphp
-                                                <div class="rounded-lg border border-base-200 p-2 {{ $notification->read_at ? 'opacity-80' : 'bg-base-200/40' }}">
-                                                    <a href="{{ $notificationUrl }}" class="block">
-                                                        <p class="text-sm font-medium">{{ $notificationTitle }}</p>
-                                                        @if(filled($notificationMessage))
-                                                            <p class="text-xs text-base-content/70">{{ $notificationMessage }}</p>
-                                                        @endif
-                                                    </a>
-                                                    @if($notification->read_at === null)
-                                                        <form method="POST" action="{{ route('notifications.read', $notification) }}" class="mt-1">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-ghost btn-xs px-1">Отметить прочитанным</button>
-                                                        </form>
-                                                    @endif
-                                                </div>
-                                            @endforeach
+                                </div>
+                                <div tabindex="-1" class="card card-compact dropdown-content z-50 mt-3 w-[min(20rem,calc(100vw-2rem))] max-w-[min(20rem,calc(100vw-2rem))] border border-base-200 bg-base-100 shadow-xl">
+                                    <div class="card-body gap-2">
+                                        <div class="flex items-center justify-between">
+                                            <p class="font-medium">Уведомления</p>
+                                            @if($unreadNotificationsCount > 0)
+                                                <form method="POST" action="{{ route('notifications.read-all') }}">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-ghost btn-xs">Прочитать все</button>
+                                                </form>
+                                            @endif
                                         </div>
-                                    @endif
+                                        @if($recentNotifications->isEmpty())
+                                            <p class="text-sm text-base-content/70">Пока нет уведомлений.</p>
+                                        @else
+                                            <div class="space-y-2">
+                                                @foreach($recentNotifications as $notification)
+                                                    @php
+                                                        $notificationData = $notification->data ?? [];
+                                                        $notificationUrl = $notificationData['url'] ?? route('home');
+                                                        $notificationTitle = $notificationData['title'] ?? 'Новое уведомление';
+                                                        $notificationMessage = $notificationData['message'] ?? null;
+                                                    @endphp
+                                                    <div class="rounded-lg border border-base-200 p-2 {{ $notification->read_at ? 'opacity-80' : 'bg-base-200/40' }}">
+                                                        <a href="{{ $notificationUrl }}" class="block">
+                                                            <p class="text-sm font-medium">{{ $notificationTitle }}</p>
+                                                            @if(filled($notificationMessage))
+                                                                <p class="text-xs text-base-content/70">{{ $notificationMessage }}</p>
+                                                            @endif
+                                                        </a>
+                                                        @if($notification->read_at === null)
+                                                            <form method="POST" action="{{ route('notifications.read', $notification) }}" class="mt-1">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-ghost btn-xs px-1">Отметить прочитанным</button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="dropdown dropdown-end">
-                            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                                <div class="w-10 rounded-full">
-                                    <img alt="Аватар пользователя" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
+                            <div class="dropdown dropdown-end">
+                                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                                    <div class="w-10 rounded-full">
+                                        <img alt="Аватар пользователя" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
+                                    </div>
                                 </div>
+                                <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                                    <li><a href="/profile">Профиль</a></li>
+                                    <li class="w-full">
+                                        <form class="w-full" method="post" action="/logout">
+                                            @csrf
+                                            <button class="w-full text-left" type="submit">Выйти</button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </div>
-                            <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                                <li><a href="/profile">Профиль</a></li>
-                                <li class="w-full">
-                                    <form class="w-full" method="post" action="/logout">
-                                        @csrf
-                                        <button class="w-full text-left" type="submit">Выйти</button>
-                                    </form>
-                                </li>
-                            </ul>
                         </div>
                     @endauth
                 </div>

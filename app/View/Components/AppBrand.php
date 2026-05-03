@@ -14,6 +14,7 @@ class AppBrand extends Component
 {
     public function __construct(
         public string $imgClass = 'h-8 w-auto sm:h-9',
+        public bool $wide = false,
     ) {}
 
     public function render(): View

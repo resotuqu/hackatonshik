@@ -1,6 +1,6 @@
 <a
     href="{{ route('home') }}"
-    {{ $attributes->merge(['class' => 'inline-flex shrink-0 items-center']) }}
+    {{ $attributes->merge(['class' => $wide ? 'flex w-full min-w-0 items-stretch justify-start' : 'inline-flex shrink-0 items-center']) }}
     aria-label="Хакатонщик — на главную"
 >
     <img
@@ -8,8 +8,13 @@
         onerror="this.onerror=null;this.src='/logo.svg';"
         alt="Хакатонщик"
         class="{{ $imgClass }} block group-data-[theme=hackatonshik-light]:hidden"
-        width="240"
-        height="48"
+        @if ($wide)
+            width="1500"
+            height="750"
+        @else
+            width="240"
+            height="48"
+        @endif
         loading="eager"
         decoding="async"
     />
@@ -18,8 +23,13 @@
         onerror="this.onerror=null;this.src='/logo.svg';"
         alt="Хакатонщик"
         class="{{ $imgClass }} hidden group-data-[theme=hackatonshik-light]:block"
-        width="240"
-        height="48"
+        @if ($wide)
+            width="1500"
+            height="750"
+        @else
+            width="240"
+            height="48"
+        @endif
         loading="eager"
         decoding="async"
     />
