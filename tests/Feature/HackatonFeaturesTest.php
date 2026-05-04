@@ -25,7 +25,7 @@ test('hackaton show page renders without participant collection type errors', fu
     $response = $this->get(route('hackatons.show', $hackaton));
 
     $response->assertOk();
-    $response->assertViewIs('pages.hackatons.show');
+    $response->assertSee($hackaton->title, false);
 });
 
 test('organizer can create a case for own hackaton', function () {
