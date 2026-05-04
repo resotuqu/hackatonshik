@@ -6,4 +6,4 @@ parameters:
         - app
         - routes
     level: 5
-    tmpDir: storage/phpstan
+    tmpDir: storage/framework/phpstan

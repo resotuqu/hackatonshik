@@ -1,5 +1,11 @@
 /.phpunit.cache
 /node_modules
+/junit.xml
+/junit-profile.xml
+/out.log
+/database/database.sqlite
+/storage/phpstan
+/storage/framework/phpstan
 /public/build
 /public/hot
 /public/storage
