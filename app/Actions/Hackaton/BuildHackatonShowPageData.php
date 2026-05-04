@@ -29,6 +29,7 @@ final class BuildHackatonShowPageData
 
         $isOrganizer = $user !== null && Gate::forUser($user)->allows('update', $hackaton);
         $isAssignedJudge = $user !== null && $hackaton->isJudge($user);
+        $needsOrganizationInsights = $isOrganizer || $isAssignedJudge;
 
         $hackaton->loadShowRelations();
         $hackaton->setRelation('announcements', $hackaton->announcements()
@@ -48,20 +49,34 @@ final class BuildHackatonShowPageData
                         ->orWhere('publish_at', '<=', now());
                 }))
             ->get());
-        $hackaton->setRelation('certificates', $hackaton->certificates()->with('user')->get());
+        if ($isOrganizer) {
+            $hackaton->setRelation('certificates', $hackaton->certificates()->with('user')->get());
+        } else {
+            $hackaton->setRelation('certificates', collect());
+        }
+
+        $this->hydrateHackatonApplicationsRelation($hackaton, $user, $isOrganizer);
 
         $availableTeams = $this->resolveAvailableTeams();
         $submitterTeams = $this->resolveSubmitterTeams($hackaton);
-        $participantUsers = $this->resolveParticipantUsers($hackaton);
+        $participantUsers = $isOrganizer
+            ? $this->resolveParticipantUsers($hackaton)
+            : collect();
         $applicationStatusFilter = $request->string('applications_status')->toString();
-        $applications = $hackaton->applications()
-            ->with(['team', 'reviewer'])
-            ->when($applicationStatusFilter !== '', fn (Builder $query) => $query->where('status', $applicationStatusFilter))
-            ->latest()
-            ->get();
+        $applications = $isOrganizer
+            ? $hackaton->applications()
+                ->with(['team', 'reviewer'])
+                ->when($applicationStatusFilter !== '', fn (Builder $query) => $query->where('status', $applicationStatusFilter))
+                ->latest()
+                ->get()
+            : collect();
 
-        $metrics = $this->buildMetrics($hackaton);
-        $leaderboard = $this->buildLeaderboard($hackaton);
+        $metrics = $needsOrganizationInsights
+            ? $this->buildMetrics($hackaton)
+            : $this->emptyMetrics();
+        $leaderboard = $needsOrganizationInsights
+            ? $this->buildLeaderboard($hackaton)
+            : collect();
 
         $judgeCandidates = $isOrganizer
             ? User::query()
@@ -132,7 +147,7 @@ final class BuildHackatonShowPageData
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{team: ?\App\Models\Team, total_score: int, max_score: int, progress_percent: int}>
+     * @return Collection<int, array{team: ?Team, total_score: int, max_score: int, progress_percent: int}>
      */
     private function buildLeaderboard(Hackaton $hackaton): Collection
     {
@@ -226,5 +241,49 @@ final class BuildHackatonShowPageData
             ->values();
 
         return $participants;
+    }
+
+    private function hydrateHackatonApplicationsRelation(Hackaton $hackaton, ?User $user, bool $isOrganizer): void
+    {
+        if ($isOrganizer) {
+            $hackaton->setRelation(
+                'applications',
+                $hackaton->applications()->with(['team', 'reviewer'])->latest()->get(),
+            );
+
+            return;
+        }
+
+        if ($user === null) {
+            $hackaton->setRelation('applications', collect());
+
+            return;
+        }
+
+        $myTeamIds = $user->teams()->pluck('id');
+        $hackaton->setRelation(
+            'applications',
+            $hackaton->applications()
+                ->whereIn('team_id', $myTeamIds)
+                ->with(['team', 'reviewer'])
+                ->latest()
+                ->get(),
+        );
+    }
+
+    /**
+     * @return array<string, int|float>
+     */
+    private function emptyMetrics(): array
+    {
+        return [
+            'applications_total' => 0,
+            'applications_pending' => 0,
+            'applications_accepted' => 0,
+            'applications_rejected' => 0,
+            'submissions_total' => 0,
+            'submissions_scored' => 0,
+            'submissions_scored_percent' => 0,
+        ];
     }
 }

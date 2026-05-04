@@ -71,7 +71,7 @@
             </ul>
         </div>
 
-        <div class="tabs tabs-boxed w-full overflow-x-auto" role="tablist" aria-label="Разделы хакатона" data-tab-list="hackaton">
+        <div class="tabs tabs-boxed w-full overflow-x-auto scroll-smooth focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2 rounded-lg" role="tablist" aria-label="Разделы хакатона" data-tab-list="hackaton">
             <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="hackaton-panel-description" data-tab-trigger="hackaton" data-tab-value="description">
                 Описание
             </button>
@@ -107,7 +107,7 @@
                 <div class="card-body">
                     <h1 class="card-title text-3xl">{{ $hackaton->title }}</h1>
                     <div class="prose max-w-none prose-sm sm:prose-base">
-                        {!! \Illuminate\Support\Str::markdown($hackaton->description ?? 'Описание отсутствует.') !!}
+                        {!! \App\Support\SafeMarkdown::toHtml($hackaton->description ?? 'Описание отсутствует.') !!}
                     </div>
                 </div>
             </div>
@@ -707,6 +707,7 @@
                 </div>
             @endif
 
+            @if($isOrganizer)
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -777,6 +778,7 @@
                     @endif
                 </div>
             </div>
+            @endif
             </section>
         @endif
 
@@ -907,6 +909,7 @@
                         const isActive = trigger.dataset.tabValue === tabValue;
                         trigger.classList.toggle('tab-active', isActive);
                         trigger.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                        trigger.tabIndex = isActive ? 0 : -1;
                     });
 
                     panels.forEach((panel) => {
@@ -923,6 +926,29 @@
 
                 triggers.forEach((trigger) => {
                     trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
+                    trigger.addEventListener('keydown', (event) => {
+                        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) {
+                            return;
+                        }
+                        event.preventDefault();
+                        const index = triggers.indexOf(trigger);
+                        if (index === -1) {
+                            return;
+                        }
+                        let nextIndex = index;
+                        if (event.key === 'ArrowRight') {
+                            nextIndex = (index + 1) % triggers.length;
+                        } else if (event.key === 'ArrowLeft') {
+                            nextIndex = (index - 1 + triggers.length) % triggers.length;
+                        } else if (event.key === 'Home') {
+                            nextIndex = 0;
+                        } else if (event.key === 'End') {
+                            nextIndex = triggers.length - 1;
+                        }
+                        const nextTrigger = triggers[nextIndex];
+                        setActiveTab(nextTrigger.dataset.tabValue);
+                        nextTrigger.focus();
+                    });
                 });
 
                 setActiveTab(activeTab, true);
