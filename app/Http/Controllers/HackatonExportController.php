@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Hackaton;
@@ -15,6 +17,8 @@ class HackatonExportController extends Controller
     public function teams(Hackaton $hackaton): StreamedResponse
     {
         $this->authorizeOrganizer($hackaton);
+
+        @set_time_limit(120);
 
         $teams = $hackaton->teams()->with(['user:id,fio,email,nickname', 'roles:id,team_id,user_id'])->get();
         $filename = "hackaton_{$hackaton->id}_teams.csv";
@@ -41,6 +45,8 @@ class HackatonExportController extends Controller
     {
         $this->authorizeOrganizer($hackaton);
 
+        @set_time_limit(120);
+
         $participants = $this->resolveParticipants($hackaton);
         $filename = "hackaton_{$hackaton->id}_participants.csv";
 
@@ -65,6 +71,8 @@ class HackatonExportController extends Controller
     public function documentsZip(Hackaton $hackaton): StreamedResponse|RedirectResponse
     {
         $this->authorizeOrganizer($hackaton);
+
+        @set_time_limit(300);
 
         $documents = UserHackatonDocument::query()
             ->whereHas('hackatonDocument', fn ($query) => $query->where('hackaton_id', $hackaton->id))

@@ -9,7 +9,6 @@ use App\Models\HackatonCaseSubmission;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 
 final class BuildParticipantHackatonHubPageData
 {
@@ -54,9 +53,20 @@ final class BuildParticipantHackatonHubPageData
         $upcomingCases = $hackaton->cases()
             ->whereNotNull('deadline_at')
             ->where('deadline_at', '>', now())
+            ->where('is_published', true)
+            ->where(function (Builder $scheduleQuery): void {
+                $scheduleQuery
+                    ->whereNull('publish_at')
+                    ->orWhere('publish_at', '<=', now());
+            })
             ->orderBy('deadline_at')
             ->limit(5)
             ->get(['id', 'title', 'deadline_at']);
+
+        $myCertificates = $hackaton->certificates()
+            ->where('user_id', $user->id)
+            ->orderByDesc('issued_at')
+            ->get(['id', 'title', 'issued_at']);
 
         return [
             'teams' => $teams,
@@ -64,6 +74,7 @@ final class BuildParticipantHackatonHubPageData
             'submissions' => $submissions,
             'requiredDocuments' => $requiredDocuments,
             'upcomingCases' => $upcomingCases,
+            'myCertificates' => $myCertificates,
         ];
     }
 }
