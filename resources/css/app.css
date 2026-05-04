@@ -195,6 +195,23 @@
     @apply text-primary underline
 }
 
+.EasyMDEContainer .CodeMirror {
+    @apply bg-base-200 text-base-content border-base-300 rounded-lg
+}
+
+.EasyMDEContainer .editor-toolbar {
+    @apply bg-base-200 border-base-300 rounded-t-lg
+}
+
+.EasyMDEContainer .editor-toolbar button:hover {
+    @apply bg-primary/15 text-primary
+}
+
+.EasyMDEContainer .editor-preview,
+.EasyMDEContainer .editor-preview-side {
+    @apply bg-base-100 text-base-content border-base-300
+}
+
 
 
 

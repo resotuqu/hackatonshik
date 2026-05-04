@@ -1,12 +1,14 @@
 <?php
 
+use App\Enums\ApplicationStatus;
+use App\Models\TeamApplication;
 use App\Services\ContactChangeService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Livewire\WithFileUploads;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 new #[Layout('layouts::app', ['title' => 'Профиль'])]
 class extends Component {
@@ -360,105 +362,419 @@ class extends Component {
     }
 
     #[Computed]
-    public function certificates()
+    public function profileCompletenessPercent(): int
     {
-        return Auth::user()?->certificates()->with('hackaton')->latest('issued_at')->get() ?? collect();
+        $user = Auth::user();
+        if (! $user) {
+            return 0;
+        }
+
+        $checks = [
+            filled($user->fio),
+            filled($user->date_of_birth),
+            filled($user->avatar_path),
+            filled($user->description),
+            ! is_null($user->email_verified_at),
+            ! is_null($user->phone_verified_at),
+        ];
+
+        return (int) round((array_sum(array_map('intval', $checks)) / count($checks)) * 100);
     }
 
     #[Computed]
-    public function recentAnnouncements()
+    public function joinedTeamsCount(): int
     {
-        return Auth::user()?->notifications()->latest()->limit(5)->get() ?? collect();
+        $user = Auth::user();
+        if (! $user) {
+            return 0;
+        }
+
+        return TeamApplication::query()
+            ->where('team_applications.user_id', $user->id)
+            ->where('team_applications.status', ApplicationStatus::ACCEPTED)
+            ->join('team_roles', 'team_applications.team_role_id', '=', 'team_roles.id')
+            ->distinct('team_roles.team_id')
+            ->count('team_roles.team_id');
+    }
+
+    #[Computed]
+    public function joinedHackatonsCount(): int
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return 0;
+        }
+
+        return TeamApplication::query()
+            ->where('team_applications.user_id', $user->id)
+            ->where('team_applications.status', ApplicationStatus::ACCEPTED)
+            ->join('team_roles', 'team_applications.team_role_id', '=', 'team_roles.id')
+            ->join('teams', 'team_roles.team_id', '=', 'teams.id')
+            ->whereNotNull('teams.hackaton_id')
+            ->distinct('teams.hackaton_id')
+            ->count('teams.hackaton_id');
     }
 };
 ?>
 
-<div class="mx-auto w-full max-w-6xl space-y-4">
+@php
+    $authUser = auth()->user();
+    $avatarUrl = $avatar
+        ? $avatar->temporaryUrl()
+        : ($avatar_path
+            ? asset('storage/'.$avatar_path)
+            : 'https://ui-avatars.com/api/?name='.urlencode($authUser->fio).'&background=random');
+    $completeness = $this->profileCompletenessPercent;
+    $tips = [];
+    if (! filled($authUser->fio)) { $tips[] = 'Укажите ФИО'; }
+    if (! filled($authUser->date_of_birth)) { $tips[] = 'Заполните дату рождения'; }
+    if (! filled($authUser->avatar_path)) { $tips[] = 'Загрузите аватар'; }
+    if (! filled($authUser->description)) { $tips[] = 'Добавьте описание о себе'; }
+    if (is_null($authUser->email_verified_at)) { $tips[] = 'Подтвердите электронную почту'; }
+    if (is_null($authUser->phone_verified_at)) { $tips[] = 'Подтвердите номер телефона'; }
+@endphp
+
+<div class="mx-auto w-full max-w-6xl space-y-6">
     <x-marytoast />
 
-    <div class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs">
         <ul>
             <li><a href="/">Главная</a></li>
             <li class="opacity-70">Профиль</li>
         </ul>
-    </div>
+    </nav>
 
-    <div class="tabs tabs-boxed w-full max-w-3xl mx-auto">
+    <div class="tabs tabs-boxed w-full overflow-x-auto">
         <a class="tab tab-active">Личные данные</a>
         <a class="tab" href="/profile/teams">Мои команды</a>
         <a class="tab" href="/profile/hackatons">Мои хакатоны</a>
         <a class="tab" href="/profile/certificates">Сертификаты</a>
-        <a class="tab">Настройки приватности</a>
     </div>
 
-    <x-mary-card title="Профиль" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
-        <x-maryform wire:submit="save">
-            <div class="rounded-xl border border-base-300 p-4 space-y-3">
-                <p class="text-sm font-medium">Аватар профиля</p>
-                <div class="flex items-center gap-3">
-                    <div class="avatar">
-                        <div class="w-16 rounded-full border border-base-300">
-                            <img
-                                src="{{ $avatar ? $avatar->temporaryUrl() : ($avatar_path ? asset('storage/'.$avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->fio).'&background=random') }}"
-                                alt="Аватар пользователя"
-                            />
+    {{-- HERO --}}
+    <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-linear-to-br from-base-100 via-base-100 to-primary/15 p-6 shadow-sm lg:p-8">
+        <div class="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-secondary/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
+
+        <div class="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+            <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+                <div class="avatar">
+                    <div class="w-32 rounded-full ring-2 ring-secondary/40 ring-offset-2 ring-offset-base-100 sm:w-36">
+                        <img src="{{ $avatarUrl }}" alt="Аватар пользователя" />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <span class="badge badge-primary badge-outline">{{ $role }}</span>
+                    <h1 class="font-display text-3xl font-semibold tracking-tight lg:text-4xl">
+                        {{ $fio ?: 'Без имени' }}
+                    </h1>
+                    <p class="text-base text-base-content/70">{{ '@'.$nickname }}</p>
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/75">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="font-semibold text-secondary">{{ $this->joinedHackatonsCount }}</span>
+                            хакатонов
+                        </span>
+                        <span class="text-base-content/30">·</span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="font-semibold text-secondary">{{ $this->joinedTeamsCount }}</span>
+                            команд
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-5 md:flex-col md:items-end">
+                <div class="radial-progress text-secondary" style="--value:{{ $completeness }};--size:5rem;--thickness:6px" role="progressbar" aria-valuenow="{{ $completeness }}" aria-valuemin="0" aria-valuemax="100">
+                    <span class="text-sm font-semibold text-base-content">{{ $completeness }}%</span>
+                </div>
+                <a href="{{ route('profile.public.show', ['user' => $authUser->nickname]) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline btn-secondary">
+                    <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
+                    Посмотреть как другие
+                </a>
+            </div>
+        </div>
+
+        <div class="relative mt-6 space-y-2">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-base-content/70">Заполненность профиля</span>
+                <span class="font-medium text-secondary">{{ $completeness }}%</span>
+            </div>
+            <progress class="progress progress-secondary w-full" value="{{ $completeness }}" max="100"></progress>
+        </div>
+    </section>
+
+    {{-- 2-col grid --}}
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2">
+            <x-maryform wire:submit="save" class="space-y-6">
+                {{-- Avatar card --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:photo" class="h-5 w-5 text-primary" />
+                            Аватар профиля
+                        </h2>
+                        <div class="flex flex-col items-start gap-4 rounded-2xl border border-dashed border-base-300 p-4 transition hover:border-primary/50 sm:flex-row sm:items-center">
+                            <div class="avatar">
+                                <div class="w-24 rounded-full ring-1 ring-base-300">
+                                    <img src="{{ $avatarUrl }}" alt="Текущий аватар" />
+                                </div>
+                            </div>
+                            <div class="w-full flex-1">
+                                <x-mary-input type="file" wire:model="avatar" accept="image/*" hint="Изображение до 3 МБ" />
+                            </div>
                         </div>
                     </div>
-                    <x-mary-input type="file" wire:model="avatar" accept="image/*" />
+                </section>
+
+                {{-- Personal data --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:identification" class="h-5 w-5 text-primary" />
+                            Личные данные
+                        </h2>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <x-mary-input
+                                label="ФИО"
+                                wire:model="fio"
+                                placeholder="Иванов Иван Иванович"
+                                hint="Формат: Фамилия Имя или Фамилия Имя Отчество"
+                            />
+                            <x-mary-input label="Дата рождения" type="date" wire:model="date_of_birth" />
+                            <x-mary-input label="Никнейм" :value="$nickname" readonly />
+                            <x-mary-input label="Роль" :value="$role" readonly />
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Contacts --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:envelope" class="h-5 w-5 text-primary" />
+                            Контакты
+                        </h2>
+
+                        <div class="space-y-5">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                                <div>
+                                    <x-mary-input label="Электронная почта" :value="$authUser->email" readonly />
+                                    <div class="mt-2">
+                                        @if ($authUser->email_verified_at)
+                                            <span class="badge badge-success badge-sm gap-1">
+                                                <x-app-icon icon="heroicons:check-badge" class="h-3.5 w-3.5" />
+                                                Подтверждён
+                                            </span>
+                                        @else
+                                            <span class="badge badge-warning badge-sm gap-1">
+                                                <x-app-icon icon="heroicons:exclamation-triangle" class="h-3.5 w-3.5" />
+                                                Не подтверждён
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <x-mary-button label="Изменить email" class="btn-outline btn-primary" type="button" wire:click="openEmailChangeModal" />
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                                <div>
+                                    <x-mary-input label="Телефон" :value="$authUser->phone" readonly />
+                                    <div class="mt-2">
+                                        @if ($authUser->phone_verified_at)
+                                            <span class="badge badge-success badge-sm gap-1">
+                                                <x-app-icon icon="heroicons:check-badge" class="h-3.5 w-3.5" />
+                                                Подтверждён
+                                            </span>
+                                        @else
+                                            <span class="badge badge-warning badge-sm gap-1">
+                                                <x-app-icon icon="heroicons:exclamation-triangle" class="h-3.5 w-3.5" />
+                                                Не подтверждён
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <x-mary-button label="Изменить номер" class="btn-outline btn-primary" type="button" wire:click="openPhoneChangeModal" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Description --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:document-text" class="h-5 w-5 text-primary" />
+                            О себе
+                        </h2>
+                        <p class="text-sm text-base-content/70">
+                            Расскажите о навыках, интересах и опыте — этот текст увидят на вашем публичном профиле.
+                        </p>
+                        <div class="rounded-2xl border border-base-300 bg-base-200/40 p-1">
+                            <x-marymarkdown wire:model="description" :config="$this->config" />
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Privacy --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:eye" class="h-5 w-5 text-primary" />
+                            Публичный профиль
+                        </h2>
+                        <div class="space-y-3">
+                            <x-marytoggle label="Профиль виден всем" wire:model="is_profile_public" />
+                            <x-marytoggle label="Показывать email в публичном профиле" wire:model="show_email_on_profile" />
+                            <x-marytoggle label="Показывать телефон в публичном профиле" wire:model="show_phone_on_profile" />
+                        </div>
+                        <div class="rounded-xl bg-primary/10 p-4 ring-1 ring-primary/20">
+                            <p class="font-medium text-primary">Живое превью приватности</p>
+                            <p class="mt-1 text-sm text-base-content/80">
+                                Профиль: <span class="font-medium">{{ $is_profile_public ? 'публичный' : 'скрытый' }}</span>,
+                                email: <span class="font-medium">{{ $show_email_on_profile ? 'виден' : 'скрыт' }}</span>,
+                                телефон: <span class="font-medium">{{ $show_phone_on_profile ? 'виден' : 'скрыт' }}</span>.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Security --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:lock-closed" class="h-5 w-5 text-primary" />
+                            Безопасность
+                        </h2>
+                        <p class="text-sm text-base-content/70">
+                            Заполните только при смене пароля. В остальных случаях оставьте поля пустыми.
+                        </p>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div class="md:col-span-2">
+                                <x-marypassword label="Текущий пароль" wire:model="current_password" />
+                            </div>
+                            <x-marypassword label="Новый пароль" wire:model="new_password" />
+                            <x-marypassword label="Подтверждение нового пароля" wire:model="new_password_confirmation" />
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Desktop save --}}
+                <div class="hidden justify-end gap-3 pt-2 lg:flex">
+                    <x-mary-button label="Сохранить изменения" class="btn-primary btn-lg" type="submit" />
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <x-mary-input
-                    label="ФИО"
-                    wire:model="fio"
-                    placeholder="Иванов Иван Иванович"
-                    hint="Формат: Фамилия Имя или Фамилия Имя Отчество"
-                />
-                <x-mary-input label="Дата рождения" type="date" wire:model="date_of_birth" />
-            </div>
-
-            <x-mary-input label="Никнейм" :value="$nickname" readonly />
-            <x-mary-input label="Роль" :value="$role" readonly />
-
-            <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:items-end">
-                <x-mary-input label="Электронная почта" :value="auth()->user()->email" readonly />
-                <x-mary-button label="Изменить email" class="btn-outline btn-primary" type="button" wire:click="openEmailChangeModal" />
-            </div>
-
-            <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:items-end">
-                <x-mary-input label="Телефон" :value="auth()->user()->phone" readonly />
-                <x-mary-button label="Изменить номер" class="btn-outline btn-primary" type="button" wire:click="openPhoneChangeModal" />
-            </div>
-
-            <x-marymarkdown wire:model="description" label="Описание" :config="$this->config" />
-            <div class="rounded-xl border border-base-300 p-4 space-y-2">
-                <p class="text-sm font-medium">Настройки публичного профиля</p>
-                <x-marytoggle label="Профиль виден всем" wire:model="is_profile_public" />
-                <x-marytoggle label="Показывать email в публичном профиле" wire:model="show_email_on_profile" />
-                <x-marytoggle label="Показывать телефон в публичном профиле" wire:model="show_phone_on_profile" />
-                <a class="link link-primary text-sm" href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener">
-                    Открыть публичный профиль
-                </a>
-                <div class="rounded-lg bg-base-200/60 p-3 text-sm">
-                    <p class="font-medium">Живое превью приватности</p>
-                    <p class="text-base-content/75">
-                        Профиль: {{ $is_profile_public ? 'публичный' : 'скрытый' }},
-                        email: {{ $show_email_on_profile ? 'виден' : 'скрыт' }},
-                        телефон: {{ $show_phone_on_profile ? 'виден' : 'скрыт' }}.
-                    </p>
+                {{-- Mobile sticky save --}}
+                <div class="sticky bottom-0 z-30 -mx-4 flex gap-2 border-t border-base-300 bg-base-100/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+                    <x-mary-button label="Сохранить изменения" class="btn-primary w-full" type="submit" />
                 </div>
-            </div>
+            </x-maryform>
+        </div>
 
-            <x-marypassword label="Текущий пароль (нужен только при смене пароля)" wire:model="current_password" />
-            <x-marypassword label="Новый пароль" wire:model="new_password" />
-            <x-marypassword label="Подтверждение нового пароля" wire:model="new_password_confirmation" />
+        {{-- RIGHT sidebar --}}
+        <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
+            {{-- Verification --}}
+            <section class="card border border-base-300 bg-base-100">
+                <div class="card-body gap-3">
+                    <h2 class="card-title text-base">
+                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 text-secondary" />
+                        Верификация
+                    </h2>
 
-            <x-slot:actions>
-                <x-mary-button label="Сохранить" class="btn-primary" type="submit" />
-            </x-slot:actions>
-        </x-maryform>
-    </x-mary-card>
+                    <div class="flex items-start gap-3 rounded-xl border border-base-300 p-3">
+                        @if ($authUser->email_verified_at)
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+                                <x-app-icon icon="heroicons:check-circle" class="h-5 w-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium">Email подтверждён</p>
+                                <p class="truncate text-xs text-base-content/70">{{ $authUser->email }}</p>
+                            </div>
+                        @else
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
+                                <x-app-icon icon="heroicons:exclamation-triangle" class="h-5 w-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium">Email не подтверждён</p>
+                                <a href="{{ route('verification.notice') }}" class="link link-primary text-xs">Подтвердить почту</a>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="flex items-start gap-3 rounded-xl border border-base-300 p-3">
+                        @if ($authUser->phone_verified_at)
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+                                <x-app-icon icon="heroicons:check-circle" class="h-5 w-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium">Телефон подтверждён</p>
+                                <p class="truncate text-xs text-base-content/70">{{ $authUser->phone }}</p>
+                            </div>
+                        @else
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
+                                <x-app-icon icon="heroicons:exclamation-triangle" class="h-5 w-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium">Телефон не подтверждён</p>
+                                <a href="{{ route('phone.verify.notice') }}" class="link link-primary text-xs">Подтвердить номер</a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </section>
+
+            {{-- Public preview --}}
+            <section class="card border border-base-300 bg-linear-to-br from-base-100 to-primary/5">
+                <div class="card-body gap-4">
+                    <h2 class="card-title text-base">
+                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 text-secondary" />
+                        Как видят другие
+                    </h2>
+                    <div class="rounded-2xl border border-base-300 bg-base-100 p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="avatar">
+                                <div class="w-14 rounded-full ring-1 ring-secondary/30">
+                                    <img src="{{ $avatarUrl }}" alt="Превью аватара" />
+                                </div>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate font-semibold">{{ $fio ?: '—' }}</p>
+                                <p class="truncate text-xs text-base-content/70">{{ '@'.$nickname }}</p>
+                                <span class="badge badge-primary badge-outline badge-sm mt-1">{{ $role }}</span>
+                            </div>
+                        </div>
+                        <p class="mt-3 line-clamp-3 text-xs text-base-content/75">
+                            {{ $description ?: 'Описание пока не заполнено.' }}
+                        </p>
+                    </div>
+                    <a href="{{ route('profile.public.show', ['user' => $authUser->nickname]) }}" target="_blank" rel="noopener" class="btn btn-block btn-sm btn-outline">
+                        <x-app-icon icon="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+                        Открыть публичную страницу
+                    </a>
+                </div>
+            </section>
+
+            {{-- Tips --}}
+            @if (! empty($tips))
+                <section class="card border border-secondary/20 bg-secondary/5">
+                    <div class="card-body gap-3">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-secondary" />
+                            Что добавить
+                        </h2>
+                        <ul class="space-y-2 text-sm">
+                            @foreach ($tips as $tip)
+                                <li class="flex items-start gap-2">
+                                    <x-app-icon icon="heroicons:plus-circle" class="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                                    <span>{{ $tip }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </section>
+            @endif
+        </aside>
+    </div>
 
     <x-mary-modal wire:model="phoneChangeModal" title="Смена номера телефона" class="backdrop-blur">
         <div class="space-y-4">
@@ -527,50 +843,4 @@ class extends Component {
         </div>
     </x-mary-modal>
 
-    <x-mary-card title="Мои сертификаты" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
-        @if($this->certificates->isEmpty())
-            <p class="text-sm text-base-content/70">У вас пока нет загруженных сертификатов.</p>
-        @else
-            <div class="overflow-x-auto">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Хакатон</th>
-                            <th>Сертификат</th>
-                            <th>Дата</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($this->certificates as $certificate)
-                            <tr>
-                                <td>{{ $certificate->hackaton->title }}</td>
-                                <td>{{ $certificate->title }}</td>
-                                <td>{{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</td>
-                                <td class="text-right">
-                                    <a href="{{ route('certificates.download', $certificate) }}" class="btn btn-xs btn-outline">Скачать</a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </x-mary-card>
-
-    <x-mary-card title="Последние анонсы" class="mx-auto w-full max-w-3xl card card-border bg-base-100">
-        @if($this->recentAnnouncements->isEmpty())
-            <p class="text-sm text-base-content/70">Новых уведомлений пока нет.</p>
-        @else
-            <div class="space-y-2">
-                @foreach($this->recentAnnouncements as $notification)
-                    <div class="rounded-lg border border-base-300 p-3">
-                        <p class="font-medium">{{ data_get($notification->data, 'title', 'Анонс') }}</p>
-                        <p class="text-xs text-base-content/70">{{ $notification->created_at?->format('d.m.Y H:i') }}</p>
-                        <a class="link link-primary text-sm" href="{{ data_get($notification->data, 'url', '/hackatons') }}">Открыть хакатон</a>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-    </x-mary-card>
 </div>
