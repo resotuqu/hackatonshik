@@ -6,11 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AssignHackatonJudgeRequest;
 use App\Http\Requests\StoreJudgeInvitationRequest;
+use App\Mail\JudgeInvitationMail;
 use App\Models\Hackaton;
 use App\Models\JudgeInvitation;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class JudgeManagementController extends Controller
@@ -20,7 +22,7 @@ class JudgeManagementController extends Controller
         $email = mb_strtolower($request->validated('email'));
         $invitedUser = User::query()->where('email', $email)->first();
 
-        JudgeInvitation::query()->create([
+        $invitation = JudgeInvitation::query()->create([
             'hackaton_id' => $hackaton->id,
             'invited_email' => $email,
             'invited_by' => $request->user()->id,
@@ -29,7 +31,10 @@ class JudgeManagementController extends Controller
             'status' => JudgeInvitation::STATUS_PENDING,
         ]);
 
-        return back()->with('success', 'Инвайт судьи отправлен.');
+        $acceptUrl = route('judges.invitations.accept', ['token' => $invitation->token], absolute: true);
+        Mail::to($email)->send(new JudgeInvitationMail($invitation, $acceptUrl));
+
+        return back()->with('success', 'Инвайт судьи отправлен на email.');
     }
 
     public function assign(AssignHackatonJudgeRequest $request, Hackaton $hackaton): RedirectResponse
