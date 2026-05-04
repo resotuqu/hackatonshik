@@ -219,7 +219,7 @@ class extends Component {
                         @endforeach
                     </select>
                 </div>
-                <x-mary-input type="file" wire:model="upload_files" accept="image/*" multiple hint="Несколько файлов, до 3 МБ каждый" />
+                <x-avatar-cropper-modal property="upload_files" :multiple="true" hint="Несколько файлов, до 3 МБ каждый" />
             </div>
             @error('upload_files')
                 <p class="text-sm text-error">{{ $message }}</p>

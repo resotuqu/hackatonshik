@@ -157,6 +157,12 @@
     display: none !important;
 }
 
+/* Avatar cropper — circular live preview (Cropper.js preview target) */
+.avatar-crop-preview {
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
 
 
 

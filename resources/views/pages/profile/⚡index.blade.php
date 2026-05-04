@@ -602,9 +602,12 @@ class extends Component {
                                 </div>
                             </div>
                             <div class="w-full flex-1">
-                                <x-mary-input type="file" wire:model="avatar" accept="image/*" hint="PNG/JPEG/WebP до 3 МБ" />
+                                <x-avatar-cropper-modal property="avatar" :multiple="false" hint="PNG/JPEG/WebP до 3 МБ" />
                             </div>
                         </div>
+                        @error('avatar')
+                            <p class="text-sm text-error">{{ $message }}</p>
+                        @enderror
                         @error('selected_preset_path')
                             <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
