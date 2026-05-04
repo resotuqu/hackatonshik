@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateTeamRequest;
 use App\Models\Team;
 use App\Models\TeamRole;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 
 class TeamController extends Controller
 {
@@ -35,18 +34,9 @@ class TeamController extends Controller
         //
     }
 
-    public function show(Team $team)
-    {
-        $team->loadShowRelations();
-
-        return view('pages.teams.show', compact('team'));
-    }
-
     public function destroyParticipant(Team $team, TeamRole $teamRole): RedirectResponse
     {
-        if (Auth::id() !== $team->user_id) {
-            abort(403);
-        }
+        $this->authorize('update', $team);
 
         if ($teamRole->team_id !== $team->id) {
             abort(404);

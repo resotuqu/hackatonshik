@@ -41,7 +41,7 @@ new #[Layout('layouts::app')] class extends Component
         </figure>
 
         <div class="prose prose-sm mt-5 max-w-none sm:prose-base">
-            {!! \Illuminate\Support\Str::markdown($post->body) !!}
+            {!! \App\Support\SafeMarkdown::toHtml($post->body) !!}
         </div>
 
         @if (! empty($post->tags))

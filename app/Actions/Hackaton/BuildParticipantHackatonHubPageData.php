@@ -1,19 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
+
+namespace App\Actions\Hackaton;
 
 use App\Models\Hackaton;
 use App\Models\HackatonCaseSubmission;
 use App\Models\Team;
-use Illuminate\Contracts\View\View;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
-class ParticipantHackatonHubController extends Controller
+final class BuildParticipantHackatonHubPageData
 {
-    public function show(Hackaton $hackaton): View
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function build(Hackaton $hackaton, User $user): ?array
     {
-        $user = auth()->user();
-
         $teams = Team::query()
             ->where('hackaton_id', $hackaton->id)
             ->where(function (Builder $query) use ($user): void {
@@ -25,7 +29,7 @@ class ParticipantHackatonHubController extends Controller
             ->get();
 
         if ($teams->isEmpty()) {
-            abort(403);
+            return null;
         }
 
         $teamIds = $teams->pluck('id');
@@ -54,13 +58,12 @@ class ParticipantHackatonHubController extends Controller
             ->limit(5)
             ->get(['id', 'title', 'deadline_at']);
 
-        return view('pages.profile.hackatons.hub', compact(
-            'hackaton',
-            'teams',
-            'applications',
-            'submissions',
-            'requiredDocuments',
-            'upcomingCases'
-        ));
+        return [
+            'teams' => $teams,
+            'applications' => $applications,
+            'submissions' => $submissions,
+            'requiredDocuments' => $requiredDocuments,
+            'upcomingCases' => $upcomingCases,
+        ];
     }
 }
