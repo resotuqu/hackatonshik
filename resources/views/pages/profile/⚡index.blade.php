@@ -16,7 +16,7 @@ class extends Component {
     use \Mary\Traits\Toast, WithFileUploads;
 
     public array $config = [
-        'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
+        'toolbar' => ['heading', 'bold', 'italic', '|', 'preview', 'side-by-side'],
         'uploadImage' => false,
     ];
 
@@ -65,6 +65,15 @@ class extends Component {
 
     public bool $passwordChangeModal = false;
 
+    private function normalizedProfileDescription(mixed $raw): ?string
+    {
+        if (! is_string($raw) || trim($raw) === '') {
+            return null;
+        }
+
+        return str_replace("\r\n", "\n", $raw);
+    }
+
     public function mount()
     {
         if (!Auth::check()) {
@@ -78,7 +87,7 @@ class extends Component {
             ? 'Участник'
             : ($user->role == 'partner' ? 'Партнёр' : ($user->role == 'judge' ? 'Судья' : 'Администратор'));
         $this->date_of_birth = $user->date_of_birth;
-        $this->description = $user->description;
+        $this->description = $this->normalizedProfileDescription($user->description);
         $this->is_profile_public = (bool) $user->is_profile_public;
         $this->show_email_on_profile = (bool) $user->show_email_on_profile;
         $this->show_phone_on_profile = (bool) $user->show_phone_on_profile;
@@ -203,12 +212,17 @@ class extends Component {
         ], [
             'description.max' => 'Описание не должно превышать 2000 символов.',
         ]);
-        $user->update(['description' => $this->description]);
+
+        $normalized = $this->normalizedProfileDescription($this->description);
+
+        $this->description = $normalized;
+        $user->update(['description' => $normalized]);
     }
 
     public function updatedDescription(): void
     {
         $this->persistDescription();
+        $this->skipRender();
     }
 
     public function persistPrivacyToggles(): void
@@ -946,7 +960,11 @@ class extends Component {
                                 <span class="badge badge-primary badge-outline badge-sm mt-1">{{ $role }}</span>
                             </div>
                         </div>
-                        <p class="mt-3 line-clamp-3 text-xs text-base-content/75">
+                        <p
+                            class="mt-3 line-clamp-3 text-xs text-base-content/75"
+                            x-data="{ placeholder: 'Описание пока не заполнено.' }"
+                            x-text="(($wire.description ?? '').trim() ? $wire.description : placeholder)"
+                        >
                             {{ $description ?: 'Описание пока не заполнено.' }}
                         </p>
                     </div>

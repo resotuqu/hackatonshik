@@ -218,6 +218,18 @@
     @apply bg-base-100 text-base-content border-base-300
 }
 
+/* EasyMDE: ensure preview mode hides CodeMirror (Tailwind @apply can affect stacking/display). */
+.EasyMDEContainer.editor-preview-active .CodeMirror-wrap {
+    display: none !important;
+}
+
+.EasyMDEContainer.editor-preview-active .editor-preview {
+    display: block !important;
+    position: relative;
+    z-index: 1;
+    min-height: 8rem;
+}
+
 
 
 
