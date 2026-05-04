@@ -152,6 +152,29 @@
     themes: hackatonshik --default, hackatonshik-light;
 }
 
+/* Team show — reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .team-page .animate-card-enter {
+        animation: none !important;
+    }
+
+    .team-page .team-hero-orb {
+        opacity: 0.3;
+    }
+}
+
+[data-tab-list='team'] .tab {
+    @apply inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl border border-transparent px-4 py-2 text-sm font-medium transition duration-200;
+}
+
+[data-tab-list='team'] .tab.tab-active {
+    @apply border-base-300/70 bg-base-100 text-base-content shadow-md ring-1 ring-primary/25;
+}
+
+[data-tab-list='team'] .tab:not(.tab-active) {
+    @apply text-base-content/70 hover:border-base-300/50 hover:bg-base-100/40 hover:text-base-content;
+}
+
 /* Alpine.js cloak guard — hides elements until Alpine has initialised */
 [x-cloak] {
     display: none !important;

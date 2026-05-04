@@ -13,7 +13,13 @@
 @endphp
 
 <div class="inline-block">
-    <label for="{{ $modalId }}" class="{{ $triggerClass }}">{{ $triggerLabel }}</label>
+    <label for="{{ $modalId }}" class="{{ $triggerClass }}">
+        @isset($trigger)
+            {{ $trigger }}
+        @else
+            {{ $triggerLabel }}
+        @endisset
+    </label>
     <input type="checkbox" id="{{ $modalId }}" class="modal-toggle" />
 
     <div class="modal modal-bottom sm:modal-middle" role="dialog">
