@@ -26,6 +26,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Reject accidental deploy-scrap files
+        run: |
+          if [ -f public/test.html ]; then echo "Remove public/test.html from the repository (local HTML artifact)."; exit 1; fi
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
