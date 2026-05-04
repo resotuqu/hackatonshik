@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
+use App\Mail\EmailChangeCodeMail;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Notifications\Notification;
 
 class PhoneChangeEmailCodeNotification extends Notification
@@ -22,12 +26,16 @@ class PhoneChangeEmailCodeNotification extends Notification
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): Mailable
     {
-        return (new MailMessage)
-            ->subject('Код для смены номера телефона')
-            ->line('Вы начали смену номера телефона в профиле.')
-            ->line("Код подтверждения: **{$this->code}**")
-            ->line('Если это были не вы, смените пароль и обратитесь в поддержку.');
+        /** @var User $notifiable */
+        return (new EmailChangeCodeMail(
+            user: $notifiable,
+            code: $this->code,
+            mailSubject: 'Код для смены номера телефона — Хакатонщик',
+            intro: 'Вы начали смену номера телефона в профиле на платформе Хакатонщик. Введите код ниже, чтобы продолжить.',
+            disclaimer: 'Если это были не вы, смените пароль и обратитесь в поддержку.',
+            recipientEmail: null,
+        ))->locale('ru');
     }
 }

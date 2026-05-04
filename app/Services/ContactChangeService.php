@@ -273,7 +273,7 @@ class ContactChangeService
         ], now()->addMinutes(self::CODE_TTL_MINUTES));
 
         Notification::route('mail', $newEmail)
-            ->notify(new EmailChangeNewAddressCodeNotification($newCode));
+            ->notify(new EmailChangeNewAddressCodeNotification($user, $newEmail, $newCode));
     }
 
     public function resendEmailChangeNewCode(User $user): void
@@ -297,7 +297,7 @@ class ContactChangeService
         Cache::put($this->emailChangeCacheKey($user->id), $state, now()->addMinutes(self::CODE_TTL_MINUTES));
 
         Notification::route('mail', $newEmail)
-            ->notify(new EmailChangeNewAddressCodeNotification($code));
+            ->notify(new EmailChangeNewAddressCodeNotification($user, $newEmail, $code));
     }
 
     public function completeEmailChange(User $user, string $code): void
