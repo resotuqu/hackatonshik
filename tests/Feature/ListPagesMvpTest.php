@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\ListAnalyticsEvent;
@@ -125,4 +126,148 @@ test('list pages record analytics events', function () {
         ->toBeTrue();
     expect(ListAnalyticsEvent::query()->where('list_key', 'teams')->where('event_name', 'filter_apply')->exists())
         ->toBeTrue();
+});
+
+test('hackatons page renders hero, filters and presets', function () {
+    Livewire::test('pages::hackatons.index')
+        ->assertSee('Каталог хакатонов')
+        ->assertSee('Активные сейчас')
+        ->assertSee('Завершённые')
+        ->assertSee('Для новичков')
+        ->assertSee('С призами')
+        ->assertSee('Найдено');
+});
+
+test('hackatons preset filters by status group', function () {
+    Hackaton::factory()->create([
+        'title' => 'ActiveHackUnique',
+        'status' => HackatonStatus::REGISTRATION_OPEN,
+        'is_public' => true,
+    ]);
+    Hackaton::factory()->create([
+        'title' => 'FinishedHackUnique',
+        'status' => HackatonStatus::FINISHED,
+        'is_public' => true,
+    ]);
+
+    Livewire::test('pages::hackatons.index')
+        ->call('setPreset', 'active_now')
+        ->assertSee('ActiveHackUnique')
+        ->assertDontSee('FinishedHackUnique');
+
+    Livewire::test('pages::hackatons.index')
+        ->call('setPreset', 'finished')
+        ->assertSee('FinishedHackUnique')
+        ->assertDontSee('ActiveHackUnique');
+});
+
+test('hackatons with prizes preset only shows hackatons with prize fund', function () {
+    Hackaton::factory()->create([
+        'title' => 'PrizedHackUnique',
+        'is_public' => true,
+        'prize_fund' => 100000,
+    ]);
+    Hackaton::factory()->create([
+        'title' => 'NoPrizeHackUnique',
+        'is_public' => true,
+        'prize_fund' => null,
+    ]);
+
+    Livewire::test('pages::hackatons.index')
+        ->call('setPreset', 'with_prizes')
+        ->assertSee('PrizedHackUnique')
+        ->assertDontSee('NoPrizeHackUnique');
+});
+
+test('hackatons beginner preset filters by level', function () {
+    Hackaton::factory()->create([
+        'title' => 'BeginnerHackUnique',
+        'is_public' => true,
+        'level' => HackatonLevel::Beginner,
+    ]);
+    Hackaton::factory()->create([
+        'title' => 'AdvancedHackUnique',
+        'is_public' => true,
+        'level' => HackatonLevel::Advanced,
+    ]);
+
+    Livewire::test('pages::hackatons.index')
+        ->call('setPreset', 'beginner')
+        ->assertSee('BeginnerHackUnique')
+        ->assertDontSee('AdvancedHackUnique');
+});
+
+test('hackatons status chip overrides preset', function () {
+    Livewire::test('pages::hackatons.index')
+        ->call('setPreset', 'active_now')
+        ->assertSet('preset', 'active_now')
+        ->call('setStatusChip', HackatonStatus::FINISHED->value)
+        ->assertSet('status', HackatonStatus::FINISHED->value)
+        ->assertSet('preset', 'all');
+});
+
+test('hackaton card displays prize fund and dates for active hackaton', function () {
+    Hackaton::factory()->create([
+        'title' => 'CardMetricsHack',
+        'is_public' => true,
+        'status' => HackatonStatus::REGISTRATION_OPEN,
+        'start_at' => now()->addDays(5),
+        'end_at' => now()->addDays(10),
+        'prize_fund' => 250000,
+        'prize_places_count' => 3,
+        'registration_deadline_at' => now()->addDays(2),
+    ]);
+
+    Livewire::test('pages::hackatons.index')
+        ->assertSee('CardMetricsHack')
+        ->assertSee('Команд')
+        ->assertSee('Участников')
+        ->assertSee('250 000')
+        ->assertSee('3 призовых мест')
+        ->assertSee('До дедлайна');
+});
+
+test('finished hackatons render finished overlay marker', function () {
+    Hackaton::factory()->create([
+        'title' => 'OverlayFinishedHack',
+        'is_public' => true,
+        'status' => HackatonStatus::FINISHED,
+    ]);
+
+    Livewire::test('pages::hackatons.index')
+        ->assertSee('OverlayFinishedHack')
+        ->assertSee('Завершён');
+});
+
+test('clearFilters resets new metric filters too', function () {
+    Livewire::test('pages::hackatons.index')
+        ->set('q', 'something')
+        ->set('level', HackatonLevel::Beginner->value)
+        ->set('with_prizes', true)
+        ->set('preset', 'active_now')
+        ->call('clearFilters')
+        ->assertSet('q', '')
+        ->assertSet('level', 'all')
+        ->assertSet('with_prizes', false)
+        ->assertSet('preset', 'all');
+});
+
+test('hackaton can be created with new metric fields', function () {
+    $hackaton = Hackaton::factory()->create([
+        'prize_fund' => 1000000,
+        'prize_places_count' => 5,
+        'level' => HackatonLevel::Pro,
+        'registration_deadline_at' => now()->addDays(10),
+    ]);
+
+    expect($hackaton->fresh())
+        ->prize_fund->toEqual('1000000.00')
+        ->prize_places_count->toBe(5)
+        ->level->toBe(HackatonLevel::Pro)
+        ->registration_deadline_at->not->toBeNull();
+});
+
+test('teams page hero shows brand badge', function () {
+    Livewire::test('pages::teams.index')
+        ->assertSee('Каталог команд');
 });

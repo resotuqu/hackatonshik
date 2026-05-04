@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use Database\Factories\HackatonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -149,9 +150,12 @@ class Hackaton extends Model
     {
         return [
             'status' => HackatonStatus::class,
+            'level' => HackatonLevel::class,
             'is_public' => 'boolean',
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'registration_deadline_at' => 'datetime',
+            'prize_fund' => 'decimal:2',
         ];
     }
 
@@ -164,5 +168,9 @@ class Hackaton extends Model
         'end_at',
         'is_public',
         'status',
+        'prize_fund',
+        'prize_places_count',
+        'level',
+        'registration_deadline_at',
     ];
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\HackatonLevel;
 use App\Models\Hackaton;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -52,6 +53,31 @@ class extends Component {
 
     public bool $is_public = true;
 
+    #[Validate(['prize_fund' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99']], message: [
+        'prize_fund.numeric' => 'Призовой фонд должен быть числом',
+        'prize_fund.min' => 'Призовой фонд не может быть отрицательным',
+    ])]
+    public $prize_fund = null;
+
+    #[Validate(['prize_places_count' => ['nullable', 'integer', 'min:1', 'max:1000']], message: [
+        'prize_places_count.integer' => 'Количество призовых мест должно быть целым числом',
+        'prize_places_count.min' => 'Призовых мест должно быть минимум 1',
+    ])]
+    public $prize_places_count = null;
+
+    #[Validate(['level' => ['nullable', 'string']], message: [
+        'level.string' => 'Неверное значение уровня',
+    ])]
+    public ?string $level = null;
+
+    #[Validate([
+        'registration_deadline_at' => ['nullable', 'date', 'before_or_equal:start_at'],
+    ], message: [
+        'registration_deadline_at.date' => 'Неверный формат даты',
+        'registration_deadline_at.before_or_equal' => 'Дедлайн регистрации не может быть позже даты начала',
+    ])]
+    public $registration_deadline_at = null;
+
     #[Validate([
         'hackatonDocuments.*.name' => ['required'],
         'hackatonDocuments.*.description' => ['required'],
@@ -67,6 +93,19 @@ class extends Component {
         ['id' => 0, 'name' => 'Информационный документ', 'hint' => 'Положение о проведении, регламент и т.д.'],
         ['id' => 1, 'name' => 'Заполняемый документ', 'hint' => 'Согласие на обработку персональных данных и т.д.'],
     ];
+
+    /**
+     * @return list<array{id: string, name: string}>
+     */
+    public function levelOptions(): array
+    {
+        $options = [['id' => '', 'name' => 'Не указан']];
+        foreach (HackatonLevel::cases() as $case) {
+            $options[] = ['id' => $case->value, 'name' => $case->label()];
+        }
+
+        return $options;
+    }
 
     public array $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
@@ -86,6 +125,10 @@ class extends Component {
         $this->start_at = $hackaton->start_at;
         $this->end_at = $hackaton->end_at;
         $this->is_public = (bool) $hackaton->is_public;
+        $this->prize_fund = $hackaton->prize_fund;
+        $this->prize_places_count = $hackaton->prize_places_count;
+        $this->level = $hackaton->level?->value;
+        $this->registration_deadline_at = $hackaton->registration_deadline_at;
 
         foreach ($hackaton->documents as $document) {
             $this->hackatonDocuments[] = [
@@ -152,6 +195,10 @@ class extends Component {
             'start_at' => $this->start_at,
             'end_at' => $this->end_at,
             'is_public' => $this->is_public,
+            'prize_fund' => $this->prize_fund !== '' ? $this->prize_fund : null,
+            'prize_places_count' => $this->prize_places_count !== '' ? $this->prize_places_count : null,
+            'level' => $this->level !== '' ? $this->level : null,
+            'registration_deadline_at' => $this->registration_deadline_at !== '' ? $this->registration_deadline_at : null,
         ];
 
         if ($this->photo) {
@@ -288,8 +335,40 @@ class extends Component {
                     <h2 class="text-lg font-semibold">Основная информация</h2>
                     <x-mary-input label="Название хакатона" wire:model="title" />
                     <x-marymarkdown wire:model="description" :config="$this->config" label="Описание хакатона" />
-                    <x-marydatetime label="Дата начала" wire:model="start_at" />
-                    <x-marydatetime label="Дата конца" wire:model="end_at" />
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <x-marydatetime label="Дата начала" wire:model="start_at" />
+                        <x-marydatetime label="Дата конца" wire:model="end_at" />
+                    </div>
+                    <x-marydatetime
+                        label="Дедлайн регистрации"
+                        wire:model="registration_deadline_at"
+                        hint="Когда закрывается прием заявок (не позже даты начала)"
+                    />
+
+                    <div class="divider my-1 text-xs text-base-content/50">Метрики хакатона</div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <x-mary-input
+                            label="Призовой фонд (₽)"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Например, 500000"
+                            wire:model="prize_fund"
+                        />
+                        <x-mary-input
+                            label="Количество призовых мест"
+                            type="number"
+                            min="1"
+                            placeholder="Например, 3"
+                            wire:model="prize_places_count"
+                        />
+                    </div>
+                    <x-maryselect
+                        label="Уровень хакатона"
+                        wire:model="level"
+                        :options="$this->levelOptions()"
+                    />
                 </div>
 
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">

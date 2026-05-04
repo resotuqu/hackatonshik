@@ -401,58 +401,81 @@ class extends Component {
 @endphp
 
 <div class="space-y-8">
-    <header class="flex flex-col gap-6 border-b border-base-300/80 pb-8 md:flex-row md:items-end md:justify-between">
-        <div class="min-w-0 space-y-2">
-            @if ($catalog_tab === 'open')
-                <h1 class="font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl">Открытые команды</h1>
-                <p class="max-w-xl text-base text-base-content/70">Команды, которые сейчас ищут участников</p>
-            @else
-                <h1 class="font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl">Все команды</h1>
-                <p class="max-w-xl text-base text-base-content/70">Каталог публичных команд на платформе</p>
-            @endif
-            @php
-                $totalTeams = $this->teams->total();
-                $tc = $totalTeams % 100;
-                $tn = $totalTeams % 10;
-                $teamsWord = match (true) {
-                    $tc >= 11 && $tc <= 19 => 'команд',
-                    $tn === 1 => 'команда',
-                    $tn >= 2 && $tn <= 4 => 'команды',
-                    default => 'команд',
-                };
-            @endphp
-            <p class="text-sm font-medium tabular-nums text-base-content/60">
-                Найдено {{ $totalTeams }} {{ $teamsWord }}
-            </p>
+    @php
+        $totalTeams = $this->teams->total();
+        $tc = $totalTeams % 100;
+        $tn = $totalTeams % 10;
+        $teamsWord = match (true) {
+            $tc >= 11 && $tc <= 19 => 'команд',
+            $tn === 1 => 'команда',
+            $tn >= 2 && $tn <= 4 => 'команды',
+            default => 'команд',
+        };
+    @endphp
+    <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-base-200/50 px-5 py-8 sm:px-8 sm:py-10">
+        <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
+            <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-secondary/30 blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-primary/25 blur-3xl"></div>
+            <div class="absolute top-1/2 left-1/3 h-40 w-40 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl"></div>
         </div>
-        <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
-            <div
-                class="tabs tabs-boxed w-fit max-w-full gap-1 overflow-x-auto rounded-xl bg-base-200/80 p-1"
-                role="tablist"
-                aria-label="Режим каталога команд"
-            >
-                <button
-                    type="button"
-                    role="tab"
-                    class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'open' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
-                    aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
-                    wire:click="setCatalogTab('open')"
-                >
-                    Открытые
-                </button>
-                <button
-                    type="button"
-                    role="tab"
-                    class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'all' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
-                    aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
-                    wire:click="setCatalogTab('all')"
-                >
-                    Все команды
-                </button>
+
+        <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div class="min-w-0 space-y-3">
+                <div class="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
+                    <x-app-icon icon="heroicons:user-group" class="h-3.5 w-3.5" />
+                    Каталог команд
+                </div>
+                @if ($catalog_tab === 'open')
+                    <h1 class="font-display text-3xl font-black tracking-tight text-base-content sm:text-4xl lg:text-5xl">
+                        <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
+                            Открытые команды
+                        </span>
+                    </h1>
+                    <p class="max-w-2xl text-base text-base-content/70">Команды, которые сейчас ищут участников.</p>
+                @else
+                    <h1 class="font-display text-3xl font-black tracking-tight text-base-content sm:text-4xl lg:text-5xl">
+                        <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
+                            Все команды
+                        </span>
+                    </h1>
+                    <p class="max-w-2xl text-base text-base-content/70">Каталог публичных команд на платформе.</p>
+                @endif
+                <p class="text-sm font-medium tabular-nums text-base-content/60">
+                    Найдено {{ $totalTeams }} {{ $teamsWord }}
+                </p>
             </div>
-            <a href="/teams/create" wire:navigate class="btn btn-primary">Создать свою команду</a>
+            <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+                <div
+                    class="tabs tabs-boxed w-fit max-w-full gap-1 overflow-x-auto rounded-xl bg-base-100/80 p-1 backdrop-blur-sm"
+                    role="tablist"
+                    aria-label="Режим каталога команд"
+                >
+                    <button
+                        type="button"
+                        role="tab"
+                        class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'open' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
+                        aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
+                        wire:click="setCatalogTab('open')"
+                    >
+                        Открытые
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'all' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
+                        aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
+                        wire:click="setCatalogTab('all')"
+                    >
+                        Все команды
+                    </button>
+                </div>
+                <a href="/teams/create" wire:navigate class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
+                    <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
+                    Создать команду
+                </a>
+            </div>
         </div>
-    </header>
+    </section>
 
     <section class="space-y-4" aria-label="Фильтры">
         <div class="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-200/30 p-4 sm:p-5">
@@ -663,7 +686,11 @@ class extends Component {
                         ->values()
                         ->take(4);
                 @endphp
-                <div wire:key="team-wrap-{{ $team->id }}">
+                <div
+                    wire:key="team-wrap-{{ $team->id }}"
+                    class="motion-safe:animate-card-enter"
+                    style="animation-delay: {{ ($loop->index % 9) * 40 }}ms;"
+                >
                     <x-team-card
                         :team="$team"
                         :can-quick-apply="$canQuickApply"

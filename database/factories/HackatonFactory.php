@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\User;
@@ -21,6 +22,7 @@ class HackatonFactory extends Factory
     {
         $startAt = fake()->dateTimeBetween('+3 days', '+20 days');
         $endAt = fake()->dateTimeBetween($startAt, '+30 days');
+        $registrationDeadlineAt = fake()->dateTimeBetween('+1 days', $startAt);
 
         return [
             'user_id' => User::factory()->partner(),
@@ -31,6 +33,10 @@ class HackatonFactory extends Factory
             'end_at' => $endAt,
             'is_public' => true,
             'status' => HackatonStatus::REGISTRATION_OPEN,
+            'prize_fund' => fake()->randomElement([null, 50000, 100000, 250000, 500000, 1000000]),
+            'prize_places_count' => fake()->randomElement([null, 1, 3, 5, 10]),
+            'level' => fake()->randomElement(HackatonLevel::cases()),
+            'registration_deadline_at' => $registrationDeadlineAt,
         ];
     }
 }
