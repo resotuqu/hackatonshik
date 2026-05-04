@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Mail\VerifyEmailAddressMail;
+use App\Models\Hackaton;
 use App\Models\HackatonAnnouncement;
 use App\Models\HackatonApplication;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseSubmission;
 use App\Models\HackatonCertificate;
+use App\Models\Team;
 use App\Models\TeamApplication;
 use App\Models\User;
 use App\Policies\HackatonAnnouncementPolicy;
@@ -15,14 +17,19 @@ use App\Policies\HackatonApplicationPolicy;
 use App\Policies\HackatonCasePolicy;
 use App\Policies\HackatonCaseSubmissionPolicy;
 use App\Policies\HackatonCertificatePolicy;
+use App\Policies\HackatonPolicy;
 use App\Policies\TeamApplicationPolicy;
+use App\Policies\TeamPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -73,11 +80,14 @@ class AppServiceProvider extends ServiceProvider
         ))->locale('ru'));
 
         $this->configureDefaults();
+        $this->configureRateLimiting();
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('yandex', Provider::class);
             $event->extendSocialite('vkontakte', VkontakteProvider::class);
         });
 
+        Gate::policy(Hackaton::class, HackatonPolicy::class);
+        Gate::policy(Team::class, TeamPolicy::class);
         Gate::policy(TeamApplication::class, TeamApplicationPolicy::class);
         Gate::policy(HackatonApplication::class, HackatonApplicationPolicy::class);
         Gate::policy(HackatonCase::class, HackatonCasePolicy::class);
@@ -108,5 +118,14 @@ class AppServiceProvider extends ServiceProvider
                     ->uncompromised()
                 : null,
         );
+    }
+
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+
+        RateLimiter::for('bulk-actions', fn (Request $request) => Limit::perMinute(15)->by($request->user()?->id ?: $request->ip()));
+
+        RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(8)->by($request->user()?->id ?: $request->ip()));
     }
 }

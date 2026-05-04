@@ -19,7 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'signed' => ValidateSignature::class.':relative',
         ]);
 
-        $middleware->trustProxies(at: '*');
+        $appEnv = (string) env('APP_ENV', 'production');
+        $trusted = env('TRUSTED_PROXIES');
+        $at = match (true) {
+            in_array($appEnv, ['local', 'testing'], true) => '*',
+            $trusted === '*' => '*',
+            is_string($trusted) && $trusted !== '' => array_values(array_filter(array_map('trim', explode(',', $trusted)))),
+            default => [],
+        };
+        $middleware->trustProxies(at: $at);
 
         $middleware->web(append: [
             EnsureContactChannelsVerified::class,
