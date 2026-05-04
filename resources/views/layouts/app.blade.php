@@ -114,13 +114,17 @@
 
         <div class="drawer-side z-40">
             <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
-            <aside class="flex min-h-full w-72 flex-col overflow-x-visible border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/40 p-4" aria-label="Основная навигация">
-                <div class="relative flex shrink-0 flex-col gap-2">
-                    <div class="w-full">
+            <aside
+                id="app-sidebar"
+                class="flex min-h-full w-80 max-h-[100dvh] flex-col overflow-x-visible overflow-y-auto overscroll-y-contain border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/50 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6 lg:max-h-none lg:overflow-y-visible lg:pb-6"
+                aria-label="Основная навигация"
+            >
+                <div class="relative flex shrink-0 flex-col gap-3">
+                    <div class="w-full rounded-2xl border border-base-300/35 bg-base-200/45 p-3 ring-1 ring-base-content/[0.06]">
                         <x-app-brand
                             :wide="true"
-                            class="min-h-0 border-0 p-0 hover:bg-transparent"
-                            img-class="h-auto w-full object-contain object-left"
+                            class="min-h-0 w-full border-0 p-0 hover:bg-transparent"
+                            img-class="h-auto w-full min-h-0 object-contain object-left"
                         />
                     </div>
                     @auth
@@ -200,36 +204,40 @@
                     @endauth
                 </div>
 
-                <ul class="menu mt-4 w-full gap-1" role="navigation" aria-label="Меню сайта">
-                    <li class="menu-title"><span>Основное</span></li>
-                    <li><a href="/teams" class="{{ request()->is('teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-4 w-4" />Команды</a></li>
-                    <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:rocket-launch" class="h-4 w-4" />Хакатоны</a></li>
+                <ul class="menu menu-vertical app-sidebar-menu mt-5 w-full min-w-0 flex-1 gap-0.5 px-0 py-1" role="navigation" aria-label="Меню сайта">
+                    <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Основное</span></li>
+                    <li><a href="/teams" class="sidebar-nav-link {{ request()->is('teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-5 w-5" />Команды</a></li>
+                    <li><a href="/hackatons" class="sidebar-nav-link {{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5" />Хакатоны</a></li>
 
-                    <li class="menu-title mt-3"><span>Мой кабинет</span></li>
+                    <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+
+                    <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Мой кабинет</span></li>
                     @auth
                         @if (Auth::user()->role === 'user')
-                            <li><a href="/profile/teams" class="{{ request()->is('profile/teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-4 w-4" />Мои команды</a></li>
-                            <li><a href="/teams/create" class="{{ request()->is('teams/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />Создать команду</a></li>
-                            <li><a href="/profile/certificates" class="{{ request()->is('profile/certificates') ? 'active' : '' }}"><x-app-icon icon="heroicons:academic-cap" class="h-4 w-4" />Сертификаты</a></li>
+                            <li><a href="/profile/teams" class="sidebar-nav-link {{ request()->is('profile/teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-5 w-5" />Мои команды</a></li>
+                            <li><a href="/teams/create" class="sidebar-nav-link {{ request()->is('teams/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />Создать команду</a></li>
+                            <li><a href="/profile/certificates" class="sidebar-nav-link {{ request()->is('profile/certificates') ? 'active' : '' }}"><x-app-icon icon="heroicons:academic-cap" class="h-5 w-5" />Сертификаты</a></li>
                         @elseif (Auth::user()->role === 'partner')
-                            <li><a href="/profile/hackatons" class="{{ request()->is('profile/hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:clipboard-document-list" class="h-4 w-4" />Мои хакатоны</a></li>
-                            <li><a href="/hackatons/create" class="{{ request()->is('hackatons/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />Создать хакатон</a></li>
+                            <li><a href="/profile/hackatons" class="sidebar-nav-link {{ request()->is('profile/hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5" />Мои хакатоны</a></li>
+                            <li><a href="/hackatons/create" class="sidebar-nav-link {{ request()->is('hackatons/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />Создать хакатон</a></li>
                         @elseif (Auth::user()->role === 'judge')
-                            <li><a href="/hackatons" class="{{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:scale" class="h-4 w-4" />Назначенные хакатоны</a></li>
+                            <li><a href="/hackatons" class="sidebar-nav-link {{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:scale" class="h-5 w-5" />Назначенные хакатоны</a></li>
                         @elseif (Auth::user()->role === 'admin')
-                            <li><a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}"><x-app-icon icon="heroicons:chart-bar-square" class="h-4 w-4" />Админ-панель</a></li>
+                            <li><a href="/admin" class="sidebar-nav-link {{ request()->is('admin') ? 'active' : '' }}"><x-app-icon icon="heroicons:chart-bar-square" class="h-5 w-5" />Админ-панель</a></li>
                         @endif
-                        <li><a href="/profile" class="{{ request()->is('profile') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-circle" class="h-4 w-4" />Профиль</a></li>
+                        <li><a href="/profile" class="sidebar-nav-link {{ request()->is('profile') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-circle" class="h-5 w-5" />Профиль</a></li>
                     @else
-                        <li><a href="/login" class="font-medium {{ request()->is('login') ? 'active' : '' }}"><x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />Авторизироваться</a></li>
-                        <li><a href="/register" class="font-medium {{ request()->is('register') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-plus" class="h-4 w-4" />Зарегистрироваться</a></li>
+                        <li><a href="/login" class="sidebar-nav-link {{ request()->is('login') ? 'active' : '' }}"><x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />Авторизироваться</a></li>
+                        <li><a href="/register" class="sidebar-nav-link {{ request()->is('register') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-plus" class="h-5 w-5" />Зарегистрироваться</a></li>
                     @endauth
 
-                    <li class="menu-title mt-3"><span>Настройки</span></li>
+                    <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+
+                    <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Настройки</span></li>
                     <li>
-                        <label class="flex cursor-pointer items-center justify-between rounded-box px-4 py-2 hover:bg-base-200">
-                            <span>Тёмная тема</span>
-                            <input type="checkbox" class="toggle" data-theme-toggle aria-label="Переключить тёмную тему" />
+                        <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:border-primary/25 hover:bg-base-200/85">
+                            <span class="text-[0.9375rem]">Тёмная тема</span>
+                            <input type="checkbox" class="toggle toggle-primary shrink-0" data-theme-toggle aria-label="Переключить тёмную тему" />
                         </label>
                     </li>
                 </ul>

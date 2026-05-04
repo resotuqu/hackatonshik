@@ -285,6 +285,48 @@
     @apply text-neutral underline
 }
 
+/**
+ * Main layout sidebar — scoped to #app-sidebar only (do not use global .menu selectors).
+ */
+#app-sidebar .app-sidebar-menu > li.menu-title {
+    @apply mx-0 mt-0 mb-0 px-1 py-2;
+}
+
+#app-sidebar .app-sidebar-menu > li.menu-title:first-child {
+    @apply pt-1;
+}
+
+#app-sidebar .app-sidebar-menu > li.sidebar-nav-divider {
+    @apply my-1 list-none py-0;
+}
+
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link {
+    @apply flex min-h-12 items-center gap-3 rounded-xl border-l-4 border-transparent px-3 py-2.5 text-[0.9375rem] font-medium leading-snug text-base-content no-underline transition-colors duration-200;
+}
+
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link:hover {
+    @apply border-primary/35 bg-base-200/90 text-base-content;
+}
+
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link.active {
+    @apply border-primary bg-primary/15 font-semibold text-primary;
+}
+
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link:focus-visible {
+    @apply outline-none ring-2 ring-primary/40 ring-offset-2 ring-offset-base-100;
+}
+
+#app-sidebar .sidebar-theme-toggle:focus-within {
+    @apply border-primary/30 bg-base-200/90 ring-2 ring-primary/35 ring-offset-2 ring-offset-base-100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #app-sidebar .sidebar-nav-link,
+    #app-sidebar .sidebar-theme-toggle {
+        @apply transition-none;
+    }
+}
+
 
 /*h1 {*/
 /*    font-size: 2.25rem;*/
