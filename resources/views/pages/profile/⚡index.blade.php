@@ -3,8 +3,10 @@
 use App\Enums\ApplicationStatus;
 use App\Models\TeamApplication;
 use App\Services\ContactChangeService;
+use App\Support\PresetAvatar;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -32,6 +34,8 @@ class extends Component {
     public bool $show_phone_on_profile = false;
     public $avatar = null;
     public ?string $avatar_path = null;
+
+    public ?string $selected_preset_path = null;
 
     public bool $phoneChangeModal = false;
 
@@ -71,6 +75,24 @@ class extends Component {
         $this->show_email_on_profile = (bool) $user->show_email_on_profile;
         $this->show_phone_on_profile = (bool) $user->show_phone_on_profile;
         $this->avatar_path = $user->avatar_path;
+        if ($user->avatar_path && PresetAvatar::isAllowedPath($user->avatar_path)) {
+            $this->selected_preset_path = $user->avatar_path;
+        }
+    }
+
+    public function selectPreset(string $path): void
+    {
+        if (! PresetAvatar::isAllowedPath($path)) {
+            return;
+        }
+        $this->avatar = null;
+        $this->resetErrorBag('avatar');
+        $this->selected_preset_path = $path;
+    }
+
+    public function updatedAvatar(): void
+    {
+        $this->selected_preset_path = null;
     }
 
     public function openPhoneChangeModal(): void
@@ -301,6 +323,8 @@ class extends Component {
             return;
         }
 
+        $this->selected_preset_path = filled($this->selected_preset_path) ? $this->selected_preset_path : null;
+
         $isChangingPassword = $this->new_password !== '';
         $requiresPasswordConfirmation = $isChangingPassword;
 
@@ -314,6 +338,7 @@ class extends Component {
             'current_password' => [$requiresPasswordConfirmation ? 'required' : 'nullable', 'string'],
             'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'avatar' => ['nullable', 'image', 'max:3072'],
+            'selected_preset_path' => ['nullable', 'string', Rule::in(PresetAvatar::allowedPaths())],
         ], [
             'fio.required' => 'ФИО обязательно для заполнения.',
             'fio.regex' => 'Укажите ФИО в формате "Фамилия Имя" или "Фамилия Имя Отчество".',
@@ -326,6 +351,7 @@ class extends Component {
             'new_password.confirmed' => 'Подтверждение нового пароля не совпадает.',
             'avatar.image' => 'Аватар должен быть изображением.',
             'avatar.max' => 'Размер аватара не должен превышать 3 МБ.',
+            'selected_preset_path.in' => 'Выбран недопустимый готовый аватар.',
         ]);
 
         if ($requiresPasswordConfirmation && !Hash::check($this->current_password, $user->password)) {
@@ -349,6 +375,10 @@ class extends Component {
         if ($this->avatar) {
             $payload['avatar_path'] = $this->avatar->store('avatars', 'public');
             $this->avatar_path = $payload['avatar_path'];
+            $this->selected_preset_path = null;
+        } elseif ($this->selected_preset_path && PresetAvatar::isAllowedPath($this->selected_preset_path)) {
+            $payload['avatar_path'] = PresetAvatar::storagePathForDb($this->selected_preset_path);
+            $this->avatar_path = $payload['avatar_path'];
         }
 
         $user->update($payload);
@@ -357,8 +387,19 @@ class extends Component {
         $this->new_password = '';
         $this->new_password_confirmation = '';
         $this->avatar = null;
+        if ($this->avatar_path && PresetAvatar::isAllowedPath($this->avatar_path)) {
+            $this->selected_preset_path = $this->avatar_path;
+        } else {
+            $this->selected_preset_path = null;
+        }
 
         $this->success('Профиль успешно обновлён.', position: 'toast-center toast-top');
+    }
+
+    #[Computed]
+    public function presetAvatarPacks(): array
+    {
+        return PresetAvatar::activePacksWithPresets();
     }
 
     #[Computed]
@@ -421,14 +462,16 @@ class extends Component {
     $authUser = auth()->user();
     $avatarUrl = $avatar
         ? $avatar->temporaryUrl()
-        : ($avatar_path
-            ? asset('storage/'.$avatar_path)
-            : 'https://ui-avatars.com/api/?name='.urlencode($authUser->fio).'&background=random');
+        : ($selected_preset_path
+            ? asset('storage/'.$selected_preset_path)
+            : ($avatar_path
+                ? asset('storage/'.$avatar_path)
+                : 'https://ui-avatars.com/api/?name='.urlencode($authUser->fio).'&background=random'));
     $completeness = $this->profileCompletenessPercent;
     $tips = [];
     if (! filled($authUser->fio)) { $tips[] = 'Укажите ФИО'; }
     if (! filled($authUser->date_of_birth)) { $tips[] = 'Заполните дату рождения'; }
-    if (! filled($authUser->avatar_path)) { $tips[] = 'Загрузите аватар'; }
+    if (! filled($authUser->avatar_path)) { $tips[] = 'Добавьте аватар'; }
     if (! filled($authUser->description)) { $tips[] = 'Добавьте описание о себе'; }
     if (is_null($authUser->email_verified_at)) { $tips[] = 'Подтвердите электронную почту'; }
     if (is_null($authUser->phone_verified_at)) { $tips[] = 'Подтвердите номер телефона'; }
@@ -514,6 +557,44 @@ class extends Component {
                             <x-app-icon icon="heroicons:photo" class="h-5 w-5 text-primary" />
                             Аватар профиля
                         </h2>
+                        <p class="text-sm text-base-content/70">Выберите готовый аватар (по пакам) или загрузите своё изображение.</p>
+                        @if (! empty($this->presetAvatarPacks))
+                            <div class="space-y-6">
+                                @foreach ($this->presetAvatarPacks as $pack)
+                                    <div>
+                                        <h3 class="mb-2 text-sm font-semibold text-base-content/80">{{ $pack['name'] }}</h3>
+                                        <div class="grid grid-cols-3 gap-3 sm:grid-cols-6" role="list">
+                                            @foreach ($pack['presets'] as $preset)
+                                                @php
+                                                    $pPath = $preset['path'];
+                                                    $isActive = $selected_preset_path === $pPath
+                                                        || ($selected_preset_path === null && $avatar_path === $pPath);
+                                                @endphp
+                                                <button
+                                                    type="button"
+                                                    wire:click="selectPreset({{ json_encode($pPath) }})"
+                                                    class="group relative aspect-square overflow-hidden rounded-2xl border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary {{ $isActive ? 'border-primary ring-2 ring-primary/30' : 'border-base-300 hover:border-primary/50' }}"
+                                                    title="Аватар"
+                                                    aria-pressed="{{ $isActive ? 'true' : 'false' }}"
+                                                >
+                                                    <img
+                                                        src="{{ $preset['url'] }}"
+                                                        alt=""
+                                                        class="h-full w-full object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="flex items-center gap-3 py-1">
+                                <span class="h-px flex-1 bg-base-300"></span>
+                                <span class="text-xs font-medium uppercase tracking-wide text-base-content/50">или файл</span>
+                                <span class="h-px flex-1 bg-base-300"></span>
+                            </div>
+                        @endif
                         <div class="flex flex-col items-start gap-4 rounded-2xl border border-dashed border-base-300 p-4 transition hover:border-primary/50 sm:flex-row sm:items-center">
                             <div class="avatar">
                                 <div class="w-24 rounded-full ring-1 ring-base-300">
@@ -521,9 +602,12 @@ class extends Component {
                                 </div>
                             </div>
                             <div class="w-full flex-1">
-                                <x-mary-input type="file" wire:model="avatar" accept="image/*" hint="Изображение до 3 МБ" />
+                                <x-mary-input type="file" wire:model="avatar" accept="image/*" hint="PNG/JPEG/WebP до 3 МБ" />
                             </div>
                         </div>
+                        @error('selected_preset_path')
+                            <p class="text-sm text-error">{{ $message }}</p>
+                        @enderror
                     </div>
                 </section>
 

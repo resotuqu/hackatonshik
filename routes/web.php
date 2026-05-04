@@ -40,6 +40,7 @@ Route::livewire('/login', 'pages::auth.login')->name('login');
 Route::livewire('/register', 'pages::auth.register');
 Route::livewire('/profile', 'pages::profile.index')->middleware(['auth', 'verified']);
 Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'verified', 'can:access-admin']);
+Route::livewire('/admin/avatar-presets', 'pages::admin.avatar-presets')->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/u/{user:nickname}', [PublicProfileController::class, 'show'])->name('profile.public.show');
 
 Route::livewire('/teams', 'pages::teams.index')->name('teams.index');

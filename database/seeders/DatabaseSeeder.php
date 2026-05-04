@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             ContactMessageSeeder::class,
             SavedListFilterSeeder::class,
             ListAnalyticsEventSeeder::class,
+            AvatarPresetPackSeeder::class,
         ]);
     }
 }
