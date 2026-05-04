@@ -51,6 +51,16 @@ class UserFactory extends Factory
         ]);
     }
 
+    /**
+     * Email remains verified; phone is not (used for phone verification funnel tests).
+     */
+    public function withoutPhoneVerification(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'phone_verified_at' => null,
+        ]);
+    }
+
     public function partner(): static
     {
         return $this->state(fn (array $attributes) => [

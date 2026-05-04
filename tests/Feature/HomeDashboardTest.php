@@ -35,7 +35,7 @@ test('authenticated participant sees dashboard summary on home', function () {
     $response->assertSee('Ваш следующий шаг', false);
 });
 
-test('participant with unverified phone sees verification banner', function () {
+test('participant with unverified phone is redirected from home to phone verification', function () {
     $user = User::factory()->create([
         'role' => 'user',
         'phone' => '+79990001122',
@@ -44,8 +44,7 @@ test('participant with unverified phone sees verification banner', function () {
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertOk()
-        ->assertSee('data-test="dashboard-phone-banner"', false);
+        ->assertRedirect(route('phone.verify.notice'));
 });
 
 test('organizer with pending hackaton application sees review link', function () {
