@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Notifications\EmailChangeNewAddressCodeNotification;
 use App\Notifications\EmailChangeOldAddressCodeNotification;
 use App\Notifications\PhoneChangeEmailCodeNotification;
-use App\Services\Sms\PlusofonSmsSender;
+use App\Services\Sms\PlusofonFlashCallSender;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -25,7 +25,7 @@ class ContactChangeService
     private const RATE_LIMIT_DECAY_SECONDS = 60;
 
     public function __construct(
-        private readonly PlusofonSmsSender $smsSender,
+        private readonly PlusofonFlashCallSender $flashCallSender,
     ) {}
 
     /**
@@ -76,7 +76,7 @@ class ContactChangeService
             'new_phone'
         );
 
-        $code = $this->generateCode();
+        $code = $this->generateEmailCode();
 
         Cache::put($this->phoneChangeCacheKey($user->id), [
             'new_phone' => $newPhone,
@@ -102,14 +102,14 @@ class ContactChangeService
             'phone_email_code'
         );
 
-        $code = $this->generateCode();
+        $code = $this->generateEmailCode();
         $state['code'] = $code;
         Cache::put($this->phoneChangeCacheKey($user->id), $state, now()->addMinutes(self::CODE_TTL_MINUTES));
 
         $user->notify(new PhoneChangeEmailCodeNotification($code));
     }
 
-    public function verifyPhoneChangeEmailAndSendSms(User $user, string $code): void
+    public function verifyPhoneChangeEmailAndSendCall(User $user, string $code): void
     {
         $state = Cache::get($this->phoneChangeCacheKey($user->id));
         if (! is_array($state) || (int) ($state['step'] ?? 0) !== 1) {
@@ -125,23 +125,23 @@ class ContactChangeService
         }
 
         $newPhone = (string) $state['new_phone'];
-        $smsCode = $this->generateCode();
+        $callPin = $this->generateCallPin();
 
         Cache::put($this->phoneChangeCacheKey($user->id), [
             'new_phone' => $newPhone,
             'step' => 2,
-            'code' => $smsCode,
+            'code' => $callPin,
         ], now()->addMinutes(self::CODE_TTL_MINUTES));
 
-        if (! $this->smsSender->sendVerificationCode($newPhone, $smsCode)) {
+        if (! $this->flashCallSender->sendVerificationCode($newPhone, $callPin)) {
             Cache::forget($this->phoneChangeCacheKey($user->id));
             throw ValidationException::withMessages([
-                'code' => 'Не удалось отправить SMS. Попробуйте позже.',
+                'code' => 'Не удалось инициировать звонок. Попробуйте позже.',
             ]);
         }
     }
 
-    public function resendPhoneChangeSms(User $user): void
+    public function resendPhoneChangeCall(User $user): void
     {
         $state = Cache::get($this->phoneChangeCacheKey($user->id));
         if (! is_array($state) || (int) ($state['step'] ?? 0) !== 2) {
@@ -151,20 +151,20 @@ class ContactChangeService
         }
 
         $this->hitRateLimit(
-            "phone-change-send-sms:{$user->id}",
-            'Слишком много запросов SMS. Попробуйте позже.',
-            'phone_sms_code'
+            "phone-change-send-call:{$user->id}",
+            'Слишком много запросов звонков. Попробуйте позже.',
+            'phone_call_code'
         );
 
         $newPhone = (string) $state['new_phone'];
-        $smsCode = $this->generateCode();
+        $callPin = $this->generateCallPin();
 
-        $state['code'] = $smsCode;
+        $state['code'] = $callPin;
         Cache::put($this->phoneChangeCacheKey($user->id), $state, now()->addMinutes(self::CODE_TTL_MINUTES));
 
-        if (! $this->smsSender->sendVerificationCode($newPhone, $smsCode)) {
+        if (! $this->flashCallSender->sendVerificationCode($newPhone, $callPin)) {
             throw ValidationException::withMessages([
-                'code' => 'Не удалось отправить SMS. Попробуйте позже.',
+                'code' => 'Не удалось инициировать звонок. Попробуйте позже.',
             ]);
         }
     }
@@ -174,13 +174,13 @@ class ContactChangeService
         $state = Cache::get($this->phoneChangeCacheKey($user->id));
         if (! is_array($state) || (int) ($state['step'] ?? 0) !== 2) {
             throw ValidationException::withMessages([
-                'code' => 'Сессия смены номера истекла или SMS ещё не отправлена.',
+                'code' => 'Сессия смены номера истекла или звонок ещё не инициирован.',
             ]);
         }
 
         if (! $this->codesMatch((string) ($state['code'] ?? ''), $code)) {
             throw ValidationException::withMessages([
-                'code' => 'Неверный код из SMS.',
+                'code' => 'Неверный код из звонка.',
             ]);
         }
 
@@ -215,7 +215,7 @@ class ContactChangeService
             'new_email'
         );
 
-        $code = $this->generateCode();
+        $code = $this->generateEmailCode();
 
         Cache::put($this->emailChangeCacheKey($user->id), [
             'new_email' => $newEmail,
@@ -241,7 +241,7 @@ class ContactChangeService
             'email_old_code'
         );
 
-        $code = $this->generateCode();
+        $code = $this->generateEmailCode();
         $state['code'] = $code;
         Cache::put($this->emailChangeCacheKey($user->id), $state, now()->addMinutes(self::CODE_TTL_MINUTES));
 
@@ -264,7 +264,7 @@ class ContactChangeService
         }
 
         $newEmail = (string) $state['new_email'];
-        $newCode = $this->generateCode();
+        $newCode = $this->generateEmailCode();
 
         Cache::put($this->emailChangeCacheKey($user->id), [
             'new_email' => $newEmail,
@@ -292,7 +292,7 @@ class ContactChangeService
         );
 
         $newEmail = (string) $state['new_email'];
-        $code = $this->generateCode();
+        $code = $this->generateEmailCode();
         $state['code'] = $code;
         Cache::put($this->emailChangeCacheKey($user->id), $state, now()->addMinutes(self::CODE_TTL_MINUTES));
 
@@ -340,9 +340,14 @@ class ContactChangeService
         return "contact-email-change:{$userId}";
     }
 
-    private function generateCode(): string
+    private function generateEmailCode(): string
     {
         return (string) random_int(100000, 999999);
+    }
+
+    private function generateCallPin(): string
+    {
+        return (string) random_int(1000, 9999);
     }
 
     private function codesMatch(string $expected, string $given): bool

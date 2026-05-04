@@ -54,7 +54,7 @@ test('email change rejects duplicate email', function () {
         ->toThrow(ValidationException::class);
 });
 
-test('phone change completes after email and sms codes', function () {
+test('phone change completes after email code and flash call', function () {
     $user = User::factory()->create([
         'email' => 'u@example.com',
         'phone' => '+79991112233',
@@ -68,13 +68,14 @@ test('phone change completes after email and sms codes', function () {
     $payload = Cache::get('contact-phone-change:'.$user->id);
     $emailCode = $payload['code'];
 
-    $service->verifyPhoneChangeEmailAndSendSms($user, $emailCode);
+    $service->verifyPhoneChangeEmailAndSendCall($user, $emailCode);
 
     $payload = Cache::get('contact-phone-change:'.$user->id);
     expect((int) $payload['step'])->toBe(2);
-    $smsCode = $payload['code'];
+    $callPin = $payload['code'];
+    expect(strlen((string) $callPin))->toBe(4);
 
-    $service->completePhoneChange($user, $smsCode);
+    $service->completePhoneChange($user, $callPin);
 
     expect($user->fresh()->phone)->toBe('+79991112255')
         ->and($user->fresh()->phone_verified_at)->not->toBeNull()
@@ -89,7 +90,7 @@ test('phone change rejects wrong email step code', function () {
 
     app(ContactChangeService::class)->startPhoneChange($user, '+79991112266');
 
-    expect(fn () => app(ContactChangeService::class)->verifyPhoneChangeEmailAndSendSms($user, '000000'))
+    expect(fn () => app(ContactChangeService::class)->verifyPhoneChangeEmailAndSendCall($user, '000000'))
         ->toThrow(ValidationException::class);
 });
 

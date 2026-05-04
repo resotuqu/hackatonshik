@@ -53,4 +53,11 @@ return [
         'sender' => env('PLUSOFON_SENDER'),
     ],
 
+    'plusofon_flash_call' => [
+        'enabled' => (bool) env('PLUSOFON_FLASH_CALL_ENABLED', false),
+        'base_url' => env('PLUSOFON_FLASH_CALL_BASE_URL', 'https://restapi.plusofon.ru/api/v1'),
+        'token' => env('PLUSOFON_FLASH_CALL_TOKEN', env('PLUSOFON_API_TOKEN')),
+        'client_id' => env('PLUSOFON_FLASH_CALL_CLIENT', '10553'),
+    ],
+
 ];

@@ -41,7 +41,7 @@ class extends Component {
 
     public string $phone_email_code = '';
 
-    public string $phone_sms_code = '';
+    public string $phone_call_code = '';
 
     public bool $emailChangeModal = false;
 
@@ -83,13 +83,13 @@ class extends Component {
         $state = app(ContactChangeService::class)->phoneChangeState($user);
         if ($state) {
             $this->new_phone = $state['new_phone'];
-            $this->phoneChangeStep = $state['step'] === 1 ? 'email' : 'sms';
+            $this->phoneChangeStep = $state['step'] === 1 ? 'email' : 'call';
         } else {
             $this->new_phone = '';
             $this->phoneChangeStep = 'phone';
         }
         $this->phone_email_code = '';
-        $this->phone_sms_code = '';
+        $this->phone_call_code = '';
         $this->phoneChangeModal = true;
     }
 
@@ -101,7 +101,7 @@ class extends Component {
         }
         $this->new_phone = '';
         $this->phone_email_code = '';
-        $this->phone_sms_code = '';
+        $this->phone_call_code = '';
         $this->phoneChangeStep = 'phone';
         $this->phoneChangeModal = false;
     }
@@ -147,35 +147,35 @@ class extends Component {
         if (! $user) {
             return;
         }
-        app(ContactChangeService::class)->verifyPhoneChangeEmailAndSendSms($user, $this->phone_email_code);
-        $this->phoneChangeStep = 'sms';
-        $this->phone_sms_code = '';
-        $this->success('Код отправлен SMS на новый номер.', position: 'toast-center toast-top');
+        app(ContactChangeService::class)->verifyPhoneChangeEmailAndSendCall($user, $this->phone_email_code);
+        $this->phoneChangeStep = 'call';
+        $this->phone_call_code = '';
+        $this->success('Сейчас поступит звонок на новый номер.', position: 'toast-center toast-top');
     }
 
-    public function resendPhoneChangeSms(): void
+    public function resendPhoneChangeCall(): void
     {
         $user = Auth::user();
         if (! $user) {
             return;
         }
-        app(ContactChangeService::class)->resendPhoneChangeSms($user);
-        $this->success('SMS отправлено повторно.', position: 'toast-center toast-top');
+        app(ContactChangeService::class)->resendPhoneChangeCall($user);
+        $this->success('Звонок инициирован повторно.', position: 'toast-center toast-top');
     }
 
-    public function confirmPhoneSmsCode(): void
+    public function confirmPhoneCallCode(): void
     {
         $this->validate([
-            'phone_sms_code' => ['required', 'digits:6'],
+            'phone_call_code' => ['required', 'digits:4'],
         ], [
-            'phone_sms_code.required' => 'Введите код из SMS.',
-            'phone_sms_code.digits' => 'Код из 6 цифр.',
+            'phone_call_code.required' => 'Введите код из звонка.',
+            'phone_call_code.digits' => 'Код из 4 цифр.',
         ]);
         $user = Auth::user();
         if (! $user) {
             return;
         }
-        app(ContactChangeService::class)->completePhoneChange($user, $this->phone_sms_code);
+        app(ContactChangeService::class)->completePhoneChange($user, $this->phone_call_code);
         auth()->user()?->refresh();
         $this->closePhoneChangeModal();
         $this->success('Номер телефона обновлён.', position: 'toast-center toast-top');
@@ -779,7 +779,7 @@ class extends Component {
     <x-mary-modal wire:model="phoneChangeModal" title="Смена номера телефона" class="backdrop-blur">
         <div class="space-y-4">
             @if ($phoneChangeStep === 'phone')
-                <p class="text-sm text-base-content/80">Сначала придёт код на вашу текущую почту, затем SMS на новый номер.</p>
+                <p class="text-sm text-base-content/80">Сначала придёт код на вашу текущую почту, затем мы позвоним на новый номер.</p>
                 <x-mary-input label="Новый номер телефона" wire:model="new_phone" hint="11–12 символов, как при регистрации" />
             @elseif ($phoneChangeStep === 'email')
                 <p class="text-sm text-base-content/80">Введите код из письма, отправленного на <span class="font-medium">{{ auth()->user()->email }}</span>.</p>
@@ -788,12 +788,12 @@ class extends Component {
                     <x-mary-button label="Подтвердить" class="btn-primary" type="button" wire:click="confirmPhoneEmailCode" />
                     <x-mary-button label="Отправить код снова" class="btn-ghost" type="button" wire:click="resendPhoneChangeEmailCode" />
                 </div>
-            @elseif ($phoneChangeStep === 'sms')
-                <p class="text-sm text-base-content/80">Введите код из SMS, отправленного на <span class="font-medium">{{ $new_phone }}</span>.</p>
-                <x-mary-input label="Код из SMS" wire:model="phone_sms_code" maxlength="6" />
+            @elseif ($phoneChangeStep === 'call')
+                <p class="text-sm text-base-content/80">Ответьте на звонок и введите 4 цифры, которые проговорит ассистент. Звонок поступит на <span class="font-medium">{{ $new_phone }}</span>.</p>
+                <x-mary-input label="Код из звонка" wire:model="phone_call_code" maxlength="4" />
                 <div class="flex flex-wrap gap-2">
-                    <x-mary-button label="Подтвердить" class="btn-primary" type="button" wire:click="confirmPhoneSmsCode" />
-                    <x-mary-button label="Отправить SMS снова" class="btn-ghost" type="button" wire:click="resendPhoneChangeSms" />
+                    <x-mary-button label="Подтвердить" class="btn-primary" type="button" wire:click="confirmPhoneCallCode" />
+                    <x-mary-button label="Позвонить снова" class="btn-ghost" type="button" wire:click="resendPhoneChangeCall" />
                 </div>
             @endif
 

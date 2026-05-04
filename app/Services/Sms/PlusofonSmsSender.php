@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Sms;
 
+use App\Services\Sms\Contracts\VerificationSender;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class PlusofonSmsSender
+class PlusofonSmsSender implements VerificationSender
 {
     public function sendVerificationCode(string $phone, string $code): bool
     {

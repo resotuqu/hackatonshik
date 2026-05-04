@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Services\Sms\PlusofonSmsSender;
+use App\Services\Sms\PlusofonFlashCallSender;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class PhoneVerificationController extends Controller
 {
-    public function __construct(private readonly PlusofonSmsSender $smsSender) {}
+    public function __construct(private readonly PlusofonFlashCallSender $flashCallSender) {}
 
     public function notice(): View
     {
@@ -35,26 +37,26 @@ class PhoneVerificationController extends Controller
 
         RateLimiter::hit($key, 60);
 
-        $code = (string) random_int(100000, 999999);
+        $code = (string) random_int(1000, 9999);
         $cacheKey = $this->codeCacheKey($user->id);
         Cache::put($cacheKey, $code, now()->addMinutes(10));
 
-        if (! $this->smsSender->sendVerificationCode($user->phone, $code)) {
+        if (! $this->flashCallSender->sendVerificationCode($user->phone, $code)) {
             throw ValidationException::withMessages([
-                'code' => 'Не удалось отправить SMS. Повторите попытку.',
+                'code' => 'Не удалось инициировать звонок. Повторите попытку.',
             ]);
         }
 
-        return back()->with('success', 'Код отправлен на ваш номер телефона.');
+        return back()->with('success', 'Сейчас поступит звонок. Голосовой ассистент проговорит код.');
     }
 
     public function verify(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'code' => ['required', 'digits:6'],
+            'code' => ['required', 'digits:4'],
         ], [
-            'code.required' => 'Введите код из SMS.',
-            'code.digits' => 'Код должен содержать 6 цифр.',
+            'code.required' => 'Введите код из звонка.',
+            'code.digits' => 'Код должен содержать 4 цифры.',
         ]);
 
         $user = $request->user();
