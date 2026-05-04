@@ -5,7 +5,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
-test('profile save stores uploaded avatar when jpeg file is set on component', function () {
+test('uploaded avatar persists when file is set on component', function () {
     Storage::fake('public');
 
     $user = User::factory()->create([
@@ -20,7 +20,6 @@ test('profile save stores uploaded avatar when jpeg file is set on component', f
     Livewire::actingAs($user)
         ->test('pages::profile.index')
         ->set('avatar', $file)
-        ->call('save')
         ->assertHasNoErrors();
 
     $fresh = $user->fresh();

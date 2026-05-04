@@ -6,7 +6,6 @@ use App\Services\ContactChangeService;
 use App\Support\PresetAvatar;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -57,6 +56,15 @@ class extends Component {
 
     public string $email_new_code = '';
 
+    public bool $personalEditModal = false;
+
+    /** @var ''|'fio'|'date_of_birth' */
+    public string $personalEditField = '';
+
+    public string $personalDraft = '';
+
+    public bool $passwordChangeModal = false;
+
     public function mount()
     {
         if (!Auth::check()) {
@@ -85,14 +93,196 @@ class extends Component {
         if (! PresetAvatar::isAllowedPath($path)) {
             return;
         }
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
         $this->avatar = null;
         $this->resetErrorBag('avatar');
         $this->selected_preset_path = $path;
+        $dbPath = PresetAvatar::storagePathForDb($path);
+        $user->update(['avatar_path' => $dbPath]);
+        $this->avatar_path = $dbPath;
+        $this->success('Аватар обновлён.', position: 'toast-center toast-top');
     }
 
     public function updatedAvatar(): void
     {
         $this->selected_preset_path = null;
+        if (! $this->avatar) {
+            return;
+        }
+        $this->persistUploadedAvatar();
+    }
+
+    public function persistUploadedAvatar(): void
+    {
+        $user = Auth::user();
+        if (! $user || ! $this->avatar) {
+            return;
+        }
+
+        $this->validate([
+            'avatar' => ['required', 'image', 'max:3072'],
+        ], [
+            'avatar.image' => 'Аватар должен быть изображением.',
+            'avatar.max' => 'Размер аватара не должен превышать 3 МБ.',
+        ]);
+
+        $stored = $this->avatar->store('avatars', 'public');
+        $user->update(['avatar_path' => $stored]);
+        $this->avatar_path = $stored;
+        $this->avatar = null;
+        $this->success('Аватар обновлён.', position: 'toast-center toast-top');
+    }
+
+    public function openPersonalEdit(string $field): void
+    {
+        if ($field !== 'fio' && $field !== 'date_of_birth') {
+            return;
+        }
+        $this->resetErrorBag();
+        $this->personalEditField = $field;
+        $this->personalDraft = $field === 'fio' ? $this->fio : $this->date_of_birth;
+        $this->personalEditModal = true;
+    }
+
+    public function closePersonalEdit(): void
+    {
+        $this->personalEditModal = false;
+        $this->personalEditField = '';
+        $this->personalDraft = '';
+        $this->resetErrorBag();
+    }
+
+    public function savePersonalFromModal(): void
+    {
+        if ($this->personalEditField === 'fio') {
+            $this->validate([
+                'personalDraft' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\-]+(?:\s+[\p{L}\-]+){1,2}$/u'],
+            ], [
+                'personalDraft.required' => 'ФИО обязательно для заполнения.',
+                'personalDraft.regex' => 'Укажите ФИО в формате "Фамилия Имя" или "Фамилия Имя Отчество".',
+            ]);
+            $user = Auth::user();
+            if (! $user) {
+                return;
+            }
+            $user->update(['fio' => $this->personalDraft]);
+            $this->fio = $this->personalDraft;
+        } elseif ($this->personalEditField === 'date_of_birth') {
+            $this->validate([
+                'personalDraft' => ['required', 'date', 'before:today'],
+            ], [
+                'personalDraft.required' => 'Дата рождения обязательна.',
+                'personalDraft.date' => 'Введите корректную дату рождения.',
+                'personalDraft.before' => 'Дата рождения должна быть в прошлом.',
+            ]);
+            $user = Auth::user();
+            if (! $user) {
+                return;
+            }
+            $user->update(['date_of_birth' => $this->personalDraft]);
+            $this->date_of_birth = $this->personalDraft;
+        } else {
+            return;
+        }
+
+        $this->closePersonalEdit();
+        $this->success('Данные сохранены.', position: 'toast-center toast-top');
+    }
+
+    public function persistDescription(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+        $this->validate([
+            'description' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'description.max' => 'Описание не должно превышать 2000 символов.',
+        ]);
+        $user->update(['description' => $this->description]);
+    }
+
+    public function updatedDescription(): void
+    {
+        $this->persistDescription();
+    }
+
+    public function persistPrivacyToggles(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+        $user->update([
+            'is_profile_public' => $this->is_profile_public,
+            'show_email_on_profile' => $this->show_email_on_profile,
+            'show_phone_on_profile' => $this->show_phone_on_profile,
+        ]);
+    }
+
+    public function updatedIsProfilePublic(): void
+    {
+        $this->persistPrivacyToggles();
+    }
+
+    public function updatedShowEmailOnProfile(): void
+    {
+        $this->persistPrivacyToggles();
+    }
+
+    public function updatedShowPhoneOnProfile(): void
+    {
+        $this->persistPrivacyToggles();
+    }
+
+    public function openPasswordChangeModal(): void
+    {
+        $this->resetErrorBag();
+        $this->current_password = '';
+        $this->new_password = '';
+        $this->new_password_confirmation = '';
+        $this->passwordChangeModal = true;
+    }
+
+    public function closePasswordChangeModal(): void
+    {
+        $this->passwordChangeModal = false;
+        $this->current_password = '';
+        $this->new_password = '';
+        $this->new_password_confirmation = '';
+        $this->resetErrorBag();
+    }
+
+    public function savePasswordFromModal(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+
+        $this->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'current_password.required' => 'Введите текущий пароль.',
+            'new_password.required' => 'Введите новый пароль.',
+            'new_password.min' => 'Новый пароль должен содержать минимум 8 символов.',
+            'new_password.confirmed' => 'Подтверждение нового пароля не совпадает.',
+        ]);
+
+        if (! Hash::check($this->current_password, $user->password)) {
+            $this->addError('current_password', 'Текущий пароль указан неверно.');
+
+            return;
+        }
+
+        $user->update(['password' => $this->new_password]);
+        $this->closePasswordChangeModal();
+        $this->success('Пароль обновлён.', position: 'toast-center toast-top');
     }
 
     public function openPhoneChangeModal(): void
@@ -314,88 +504,6 @@ class extends Component {
         $this->success('Адрес электронной почты обновлён.', position: 'toast-center toast-top');
     }
 
-    public function save(): void
-    {
-        $user = Auth::user();
-
-        if (!$user) {
-            $this->redirect('/login');
-            return;
-        }
-
-        $this->selected_preset_path = filled($this->selected_preset_path) ? $this->selected_preset_path : null;
-
-        $isChangingPassword = $this->new_password !== '';
-        $requiresPasswordConfirmation = $isChangingPassword;
-
-        $this->validate([
-            'fio' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\-]+(?:\s+[\p{L}\-]+){1,2}$/u'],
-            'date_of_birth' => ['required', 'date', 'before:today'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'is_profile_public' => ['boolean'],
-            'show_email_on_profile' => ['boolean'],
-            'show_phone_on_profile' => ['boolean'],
-            'current_password' => [$requiresPasswordConfirmation ? 'required' : 'nullable', 'string'],
-            'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'avatar' => ['nullable', 'image', 'max:3072'],
-            'selected_preset_path' => ['nullable', 'string', Rule::in(PresetAvatar::allowedPaths())],
-        ], [
-            'fio.required' => 'ФИО обязательно для заполнения.',
-            'fio.regex' => 'Укажите ФИО в формате "Фамилия Имя" или "Фамилия Имя Отчество".',
-            'date_of_birth.required' => 'Дата рождения обязательна.',
-            'date_of_birth.date' => 'Введите корректную дату рождения.',
-            'date_of_birth.before' => 'Дата рождения должна быть в прошлом.',
-            'description.max' => 'Описание не должно превышать 2000 символов.',
-            'current_password.required' => 'Для смены пароля введите текущий пароль.',
-            'new_password.min' => 'Новый пароль должен содержать минимум 8 символов.',
-            'new_password.confirmed' => 'Подтверждение нового пароля не совпадает.',
-            'avatar.image' => 'Аватар должен быть изображением.',
-            'avatar.max' => 'Размер аватара не должен превышать 3 МБ.',
-            'selected_preset_path.in' => 'Выбран недопустимый готовый аватар.',
-        ]);
-
-        if ($requiresPasswordConfirmation && !Hash::check($this->current_password, $user->password)) {
-            $this->addError('current_password', 'Текущий пароль указан неверно.');
-            return;
-        }
-
-        $payload = [
-            'fio' => $this->fio,
-            'date_of_birth' => $this->date_of_birth,
-            'description' => $this->description,
-            'is_profile_public' => $this->is_profile_public,
-            'show_email_on_profile' => $this->show_email_on_profile,
-            'show_phone_on_profile' => $this->show_phone_on_profile,
-        ];
-
-        if ($this->new_password !== '') {
-            $payload['password'] = $this->new_password;
-        }
-
-        if ($this->avatar) {
-            $payload['avatar_path'] = $this->avatar->store('avatars', 'public');
-            $this->avatar_path = $payload['avatar_path'];
-            $this->selected_preset_path = null;
-        } elseif ($this->selected_preset_path && PresetAvatar::isAllowedPath($this->selected_preset_path)) {
-            $payload['avatar_path'] = PresetAvatar::storagePathForDb($this->selected_preset_path);
-            $this->avatar_path = $payload['avatar_path'];
-        }
-
-        $user->update($payload);
-
-        $this->current_password = '';
-        $this->new_password = '';
-        $this->new_password_confirmation = '';
-        $this->avatar = null;
-        if ($this->avatar_path && PresetAvatar::isAllowedPath($this->avatar_path)) {
-            $this->selected_preset_path = $this->avatar_path;
-        } else {
-            $this->selected_preset_path = null;
-        }
-
-        $this->success('Профиль успешно обновлён.', position: 'toast-center toast-top');
-    }
-
     #[Computed]
     public function presetAvatarPacks(): array
     {
@@ -549,7 +657,7 @@ class extends Component {
     {{-- 2-col grid --}}
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
-            <x-maryform wire:submit="save" class="space-y-6">
+            <div class="space-y-6">
                 {{-- Avatar card --}}
                 <section class="card border border-base-300 bg-base-100">
                     <div class="card-body gap-4">
@@ -608,9 +716,6 @@ class extends Component {
                         @error('avatar')
                             <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
-                        @error('selected_preset_path')
-                            <p class="text-sm text-error">{{ $message }}</p>
-                        @enderror
                     </div>
                 </section>
 
@@ -621,16 +726,44 @@ class extends Component {
                             <x-app-icon icon="heroicons:identification" class="h-5 w-5 text-primary" />
                             Личные данные
                         </h2>
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <x-mary-input
-                                label="ФИО"
-                                wire:model="fio"
-                                placeholder="Иванов Иван Иванович"
-                                hint="Формат: Фамилия Имя или Фамилия Имя Отчество"
-                            />
-                            <x-mary-input label="Дата рождения" type="date" wire:model="date_of_birth" />
-                            <x-mary-input label="Никнейм" :value="$nickname" readonly />
-                            <x-mary-input label="Роль" :value="$role" readonly />
+                        <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-medium text-base-content/60">ФИО</p>
+                                    <p class="mt-0.5 font-medium text-base-content">{{ $fio !== '' ? $fio : '—' }}</p>
+                                    <p class="mt-1 text-xs text-base-content/50">Формат: Фамилия Имя или Фамилия Имя Отчество</p>
+                                </div>
+                                <button type="button" wire:click="openPersonalEdit('fio')" class="btn btn-ghost btn-square btn-sm shrink-0" title="Изменить ФИО">
+                                    <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-medium text-base-content/60">Дата рождения</p>
+                                    <p class="mt-0.5 font-medium text-base-content">{{ $date_of_birth !== '' ? $date_of_birth : '—' }}</p>
+                                </div>
+                                <button type="button" wire:click="openPersonalEdit('date_of_birth')" class="btn btn-ghost btn-square btn-sm shrink-0" title="Изменить дату рождения">
+                                    <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-medium text-base-content/60">Никнейм</p>
+                                    <p class="mt-0.5 font-medium text-base-content">{{ '@'.$nickname }}</p>
+                                </div>
+                                <span class="btn btn-ghost btn-square btn-sm shrink-0 cursor-default border-0 bg-transparent" title="Никнейм нельзя изменить">
+                                    <x-app-icon icon="heroicons:lock-closed" class="h-5 w-5 text-base-content/40" />
+                                </span>
+                            </div>
+                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-medium text-base-content/60">Роль</p>
+                                    <p class="mt-0.5 font-medium text-base-content">{{ $role }}</p>
+                                </div>
+                                <span class="btn btn-ghost btn-square btn-sm shrink-0 cursor-default border-0 bg-transparent" title="Роль назначается системой">
+                                    <x-app-icon icon="heroicons:lock-closed" class="h-5 w-5 text-base-content/40" />
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -644,44 +777,38 @@ class extends Component {
                         </h2>
 
                         <div class="space-y-5">
-                            <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
-                                <div>
-                                    <x-mary-input label="Электронная почта" :value="$authUser->email" readonly />
-                                    <div class="mt-2">
-                                        @if ($authUser->email_verified_at)
-                                            <span class="badge badge-success badge-sm gap-1">
-                                                <x-app-icon icon="heroicons:check-badge" class="h-3.5 w-3.5" />
-                                                Подтверждён
-                                            </span>
-                                        @else
-                                            <span class="badge badge-warning badge-sm gap-1">
-                                                <x-app-icon icon="heroicons:exclamation-triangle" class="h-3.5 w-3.5" />
-                                                Не подтверждён
-                                            </span>
-                                        @endif
-                                    </div>
+                            <div class="form-control w-full">
+                                <label class="label cursor-default py-0 pb-1">
+                                    <span class="label-text">Электронная почта</span>
+                                </label>
+                                <div class="flex flex-row items-center gap-3">
+                                    <input
+                                        type="text"
+                                        readonly
+                                        class="input input-bordered w-full min-w-0 flex-1 cursor-default bg-base-200/40"
+                                        value="{{ $authUser->email }}"
+                                    />
+                                    <button type="button" wire:click="openEmailChangeModal" class="btn btn-ghost btn-square btn-sm shrink-0 border border-base-300 md:btn-md" title="Изменить email">
+                                        <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
+                                    </button>
                                 </div>
-                                <x-mary-button label="Изменить email" class="btn-outline btn-primary" type="button" wire:click="openEmailChangeModal" />
                             </div>
 
-                            <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
-                                <div>
-                                    <x-mary-input label="Телефон" :value="$authUser->phone" readonly />
-                                    <div class="mt-2">
-                                        @if ($authUser->phone_verified_at)
-                                            <span class="badge badge-success badge-sm gap-1">
-                                                <x-app-icon icon="heroicons:check-badge" class="h-3.5 w-3.5" />
-                                                Подтверждён
-                                            </span>
-                                        @else
-                                            <span class="badge badge-warning badge-sm gap-1">
-                                                <x-app-icon icon="heroicons:exclamation-triangle" class="h-3.5 w-3.5" />
-                                                Не подтверждён
-                                            </span>
-                                        @endif
-                                    </div>
+                            <div class="form-control w-full">
+                                <label class="label cursor-default py-0 pb-1">
+                                    <span class="label-text">Телефон</span>
+                                </label>
+                                <div class="flex flex-row items-center gap-3">
+                                    <input
+                                        type="text"
+                                        readonly
+                                        class="input input-bordered w-full min-w-0 flex-1 cursor-default bg-base-200/40"
+                                        value="{{ $authUser->phone }}"
+                                    />
+                                    <button type="button" wire:click="openPhoneChangeModal" class="btn btn-ghost btn-square btn-sm shrink-0 border border-base-300 md:btn-md" title="Изменить номер">
+                                        <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
+                                    </button>
                                 </div>
-                                <x-mary-button label="Изменить номер" class="btn-outline btn-primary" type="button" wire:click="openPhoneChangeModal" />
                             </div>
                         </div>
                     </div>
@@ -698,8 +825,11 @@ class extends Component {
                             Расскажите о навыках, интересах и опыте — этот текст увидят на вашем публичном профиле.
                         </p>
                         <div class="rounded-2xl border border-base-300 bg-base-200/40 p-1">
-                            <x-marymarkdown wire:model="description" :config="$this->config" />
+                            <x-marymarkdown wire:model.live.debounce.1500ms="description" :config="$this->config" />
                         </div>
+                        @error('description')
+                            <p class="text-sm text-error">{{ $message }}</p>
+                        @enderror
                     </div>
                 </section>
 
@@ -711,9 +841,9 @@ class extends Component {
                             Публичный профиль
                         </h2>
                         <div class="space-y-3">
-                            <x-marytoggle label="Профиль виден всем" wire:model="is_profile_public" />
-                            <x-marytoggle label="Показывать email в публичном профиле" wire:model="show_email_on_profile" />
-                            <x-marytoggle label="Показывать телефон в публичном профиле" wire:model="show_phone_on_profile" />
+                            <x-marytoggle label="Профиль виден всем" wire:model.live="is_profile_public" />
+                            <x-marytoggle label="Показывать email в публичном профиле" wire:model.live="show_email_on_profile" />
+                            <x-marytoggle label="Показывать телефон в публичном профиле" wire:model.live="show_phone_on_profile" />
                         </div>
                         <div class="rounded-xl bg-primary/10 p-4 ring-1 ring-primary/20">
                             <p class="font-medium text-primary">Живое превью приватности</p>
@@ -734,28 +864,14 @@ class extends Component {
                             Безопасность
                         </h2>
                         <p class="text-sm text-base-content/70">
-                            Заполните только при смене пароля. В остальных случаях оставьте поля пустыми.
+                            Смена пароля выполняется в отдельном окне — потребуется текущий пароль.
                         </p>
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div class="md:col-span-2">
-                                <x-marypassword label="Текущий пароль" wire:model="current_password" />
-                            </div>
-                            <x-marypassword label="Новый пароль" wire:model="new_password" />
-                            <x-marypassword label="Подтверждение нового пароля" wire:model="new_password_confirmation" />
-                        </div>
+                        <button type="button" wire:click="openPasswordChangeModal" class="btn btn-ghost btn-square btn-sm border border-base-300 md:btn-md" title="Изменить пароль">
+                            <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
+                        </button>
                     </div>
                 </section>
-
-                {{-- Desktop save --}}
-                <div class="hidden justify-end gap-3 pt-2 lg:flex">
-                    <x-mary-button label="Сохранить изменения" class="btn-primary btn-lg" type="submit" />
-                </div>
-
-                {{-- Mobile sticky save --}}
-                <div class="sticky bottom-0 z-30 -mx-4 flex gap-2 border-t border-base-300 bg-base-100/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
-                    <x-mary-button label="Сохранить изменения" class="btn-primary w-full" type="submit" />
-                </div>
-            </x-maryform>
+            </div>
         </div>
 
         {{-- RIGHT sidebar --}}
@@ -927,6 +1043,40 @@ class extends Component {
                     <x-mary-button label="Отмена" class="btn-ghost" type="button" wire:click="closeEmailChangeModal" />
                 </div>
             @endif
+        </div>
+    </x-mary-modal>
+
+    <x-mary-modal wire:model="personalEditModal" title="Редактирование" class="backdrop-blur">
+        <div class="space-y-4">
+            @if ($personalEditField === 'fio')
+                <x-mary-input
+                    label="ФИО"
+                    wire:model="personalDraft"
+                    placeholder="Иванов Иван Иванович"
+                    hint="Формат: Фамилия Имя или Фамилия Имя Отчество"
+                />
+            @elseif ($personalEditField === 'date_of_birth')
+                <x-mary-input label="Дата рождения" type="date" wire:model="personalDraft" />
+            @endif
+            @error('personalDraft')
+                <p class="text-sm text-error">{{ $message }}</p>
+            @enderror
+            <div class="flex flex-wrap justify-end gap-2">
+                <x-mary-button label="Отмена" class="btn-ghost" type="button" wire:click="closePersonalEdit" />
+                <x-mary-button label="Сохранить" class="btn-primary" type="button" wire:click="savePersonalFromModal" />
+            </div>
+        </div>
+    </x-mary-modal>
+
+    <x-mary-modal wire:model="passwordChangeModal" title="Смена пароля" class="backdrop-blur">
+        <div class="space-y-4">
+            <x-marypassword label="Текущий пароль" wire:model="current_password" />
+            <x-marypassword label="Новый пароль" wire:model="new_password" />
+            <x-marypassword label="Подтверждение нового пароля" wire:model="new_password_confirmation" />
+            <div class="flex flex-wrap justify-end gap-2">
+                <x-mary-button label="Отмена" class="btn-ghost" type="button" wire:click="closePasswordChangeModal" />
+                <x-mary-button label="Сохранить пароль" class="btn-primary" type="button" wire:click="savePasswordFromModal" />
+            </div>
         </div>
     </x-mary-modal>
 

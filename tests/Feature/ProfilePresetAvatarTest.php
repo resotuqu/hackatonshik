@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
-test('profile save stores preset avatar path when preset is selected', function () {
+test('select preset persists avatar path without global save', function () {
     Storage::fake('public');
 
     $pack = AvatarPresetPack::factory()->create([
@@ -33,13 +33,12 @@ test('profile save stores preset avatar path when preset is selected', function 
         ->test('pages::profile.index')
         ->call('selectPreset', $path)
         ->assertSet('selected_preset_path', $path)
-        ->call('save')
         ->assertHasNoErrors();
 
     expect($user->fresh()->avatar_path)->toBe($path);
 });
 
-test('profile save rejects invalid preset path', function () {
+test('tampered selected preset path does not change stored avatar', function () {
     Storage::fake('public');
 
     $pack = AvatarPresetPack::factory()->create([
@@ -64,9 +63,7 @@ test('profile save rejects invalid preset path', function () {
 
     Livewire::actingAs($user)
         ->test('pages::profile.index')
-        ->set('selected_preset_path', '../../../etc/passwd')
-        ->call('save')
-        ->assertHasErrors(['selected_preset_path']);
+        ->set('selected_preset_path', '../../../etc/passwd');
 
     expect($user->fresh()->avatar_path)->toBe($current);
 });
@@ -106,4 +103,6 @@ test('legacy flat preset path still selectable when file exists on disk', functi
         ->test('pages::profile.index')
         ->call('selectPreset', $path)
         ->assertSet('selected_preset_path', $path);
+
+    expect($user->fresh()->avatar_path)->toBe($path);
 });
