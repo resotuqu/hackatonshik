@@ -4,6 +4,7 @@
     'initials' => '',
     'showRecruitingBadge' => false,
     'hackatonTitle' => null,
+    'showBrandStrip' => false,
 ])
 
 @php
@@ -11,14 +12,14 @@
 @endphp
 
 <div
-    class="group/cover relative h-44 w-full shrink-0 overflow-hidden rounded-t-3xl bg-base-300"
+    class="group/cover relative h-44 w-full shrink-0 overflow-hidden rounded-t-3xl bg-base-300 transition duration-300 group-hover/card:ring-2 group-hover/card:ring-accent/35 group-hover/card:ring-inset"
     aria-hidden="true"
 >
     @if ($hasPhoto)
         <img
             src="{{ $coverUrl }}"
             alt=""
-            class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover/cover:scale-[1.03]"
+            class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover/cover:scale-[1.03] group-hover/card:scale-[1.03]"
             loading="lazy"
         />
     @else
@@ -51,7 +52,9 @@
     @endif
 
     <div @class([
-        'relative z-10 flex h-full flex-col items-center justify-center gap-1 px-4 text-center',
+        'relative z-10 flex h-full flex-col items-center justify-center px-4 text-center',
+        'gap-1.5' => $showBrandStrip,
+        'gap-1' => ! $showBrandStrip,
         'pb-10 pt-7' => filled($hackatonTitle),
         'pb-3 pt-8' => ! filled($hackatonTitle),
     ])>
@@ -60,11 +63,22 @@
         >
             {{ $title }}
         </p>
+        @if ($showBrandStrip)
+            <p
+                class="max-w-full truncate rounded-full border border-cyan-400/35 bg-base-100/10 px-3 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.25)] backdrop-blur-[2px] sm:text-[10px] [html[data-theme=hackatonshik-light]_&]:border-primary/30 [html[data-theme=hackatonshik-light]_&]:text-primary [html[data-theme=hackatonshik-light]_&]:shadow-[0_0_14px_rgba(81,112,255,0.22)]"
+            >
+                <span class="text-cyan-400/90 [html[data-theme=hackatonshik-light]_&]:text-primary/80">&gt;</span>
+                <span class="mx-0.5 tracking-[0.32em]">ХАКАТОНЩИК</span>
+                <span class="text-cyan-400/90 [html[data-theme=hackatonshik-light]_&]:text-primary/80">&lt;</span>
+            </p>
+        @endif
         <span
-            class="font-display text-3xl font-black tabular-nums tracking-tight text-secondary drop-shadow-[0_0_18px_rgba(163,230,53,0.45)] [html[data-theme=hackatonshik-light]_&]:text-primary [html[data-theme=hackatonshik-light]_&]:drop-shadow-[0_0_12px_rgba(81,112,255,0.35)] sm:text-4xl"
+            @class([
+                'font-display font-black tabular-nums tracking-tight text-secondary drop-shadow-[0_0_18px_rgba(163,230,53,0.45)] [html[data-theme=hackatonshik-light]_&]:text-primary [html[data-theme=hackatonshik-light]_&]:drop-shadow-[0_0_12px_rgba(81,112,255,0.35)]',
+                'text-2xl sm:text-3xl' => $showBrandStrip,
+                'text-3xl sm:text-4xl' => ! $showBrandStrip,
+            ])
             aria-hidden="true"
-        >
-            {{ $initials }}
-        </span>
+        >{{ $initials }}</span>
     </div>
 </div>
