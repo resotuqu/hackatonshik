@@ -2,22 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\Hackaton;
+use App\Models\HackatonDocument;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\HackatonDocument>
+ * @extends Factory<HackatonDocument>
  */
 class HackatonDocumentFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'hackaton_id' => Hackaton::factory(),
+            'name' => fake()->sentence(3),
+            'description' => fake()->sentence(8),
+            'file_url' => 'hackaton_documents/'.fake()->uuid().'.pdf',
+            'filling_by_team_member' => fake()->boolean(40),
         ];
     }
 }

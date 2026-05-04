@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Seeders;
+
+use App\Models\ContactMessage;
+use Illuminate\Database\Seeder;
+
+class ContactMessageSeeder extends Seeder
+{
+    public function run(): void
+    {
+        ContactMessage::factory()->count(10)->create();
+    }
+}

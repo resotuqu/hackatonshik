@@ -19,6 +19,8 @@ class HackatonAnnouncementFactory extends Factory
             'created_by' => User::factory()->partner(),
             'title' => fake()->sentence(4),
             'body' => fake()->paragraph(),
+            'is_draft' => false,
+            'template_key' => null,
             'published_at' => now(),
         ];
     }

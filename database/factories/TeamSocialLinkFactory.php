@@ -2,22 +2,21 @@
 
 namespace Database\Factories;
 
+use App\Models\Team;
+use App\Models\TeamSocialLink;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TeamSocialLink>
+ * @extends Factory<TeamSocialLink>
  */
 class TeamSocialLinkFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'team_id' => Team::factory(),
+            'name' => fake()->randomElement(['Telegram', 'GitHub', 'ВКонтакте', 'Сайт команды']),
+            'url' => fake()->url(),
         ];
     }
 }

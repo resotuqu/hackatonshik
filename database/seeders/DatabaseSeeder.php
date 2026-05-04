@@ -1,23 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        $this->call(HackatonSeeder::class);
-        $this->call(RoleSeeder::class);
-        $this->call(SkillSeeder::class);
-        $this->call(NewsPostSeeder::class);
+        $this->call([
+            UserSeeder::class,
+            RoleSeeder::class,
+            SkillSeeder::class,
+            HackatonSeeder::class,
+            HackatonDocumentSeeder::class,
+            HackatonCaseSeeder::class,
+            TeamSeeder::class,
+            TeamRoleSeeder::class,
+            TeamRoleSkillSeeder::class,
+            TeamSocialLinkSeeder::class,
+            HackatonApplicationSeeder::class,
+            TeamApplicationSeeder::class,
+            HackatonCaseSubmissionSeeder::class,
+            HackatonCaseAnswerSeeder::class,
+            HackatonCaseScoreSeeder::class,
+            HackatonAnnouncementSeeder::class,
+            HackatonAnnouncementImageSeeder::class,
+            HackatonImageSeeder::class,
+            HackatonCertificateSeeder::class,
+            UserHackatonDocumentSeeder::class,
+            HackatonJudgeSeeder::class,
+            JudgeInvitationSeeder::class,
+            NewsPostSeeder::class,
+            ContactMessageSeeder::class,
+            SavedListFilterSeeder::class,
+            ListAnalyticsEventSeeder::class,
+        ]);
     }
 }

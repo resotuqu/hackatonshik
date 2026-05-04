@@ -16,7 +16,7 @@ class HackatonCaseFieldFactory extends Factory
         return [
             'hackaton_case_id' => HackatonCase::factory(),
             'label' => fake()->sentence(2),
-            'key' => fake()->unique()->slug(),
+            'key' => 'field_'.str_replace('.', '_', uniqid('', true)),
             'type' => fake()->randomElement(HackatonCaseField::allowedTypes()),
             'is_required' => false,
             'sort_order' => fake()->numberBetween(0, 20),
