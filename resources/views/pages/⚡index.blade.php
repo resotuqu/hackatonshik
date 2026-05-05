@@ -169,7 +169,7 @@ new #[Layout('layouts::app', [
         <div class="pointer-events-none absolute inset-0 opacity-90" aria-hidden="true" style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.22), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"></div>
         <div class="relative flex min-h-[inherit] flex-col gap-8 px-5 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
             <div class="flex max-w-xl flex-1 flex-col justify-center lg:max-w-[min(36rem,50%)] lg:text-left">
-                <h1 class="font-display text-5xl font-bold leading-[1.06] tracking-tight sm:text-6xl lg:text-7xl">
+                <h1 class="ui-heading-display text-5xl font-bold leading-[1.06] sm:text-6xl lg:text-7xl">
                     Найдите команду. Проведите хакатон.
                 </h1>
                 <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/85 sm:text-lg">
@@ -178,11 +178,11 @@ new #[Layout('layouts::app', [
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
                     <a
                         href="/hackatons/create"
-                        class="btn btn-secondary btn-lg order-1 text-base shadow-xl shadow-secondary/30 ring-2 ring-secondary/40 ring-offset-2 ring-offset-base-100 transition-transform hover:scale-[1.02] active:scale-[0.99] sm:text-lg sm:order-2"
+                        class="ui-cta-secondary btn-lg order-1 text-base transition-transform hover:scale-[1.02] active:scale-[0.99] sm:text-lg sm:order-2"
                     >
                         Создать хакатон
                     </a>
-                    <a href="/teams" class="btn btn-primary btn-lg order-2 btn-outline border-primary/50 sm:order-1">
+                    <a href="/teams" class="ui-cta-outline-primary btn-lg order-2 sm:order-1">
                         Найти команду
                     </a>
                 </div>
@@ -213,7 +213,7 @@ new #[Layout('layouts::app', [
         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
     >
         <div class="flex flex-wrap items-end justify-between gap-4">
-            <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">Активные хакатоны</h2>
+            <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Активные хакатоны</h2>
             <a href="/hackatons" class="btn btn-ghost btn-sm gap-2 sm:btn-md">
                 <x-app-icon icon="heroicons:arrow-right" class="h-4 w-4" />
                 Все хакатоны
@@ -296,7 +296,7 @@ new #[Layout('layouts::app', [
         x-init="start()"
         :class="reveal ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
     >
-        <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">Платформа в цифрах</h2>
+        <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Платформа в цифрах</h2>
         <p class="mt-2 max-w-2xl text-base-content/70">Учитываются все публичные хакатоны на платформе — текущие, предстоящие, завершённые и в архиве (кроме черновиков).</p>
         <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
             <div
@@ -353,7 +353,7 @@ new #[Layout('layouts::app', [
         x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.08 }); io.observe($el);"
         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
     >
-        <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">Отзывы участников</h2>
+        <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Отзывы участников</h2>
 
         <div class="lg:hidden">
             <div class="overflow-hidden rounded-3xl border border-base-300 bg-base-100/50 shadow-sm">
@@ -551,7 +551,7 @@ new #[Layout('layouts::app', [
     aria-labelledby="dashboard-heading"
 >
     <header class="space-y-2">
-        <h1 id="dashboard-heading" class="font-display text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
+        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
         <p class="text-base-content/80">
             Здравствуйте, {{ auth()->user()->fio }}.
         </p>

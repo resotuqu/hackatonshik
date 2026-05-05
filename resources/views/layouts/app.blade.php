@@ -61,8 +61,8 @@
         <div class="drawer-content flex min-h-screen flex-col">
             <header class="navbar min-h-12 border-b border-base-200 bg-base-100/95 px-3 shadow-sm backdrop-blur-sm sm:min-h-14 sm:px-4 lg:hidden">
                 <div class="flex w-full min-w-0 flex-1 items-center gap-2">
-                    <label for="main-nav-drawer" class="btn btn-ghost btn-circle drawer-button shrink-0" aria-label="Открыть меню">
-                        <x-app-icon icon="heroicons:bars-3" class="h-5 w-5" />
+                    <label for="main-nav-drawer" class="btn btn-ghost btn-square min-h-12 min-w-12 shrink-0 drawer-button" aria-label="Открыть меню">
+                        <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
                     </label>
                     <div class="flex h-10 min-h-0 min-w-0 flex-1 items-stretch sm:h-11">
                         <x-app-brand
@@ -75,7 +75,7 @@
             </header>
 
             <main id="main-content" class="flex-1 pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:pb-0" tabindex="-1">
-                <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+                <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
                     @if (session('success') || session('error') || session('warning'))
                         <div class="toast toast-top toast-end z-70">
                             @if (session('success'))
@@ -127,34 +127,34 @@
             </footer>
 
             <nav
-                class="btm-nav lg:hidden z-60 border-t border-base-200 bg-base-100/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]"
+                class="btm-nav btm-nav-touch lg:hidden z-60 border-t border-base-200 bg-base-100/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]"
                 aria-label="Нижняя навигация"
             >
                 <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/75'])>
-                    <x-app-icon icon="heroicons:home" class="h-5 w-5" />
-                    <span class="btm-nav-label text-[11px]">Главная</span>
+                    <x-app-icon icon="heroicons:home" class="h-6 w-6" />
+                    <span class="btm-nav-label">Главная</span>
                 </a>
                 <a href="/teams" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
-                    <x-app-icon icon="heroicons:user-group" class="h-5 w-5" />
-                    <span class="btm-nav-label text-[11px]">Команды</span>
+                    <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
+                    <span class="btm-nav-label">Команды</span>
                 </a>
-                <label for="main-nav-drawer" class="cursor-pointer text-base-content/75">
-                    <x-app-icon icon="heroicons:bars-3" class="h-5 w-5" />
-                    <span class="btm-nav-label text-[11px]">Меню</span>
+                <label for="main-nav-drawer" class="flex min-h-14 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-base-content/75">
+                    <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
+                    <span class="btm-nav-label">Меню</span>
                 </label>
                 <a href="/hackatons" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
-                    <x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5" />
-                    <span class="btm-nav-label text-[11px]">Хакатоны</span>
+                    <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
+                    <span class="btm-nav-label">Хакатоны</span>
                 </a>
                 @auth
                     <a href="/profile" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/75'])>
-                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5" />
-                        <span class="btm-nav-label text-[11px]">Профиль</span>
+                        <x-app-icon icon="heroicons:user-circle" class="h-6 w-6" />
+                        <span class="btm-nav-label">Профиль</span>
                     </a>
                 @else
                     <a href="/login" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/75'])>
-                        <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />
-                        <span class="btm-nav-label text-[11px]">Войти</span>
+                        <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-6 w-6" />
+                        <span class="btm-nav-label">Войти</span>
                     </a>
                 @endauth
             </nav>

@@ -2,6 +2,7 @@
 
 use App\Actions\Hackaton\BuildParticipantHackatonHubPageData;
 use App\Models\Hackaton;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -13,6 +14,11 @@ new class extends Component
     {
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
+    }
+
+    public function placeholder(array $params = []): ViewContract
+    {
+        return view('pages.profile.hackatons.hub-placeholder', $params);
     }
 
     public function render(BuildParticipantHackatonHubPageData $builder): View

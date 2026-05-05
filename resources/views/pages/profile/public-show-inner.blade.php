@@ -44,7 +44,7 @@
                     </div>
                     <div class="space-y-2">
                         <span class="badge badge-primary badge-outline">{{ $publicRoleLabel }}</span>
-                        <h1 class="font-display text-3xl font-semibold tracking-tight lg:text-4xl">
+                        <h1 class="ui-heading-display text-3xl font-semibold lg:text-4xl">
                             {{ $profileUser->fio }}
                         </h1>
                         <p class="text-base text-base-content/70">{{ '@'.$profileUser->nickname }}</p>
@@ -129,7 +129,12 @@
                     Навыки и роли
                 </h2>
                 @if ($skills->isEmpty())
-                    <p class="text-sm text-base-content/70">Пользователь пока не добавил навыки.</p>
+                    <x-empty-state
+                        embedded
+                        title="Навыки не указаны"
+                        description="Пользователь пока не добавил навыки в профиль."
+                        icon="heroicons:sparkles"
+                    />
                 @else
                     <div class="flex flex-wrap gap-2">
                         @foreach ($skills as $skill)
@@ -177,7 +182,12 @@
                     Последние команды
                 </h2>
                 @if ($profileUser->teams->isEmpty())
-                    <p class="text-sm text-base-content/70">Публичных команд пока нет.</p>
+                    <x-empty-state
+                        embedded
+                        title="Команд нет"
+                        description="Публичных команд у пользователя пока не отображается."
+                        icon="heroicons:user-group"
+                    />
                 @else
                     <div class="flex flex-wrap gap-2">
                         @foreach ($profileUser->teams as $team)
@@ -195,7 +205,12 @@
                     Последние хакатоны
                 </h2>
                 @if ($profileUser->hackatons->isEmpty())
-                    <p class="text-sm text-base-content/70">Пока нет созданных хакатонов.</p>
+                    <x-empty-state
+                        embedded
+                        title="Хакатонов нет"
+                        description="Пользователь ещё не создавал хакатоны на платформе."
+                        icon="heroicons:flag"
+                    />
                 @else
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         @foreach ($profileUser->hackatons as $hackaton)
@@ -220,7 +235,12 @@
                     Сертификаты
                 </h2>
                 @if ($profileUser->certificates->isEmpty())
-                    <p class="text-sm text-base-content/70">Сертификаты пока не опубликованы.</p>
+                    <x-empty-state
+                        embedded
+                        title="Сертификатов нет"
+                        description="Сертификаты пока не опубликованы в профиле."
+                        icon="heroicons:academic-cap"
+                    />
                 @else
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         @foreach ($profileUser->certificates as $certificate)

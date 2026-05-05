@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -20,6 +21,11 @@ new class extends Component
             'teamRoles.skills',
         ]);
         $this->profileUser = $user;
+    }
+
+    public function placeholder(array $params = []): ViewContract
+    {
+        return view('pages.profile.public-profile-placeholder', $params);
     }
 
     public function render(): View

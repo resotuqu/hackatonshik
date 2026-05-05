@@ -90,7 +90,7 @@
             </ul>
         </div>
 
-        <div class="tabs tabs-boxed w-full overflow-x-auto scroll-smooth focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2 rounded-lg" role="tablist" aria-label="Разделы хакатона" data-tab-list="hackaton">
+        <div class="tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2" role="tablist" aria-label="Разделы хакатона" data-tab-list="hackaton">
             <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="hackaton-panel-description" data-tab-trigger="hackaton" data-tab-value="description">
                 Описание
             </button>
@@ -215,9 +215,14 @@
                                     Все ваши команды уже подали заявки на этот хакатон.
                                 </p>
                             @else
-                                <p class="text-sm text-base-content/70">
-                                    У вас пока нет команд для подачи заявки.
-                                </p>
+                                <x-empty-state
+                                    embedded
+                                    title="Нет команд для заявки"
+                                    description="Создайте команду для этого хакатона, чтобы подать заявку на участие."
+                                    icon="heroicons:user-group"
+                                    action-href="/teams/create"
+                                    action-label="Создать команду"
+                                />
                             @endif
                         @endif
                     @endauth
@@ -231,7 +236,12 @@
             <div class="card-body">
                 <h2 class="card-title text-xl">Документы хакатона</h2>
                 @if ($hackaton->documents->isEmpty())
-                    <p class="text-base-content/60">Для этого хакатона пока нет документов. Проверяйте раздел позже или уточните детали у организатора.</p>
+                    <x-empty-state
+                        embedded
+                        title="Документов пока нет"
+                        description="Проверяйте раздел позже или уточните детали у организатора."
+                        icon="heroicons:document-text"
+                    />
                 @else
                     <div class="space-y-3">
                         @foreach ($hackaton->documents as $document)
@@ -297,7 +307,12 @@
                 </div>
 
                 @if($hackaton->announcements->isEmpty())
-                    <p class="text-base-content/60">Пока нет опубликованных анонсов. Проверяйте раздел перед стартом и во время хакатона.</p>
+                    <x-empty-state
+                        embedded
+                        title="Анонсов пока нет"
+                        description="Проверяйте раздел перед стартом и во время хакатона."
+                        icon="heroicons:megaphone"
+                    />
                 @else
                     <div class="space-y-3">
                         @foreach($hackaton->announcements as $announcement)
@@ -349,7 +364,12 @@
                 <h2 class="card-title text-xl">Кейсы</h2>
 
                 @if($hackaton->cases->isEmpty())
-                    <p class="text-base-content/60">Для этого хакатона пока нет кейсов.</p>
+                    <x-empty-state
+                        embedded
+                        title="Кейсов пока нет"
+                        description="Организатор ещё не опубликовал задания для этого хакатона."
+                        icon="heroicons:puzzle-piece"
+                    />
                 @else
                     <div class="space-y-4">
                         @foreach($hackaton->cases as $case)

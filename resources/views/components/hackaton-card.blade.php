@@ -83,9 +83,9 @@
 
 <article
     @class([
-        'group/card flex h-full flex-col overflow-hidden rounded-3xl border bg-base-100 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-2xl motion-reduce:transition-none motion-reduce:hover:translate-y-0',
-        'border-base-300 hover:border-primary/55 hover:shadow-primary/10' => ! $isFinished,
-        'border-base-300/70 opacity-85 hover:border-base-content/30 hover:opacity-100 hover:shadow-base-content/5' => $isFinished,
+        'ui-surface-card ui-surface-card--hover group/card flex h-full flex-col',
+        'ui-surface-card--hackaton-active' => ! $isFinished,
+        'ui-surface-card--hackaton-finished' => $isFinished,
     ])
     aria-labelledby="{{ $titleId }}"
 >
@@ -123,13 +123,13 @@
         @endif
 
         <div class="grid grid-cols-2 gap-2">
-            <div class="rounded-xl border border-base-300 bg-base-200/40 px-3 py-2 text-center">
+            <div class="ui-stat-tile px-3 py-2 text-center">
                 <p class="text-[10px] font-semibold uppercase tracking-wider text-base-content/55">Команд</p>
-                <p class="font-display text-xl font-black tabular-nums text-base-content">{{ $teamsCount }}</p>
+                <p class="ui-heading-display text-xl font-black tabular-nums text-base-content">{{ $teamsCount }}</p>
             </div>
-            <div class="rounded-xl border border-base-300 bg-base-200/40 px-3 py-2 text-center">
+            <div class="ui-stat-tile px-3 py-2 text-center">
                 <p class="text-[10px] font-semibold uppercase tracking-wider text-base-content/55">Участников</p>
-                <p class="font-display text-xl font-black tabular-nums text-base-content">{{ $participantsCount }}</p>
+                <p class="ui-heading-display text-xl font-black tabular-nums text-base-content">{{ $participantsCount }}</p>
             </div>
         </div>
 
@@ -175,14 +175,14 @@
                 <a
                     href="{{ $href }}"
                     @if ($navigate) wire:navigate @endif
-                    class="btn btn-primary btn-sm sm:btn-md sm:flex-1"
+                    class="ui-cta-primary btn-sm sm:btn-md sm:flex-1"
                 >
                     Подробнее
                 </a>
             @else
                 <button
                     type="button"
-                    class="btn btn-primary btn-sm sm:btn-md sm:flex-1"
+                    class="ui-cta-primary btn-sm sm:btn-md sm:flex-1"
                     wire:click="openHackaton({{ $hackaton->id }})"
                 >
                     Подробнее
@@ -191,7 +191,7 @@
             @if ($canQuickApply && ! $isFinished)
                 <button
                     type="button"
-                    class="btn btn-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
+                    class="ui-cta-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
                     wire:click="quickApplyHackaton({{ $hackaton->id }})"
                     wire:loading.attr="disabled"
                     wire:target="quickApplyHackaton({{ $hackaton->id }})"

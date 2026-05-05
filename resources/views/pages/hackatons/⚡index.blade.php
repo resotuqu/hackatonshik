@@ -309,7 +309,7 @@ class extends Component {
 
 <div class="space-y-8">
     {{-- Hero section --}}
-    <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-base-200/50 px-5 py-8 sm:px-8 sm:py-10">
+    <section class="ui-page-hero">
         <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
             <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-primary/30 blur-3xl"></div>
             <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-secondary/25 blur-3xl"></div>
@@ -322,7 +322,7 @@ class extends Component {
                     <x-app-icon icon="heroicons:rocket-launch" class="h-3.5 w-3.5" />
                     Каталог хакатонов
                 </div>
-                <h1 class="font-display text-3xl font-black tracking-tight text-base-content sm:text-4xl lg:text-5xl">
+                <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
                     <span class="bg-linear-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
                         Хакатоны
                     </span>
@@ -337,12 +337,12 @@ class extends Component {
 
             <div class="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
                 @if ($canCreate)
-                    <a href="/hackatons/create" wire:navigate class="btn btn-primary btn-md gap-2 shadow-lg shadow-primary/20">
+                    <a href="/hackatons/create" wire:navigate class="ui-cta-primary btn-md">
                         <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
                         Создать хакатон
                     </a>
                 @elseif (! auth()->check())
-                    <a href="{{ route('login') }}" class="btn btn-outline btn-md gap-2">
+                    <a href="{{ route('login') }}" class="ui-cta-outline btn-md gap-2">
                         <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />
                         Войти, чтобы участвовать
                     </a>

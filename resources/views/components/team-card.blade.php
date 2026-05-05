@@ -22,7 +22,7 @@
 @endphp
 
 <article
-    class="group/card flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:border-accent/55 hover:shadow-2xl hover:shadow-accent/10"
+    class="ui-surface-card ui-surface-card--hover ui-surface-card--team group/card flex h-full flex-col"
     aria-labelledby="{{ $titleId }}"
 >
     <x-team-cover
@@ -35,7 +35,7 @@
 
     <div class="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-5">
         <div class="space-y-2">
-            <h3 id="{{ $titleId }}" class="font-display text-xl font-bold leading-snug tracking-tight text-base-content sm:text-2xl">
+            <h3 id="{{ $titleId }}" class="ui-heading-display text-xl font-bold leading-snug sm:text-2xl">
                 {{ $team->title }}
             </h3>
             <p class="line-clamp-2 text-sm leading-relaxed text-base-content/70">
@@ -98,7 +98,7 @@
             @if ($canQuickApply && $hasVacancies)
                 <button
                     type="button"
-                    class="btn btn-primary btn-sm order-1 sm:order-0 sm:btn-md sm:flex-1"
+                    class="ui-cta-primary btn-sm order-1 sm:order-0 sm:btn-md sm:flex-1"
                     wire:click="quickApplyTeam({{ $team->id }})"
                     wire:loading.attr="disabled"
                     wire:target="quickApplyTeam({{ $team->id }})"
@@ -107,7 +107,7 @@
                     <span wire:loading wire:target="quickApplyTeam({{ $team->id }})" class="loading loading-spinner loading-sm"></span>
                 </button>
             @elseif (! auth()->check() && $hasVacancies)
-                <a href="{{ route('login') }}" class="btn btn-primary btn-sm order-1 sm:order-0 sm:btn-md sm:flex-1">
+                <a href="{{ route('login') }}" class="ui-cta-primary btn-sm order-1 sm:order-0 sm:btn-md sm:flex-1">
                     Откликнуться
                 </a>
             @endif
@@ -115,14 +115,14 @@
                 <a
                     href="{{ $href }}"
                     @if ($navigate) wire:navigate @endif
-                    class="btn btn-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
+                    class="ui-cta-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
                 >
                     Подробнее
                 </a>
             @else
                 <button
                     type="button"
-                    class="btn btn-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
+                    class="ui-cta-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
                     wire:click="openTeam({{ $team->id }})"
                 >
                     Подробнее

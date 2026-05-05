@@ -19,7 +19,7 @@
             <div class="card-body">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="card-title text-2xl">{{ $hackaton->title }}</h1>
+                        <h1 class="ui-heading-display card-title text-2xl">{{ $hackaton->title }}</h1>
                         <p class="text-sm text-base-content/70">Личный кабинет участника с ключевыми действиями и дедлайнами.</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
@@ -67,7 +67,12 @@
                 <div class="card-body">
                     <h2 class="card-title text-lg">Статусы заявок</h2>
                     @if($applications->isEmpty())
-                        <p class="text-sm text-base-content/70">Пока нет заявок команд на этот хакатон.</p>
+                        <x-empty-state
+                            embedded
+                            title="Заявок пока нет"
+                            description="Подайте заявку командой со страницы хакатона, чтобы статус отобразился здесь."
+                            icon="heroicons:inbox"
+                        />
                     @else
                         <div class="space-y-2">
                             @foreach($applications as $application)
@@ -92,7 +97,12 @@
                 <div class="card-body">
                     <h2 class="card-title text-lg">Обязательные документы</h2>
                     @if($requiredDocuments->isEmpty())
-                        <p class="text-sm text-base-content/70">Организатор пока не добавил обязательные документы.</p>
+                        <x-empty-state
+                            embedded
+                            title="Документы не заданы"
+                            description="Организатор пока не добавил обязательные документы."
+                            icon="heroicons:document-text"
+                        />
                     @else
                         <div class="space-y-2">
                             @foreach($requiredDocuments as $document)
@@ -114,7 +124,12 @@
                 <div class="card-body">
                     <h2 class="card-title text-lg">Ближайшие дедлайны кейсов</h2>
                     @if($upcomingCases->isEmpty())
-                        <p class="text-sm text-base-content/70">Активных дедлайнов пока нет.</p>
+                        <x-empty-state
+                            embedded
+                            title="Дедлайнов нет"
+                            description="Активных дедлайнов по кейсам сейчас нет."
+                            icon="heroicons:clock"
+                        />
                     @else
                         <div class="space-y-2">
                             @foreach($upcomingCases as $case)
@@ -132,7 +147,12 @@
                 <div class="card-body">
                     <h2 class="card-title text-lg">Последние отправки</h2>
                     @if($submissions->isEmpty())
-                        <p class="text-sm text-base-content/70">Отправок кейсов пока нет.</p>
+                        <x-empty-state
+                            embedded
+                            title="Отправок нет"
+                            description="Отправки решений кейсов появятся здесь после загрузки."
+                            icon="heroicons:paper-airplane"
+                        />
                     @else
                         <div class="space-y-2">
                             @foreach($submissions->take(5) as $submission)

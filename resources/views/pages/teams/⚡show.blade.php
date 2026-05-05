@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Team;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -13,6 +14,11 @@ new class extends Component
         $this->authorize('view', $team);
         $team->loadShowRelations();
         $this->team = $team;
+    }
+
+    public function placeholder(array $params = []): ViewContract
+    {
+        return view('pages.teams.show-placeholder', $params);
     }
 
     public function render(): View

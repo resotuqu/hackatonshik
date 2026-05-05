@@ -2,6 +2,7 @@
 
 use App\Actions\Hackaton\BuildHackatonShowPageData;
 use App\Models\Hackaton;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -14,6 +15,11 @@ new class extends Component
         $hackaton->syncStatusByTimeline();
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
+    }
+
+    public function placeholder(array $params = []): ViewContract
+    {
+        return view('pages.hackatons.show-placeholder', $params);
     }
 
     public function render(BuildHackatonShowPageData $pageData): View

@@ -48,19 +48,9 @@ class extends Component {
 ?>
 
 <div class="">
-    <div wire:loading class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6" aria-busy="true" aria-label="Загрузка хакатонов">
+    <div wire:loading class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Загрузка хакатонов">
         @foreach (range(1, 6) as $_)
-            <div class="card card-border border-base-300 bg-base-100 shadow-sm overflow-hidden rounded-3xl">
-                <div class="skeleton aspect-video w-full rounded-none"></div>
-                <div class="p-4 space-y-3">
-                    <div class="skeleton h-6 w-4/5 rounded-xl"></div>
-                    <div class="skeleton h-16 w-full rounded-2xl"></div>
-                    <div class="flex gap-2 pt-2">
-                        <div class="skeleton h-9 flex-1 rounded-xl"></div>
-                        <div class="skeleton h-9 flex-1 rounded-xl"></div>
-                    </div>
-                </div>
-            </div>
+            <x-profile-hackaton-card-skeleton />
         @endforeach
     </div>
 
@@ -73,7 +63,7 @@ class extends Component {
         </ul>
     </div>
 
-    <h3 class="text-3xl text-center">Ваши хакатоны</h3>
+    <h3 class="ui-heading-display mt-6 text-center text-2xl font-bold sm:text-3xl">Ваши хакатоны</h3>
 
     <x-mary-modal wire:model="deleteHackatonModal" title="Подтверждение удаления" class="backdrop-blur">
         Вы действительно хотите удалить хакатон? Это действие нельзя отменить.
@@ -111,12 +101,20 @@ class extends Component {
 
             </x-marycard>
 
-            @empty
-
-            <h4>У вас нет хакатонов :(</h4>
-
+        @empty
+            <div class="col-span-full">
+                <x-empty-state
+                    title="Пока нет хакатонов"
+                    description="Создайте событие для участников — настройте регистрацию, кейсы и судейство в одном месте."
+                    icon="heroicons:rocket-launch"
+                    action-href="/hackatons/create"
+                    action-label="Создать хакатон"
+                    secondary-action-href="/hackatons"
+                    secondary-action-label="Каталог хакатонов"
+                />
+            </div>
         @endforelse
     </div>
 
-</div>
     </div>
+</div>

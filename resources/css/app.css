@@ -56,10 +56,16 @@
     --font-display: 'Space Grotesk', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
     --radius-card: 1.5rem;
     --radius-panel: 1rem;
+    --radius-control: 0.75rem;
     --shadow-card: 0 10px 30px -14px oklch(8% 0.02 264 / 0.45);
     --shadow-card-hover: 0 18px 40px -20px oklch(8% 0.03 264 / 0.55);
+    --shadow-surface-soft: 0 1px 3px -1px oklch(8% 0.02 264 / 0.35);
     --tracking-tight-display: -0.02em;
     --spacing-section: clamp(2.5rem, 2rem + 1.5vw, 4rem);
+    --spacing-stack-sm: 0.5rem;
+    --spacing-stack-md: 1rem;
+    --spacing-stack-lg: 1.5rem;
+    --spacing-stack-xl: 2rem;
 
     --animate-card-enter: card-enter 360ms ease-out both;
 
@@ -169,16 +175,124 @@
     }
 }
 
-[data-tab-list='team'] .tab {
+[data-tab-list='team'] .tab,
+[data-tab-list='hackaton'] .tab {
     @apply inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl border border-transparent px-4 py-2 text-sm font-medium transition duration-200;
 }
 
-[data-tab-list='team'] .tab.tab-active {
+[data-tab-list='team'] .tab.tab-active,
+[data-tab-list='hackaton'] .tab.tab-active {
     @apply border-base-300/70 bg-base-100 text-base-content shadow-md ring-1 ring-primary/25;
 }
 
-[data-tab-list='team'] .tab:not(.tab-active) {
+[data-tab-list='team'] .tab:not(.tab-active),
+[data-tab-list='hackaton'] .tab:not(.tab-active) {
     @apply text-base-content/70 hover:border-base-300/50 hover:bg-base-100/40 hover:text-base-content;
+}
+
+/**
+ * Design system — semantic surfaces & CTAs (consumes @theme CSS variables)
+ */
+.ui-surface-card {
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    @apply overflow-hidden border border-base-300 bg-base-100;
+}
+
+.ui-surface-card--hover {
+    @apply transition duration-300 ease-out motion-reduce:transition-none motion-reduce:hover:translate-y-0;
+}
+
+.ui-surface-card--hover:hover {
+    box-shadow: var(--shadow-card-hover);
+    @apply -translate-y-0.5;
+}
+
+.ui-surface-card--hackaton-active {
+    @apply border-base-300 hover:border-primary/55 hover:shadow-2xl hover:shadow-primary/10;
+}
+
+.ui-surface-card--hackaton-finished {
+    @apply border-base-300/70 opacity-85 hover:border-base-content/30 hover:opacity-100 hover:shadow-2xl hover:shadow-base-content/5;
+}
+
+.ui-surface-card--team {
+    @apply border-base-300 hover:border-accent/55 hover:shadow-2xl hover:shadow-accent/10;
+}
+
+.ui-surface-soft {
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-surface-soft);
+    @apply relative overflow-hidden border border-base-300 bg-base-200/50;
+}
+
+.ui-surface-soft-muted {
+    border-radius: var(--radius-card);
+    @apply relative overflow-hidden border border-base-300 bg-base-200/40;
+}
+
+.ui-stat-tile {
+    border-radius: var(--radius-panel);
+    @apply border border-base-300 bg-base-200/40;
+}
+
+.ui-page-hero {
+    border-radius: var(--radius-card);
+    @apply relative overflow-hidden border border-base-300 bg-base-200/50 px-5 py-8 sm:px-8 sm:py-10;
+}
+
+.ui-section-y {
+    padding-top: var(--spacing-section);
+    padding-bottom: var(--spacing-section);
+}
+
+.ui-stack-sm > * + * {
+    margin-top: var(--spacing-stack-sm);
+}
+
+.ui-stack-md > * + * {
+    margin-top: var(--spacing-stack-md);
+}
+
+.ui-heading-display {
+    letter-spacing: var(--tracking-tight-display);
+    @apply font-display tracking-tight text-base-content;
+}
+
+.ui-cta-primary {
+    @apply btn btn-primary gap-2 shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100 active:scale-[0.98];
+}
+
+.ui-cta-secondary {
+    @apply btn btn-secondary gap-2 shadow-lg shadow-secondary/25 ring-2 ring-secondary/30 ring-offset-2 ring-offset-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100 active:scale-[0.98];
+}
+
+.ui-cta-outline {
+    @apply btn btn-outline border-base-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100 active:scale-[0.98];
+}
+
+.ui-cta-outline-primary {
+    @apply btn btn-outline border-primary/50 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100 active:scale-[0.98];
+}
+
+.ui-cta-ghost {
+    @apply btn btn-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100;
+}
+
+.ui-cta-danger {
+    @apply btn btn-ghost text-error hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 focus-visible:ring-offset-base-100 active:scale-[0.98];
+}
+
+/**
+ * Mobile bottom navigation — larger touch targets (WCAG-friendly)
+ */
+.btm-nav.btm-nav-touch > a,
+.btm-nav.btm-nav-touch > label {
+    @apply min-h-14 min-w-0 flex-1 flex-col justify-center gap-0.5 py-1.5;
+}
+
+.btm-nav.btm-nav-touch .btm-nav-label {
+    @apply text-xs leading-tight;
 }
 
 /* Alpine.js cloak guard — hides elements until Alpine has initialised */

@@ -416,7 +416,7 @@ class extends Component {
             default => 'команд',
         };
     @endphp
-    <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-base-200/50 px-5 py-8 sm:px-8 sm:py-10">
+    <section class="ui-page-hero">
         <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
             <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-secondary/30 blur-3xl"></div>
             <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-primary/25 blur-3xl"></div>
@@ -430,14 +430,14 @@ class extends Component {
                     Каталог команд
                 </div>
                 @if ($catalog_tab === 'open')
-                    <h1 class="font-display text-3xl font-black tracking-tight text-base-content sm:text-4xl lg:text-5xl">
+                    <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
                         <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
                             Открытые команды
                         </span>
                     </h1>
                     <p class="max-w-2xl text-base text-base-content/70">Команды, которые сейчас ищут участников.</p>
                 @else
-                    <h1 class="font-display text-3xl font-black tracking-tight text-base-content sm:text-4xl lg:text-5xl">
+                    <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
                         <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
                             Все команды
                         </span>
@@ -473,7 +473,7 @@ class extends Component {
                         Все команды
                     </button>
                 </div>
-                <a href="/teams/create" wire:navigate class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
+                <a href="/teams/create" wire:navigate class="ui-cta-primary">
                     <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
                     Создать команду
                 </a>
@@ -728,7 +728,7 @@ class extends Component {
                             </p>
                         </div>
                         <div class="flex flex-col gap-2 sm:flex-row">
-                            <a href="/teams/create" wire:navigate class="btn btn-primary">{{ __('ui.teams.create_team') }}</a>
+                            <a href="/teams/create" wire:navigate class="ui-cta-primary">{{ __('ui.teams.create_team') }}</a>
                             <button type="button" class="btn btn-outline" wire:click="clearFilters">{{ __('ui.teams.reset_filters') }}</button>
                         </div>
                     </div>
