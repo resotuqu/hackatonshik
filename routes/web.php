@@ -38,7 +38,7 @@ Route::livewire('/register', 'pages::auth.register');
 Route::livewire('/profile', 'pages::profile.index')->middleware(['auth', 'verified']);
 Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'verified', 'can:access-admin']);
 Route::livewire('/admin/avatar-presets', 'pages::admin.avatar-presets')->middleware(['auth', 'verified', 'can:access-admin']);
-Route::livewire('/u/{user:nickname}', 'pages::profile.public-profile-show')->name('profile.public.show')->defer();
+Route::livewire('/u/{user:nickname}', 'pages::profile.public-profile-show')->name('profile.public.show');
 
 Route::livewire('/teams', 'pages::teams.index')->name('teams.index');
 Route::livewire('/teams/create', 'pages::teams.create')->middleware(['auth', 'verified']);
@@ -51,15 +51,14 @@ Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.ha
 Route::livewire('/profile/certificates', 'pages::profile.certificates.index')->middleware(['auth', 'verified']);
 Route::livewire('/profile/hackatons/{hackaton}/hub', 'pages::profile.hackatons.hub')
     ->middleware(['auth', 'verified'])
-    ->defer()
     ->name('profile.hackatons.hub');
 
-Route::livewire('/teams/{team}', 'pages::teams.show')->name('teams.show')->defer();
+Route::livewire('/teams/{team}', 'pages::teams.show')->name('teams.show');
 Route::livewire('/teams/{team}/edit', 'pages::teams.edit')
     ->middleware(['auth', 'verified'])
     ->name('teams.edit');
 
-Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show')->name('hackatons.show')->defer();
+Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show')->name('hackatons.show');
 Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit')
     ->middleware(['auth', 'verified'])
     ->name('hackatons.edit');
