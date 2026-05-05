@@ -180,8 +180,8 @@
                             $unreadNotificationsCount = Auth::user()->unreadNotifications()->count();
                             $recentNotifications = Auth::user()->notifications()->latest()->limit(5)->get();
                         @endphp
-                        <div class="flex justify-end gap-2">
-                            <div class="dropdown dropdown-end dropdown-bottom">
+                        <div class="flex w-full items-center gap-2">
+                            <div class="dropdown dropdown-end dropdown-bottom ml-auto">
                                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
                                     <div class="indicator">
                                         <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
@@ -232,7 +232,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="dropdown dropdown-end">
+                            <div class="dropdown dropdown-start order-first">
                                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                                     <div class="w-10 rounded-full">
                                         <img alt="Аватар пользователя" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
