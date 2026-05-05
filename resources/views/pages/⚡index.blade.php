@@ -11,7 +11,11 @@ use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Component {
+new #[Layout('layouts::app', [
+    'title' => 'Хакатонщик — платформа для хакатонов, команд и участников',
+    'meta_description' => 'Хакатонщик помогает участникам, командам и организаторам находить друг друга, запускать и проводить хакатоны — от поиска команды до сертификатов.',
+    'canonical_url' => '/',
+])] class extends Component {
     /** @var array<int, Hackaton> */
     public array $featuredHackatons = [];
 
@@ -67,27 +71,29 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
 
     public function mount(): void
     {
-        $this->featuredHackatons = Hackaton::query()
-            ->select('hackatons.*')
-            ->selectSub(function ($query) {
-                $query->from('team_roles')
-                    ->join('teams', 'teams.id', '=', 'team_roles.team_id')
-                    ->whereColumn('teams.hackaton_id', 'hackatons.id')
-                    ->whereNotNull('team_roles.user_id')
-                    ->selectRaw('count(*)');
-            }, 'participants_aggregate')
-            ->where('is_public', true)
-            ->whereIn('status', [
-                HackatonStatus::PUBLISHED,
-                HackatonStatus::REGISTRATION_OPEN,
-                HackatonStatus::IN_PROGRESS,
-                HackatonStatus::JUDGING,
-            ])
-            ->withCount('teams')
-            ->latest('start_at')
-            ->limit(4)
-            ->get()
-            ->all();
+        $this->featuredHackatons = Cache::remember('home-featured-hackatons-v1', now()->addMinutes(10), function (): array {
+            return Hackaton::query()
+                ->select('hackatons.*')
+                ->selectSub(function ($query) {
+                    $query->from('team_roles')
+                        ->join('teams', 'teams.id', '=', 'team_roles.team_id')
+                        ->whereColumn('teams.hackaton_id', 'hackatons.id')
+                        ->whereNotNull('team_roles.user_id')
+                        ->selectRaw('count(*)');
+                }, 'participants_count')
+                ->where('is_public', true)
+                ->whereIn('status', [
+                    HackatonStatus::PUBLISHED,
+                    HackatonStatus::REGISTRATION_OPEN,
+                    HackatonStatus::IN_PROGRESS,
+                    HackatonStatus::JUDGING,
+                ])
+                ->withCount('teams')
+                ->latest('start_at')
+                ->limit(4)
+                ->get()
+                ->all();
+        });
 
         // Все публичные события кроме черновика (в т.ч. завершённые и в архиве) + суммарно команды и участники по ним.
         $totals = Cache::remember('home-public-totals-v3', now()->addMinutes(10), function (): array {
@@ -140,6 +146,11 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
         foreach (HomeDashboardData::fromUser($user)->toLivewireArray() as $key => $value) {
             $this->{$key} = $value;
         }
+    }
+
+    public function placeholder()
+    {
+        return view('pages.home.placeholder');
     }
 };
 
@@ -210,51 +221,11 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
         </div>
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             @forelse ($featuredHackatons as $hackaton)
-                @php
-                    $hackatonImage = filled($hackaton->image_url)
-                        ? (str_starts_with((string) $hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/'.$hackaton->image_url))
-                        : null;
-                    $teamsTotal = (int) ($hackaton->teams_count ?? 0);
-                    $participantsTotal = (int) ($hackaton->participants_aggregate ?? 0);
-                @endphp
-                <x-mary-card class="card card-border border-base-300 h-full shadow-sm transition-all duration-200 hover:border-primary/35 hover:shadow-lg">
-                    <div class="overflow-hidden rounded-xl bg-base-200 aspect-video">
-                        @if ($hackatonImage)
-                            <img src="{{ $hackatonImage }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}" loading="lazy" />
-                        @else
-                            <div class="flex h-full min-h-[10rem] w-full flex-col items-center justify-center gap-2 px-4 text-center text-base-content/50">
-                                <x-app-icon icon="heroicons:photo" class="h-12 w-12 opacity-40" />
-                                <span class="text-sm">Изображение появится позже</span>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="mt-3 flex grow flex-col gap-3">
-                        <div class="flex flex-wrap items-start justify-between gap-2">
-                            <a href="{{ route('hackatons.show', $hackaton) }}" class="card-title link-hover link text-lg leading-snug">{{ $hackaton->title }}</a>
-                            <span class="badge badge-primary badge-outline shrink-0">{{ $hackaton->status?->label() }}</span>
-                        </div>
-                        <p class="text-sm text-base-content/75">
-                            @if ($hackaton->start_at && $hackaton->end_at)
-                                {{ $hackaton->start_at->translatedFormat('d.m.Y H:i') }}
-                                —
-                                {{ $hackaton->end_at->translatedFormat('d.m.Y H:i') }}
-                            @endif
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="badge badge-neutral gap-1">
-                                <x-app-icon icon="heroicons:user-group" class="h-3.5 w-3.5" />
-                                Команд: {{ $teamsTotal }}
-                            </span>
-                            <span class="badge badge-neutral gap-1">
-                                <x-app-icon icon="heroicons:users" class="h-3.5 w-3.5" />
-                                Участников: {{ $participantsTotal }}
-                            </span>
-                        </div>
-                    </div>
-                    <x-slot:actions class="mt-auto pt-2">
-                        <a href="{{ route('hackatons.show', $hackaton) }}" class="btn btn-primary btn-sm">Подробнее</a>
-                    </x-slot:actions>
-                </x-mary-card>
+                <x-hackaton-card
+                    :hackaton="$hackaton"
+                    :can-quick-apply="false"
+                    href="{{ route('hackatons.show', $hackaton) }}"
+                />
             @empty
                 <div class="sm:col-span-2">
                     <div class="card card-border border-base-300 border-dashed bg-base-100/80 bg-gradient-to-br from-base-200/80 to-base-100 shadow-sm">
@@ -263,10 +234,10 @@ new #[Layout('layouts::app', ['title' => 'Главная'])] class extends Compo
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-16 w-16 text-secondary" label="Скоро новые хакатоны" />
                             </div>
                             <div class="max-w-lg space-y-4">
-                                <h3 class="font-display text-xl font-bold sm:text-2xl">Первые хакатоны уже скоро!</h3>
-                                <p class="text-base leading-relaxed text-base-content/75">Следите за обновлениями — скоро здесь появятся интересные события.</p>
+                                <h3 class="font-display text-xl font-bold sm:text-2xl">{{ __('ui.home.featured_empty_title') }}</h3>
+                                <p class="text-base leading-relaxed text-base-content/75">{{ __('ui.home.featured_empty_description') }}</p>
                                 <a href="/hackatons" class="btn btn-secondary btn-lg mt-2 w-full shadow-md shadow-secondary/25 ring-2 ring-secondary/25 ring-offset-2 ring-offset-base-100 transition-transform hover:scale-[1.02] active:scale-[0.99] sm:mt-0 sm:w-auto">
-                                    Открыть каталог
+                                    {{ __('ui.home.open_catalog') }}
                                 </a>
                             </div>
                         </div>

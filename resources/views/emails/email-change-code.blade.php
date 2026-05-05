@@ -5,14 +5,18 @@
         </x-mail::html.header>
     </x-slot:header>
 
-    <h1 style="margin-top: 0;">Привет, {{ $user->fio ?? 'участник' }}!</h1>
+    <h1 style="margin-top: 0;">Код подтверждения</h1>
 
-    <p>{{ $intro }}</p>
+    <p>
+        {{ $user->fio ?? 'Участник' }}, {{ $intro }}
+    </p>
 
     <p style="margin-bottom: 8px; font-size: 14px; color: #52525b;">Код подтверждения:</p>
 
     <x-mail::html.panel>
-**{{ $code }}**
+        <p style="margin: 0; text-align: center; font-size: 28px; letter-spacing: 6px; font-weight: 700;">
+            {{ $code }}
+        </p>
     </x-mail::html.panel>
 
     <x-slot:subcopy>

@@ -16,7 +16,18 @@
         $sectionCard = 'card rounded-3xl border border-base-300 bg-base-100 shadow-sm';
         $heroApplyBtn = 'btn btn-primary gap-2 shadow-lg shadow-primary/20';
         $modalTriggerClass = 'btn btn-primary btn-lg inline-flex cursor-pointer items-center justify-center gap-2 shadow-lg shadow-primary/25';
+
+        $plainDescription = strip_tags(\App\Support\SafeMarkdown::toHtml($team->description ?? ''));
+        $plainDescription = preg_replace('/\s+/u', ' ', $plainDescription ?? '') ?? '';
+        $seoDescription = trim(mb_substr($plainDescription !== '' ? $plainDescription : 'Команда участників хакатонов на платформе «Хакатонщик».', 0, 180, 'UTF-8'));
     @endphp
+
+    @section('title', $team->title)
+    @section('meta_description', $seoDescription)
+    @section('canonical_url', route('teams.show', $team))
+    @if ($teamImage)
+        @section('og_image', $teamImage)
+    @endif
 
     <div class="team-page mx-auto w-full max-w-7xl space-y-6" data-testid="team-page-root">
         <nav class="flex flex-wrap items-center gap-1 text-sm" aria-label="Навигация по хлебным крошкам">

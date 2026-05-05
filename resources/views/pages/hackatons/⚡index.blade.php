@@ -15,7 +15,11 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 
-new #[Layout('layouts::app', ['title' => "Хакатоны"])]
+new #[Layout('layouts::app', [
+    'title' => 'Каталог хакатонов — Хакатонщик',
+    'meta_description' => 'Каталог хакатонов: онлайн и офлайн соревнования для команд разработчиков, дизайнеров и продуктовых команд.',
+    'canonical_url' => '/hackatons',
+])]
 class extends Component {
     use \Livewire\WithPagination;
 
@@ -600,17 +604,17 @@ class extends Component {
                             </svg>
                         </div>
                         <div class="space-y-2">
-                            <h2 class="font-display text-xl font-semibold text-base-content">Хакатоны не найдены</h2>
+                            <h2 class="font-display text-xl font-semibold text-base-content">{{ __('ui.hackatons.empty_title') }}</h2>
                             <p class="text-sm leading-relaxed text-base-content/70">
-                                Попробуйте изменить параметры поиска или выбрать другую подборку.
+                                {{ __('ui.hackatons.empty_description') }}
                             </p>
                         </div>
                         <div class="flex flex-col gap-2 sm:flex-row">
                             <button type="button" class="btn btn-primary" wire:click="setPreset('active_now')">
-                                Показать активные
+                                {{ __('ui.hackatons.show_active') }}
                             </button>
                             <button type="button" class="btn btn-outline" wire:click="clearFilters">
-                                Сбросить фильтры
+                                {{ __('ui.hackatons.reset_filters') }}
                             </button>
                         </div>
                     </div>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Events\TeamApplicationChanged;
 use App\Enums\ApplicationStatus;
 use App\Http\Requests\StoreTeamApplicationRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
@@ -22,7 +23,7 @@ class TeamApplicationController extends Controller
         Gate::authorize('create', TeamApplication::class);
         $validated = $request->validated();
         $roleId = (int) $validated['team_role_id'];
-        TeamRole::query()->findOrFail($roleId);
+        $role = TeamRole::query()->with('team:id,user_id')->findOrFail($roleId);
 
         $application = TeamApplication::query()->firstOrNew([
             'user_id' => Auth::id(),
@@ -36,6 +37,11 @@ class TeamApplicationController extends Controller
             'reviewed_by' => null,
         ]);
         $application->save();
+        event(new TeamApplicationChanged(
+            teamId: (int) $role->team_id,
+            applicantId: Auth::id() !== null ? (int) Auth::id() : null,
+            captainId: $role->team?->user_id !== null ? (int) $role->team->user_id : null,
+        ));
 
         return back()->with('success', 'Заявка подана. Ожидайте решения создателя команды.');
     }
@@ -69,6 +75,12 @@ class TeamApplicationController extends Controller
         $flashMessage = $status === ApplicationStatus::ACCEPTED->value
             ? 'Заявка принята. Участник добавлен в команду.'
             : 'Заявка отклонена.';
+        $updated = $application->fresh(['teamRole.team']);
+        event(new TeamApplicationChanged(
+            teamId: (int) $updated->teamRole->team_id,
+            applicantId: (int) $updated->user_id,
+            captainId: $updated->teamRole->team?->user_id !== null ? (int) $updated->teamRole->team->user_id : null,
+        ));
 
         return back()->with('success', $flashMessage);
     }
@@ -103,7 +115,18 @@ class TeamApplicationController extends Controller
     public function destroy(TeamApplication $application): RedirectResponse
     {
         Gate::authorize('delete', $application);
+        $teamRole = $application->teamRole()->with('team:id,user_id')->first();
+        $teamId = $teamRole?->team_id !== null ? (int) $teamRole->team_id : null;
+        $applicantId = $application->user_id !== null ? (int) $application->user_id : null;
+        $captainId = $teamRole?->team?->user_id !== null ? (int) $teamRole->team->user_id : null;
         $application->delete();
+        if ($teamId !== null) {
+            event(new TeamApplicationChanged(
+                teamId: $teamId,
+                applicantId: $applicantId,
+                captainId: $captainId,
+            ));
+        }
 
         return back()->with('success', 'Заявка удалена.');
     }

@@ -39,6 +39,18 @@
         $nextStepTitle = 'Авторизуйтесь';
         $nextStepHint = 'Войдите в аккаунт, чтобы подавать заявки и отправлять решения кейсов.';
 
+        $plainDescription = strip_tags(\App\Support\SafeMarkdown::toHtml($hackaton->description ?? ''));
+        $plainDescription = preg_replace('/\s+/u', ' ', $plainDescription ?? '') ?? '';
+        $seoDescription = trim(mb_substr($plainDescription !== '' ? $plainDescription : 'Онлайн и офлайн хакатон на платформе «Хакатонщик».', 0, 180, 'UTF-8'));
+
+        $heroImage = null;
+        if ($hackatonGalleryImages->isNotEmpty()) {
+            $first = $hackatonGalleryImages->first();
+            $heroImage = isset($first->path) ? (str_starts_with((string) $first->path, 'http') ? $first->path : asset('storage/'.$first->path)) : null;
+        } elseif (filled($hackaton->image_url)) {
+            $heroImage = str_starts_with((string) $hackaton->image_url, 'http') ? $hackaton->image_url : asset('storage/'.$hackaton->image_url);
+        }
+
         if (auth()->check()) {
             if ($isOrganizer) {
                 $nextStepTitle = 'Управляйте хакатоном';
@@ -61,6 +73,13 @@
             }
         }
     @endphp
+
+    @section('title', $hackaton->title)
+    @section('meta_description', $seoDescription)
+    @section('canonical_url', route('hackatons.show', $hackaton))
+    @if ($heroImage)
+        @section('og_image', $heroImage)
+    @endif
 
     <div class="mx-auto w-full max-w-7xl space-y-6">
         <div class="text-sm breadcrumbs">

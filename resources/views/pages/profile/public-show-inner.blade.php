@@ -9,7 +9,18 @@
         $hackatonsCount = $profileUser->hackatons->count();
         $skills = $profileUser->teamRoles->flatMap(fn ($role) => $role->skills->pluck('name'))->unique()->values();
         $publicProfileUrl = route('profile.public.show', ['user' => $profileUser->nickname]);
+
+        $bioSource = filled($profileUser->description)
+            ? strip_tags(\App\Support\SafeMarkdown::toHtml($profileUser->description))
+            : sprintf('%s — %s на платформе «Хакатонщик».', $profileUser->fio ?? $profileUser->nickname, $publicRoleLabel);
+        $bioSource = preg_replace('/\s+/u', ' ', $bioSource ?? '') ?? '';
+        $seoDescription = trim(mb_substr($bioSource, 0, 180, 'UTF-8'));
     @endphp
+
+    @section('title', $profileUser->fio ?? $profileUser->nickname)
+    @section('meta_description', $seoDescription)
+    @section('canonical_url', $publicProfileUrl)
+    @section('og_image', $avatarUrl)
 
     <div class="mx-auto w-full max-w-6xl space-y-6">
         <nav class="text-sm breadcrumbs">

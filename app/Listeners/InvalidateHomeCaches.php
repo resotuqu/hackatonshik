@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Listeners;
+
+use App\Events\HackatonApplicationChanged;
+use App\Events\TeamApplicationChanged;
+use App\Models\Team;
+use Illuminate\Support\Facades\Cache;
+
+final class InvalidateHomeCaches
+{
+    public function handle(HackatonApplicationChanged|TeamApplicationChanged $event): void
+    {
+        Cache::forget('home-public-totals-v3');
+
+        if ($event instanceof HackatonApplicationChanged && $event->invalidateHomeFeatured) {
+            Cache::forget('home-featured-hackatons-v1');
+        }
+
+        $team = Team::query()
+            ->with('roles:id,team_id,user_id')
+            ->find($event->teamId);
+
+        if (! $team) {
+            return;
+        }
+
+        $userIds = $team->roles
+            ->pluck('user_id')
+            ->filter()
+            ->push($team->user_id)
+            ->unique()
+            ->values();
+
+        if ($event instanceof HackatonApplicationChanged && $event->organizerId !== null) {
+            $userIds->push($event->organizerId);
+        }
+
+        if ($event instanceof TeamApplicationChanged) {
+            if ($event->applicantId !== null) {
+                $userIds->push($event->applicantId);
+            }
+            if ($event->captainId !== null) {
+                $userIds->push($event->captainId);
+            }
+        }
+
+        foreach ($userIds->unique()->all() as $userId) {
+            Cache::forget("home-dashboard:user:{$userId}:v1");
+        }
+    }
+}
+

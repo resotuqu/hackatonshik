@@ -4,6 +4,8 @@
     'vacantRoleNames' => [],
     'skillTags' => [],
     'participantUsers' => null,
+    'href' => null,
+    'navigate' => true,
 ])
 
 @php
@@ -109,13 +111,23 @@
                     Откликнуться
                 </a>
             @endif
-            <button
-                type="button"
-                class="btn btn-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
-                wire:click="openTeam({{ $team->id }})"
-            >
-                Подробнее
-            </button>
+            @if (filled($href))
+                <a
+                    href="{{ $href }}"
+                    @if ($navigate) wire:navigate @endif
+                    class="btn btn-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
+                >
+                    Подробнее
+                </a>
+            @else
+                <button
+                    type="button"
+                    class="btn btn-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
+                    wire:click="openTeam({{ $team->id }})"
+                >
+                    Подробнее
+                </button>
+            @endif
         </div>
     </div>
 </article>

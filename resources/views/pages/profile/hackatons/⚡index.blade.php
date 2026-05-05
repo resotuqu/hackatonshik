@@ -48,6 +48,23 @@ class extends Component {
 ?>
 
 <div class="">
+    <div wire:loading class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6" aria-busy="true" aria-label="Загрузка хакатонов">
+        @foreach (range(1, 6) as $_)
+            <div class="card card-border border-base-300 bg-base-100 shadow-sm overflow-hidden rounded-3xl">
+                <div class="skeleton aspect-video w-full rounded-none"></div>
+                <div class="p-4 space-y-3">
+                    <div class="skeleton h-6 w-4/5 rounded-xl"></div>
+                    <div class="skeleton h-16 w-full rounded-2xl"></div>
+                    <div class="flex gap-2 pt-2">
+                        <div class="skeleton h-9 flex-1 rounded-xl"></div>
+                        <div class="skeleton h-9 flex-1 rounded-xl"></div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <div wire:loading.remove>
     <div class="text-sm breadcrumbs">
         <ul>
             <li><a href="/">Главная</a></li>
@@ -102,3 +119,4 @@ class extends Component {
     </div>
 
 </div>
+    </div>

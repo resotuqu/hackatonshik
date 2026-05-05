@@ -10,6 +10,7 @@ use App\Models\HackatonApplication;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 final class HomeDashboardData
 {
@@ -58,6 +59,30 @@ final class HomeDashboardData
 
     public static function fromUser(User $user): self
     {
+        $cacheKey = "home-dashboard:user:{$user->id}:v1";
+        $payload = Cache::remember($cacheKey, now()->addSeconds(60), function () use ($user): array {
+            return self::buildForUser($user)->toLivewireArray();
+        });
+
+        return self::fromLivewireArray($payload);
+    }
+
+    /** @param array<string, mixed> $data */
+    private static function fromLivewireArray(array $data): self
+    {
+        $self = new self;
+
+        foreach ($data as $key => $value) {
+            if (property_exists($self, (string) $key)) {
+                $self->{$key} = $value;
+            }
+        }
+
+        return $self;
+    }
+
+    private static function buildForUser(User $user): self
+    {
         $self = new self;
         $self->unreadNotificationsCount = $user->unreadNotifications()->count();
         $self->showPhoneVerificationBanner = $user->phone !== null
@@ -105,13 +130,15 @@ final class HomeDashboardData
             ->where('status', ApplicationStatus::PENDING)
             ->count();
 
-        $pendingHackatonApps = $this->participantPendingHackatonApplicationsQuery($user)
+        $pendingQuery = $this->participantPendingHackatonApplicationsQuery($user);
+
+        $pendingHackatonApps = (clone $pendingQuery)
             ->with(['hackaton:id,title', 'team:id,title'])
             ->latest()
             ->limit(5)
             ->get();
 
-        $this->pendingHackatonApplicationsCount = $this->participantPendingHackatonApplicationsQuery($user)->count();
+        $this->pendingHackatonApplicationsCount = (clone $pendingQuery)->count();
 
         $this->hackatonApplicationsPreview = $pendingHackatonApps->map(fn (HackatonApplication $app): array => [
             'id' => $app->id,
@@ -123,7 +150,7 @@ final class HomeDashboardData
 
         $this->participantHackatonsPreview = $this->buildParticipantHackatonsPreview($user);
 
-        $this->setParticipantNextStep($user);
+        $this->setParticipantNextStep($user, $pendingQuery);
     }
 
     /**
@@ -192,7 +219,7 @@ final class HomeDashboardData
             ->all();
     }
 
-    private function setParticipantNextStep(User $user): void
+    private function setParticipantNextStep(User $user, Builder $pendingHackatonAppsQuery): void
     {
         if ($this->teamsCount === 0) {
             $this->participantNextStepTitle = 'Создайте команду';
@@ -213,7 +240,7 @@ final class HomeDashboardData
         }
 
         if ($this->pendingHackatonApplicationsCount > 0) {
-            $first = $this->participantPendingHackatonApplicationsQuery($user)
+            $first = (clone $pendingHackatonAppsQuery)
                 ->orderByDesc('created_at')
                 ->first();
 

@@ -16,7 +16,11 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-new #[Layout('layouts::app', ['title' => 'Команды'])]
+new #[Layout('layouts::app', [
+    'title' => 'Команды участников — Хакатонщик',
+    'meta_description' => 'Публичные команды для участия в хакатонах: находите команду мечты или собирайте свою.',
+    'canonical_url' => '/teams',
+])]
 class extends Component {
     use \Livewire\WithPagination;
 
@@ -718,14 +722,14 @@ class extends Component {
                             </svg>
                         </div>
                         <div class="space-y-2">
-                            <h2 class="font-display text-xl font-semibold text-base-content">Пока ничего не нашлось</h2>
+                            <h2 class="font-display text-xl font-semibold text-base-content">{{ __('ui.teams.empty_title') }}</h2>
                             <p class="text-sm leading-relaxed text-base-content/70">
-                                Измените фильтры или создайте свою команду — участники смогут откликнуться на вакансии.
+                                {{ __('ui.teams.empty_description') }}
                             </p>
                         </div>
                         <div class="flex flex-col gap-2 sm:flex-row">
-                            <a href="/teams/create" wire:navigate class="btn btn-primary">Создать команду</a>
-                            <button type="button" class="btn btn-outline" wire:click="clearFilters">Сбросить фильтры</button>
+                            <a href="/teams/create" wire:navigate class="btn btn-primary">{{ __('ui.teams.create_team') }}</a>
+                            <button type="button" class="btn btn-outline" wire:click="clearFilters">{{ __('ui.teams.reset_filters') }}</button>
                         </div>
                     </div>
                 </div>

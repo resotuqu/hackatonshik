@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Events\HackatonApplicationChanged;
 use App\Enums\ApplicationStatus;
 use App\Http\Requests\BulkUpdateHackatonApplicationsRequest;
 use App\Http\Requests\StoreHackatonApplicationRequest;
@@ -37,6 +38,11 @@ class HackatonApplicationController extends Controller
             'reviewed_by' => null,
         ]);
         $application->save();
+        event(new HackatonApplicationChanged(
+            teamId: (int) $application->team_id,
+            hackatonId: (int) $hackaton->id,
+            organizerId: (int) $hackaton->user_id,
+        ));
 
         return back()->with('success', 'Заявка команды на хакатон подана.');
     }
@@ -71,6 +77,13 @@ class HackatonApplicationController extends Controller
             : 'Заявка команды отклонена.';
 
         $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+        $updatedApplication = $application->fresh(['hackaton']);
+        event(new HackatonApplicationChanged(
+            teamId: (int) $application->team_id,
+            hackatonId: (int) $application->hackaton_id,
+            organizerId: $updatedApplication?->hackaton?->user_id !== null ? (int) $updatedApplication->hackaton->user_id : null,
+            invalidateHomeFeatured: $status === ApplicationStatus::ACCEPTED->value,
+        ));
 
         return back()->with('success', $flashMessage);
     }
@@ -91,7 +104,14 @@ class HackatonApplicationController extends Controller
     public function destroy(HackatonApplication $application): RedirectResponse
     {
         Gate::authorize('delete', $application);
+        $teamId = (int) $application->team_id;
+        $hackaton = $application->hackaton()->first(['id', 'user_id']);
         $application->delete();
+        event(new HackatonApplicationChanged(
+            teamId: $teamId,
+            hackatonId: $hackaton?->id !== null ? (int) $hackaton->id : null,
+            organizerId: $hackaton?->user_id !== null ? (int) $hackaton->user_id : null,
+        ));
 
         return back()->with('success', 'Заявка удалена.');
     }
@@ -121,12 +141,23 @@ class HackatonApplicationController extends Controller
                     $this->acceptApplication($application, $reviewer);
 
                     $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+                    event(new HackatonApplicationChanged(
+                        teamId: (int) $application->team_id,
+                        hackatonId: (int) $application->hackaton_id,
+                        organizerId: (int) $hackaton->user_id,
+                        invalidateHomeFeatured: true,
+                    ));
 
                     continue;
                 }
 
                 $application->markAsRejected($reviewer);
                 $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+                event(new HackatonApplicationChanged(
+                    teamId: (int) $application->team_id,
+                    hackatonId: (int) $application->hackaton_id,
+                    organizerId: (int) $hackaton->user_id,
+                ));
             }
         });
 

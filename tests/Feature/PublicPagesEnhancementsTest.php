@@ -3,6 +3,7 @@
 use App\Models\NewsPost;
 use App\Models\Hackaton;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\get;
@@ -70,4 +71,68 @@ test('hackaton page renders tab navigation and panels', function () {
     $response->assertSee('Описание');
     $response->assertSee('Кейсы');
     $response->assertSee('Участники');
+});
+
+test('home page exposes seo meta tags', function () {
+    $response = get('/');
+
+    $response->assertOk();
+    $response->assertSee('<meta name="description"', false);
+    $response->assertSee('og:title', false);
+    $response->assertSee('og:description', false);
+    $response->assertSee('og:image', false);
+    $response->assertSee('<meta name="twitter:card"', false);
+    $response->assertSee('twitter:title', false);
+    $response->assertSee('twitter:description', false);
+    $response->assertSee('<link rel="canonical"', false);
+    $response->assertSee('<meta name="robots"', false);
+});
+
+test('hackaton public page exposes seo meta tags', function () {
+    $hackaton = Hackaton::factory()->create(['is_public' => true]);
+
+    $response = get(route('hackatons.show', $hackaton));
+
+    $response->assertOk();
+    $response->assertSee(e($hackaton->title), false);
+    $response->assertSee('<meta name="description"', false);
+    $response->assertSee('og:title', false);
+    $response->assertSee('og:description', false);
+    $response->assertSee('og:image', false);
+    $response->assertSee('<meta name="twitter:card"', false);
+    $response->assertSee('twitter:title', false);
+    $response->assertSee('twitter:description', false);
+    $response->assertSee('<link rel="canonical"', false);
+    $response->assertSee('<meta name="robots"', false);
+});
+
+test('team public page exposes seo meta tags', function () {
+    $team = Team::factory()->create(['is_public' => true]);
+
+    $response = get(route('teams.show', $team));
+
+    $response->assertOk();
+    $response->assertSee(e($team->title), false);
+    $response->assertSee('<meta name="description"', false);
+    $response->assertSee('og:title', false);
+    $response->assertSee('og:description', false);
+    $response->assertSee('<link rel="canonical"', false);
+});
+
+test('public profile page exposes seo meta tags', function () {
+    $user = User::factory()->create([
+        'is_profile_public' => true,
+        'nickname' => 'seo_public_nick',
+        'fio' => 'SEO Профиль',
+    ]);
+
+    $response = get(route('profile.public.show', ['user' => $user->nickname]));
+
+    $response->assertOk();
+    $response->assertSee(e($user->fio), false);
+    $response->assertSee('<meta name="description"', false);
+    $response->assertSee('og:title', false);
+    $response->assertSee('og:description', false);
+    $response->assertSee('og:image', false);
+    $response->assertSee('<link rel="canonical"', false);
 });

@@ -89,6 +89,13 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
 ?>
 
 <div class="mx-auto max-w-7xl space-y-8">
+    <div wire:loading class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true" aria-label="Загрузка команд">
+        @foreach (range(1, 6) as $_)
+            <x-team-card-skeleton />
+        @endforeach
+    </div>
+
+    <div wire:loading.remove>
     <nav class="text-sm breadcrumbs" aria-label="Навигация по разделам">
         <ul>
             <li><a href="/" class="link link-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">Главная</a></li>
@@ -299,3 +306,4 @@ new #[Layout('layouts::app', ['title' => 'Мои команды'])]
         @endforelse
     </div>
 </div>
+    </div>

@@ -2,33 +2,48 @@
 <!DOCTYPE html>
 <html lang="ru" class="group">
 <head>
+    @php
+        $pageTitle = isset($title) ? trim($title) : trim($__env->yieldContent('title', config('app.name')));
+        $metaDescription = trim($__env->yieldContent('meta_description', 'Платформа для команд, хакатонов и совместных проектов.'));
+        $canonicalUrl = trim($__env->yieldContent('canonical_url', url()->current()));
+        $ogTitle = trim($__env->yieldContent('og_title', $pageTitle));
+        $ogDescription = trim($__env->yieldContent('og_description', $metaDescription));
+        $ogImage = trim($__env->yieldContent('og_image', url('/logo.svg')));
+        $robots = trim($__env->yieldContent('robots', 'index,follow'));
+        $twitterCard = trim($__env->yieldContent('twitter_card', 'summary_large_image'));
+    @endphp
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="@yield('meta_description', 'Платформа для команд, хакатонов и совместных проектов.')">
-    <link rel="canonical" href="@yield('canonical_url', url()->current())">
+    <meta name="description" content="{{ $metaDescription }}">
+    <meta name="robots" content="{{ $robots }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
     <meta property="og:type" content="website">
-    <meta property="og:title" content="@yield('og_title', trim($__env->yieldContent('title', config('app.name'))))">
-    <meta property="og:description" content="@yield('og_description', $__env->yieldContent('meta_description', 'Платформа для команд, хакатонов и совместных проектов.'))">
-    <meta property="og:url" content="@yield('canonical_url', url()->current())">
-    <meta property="og:image" content="@yield('og_image', url('/logo.svg'))">
-    <title>
-        @isset($title)
-            {{ $title }}
-        @else
-            @yield('title', config('app.name'))
-        @endisset
-    </title>
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+
+    <meta name="twitter:card" content="{{ $twitterCard }}">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+
+    <title>{{ $pageTitle }}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/logo.svg">
     <script>
         (function () {
             const cookieName = 'theme';
+            const darkTheme = 'hackatonshik';
+            const lightTheme = 'hackatonshik-light';
             const cookieMatch = document.cookie.match(new RegExp('(?:^|; )' + cookieName + '=([^;]*)'));
             const savedTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
-            const theme =
-                savedTheme === 'hackatonshik-light' || savedTheme === 'cupcake'
-                    ? 'hackatonshik-light'
-                    : 'hackatonshik';
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme === darkTheme || savedTheme === lightTheme
+                ? savedTheme
+                : (systemPrefersDark ? darkTheme : lightTheme);
 
             document.documentElement.setAttribute('data-theme', theme);
         })();
@@ -59,7 +74,7 @@
                 </div>
             </header>
 
-            <main id="main-content" class="flex-1" tabindex="-1">
+            <main id="main-content" class="flex-1 pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:pb-0" tabindex="-1">
                 <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
                     @if (session('success') || session('error') || session('warning'))
                         <div class="toast toast-top toast-end z-70">
@@ -110,6 +125,39 @@
                     <a href="/cookie-policy" class="link link-hover">Политика куки файлов</a>
                 </nav>
             </footer>
+
+            <nav
+                class="btm-nav lg:hidden z-60 border-t border-base-200 bg-base-100/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]"
+                aria-label="Нижняя навигация"
+            >
+                <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/75'])>
+                    <x-app-icon icon="heroicons:home" class="h-5 w-5" />
+                    <span class="btm-nav-label text-[11px]">Главная</span>
+                </a>
+                <a href="/teams" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
+                    <x-app-icon icon="heroicons:user-group" class="h-5 w-5" />
+                    <span class="btm-nav-label text-[11px]">Команды</span>
+                </a>
+                <label for="main-nav-drawer" class="cursor-pointer text-base-content/75">
+                    <x-app-icon icon="heroicons:bars-3" class="h-5 w-5" />
+                    <span class="btm-nav-label text-[11px]">Меню</span>
+                </label>
+                <a href="/hackatons" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                    <x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5" />
+                    <span class="btm-nav-label text-[11px]">Хакатоны</span>
+                </a>
+                @auth
+                    <a href="/profile" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/75'])>
+                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5" />
+                        <span class="btm-nav-label text-[11px]">Профиль</span>
+                    </a>
+                @else
+                    <a href="/login" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/75'])>
+                        <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />
+                        <span class="btm-nav-label text-[11px]">Войти</span>
+                    </a>
+                @endauth
+            </nav>
         </div>
 
         <div class="drawer-side z-40">
@@ -237,7 +285,14 @@
                     <li>
                         <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:border-primary/25 hover:bg-base-200/85">
                             <span class="text-[0.9375rem]">Тёмная тема</span>
-                            <input type="checkbox" class="toggle toggle-primary shrink-0" data-theme-toggle aria-label="Переключить тёмную тему" />
+                            <input
+                                type="checkbox"
+                                class="toggle toggle-primary shrink-0"
+                                data-theme-toggle
+                                role="switch"
+                                aria-label="Переключить тёмную тему"
+                                aria-checked="false"
+                            />
                         </label>
                     </li>
                 </ul>
@@ -249,6 +304,8 @@
     <script>
         (function () {
             const cookieName = 'theme';
+            const darkTheme = 'hackatonshik';
+            const lightTheme = 'hackatonshik-light';
             const toggle = document.querySelector('[data-theme-toggle]');
 
             if (!toggle) {
@@ -256,16 +313,18 @@
             }
 
             const currentTheme =
-                document.documentElement.getAttribute('data-theme') === 'hackatonshik-light'
-                    ? 'hackatonshik-light'
-                    : 'hackatonshik';
-            toggle.checked = currentTheme === 'hackatonshik';
+                document.documentElement.getAttribute('data-theme') === lightTheme
+                    ? lightTheme
+                    : darkTheme;
+            toggle.checked = currentTheme === darkTheme;
+            toggle.setAttribute('aria-checked', toggle.checked ? 'true' : 'false');
 
             toggle.addEventListener('change', function () {
-                const nextTheme = this.checked ? 'hackatonshik' : 'hackatonshik-light';
+                const nextTheme = this.checked ? darkTheme : lightTheme;
 
                 document.documentElement.setAttribute('data-theme', nextTheme);
                 document.cookie = cookieName + '=' + encodeURIComponent(nextTheme) + '; path=/; max-age=31536000; samesite=lax';
+                this.setAttribute('aria-checked', this.checked ? 'true' : 'false');
             });
         })();
     </script>

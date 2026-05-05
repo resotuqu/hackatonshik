@@ -46,7 +46,8 @@ class extends Component {
                 'nickname' => ['required', 'string', 'max:255', Rule::unique(User::class)],
             ],
             3 => [
-                'password' => $this->passwordRules(),
+                'password' => [...$this->passwordRules(), 'confirmed'],
+                'password_confirmation' => ['required'],
             ],
             4 => [
                 'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
@@ -65,7 +66,8 @@ class extends Component {
             'date_of_birth' => ['required', 'date', 'before:now'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
             'nickname' => ['required', 'string', 'max:255', Rule::unique(User::class)],
-            'password' => $this->passwordRules(),
+            'password' => [...$this->passwordRules(), 'confirmed'],
+            'password_confirmation' => ['required'],
             'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
         ];
     }
@@ -151,6 +153,9 @@ class extends Component {
             wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}"
             class="card border border-base-200 bg-base-100 p-4 shadow-sm sm:p-6 lg:col-span-3"
         >
+            @php
+                $progressPercent = (int) round(($step / 4) * 100);
+            @endphp
             <x-mary-header title="Регистрация" separator />
 
             <ul class="steps steps-horizontal mb-6 w-full max-w-full flex-wrap justify-start gap-y-2 text-[0.65rem] sm:text-xs">
@@ -159,6 +164,13 @@ class extends Component {
                 <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">Пароль</li>
                 <li class="step {{ $step >= 4 ? 'step-primary' : '' }}">Телефон</li>
             </ul>
+            <div class="mb-6">
+                <div class="mb-1 flex items-center justify-between text-xs text-base-content/70">
+                    <span>Прогресс регистрации</span>
+                    <span class="tabular-nums">{{ $progressPercent }}%</span>
+                </div>
+                <progress class="progress progress-primary h-2 w-full" value="{{ $progressPercent }}" max="100"></progress>
+            </div>
 
             @if ($step === 1)
                 <p class="text-xs text-base-content/60 mb-2 rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">

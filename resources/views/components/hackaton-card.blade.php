@@ -1,6 +1,8 @@
 @props([
     'hackaton',
     'canQuickApply' => false,
+    'href' => null,
+    'navigate' => true,
 ])
 
 @php
@@ -169,13 +171,23 @@
         </div>
 
         <div class="mt-auto flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
-            <button
-                type="button"
-                class="btn btn-primary btn-sm sm:btn-md sm:flex-1"
-                wire:click="openHackaton({{ $hackaton->id }})"
-            >
-                Подробнее
-            </button>
+            @if (filled($href))
+                <a
+                    href="{{ $href }}"
+                    @if ($navigate) wire:navigate @endif
+                    class="btn btn-primary btn-sm sm:btn-md sm:flex-1"
+                >
+                    Подробнее
+                </a>
+            @else
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm sm:btn-md sm:flex-1"
+                    wire:click="openHackaton({{ $hackaton->id }})"
+                >
+                    Подробнее
+                </button>
+            @endif
             @if ($canQuickApply && ! $isFinished)
                 <button
                     type="button"

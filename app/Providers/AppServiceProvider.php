@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\HackatonApplicationChanged;
+use App\Events\TeamApplicationChanged;
+use App\Listeners\InvalidateHomeCaches;
 use App\Mail\VerifyEmailAddressMail;
 use App\Models\Hackaton;
 use App\Models\HackatonAnnouncement;
@@ -85,6 +88,8 @@ class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('yandex', Provider::class);
             $event->extendSocialite('vkontakte', VkontakteProvider::class);
         });
+        Event::listen(HackatonApplicationChanged::class, InvalidateHomeCaches::class);
+        Event::listen(TeamApplicationChanged::class, InvalidateHomeCaches::class);
 
         Gate::policy(Hackaton::class, HackatonPolicy::class);
         Gate::policy(Team::class, TeamPolicy::class);

@@ -54,6 +54,12 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Space Grotesk', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --radius-card: 1.5rem;
+    --radius-panel: 1rem;
+    --shadow-card: 0 10px 30px -14px oklch(8% 0.02 264 / 0.45);
+    --shadow-card-hover: 0 18px 40px -20px oklch(8% 0.03 264 / 0.55);
+    --tracking-tight-display: -0.02em;
+    --spacing-section: clamp(2.5rem, 2rem + 1.5vw, 4rem);
 
     --animate-card-enter: card-enter 360ms ease-out both;
 
