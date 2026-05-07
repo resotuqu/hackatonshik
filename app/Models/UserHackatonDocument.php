@@ -22,6 +22,13 @@ class UserHackatonDocument extends Model
         return $this->belongsTo(User::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            //
+        ];
+    }
+
     protected $fillable = [
         'user_id',
         'hackaton_document_id',

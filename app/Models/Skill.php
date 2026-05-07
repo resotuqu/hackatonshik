@@ -17,6 +17,13 @@ class Skill extends Model
         return $this->belongsToMany(TeamRole::class, 'team_role_skills');
     }
 
+    protected function casts(): array
+    {
+        return [
+            //
+        ];
+    }
+
     protected $fillable = [
         'name',
     ];

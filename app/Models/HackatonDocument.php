@@ -23,6 +23,13 @@ class HackatonDocument extends Model
         return $this->HasMany(UserHackatonDocument::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            'filling_by_team_member' => 'boolean',
+        ];
+    }
+
     protected $fillable = [
         'hackaton_id',
         'name',

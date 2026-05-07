@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\InitialsGenerator;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -80,28 +81,7 @@ class Team extends Model
      */
     public function initialsForCover(): string
     {
-        $title = trim((string) $this->title);
-        if ($title === '') {
-            return '?';
-        }
-
-        $parts = preg_split('/\s+/u', $title) ?: [];
-        $letters = [];
-        foreach ($parts as $part) {
-            if ($part === '') {
-                continue;
-            }
-            $letters[] = mb_strtoupper(mb_substr($part, 0, 1));
-            if (count($letters) >= 2) {
-                break;
-            }
-        }
-
-        if ($letters === []) {
-            return mb_strtoupper(mb_substr($title, 0, 1));
-        }
-
-        return implode('', $letters);
+        return InitialsGenerator::generate($this->title);
     }
 
     private function isDefaultTeamImagePath(string $path): bool
@@ -139,6 +119,13 @@ class Team extends Model
         $this->load(self::SHOW_RELATIONS);
 
         return $this;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+        ];
     }
 
     protected $fillable = [

@@ -11,6 +11,13 @@ class ContactMessage extends Model
     /** @use HasFactory<ContactMessageFactory> */
     use HasFactory;
 
+    protected function casts(): array
+    {
+        return [
+            //
+        ];
+    }
+
     protected $fillable = [
         'name',
         'email',

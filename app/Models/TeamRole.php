@@ -39,6 +39,13 @@ class TeamRole extends Model
         return $this->hasMany(TeamApplication::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            //
+        ];
+    }
+
     protected $fillable = [
         'title',
         'description',

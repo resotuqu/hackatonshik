@@ -17,6 +17,13 @@ class TeamSocialLink extends Model
         return $this->belongsTo(Team::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            //
+        ];
+    }
+
     protected $fillable = [
         'team_id',
         'name',

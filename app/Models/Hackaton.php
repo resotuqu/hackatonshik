@@ -12,6 +12,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $title
+ * @property HackatonStatus $status
+ * @property \Illuminate\Support\Carbon $start_at
+ * @property \Illuminate\Support\Carbon $end_at
+ * @property bool $is_public
+ * @property-read User|null $user
+ */
 class Hackaton extends Model
 {
     /** @use HasFactory<HackatonFactory> */
@@ -31,6 +41,7 @@ class Hackaton extends Model
         'images',
     ];
 
+    /** @return HasMany<Team, $this> */
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
@@ -41,6 +52,7 @@ class Hackaton extends Model
         return $this->teams()->count();
     }
 
+    /** @return HasManyThrough<TeamRole, Team, $this> */
     public function roles(): HasManyThrough
     {
         return $this->hasManyThrough(TeamRole::class, Team::class);
@@ -51,51 +63,61 @@ class Hackaton extends Model
         return $this->roles()->whereNotNull('user_id')->count();
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<HackatonDocument, $this> */
     public function documents(): HasMany
     {
         return $this->hasMany(HackatonDocument::class);
     }
 
+    /** @return HasMany<UserHackatonDocument, $this> */
     public function usersDocuments(): HasMany
     {
         return $this->hasMany(UserHackatonDocument::class);
     }
 
+    /** @return HasMany<HackatonApplication, $this> */
     public function applications(): HasMany
     {
         return $this->hasMany(HackatonApplication::class);
     }
 
+    /** @return HasMany<HackatonCase, $this> */
     public function cases(): HasMany
     {
         return $this->hasMany(HackatonCase::class)->orderBy('sort_order');
     }
 
+    /** @return HasMany<HackatonAnnouncement, $this> */
     public function announcements(): HasMany
     {
         return $this->hasMany(HackatonAnnouncement::class)->latest('published_at');
     }
 
+    /** @return HasMany<HackatonCertificate, $this> */
     public function certificates(): HasMany
     {
         return $this->hasMany(HackatonCertificate::class)->latest('issued_at');
     }
 
+    /** @return HasMany<HackatonImage, $this> */
     public function images(): HasMany
     {
         return $this->hasMany(HackatonImage::class)->orderBy('sort_order');
     }
 
+    /** @return HasMany<HackatonJudge, $this> */
     public function judgeAssignments(): HasMany
     {
         return $this->hasMany(HackatonJudge::class);
     }
 
+    /** @return BelongsToMany<User, $this> */
     public function judges(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'hackaton_judges')
@@ -103,6 +125,7 @@ class Hackaton extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<JudgeInvitation, $this> */
     public function judgeInvitations(): HasMany
     {
         return $this->hasMany(JudgeInvitation::class)->latest();
