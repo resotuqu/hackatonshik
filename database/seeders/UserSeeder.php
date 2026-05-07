@@ -76,7 +76,7 @@ class UserSeeder extends Seeder
             ->get(['role', 'email', 'phone', 'nickname']);
 
         $table = $rows->map(fn (User $u) => [
-            $u->role,
+            $u->role->value,
             $u->email,
             $u->phone,
             $u->nickname,

@@ -135,6 +135,12 @@ class Team extends Model
         'image_url',
         'cover_image',
         'hackaton_id',
+        'hackaton_case_id',
         'is_public',
     ];
+
+    public function hackatonCase(): BelongsTo
+    {
+        return $this->belongsTo(HackatonCase::class, 'hackaton_case_id');
+    }
 }

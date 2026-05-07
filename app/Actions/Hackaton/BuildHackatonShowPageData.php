@@ -12,6 +12,7 @@ use App\Models\HackatonCaseSubmission;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -40,7 +41,28 @@ final class BuildHackatonShowPageData
                 ->where('published_at', '<=', now()))
             ->get());
         $hackaton->setRelation('cases', $hackaton->cases()
-            ->with(['fields', 'submissions.answers', 'submissions.score'])
+            ->with([
+                'fields',
+                'images',
+                'teams',
+                'submissions' => function (HasMany $query) use ($user, $isOrganizer, $isAssignedJudge): void {
+                    if (! $isOrganizer && ! $isAssignedJudge) {
+                        if ($user === null) {
+                            $query->whereRaw('1 = 0');
+
+                            return;
+                        }
+
+                        $myTeamIds = $user->teams()->pluck('id');
+                        $query->where(function (Builder $q) use ($user, $myTeamIds): void {
+                            $q->where('user_id', $user->id)
+                                ->orWhereIn('team_id', $myTeamIds);
+                        });
+                    }
+                },
+                'submissions.answers.field',
+                'submissions.score',
+            ])
             ->when(! $isOrganizer, fn (Builder $query) => $query
                 ->where('is_published', true)
                 ->where(function (Builder $scheduleQuery): void {
@@ -219,8 +241,12 @@ final class BuildHackatonShowPageData
                         $rolesQuery->where('team_roles.user_id', Auth::id());
                     });
             })
+            ->whereHas('hackatonApplications', function (Builder $query) use ($hackaton): void {
+                $query->where('hackaton_id', $hackaton->id)
+                    ->where('status', ApplicationStatus::ACCEPTED);
+            })
             ->orderBy('title')
-            ->get(['teams.id', 'teams.title']);
+            ->get(['teams.id', 'teams.title', 'teams.hackaton_case_id']);
     }
 
     /**

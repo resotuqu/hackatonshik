@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ApplicationStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonAnnouncement;
 use App\Models\HackatonAnnouncementImage;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 test('hackaton show page renders without participant collection type errors', function () {
-    $organizer = User::factory()->partner()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     $response = $this->get(route('hackatons.show', $hackaton));
@@ -29,7 +30,7 @@ test('hackaton show page renders without participant collection type errors', fu
 });
 
 test('organizer can create a case for own hackaton', function () {
-    $organizer = User::factory()->partner()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     $response = $this
@@ -50,8 +51,8 @@ test('organizer can create a case for own hackaton', function () {
 });
 
 test('non organizer cannot create case for hackaton', function () {
-    $organizer = User::factory()->partner()->create();
-    $anotherUser = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $anotherUser = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     $response = $this
@@ -64,10 +65,17 @@ test('non organizer cannot create case for hackaton', function () {
 });
 
 test('required case fields are validated on team submission', function () {
-    $organizer = User::factory()->partner()->create();
-    $participant = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
     $team = Team::factory()->for($participant)->for($hackaton)->create();
+
+    HackatonApplication::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'team_id' => $team->id,
+        'status' => ApplicationStatus::ACCEPTED,
+    ]);
+
     $case = HackatonCase::factory()->for($hackaton)->create(['is_published' => true]);
     $requiredField = HackatonCaseField::factory()->create([
         'hackaton_case_id' => $case->id,
@@ -91,9 +99,9 @@ test('required case fields are validated on team submission', function () {
 test('user cannot download certificate of another participant', function () {
     Storage::fake('local');
 
-    $organizer = User::factory()->partner()->create();
-    $owner = User::factory()->create();
-    $intruder = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $owner = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $intruder = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     $path = UploadedFile::fake()->create('certificate.pdf', 100, 'application/pdf')
@@ -115,8 +123,8 @@ test('user cannot download certificate of another participant', function () {
 test('announcement publication notifies hackaton participants', function () {
     Notification::fake();
 
-    $organizer = User::factory()->partner()->create();
-    $participant = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     Team::factory()->for($participant)->for($hackaton)->create();
@@ -142,7 +150,7 @@ test('announcement publication notifies hackaton participants', function () {
 test('organizer can upload announcement image gallery', function () {
     Storage::fake('public');
 
-    $organizer = User::factory()->partner()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     $response = $this
@@ -164,7 +172,7 @@ test('organizer can upload announcement image gallery', function () {
 });
 
 test('hackaton show page renders gallery carousel', function () {
-    $organizer = User::factory()->partner()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
     HackatonImage::query()->create([
         'hackaton_id' => $hackaton->id,
@@ -180,7 +188,7 @@ test('hackaton show page renders gallery carousel', function () {
 });
 
 test('organizer can bulk accept pending applications', function () {
-    $organizer = User::factory()->partner()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     $teamA = Team::factory()->for(User::factory()->create())->for($hackaton)->create();
@@ -208,10 +216,17 @@ test('organizer can bulk accept pending applications', function () {
 });
 
 test('case submission is blocked after deadline', function () {
-    $organizer = User::factory()->partner()->create();
-    $participant = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
     $team = Team::factory()->for($participant)->for($hackaton)->create();
+
+    HackatonApplication::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'team_id' => $team->id,
+        'status' => ApplicationStatus::ACCEPTED,
+    ]);
+
     TeamRole::factory()->for($team)->create([
         'user_id' => $participant->id,
     ]);
@@ -242,8 +257,8 @@ test('case submission is blocked after deadline', function () {
 test('draft announcement does not notify participants', function () {
     Notification::fake();
 
-    $organizer = User::factory()->partner()->create();
-    $participant = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
     Team::factory()->for($participant)->for($hackaton)->create();
 
@@ -261,8 +276,8 @@ test('draft announcement does not notify participants', function () {
 
 test('duplicate certificate title for same user is ignored', function () {
     Storage::fake('local');
-    $organizer = User::factory()->partner()->create();
-    $participant = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
     Team::factory()->for($participant)->for($hackaton)->create();
 
@@ -283,8 +298,8 @@ test('duplicate certificate title for same user is ignored', function () {
 });
 
 test('organizer can score a case submission', function () {
-    $organizer = User::factory()->partner()->create();
-    $participant = User::factory()->create();
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
     $case = HackatonCase::factory()->for($hackaton)->create();
     $submission = HackatonCaseSubmission::factory()->for($case, 'case')->create([

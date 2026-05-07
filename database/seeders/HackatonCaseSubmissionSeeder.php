@@ -14,7 +14,12 @@ class HackatonCaseSubmissionSeeder extends Seeder
     public function run(): void
     {
         foreach (HackatonCase::query()->orderBy('id')->get() as $case) {
-            $teams = Team::query()->where('hackaton_id', $case->hackaton_id)->orderBy('id')->get();
+            $teams = Team::query()
+                ->where('hackaton_id', $case->hackaton_id)
+                ->where('hackaton_case_id', $case->id)
+                ->orderBy('id')
+                ->get();
+
             foreach ($teams as $team) {
                 HackatonCaseSubmission::query()->firstOrCreate(
                     [

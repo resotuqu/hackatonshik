@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             TeamRoleSkillSeeder::class,
             TeamSocialLinkSeeder::class,
             HackatonApplicationSeeder::class,
+            HackatonCaseJoinSeeder::class,
             TeamApplicationSeeder::class,
             HackatonCaseSubmissionSeeder::class,
             HackatonCaseAnswerSeeder::class,

@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: ['*']);
+
         // Signed mail links must validate after HTTPS redirects / proxies; relative signatures ignore scheme & host.
         $middleware->alias([
             'signed' => ValidateSignature::class.':relative',
@@ -31,8 +33,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: $at);
 
         $middleware->web(append: [
-            SecurityHeaders::class,
-            EnsureContactChannelsVerified::class,
+            // SecurityHeaders::class,
+            // EnsureContactChannelsVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

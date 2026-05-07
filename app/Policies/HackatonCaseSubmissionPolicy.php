@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\ApplicationStatus;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseSubmission;
 use App\Models\User;
@@ -26,6 +27,10 @@ class HackatonCaseSubmissionPolicy
                     });
             })
             ->where('teams.hackaton_id', $hackatonId)
+            ->whereHas('hackatonApplications', function (Builder $query) use ($hackatonId): void {
+                $query->where('hackaton_id', $hackatonId)
+                    ->where('status', ApplicationStatus::ACCEPTED);
+            })
             ->exists();
     }
 

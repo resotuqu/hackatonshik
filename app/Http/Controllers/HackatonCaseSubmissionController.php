@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
+use App\Enums\HackatonStatus;
 use App\Http\Requests\StoreHackatonCaseSubmissionRequest;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
@@ -30,8 +32,45 @@ class HackatonCaseSubmissionController extends Controller
         $answers = $validated['answers'] ?? [];
         $uploadedFiles = $request->file('files', []);
 
-        if ($scope === 'team' && ! $this->isValidSubmitterTeam($hackaton, $teamId, (int) $request->user()->id)) {
-            abort(422, 'Команда не найдена среди ваших команд этого хакатона.');
+        if ($scope === 'team') {
+            $team = Team::find($teamId);
+            if (! $team || ! $this->isValidSubmitterTeam($hackaton, $teamId, (int) $request->user()->id)) {
+                abort(422, 'Команда не найдена или не одобрена для участия в этом хакатоне.');
+            }
+
+            if ($team->hackaton_case_id !== $case->id) {
+                abort(422, 'Команда должна сначала присоединиться к этому кейсу.');
+            }
+        } else {
+            // For personal scope, check if the user belongs to ANY approved team in this hackathon
+            // And if that team is joined to THIS case
+            $approvedJoinedTeamExists = $hackaton->teams()
+                ->where('hackaton_case_id', $case->id)
+                ->where(function (Builder $query) use ($request): void {
+                    $query
+                        ->where('teams.user_id', $request->user()->id)
+                        ->orWhereHas('roles', function (Builder $rolesQuery) use ($request): void {
+                            $rolesQuery->where('team_roles.user_id', $request->user()->id);
+                        });
+                })
+                ->whereHas('hackatonApplications', function (Builder $query) use ($hackaton): void {
+                    $query->where('hackaton_id', $hackaton->id)
+                        ->where('status', ApplicationStatus::ACCEPTED);
+                })
+                ->exists();
+
+            if (! $approvedJoinedTeamExists) {
+                abort(422, 'Вы должны быть участником одобренной команды, присоединившейся к этому кейсу.');
+            }
+        }
+
+        // Check hackathon status for link submissions
+        if ($hackaton->status !== HackatonStatus::IN_PROGRESS) {
+            foreach ($case->fields as $field) {
+                if ($field->type === HackatonCaseField::TYPE_URL && filled($answers[$field->id] ?? '')) {
+                    return back()->with('error', 'Загрузка ссылок (репозиторий, Figma и т.д.) доступна только после перехода хакатона в статус активной разработки.')->withInput();
+                }
+            }
         }
 
         $case->loadMissing('fields');
@@ -95,6 +134,27 @@ class HackatonCaseSubmissionController extends Controller
                     ->orWhereHas('roles', function (Builder $rolesQuery) use ($userId): void {
                         $rolesQuery->where('team_roles.user_id', $userId);
                     });
+            })
+            ->whereHas('hackatonApplications', function (Builder $query) use ($hackaton): void {
+                $query->where('hackaton_id', $hackaton->id)
+                    ->where('status', ApplicationStatus::ACCEPTED);
+            })
+            ->exists();
+    }
+
+    private function isUserInApprovedTeam(Hackaton $hackaton, int $userId): bool
+    {
+        return $hackaton->teams()
+            ->where(function (Builder $query) use ($userId): void {
+                $query
+                    ->where('teams.user_id', $userId)
+                    ->orWhereHas('roles', function (Builder $rolesQuery) use ($userId): void {
+                        $rolesQuery->where('team_roles.user_id', $userId);
+                    });
+            })
+            ->whereHas('hackatonApplications', function (Builder $query) use ($hackaton): void {
+                $query->where('hackaton_id', $hackaton->id)
+                    ->where('status', ApplicationStatus::ACCEPTED);
             })
             ->exists();
     }

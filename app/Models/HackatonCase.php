@@ -15,6 +15,7 @@ class HackatonCase extends Model
         'hackaton_id',
         'title',
         'description',
+        'resources_json',
         'sort_order',
         'is_published',
         'publish_at',
@@ -32,6 +33,7 @@ class HackatonCase extends Model
             'is_published' => 'boolean',
             'publish_at' => 'datetime',
             'deadline_at' => 'datetime',
+            'resources_json' => 'array',
         ];
     }
 
@@ -43,6 +45,16 @@ class HackatonCase extends Model
     public function fields(): HasMany
     {
         return $this->hasMany(HackatonCaseField::class)->orderBy('sort_order');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(HackatonCaseImage::class)->orderBy('sort_order');
+    }
+
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class);
     }
 
     public function submissions(): HasMany

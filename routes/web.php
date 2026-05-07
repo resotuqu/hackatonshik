@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('hackaton.applications.bulk-update');
     Route::delete('/hackaton-applications/{application}', [HackatonApplicationController::class, 'destroy'])->name('hackaton.applications.destroy');
 
+    Route::post('/hackatons/{hackaton}/cases/{case}/join', [HackatonCaseController::class, 'join'])->name('hackatons.cases.join');
     Route::post('/hackatons/{hackaton}/cases', [HackatonCaseController::class, 'store'])
         ->middleware('throttle:creations')
         ->name('hackatons.cases.store');
