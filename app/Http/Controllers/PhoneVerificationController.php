@@ -62,10 +62,18 @@ class PhoneVerificationController extends Controller
         $user = $request->user();
         abort_if(! $user, 401);
 
+        $attemptsKey = "phone-verification-attempts:{$user->id}";
+        if (RateLimiter::tooManyAttempts($attemptsKey, 5)) {
+            Cache::forget($this->codeCacheKey($user->id));
+
+            return back()->with('error', 'Слишком много неверных попыток. Запросите код заново.');
+        }
+
         $cacheKey = $this->codeCacheKey($user->id);
         $expectedCode = Cache::get($cacheKey);
 
         if (! $expectedCode || ! hash_equals((string) $expectedCode, (string) $validated['code'])) {
+            RateLimiter::hit($attemptsKey, 600);
             throw ValidationException::withMessages([
                 'code' => 'Неверный или просроченный код подтверждения.',
             ]);
@@ -73,6 +81,7 @@ class PhoneVerificationController extends Controller
 
         $user->update(['phone_verified_at' => now()]);
         Cache::forget($cacheKey);
+        RateLimiter::clear($attemptsKey);
 
         return redirect()->route('home')->with('success', 'Номер телефона подтвержден.');
     }

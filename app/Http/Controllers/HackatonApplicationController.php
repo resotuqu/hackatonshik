@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Events\HackatonApplicationChanged;
 use App\Enums\ApplicationStatus;
+use App\Events\HackatonApplicationChanged;
 use App\Http\Requests\BulkUpdateHackatonApplicationsRequest;
 use App\Http\Requests\StoreHackatonApplicationRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;

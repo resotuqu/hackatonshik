@@ -25,7 +25,7 @@ class StoreHackatonCaseSubmissionRequest extends FormRequest
             'answers' => ['nullable', 'array'],
             'answers.*' => ['nullable', 'string', 'max:10000'],
             'files' => ['nullable', 'array'],
-            'files.*' => ['nullable', 'file', 'max:10240'],
+            'files.*' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg,zip,doc,docx,xls,xlsx', 'max:10240'],
         ];
     }
 }

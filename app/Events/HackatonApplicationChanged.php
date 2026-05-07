@@ -11,7 +11,5 @@ final class HackatonApplicationChanged
         public readonly ?int $hackatonId = null,
         public readonly ?int $organizerId = null,
         public readonly bool $invalidateHomeFeatured = false,
-    ) {
-    }
+    ) {}
 }
-

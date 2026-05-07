@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Events\TeamApplicationChanged;
 use App\Enums\ApplicationStatus;
+use App\Events\TeamApplicationChanged;
 use App\Http\Requests\StoreTeamApplicationRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
 use App\Models\TeamApplication;

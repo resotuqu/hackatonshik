@@ -10,7 +10,5 @@ final class TeamApplicationChanged
         public readonly int $teamId,
         public readonly ?int $applicantId = null,
         public readonly ?int $captainId = null,
-    ) {
-    }
+    ) {}
 }
-
