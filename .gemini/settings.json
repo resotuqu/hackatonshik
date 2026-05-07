@@ -1,4 +1,7 @@
 {
+    "context": {
+        "ignoredPatterns": [".geminiignore", ".gitignore"]
+    },
     "mcpServers": {
         "laravel-boost": {
             "command": "C:\\Users\\resotuqu\\.config\\herd\\bin\\php85\\php.exe",
@@ -13,5 +16,11 @@
                 "C:\\Users\\resotuqu\\.config\\herd\\bin\\herd-mcp.phar"
             ]
         }
+    },
+    "ripgrep": {
+        "enabled": true
+    },
+    "commands": {
+        "loadBuiltinCommands": true
     }
 }

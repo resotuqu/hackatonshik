@@ -1,0 +1,84 @@
+# ========================================
+# .geminiignore — для AI-кодбейзов
+# ========================================
+
+# Зависимости
+/vendor/
+/node_modules/
+
+# Сборка и кэш
+/public/build/
+/bootstrap/cache/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/framework/views/
+/storage/logs/
+
+# Окружение и секреты
+.env
+.env.*
+!.env.example
+
+# IDE / редакторы
+/.idea/
+/.vscode/
+/.cursor/
+/.claude/
+/.gemini/
+/.github/copilot*
+
+# Локальные данные
+/storage/app/private/
+/storage/app/public/
+/database/database.sqlite
+
+# Тесты и отладка (можно оставить, если нужно анализировать тесты)
+# /tests/
+/phpunit.xml
+/.phpunit.result.cache
+
+# Бинарные и медиа-файлы
+*.zip
+*.tar.gz
+*.rar
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.woff2
+*.ttf
+*.eot
+
+# Репомикс и большие файлы
+repomix-output.md
+*.bundle
+*.repomix
+
+# Логи и временные файлы
+*.log
+.DS_Store
+Thumbs.db
+
+# Docker / dev-контейнеры (если не нужно анализировать)
+.dockerignore
+compose.yaml
+Dockerfile
+start-container
+supervisord.conf
+
+# AI-конфиги (чтобы не путались)
+.mcp.json
+.codex/
+.gemini/settings.json
+.claude/
+.cursor/
+.github/skills/
+.agents/skills/
+
+# Другое
+phpstan.neon.dist
+pint.json
+eslint.config.js
