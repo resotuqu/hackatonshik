@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Skill;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SkillSeeder extends Seeder
@@ -14,79 +13,79 @@ class SkillSeeder extends Seeder
     public function run(): void
     {
         Skill::create([
-            'name' => 'MySql'
+            'name' => 'MySql',
         ]);
 
         Skill::create([
-            'name' => 'PostgreSql'
+            'name' => 'PostgreSql',
         ]);
 
         Skill::create([
-            'name' => 'NoSql'
+            'name' => 'NoSql',
         ]);
 
         Skill::create([
-            'name' => 'PHP'
+            'name' => 'PHP',
         ]);
 
         Skill::create([
-            'name' => 'Python'
+            'name' => 'Python',
         ]);
 
         Skill::create([
-            'name' => 'Java'
+            'name' => 'Java',
         ]);
 
         Skill::create([
-            'name' => 'Basic'
+            'name' => 'Basic',
         ]);
 
         Skill::create([
-            'name' => 'Pascal'
+            'name' => 'Pascal',
         ]);
 
         Skill::create([
-            'name' => 'Базы данных'
+            'name' => 'Базы данных',
         ]);
 
         Skill::create([
-            'name' => 'Бекэнд'
+            'name' => 'Бекэнд',
         ]);
 
         Skill::create([
-            'name' => 'Фронтэнд'
+            'name' => 'Фронтэнд',
         ]);
 
         Skill::create([
-            'name' => 'Figma'
+            'name' => 'Figma',
         ]);
 
         Skill::create([
-            'name' => 'Microsoft Visio'
+            'name' => 'Microsoft Visio',
         ]);
 
         Skill::create([
-            'name' => 'Microsoft Access'
+            'name' => 'Microsoft Access',
         ]);
 
         Skill::create([
-            'name' => 'Microsoft PowerPoint'
+            'name' => 'Microsoft PowerPoint',
         ]);
 
         Skill::create([
-            'name' => 'Linux'
+            'name' => 'Linux',
         ]);
 
         Skill::create([
-            'name' => 'Laravel'
+            'name' => 'Laravel',
         ]);
 
         Skill::create([
-            'name' => 'Symphony'
+            'name' => 'Symphony',
         ]);
 
         Skill::create([
-            'name' => 'Django'
+            'name' => 'Django',
         ]);
     }
 }

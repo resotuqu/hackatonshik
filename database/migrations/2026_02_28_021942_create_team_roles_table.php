@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Hackaton;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
