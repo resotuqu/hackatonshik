@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Hackaton extends Model
 {
@@ -40,12 +41,14 @@ class Hackaton extends Model
         return $this->teams()->count();
     }
 
+    public function roles(): HasManyThrough
+    {
+        return $this->hasManyThrough(TeamRole::class, Team::class);
+    }
+
     public function participantsCount(): int
     {
-        return $this->teams()
-            ->withCount(['roles as participants_count' => fn ($query) => $query->whereNotNull('user_id')])
-            ->get()
-            ->sum('participants_count');
+        return $this->roles()->whereNotNull('user_id')->count();
     }
 
     public function user(): BelongsTo
