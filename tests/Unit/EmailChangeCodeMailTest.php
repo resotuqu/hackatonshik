@@ -22,7 +22,7 @@ test('email change code mailable for old address renders branded body', function
     $mailable->assertHasSubject('Код для смены электронной почты — Хакатонщик');
     $mailable->assertTo('old@example.test');
     $html = $mailable->render();
-    expect($html)->toContain('Привет, Иван Тестов!')
+    expect($html)->toContain('Иван Тестов, Вы запросили смену адреса электронной почты.')
         ->and($html)->toContain('123456')
         ->and($html)->toContain('Хакатонщик. Все права защищены.');
 });

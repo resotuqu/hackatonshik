@@ -14,8 +14,7 @@ test('verify email mailable has branded subject and body', function () {
 
     $mailable->assertHasSubject('Подтвердите ваш email — Хакатонщик');
     $mailable->assertTo($user->email);
-    $mailable->assertSeeInHtml('Привет, Тестовый участник!');
+    $mailable->assertSeeInHtml('Тестовый участник, добро пожаловать на платформу Хакатонщик.');
     $mailable->assertSeeInHtml('Подтвердить email');
-    $mailable->assertSeeInHtml('Добро пожаловать на платформу Хакатонщик');
     $mailable->assertSeeInHtml('© '.date('Y').' Хакатонщик. Все права защищены.');
 });

@@ -12,8 +12,11 @@ use function Pest\Laravel\actingAs;
 test('a team can submit a case solution', function () {
     // Arrange
     $user = User::factory()->create();
-    $team = Team::factory()->create(['user_id' => $user->id]);
     $hackaton = Hackaton::factory()->create();
+    $team = Team::factory()->create([
+        'user_id' => $user->id,
+        'hackaton_id' => $hackaton->id,
+    ]);
 
     // Create an accepted application for the team to the hackaton
     HackatonApplication::factory()->create([
@@ -28,6 +31,7 @@ test('a team can submit a case solution', function () {
     // Act
     actingAs($user)
         ->post(route('hackatons.cases.submissions.store', [$hackaton, $case]), [
+            'scope' => 'team',
             'answers' => [
                 $field->id => 'My answer to the field',
             ],
@@ -44,6 +48,6 @@ test('a team can submit a case solution', function () {
 
     $this->assertDatabaseHas('hackaton_case_answers', [
         'hackaton_case_field_id' => $field->id,
-        'value' => 'My answer to the field',
+        'value_text' => 'My answer to the field',
     ]);
 });

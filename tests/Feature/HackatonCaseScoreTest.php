@@ -28,9 +28,9 @@ test('a judge can score a submission', function () {
     // Act
     actingAs($judgeUser)
         ->post(route('hackatons.scores.store', $hackaton), [
-            'hackaton_case_id' => $case->id,
-            'team_id' => $team->id,
+            'hackaton_case_submission_id' => $submission->id,
             'score' => 85,
+            'max_score' => 100,
             'comment' => 'Great work!',
         ])
         ->assertRedirect()
@@ -38,9 +38,8 @@ test('a judge can score a submission', function () {
 
     // Assert
     $this->assertDatabaseHas('hackaton_case_scores', [
-        'hackaton_case_id' => $case->id,
-        'team_id' => $team->id,
-        'judge_id' => $judgeUser->id,
+        'hackaton_case_submission_id' => $submission->id,
+        'reviewed_by' => $judgeUser->id,
         'score' => 85,
         'comment' => 'Great work!',
     ]);
