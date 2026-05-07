@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\NewsPost;
 use App\Models\Hackaton;
+use App\Models\NewsPost;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

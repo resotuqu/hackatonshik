@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,9 +14,9 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)->in('Feature', 'Unit');
+pest()->extend(TestCase::class)->in('Feature', 'Unit');
 
-pest()->use(Illuminate\Foundation\Testing\RefreshDatabase::class)->in('Feature');
+pest()->use(RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
