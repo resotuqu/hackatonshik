@@ -1,14 +1,14 @@
 {
     "agents": [
-        "claude_code",
-        "copilot",
-        "gemini",
-        "codex"
+        "cursor",
+        "gemini"
     ],
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
     "nightwatch_mcp": false,
+    "packages": [
+        "livewire/blaze"
+    ],
     "sail": false,
     "skills": [
         "fortify-development",
@@ -16,6 +16,7 @@
         "socialite-development",
         "livewire-development",
         "pest-testing",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "blaze-optimize"
     ]
 }
