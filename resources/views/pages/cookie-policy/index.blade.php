@@ -1,10 +1,3 @@
-<?php
-
-use Livewire\Component;
-
-new #[\Livewire\Attributes\Layout('layouts::app', ['title' => 'Политика использования cookie'])] class extends Component {
-};
-?>
 
 <div class="mx-auto mt-8 w-full max-w-3xl space-y-6 sm:mt-12">
     <header class="space-y-2">

@@ -14,52 +14,73 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
+use App\Livewire\Pages\About\Index as AboutIndex;
+use App\Livewire\Pages\Admin\AvatarPresets as AdminAvatarPresets;
+use App\Livewire\Pages\Admin\Index as AdminIndex;
+use App\Livewire\Pages\Admin\Login as AdminLogin;
+use App\Livewire\Pages\Auth\Login as AuthLogin;
+use App\Livewire\Pages\Auth\Register as AuthRegister;
+use App\Livewire\Pages\Contacts\Index as ContactsIndex;
+use App\Livewire\Pages\CookiePolicy\Index as CookiePolicyIndex;
+use App\Livewire\Pages\Hackatons\Create as HackatonsCreate;
+use App\Livewire\Pages\Hackatons\Edit as HackatonsEdit;
+use App\Livewire\Pages\Hackatons\Index as HackatonsIndex;
+use App\Livewire\Pages\Hackatons\Show as HackatonsShow;
+use App\Livewire\Pages\Home\Index as HomeIndex;
+use App\Livewire\Pages\News\Index as NewsIndex;
+use App\Livewire\Pages\News\Show as NewsShow;
+use App\Livewire\Pages\PrivacyPolicy\Index as PrivacyPolicyIndex;
+use App\Livewire\Pages\Profile\Certificates\Index as ProfileCertificatesIndex;
+use App\Livewire\Pages\Profile\Hackatons\Hub as ProfileHackatonsHub;
+use App\Livewire\Pages\Profile\Hackatons\Index as ProfileHackatonsIndex;
+use App\Livewire\Pages\Profile\Hackatons\Participants as ProfileHackatonsParticipants;
+use App\Livewire\Pages\Profile\Index as ProfileIndex;
+use App\Livewire\Pages\Profile\PublicProfileShow;
+use App\Livewire\Pages\Profile\Teams\Index as ProfileTeamsIndex;
+use App\Livewire\Pages\Teams\Create as TeamsCreate;
+use App\Livewire\Pages\Teams\Edit as TeamsEdit;
+use App\Livewire\Pages\Teams\Index as TeamsIndex;
+use App\Livewire\Pages\Teams\Show as TeamsShow;
 use App\Models\NewsPost;
 use Illuminate\Support\Facades\Route;
 
-Route::livewire('/', 'pages::index')->name('home');
+Route::get('/', HomeIndex::class)->name('home');
 
-Route::livewire('/about', 'pages::about.index');
-Route::livewire('/news', 'pages::news.index');
-Route::get('/news/rss', function () {
-    $posts = NewsPost::query()->published()->latest('published_at')->limit(20)->get();
+Route::get('/about', AboutIndex::class);
+Route::get('/news', NewsIndex::class);
+...
+Route::get('/news/{post:slug}', NewsShow::class)->name('news.show');
+Route::get('/contacts', ContactsIndex::class);
+Route::get('/privacy-policy', PrivacyPolicyIndex::class);
+Route::get('/cookie-policy', CookiePolicyIndex::class);
 
-    return response()
-        ->view('pages.news.rss', ['posts' => $posts], 200)
-        ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
-});
-Route::livewire('/news/{post:slug}', 'pages::news.show')->name('news.show');
-Route::livewire('/contacts', 'pages::contacts.index');
-Route::livewire('/privacy-policy', 'pages::privacy-policy.index');
-Route::livewire('/cookie-policy', 'pages::cookie-policy.index');
+Route::get('/login', AuthLogin::class)->name('login');
+Route::get('/register', AuthRegister::class);
+Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified']);
+Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:access-admin']);
+Route::get('/admin/avatar-presets', AdminAvatarPresets::class)->middleware(['auth', 'verified', 'can:access-admin']);
+Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
-Route::livewire('/login', 'pages::auth.login')->name('login');
-Route::livewire('/register', 'pages::auth.register');
-Route::livewire('/profile', 'pages::profile.index')->middleware(['auth', 'verified']);
-Route::livewire('/admin', 'pages::admin.index')->middleware(['auth', 'verified', 'can:access-admin']);
-Route::livewire('/admin/avatar-presets', 'pages::admin.avatar-presets')->middleware(['auth', 'verified', 'can:access-admin']);
-Route::livewire('/u/{user:nickname}', 'pages::profile.public-profile-show')->name('profile.public.show');
+Route::get('/teams', TeamsIndex::class)->name('teams.index');
+Route::get('/teams/create', TeamsCreate::class)->middleware(['auth', 'verified']);
+Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware(['auth', 'verified']);
 
-Route::livewire('/teams', 'pages::teams.index')->name('teams.index');
-Route::livewire('/teams/create', 'pages::teams.create')->middleware(['auth', 'verified']);
-Route::livewire('/profile/teams', 'pages::profile.teams.index')->middleware(['auth', 'verified']);
-
-Route::livewire('/hackatons', 'pages::hackatons.index')->name('hackatons.index');
-Route::livewire('/hackatons/create', 'pages::hackatons.create')->middleware(['auth', 'verified']);
-Route::livewire('/profile/hackatons', 'pages::profile.hackatons.index')->middleware(['auth', 'verified']);
-Route::livewire('/profile/hackatons/{hackaton}/participants', 'pages::profile.hackatons.participants')->middleware(['auth', 'verified']);
-Route::livewire('/profile/certificates', 'pages::profile.certificates.index')->middleware(['auth', 'verified']);
-Route::livewire('/profile/hackatons/{hackaton}/hub', 'pages::profile.hackatons.hub')
+Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
+Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified']);
+Route::get('/profile/hackatons', ProfileHackatonsIndex::class)->middleware(['auth', 'verified']);
+Route::get('/profile/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware(['auth', 'verified']);
+Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware(['auth', 'verified']);
+Route::get('/profile/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
     ->middleware(['auth', 'verified'])
     ->name('profile.hackatons.hub');
 
-Route::livewire('/teams/{team}', 'pages::teams.show')->name('teams.show');
-Route::livewire('/teams/{team}/edit', 'pages::teams.edit')
+Route::get('/teams/{team}', TeamsShow::class)->name('teams.show');
+Route::get('/teams/{team}/edit', TeamsEdit::class)
     ->middleware(['auth', 'verified'])
     ->name('teams.edit');
 
-Route::livewire('/hackatons/{hackaton}', 'pages::hackatons.show')->name('hackatons.show');
-Route::livewire('/hackatons/{hackaton}/edit', 'pages::hackatons.edit')
+Route::get('/hackatons/{hackaton}', HackatonsShow::class)->name('hackatons.show');
+Route::get('/hackatons/{hackaton}/edit', HackatonsEdit::class)
     ->middleware(['auth', 'verified'])
     ->name('hackatons.edit');
 

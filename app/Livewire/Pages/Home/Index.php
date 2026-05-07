@@ -1,0 +1,164 @@
+<?php
+
+namespace App\Livewire\Pages\Home;
+
+use App\Enums\HackatonStatus;
+use App\Models\Hackaton;
+use App\Models\Team;
+use App\Models\TeamRole;
+use App\Models\User;
+use App\ViewModels\HomeDashboardData;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+
+#[Layout('layouts::app', [
+    'title' => 'Хакатонщик — платформа для хакатонов, команд и участников',
+    'meta_description' => 'Хакатонщик помогает участникам, командам и организаторам находить друг друга, запускать и проводить хакатоны — от поиска команды до сертификатов.',
+    'canonical_url' => '/',
+])]
+class Index extends Component
+{
+    /** @var array<int, Hackaton> */
+    public array $featuredHackatons = [];
+
+    /** Публичные хакатоны (все статусы кроме черновика), включая завершённые и в архиве */
+    public int $publicHackatonsCount = 0;
+
+    public int $publicParticipantsCount = 0;
+
+    public int $publicTeamsCount = 0;
+
+    public int $teamsCount = 0;
+
+    public int $certificatesCount = 0;
+
+    public int $pendingTeamApplicationsCount = 0;
+
+    public int $pendingHackatonApplicationsCount = 0;
+
+    /** @var list<array{id: int, hackaton_id: int, title: string, team_title: string, status_label: string}> */
+    public array $hackatonApplicationsPreview = [];
+
+    /** @var list<array{id: int, title: string, start_at: string|null}> */
+    public array $participantHackatonsPreview = [];
+
+    public string $participantNextStepTitle = '';
+
+    public string $participantNextStepHint = '';
+
+    public ?string $participantNextStepHref = null;
+
+    public ?string $participantNextStepLabel = null;
+
+    public int $hackatonsCount = 0;
+
+    public ?int $organizerFirstPendingHackatonId = null;
+
+    public int $judgeHackatonsCount = 0;
+
+    /** @var list<array{id: int, title: string, start_at: string|null}> */
+    public array $judgeHackatonsPreview = [];
+
+    public int $usersCount = 0;
+
+    public int $adminHackatonsCount = 0;
+
+    public int $adminPartnersCount = 0;
+
+    public int $adminPendingApplicationsCount = 0;
+
+    public int $unreadNotificationsCount = 0;
+
+    public bool $showPhoneVerificationBanner = false;
+
+    public function mount(): void
+    {
+        $this->featuredHackatons = Cache::remember('home-featured-hackatons-v1', now()->addMinutes(10), function (): array {
+            return Hackaton::query()
+                ->select('hackatons.*')
+                ->selectSub(function ($query) {
+                    $query->from('team_roles')
+                        ->join('teams', 'teams.id', '=', 'team_roles.team_id')
+                        ->whereColumn('teams.hackaton_id', 'hackatons.id')
+                        ->whereNotNull('team_roles.user_id')
+                        ->selectRaw('count(*)');
+                }, 'participants_count')
+                ->where('is_public', true)
+                ->whereIn('status', [
+                    HackatonStatus::PUBLISHED,
+                    HackatonStatus::REGISTRATION_OPEN,
+                    HackatonStatus::IN_PROGRESS,
+                    HackatonStatus::JUDGING,
+                ])
+                ->withCount('teams')
+                ->latest('start_at')
+                ->limit(4)
+                ->get()
+                ->all();
+        });
+
+        // Все публичные события кроме черновика (в т.ч. завершённые и в архиве) + суммарно команды и участники по ним.
+        $totals = Cache::remember('home-public-totals-v3', now()->addMinutes(10), function (): array {
+            $hackatonsCount = Hackaton::query()
+                ->where('is_public', true)
+                ->whereNot('status', HackatonStatus::DRAFT)
+                ->count();
+
+            $teamsCount = Team::query()
+                ->whereExists(function ($query): void {
+                    $query->selectRaw('1')
+                        ->from('hackatons')
+                        ->whereColumn('hackatons.id', 'teams.hackaton_id')
+                        ->where('hackatons.is_public', true)
+                        ->whereNot('hackatons.status', HackatonStatus::DRAFT);
+                })
+                ->count();
+
+            $participantsCount = TeamRole::query()
+                ->whereNotNull('user_id')
+                ->whereExists(function ($query): void {
+                    $query->from('teams')
+                        ->join('hackatons', 'hackatons.id', '=', 'teams.hackaton_id')
+                        ->whereColumn('teams.id', 'team_roles.team_id')
+                        ->where('hackatons.is_public', true)
+                        ->whereNot('hackatons.status', HackatonStatus::DRAFT);
+                })
+                ->count();
+
+            return [
+                'hackatons' => $hackatonsCount,
+                'participants' => $participantsCount,
+                'teams' => $teamsCount,
+            ];
+        });
+
+        $this->publicHackatonsCount = (int) ($totals['hackatons'] ?? 0);
+        $this->publicParticipantsCount = (int) ($totals['participants'] ?? 0);
+        $this->publicTeamsCount = (int) ($totals['teams'] ?? 0);
+
+        if (! Auth::check()) {
+            return;
+        }
+
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return;
+        }
+
+        foreach (HomeDashboardData::fromUser($user)->toLivewireArray() as $key => $value) {
+            $this->{$key} = $value;
+        }
+    }
+
+    public function placeholder()
+    {
+        return view('pages.home.placeholder');
+    }
+
+    public function render()
+    {
+        return view('pages.home.index');
+    }
+}
