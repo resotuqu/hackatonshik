@@ -1,11 +1,16 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "wsl.exe",
+            "command": "C:\\Users\\resotuqu\\.config\\herd\\bin\\php85\\php.exe",
             "args": [
-                "/home/sekhmych/.config/herd-lite/bin/php",
-                "/home/sekhmych/laravel/hackatonshik/artisan",
+                "C:\\Users\\resotuqu\\Herd\\hackatonshik\\artisan",
                 "boost:mcp"
+            ]
+        },
+        "herd": {
+            "command": "C:\\Users\\resotuqu\\.config\\herd\\bin\\php85\\php.exe",
+            "args": [
+                "C:\\Users\\resotuqu\\.config\\herd\\bin\\herd-mcp.phar"
             ]
         }
     }
