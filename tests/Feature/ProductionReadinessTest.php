@@ -66,3 +66,15 @@ test('hackaton public page does not echo raw script from description markdown', 
     $response->assertDontSee('<script>hackatonDescXssProbeZ9q', false);
     $response->assertSee('<strong>bold</strong>', false);
 });
+
+test('application creation routes are explicitly rate limited', function () {
+    $routes = app('router')->getRoutes();
+
+    $teamApplicationRoute = $routes->getByName('team.applications.store');
+    $hackatonApplicationRoute = $routes->getByName('hackaton.applications.store');
+    $caseCreationRoute = $routes->getByName('hackatons.cases.store');
+
+    expect($teamApplicationRoute?->gatherMiddleware())->toContain('throttle:applications');
+    expect($hackatonApplicationRoute?->gatherMiddleware())->toContain('throttle:applications');
+    expect($caseCreationRoute?->gatherMiddleware())->toContain('throttle:creations');
+});

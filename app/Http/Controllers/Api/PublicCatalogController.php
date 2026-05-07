@@ -35,7 +35,8 @@ class PublicCatalogController extends Controller
         };
 
         if (app()->isProduction()) {
-            $cacheKey = sprintf('api:v1:catalog:hackatons:p%d:u%d:pg%d', $perPage, (int) $upcoming, $page);
+            $catalogVersion = (int) Cache::get('api:v1:catalog:hackatons:version', 1);
+            $cacheKey = sprintf('api:v1:catalog:hackatons:v%d:p%d:u%d:pg%d', $catalogVersion, $perPage, (int) $upcoming, $page);
             $hackatons = Cache::remember($cacheKey, 30, $buildPaginator);
         } else {
             $hackatons = $buildPaginator();
@@ -64,7 +65,7 @@ class PublicCatalogController extends Controller
 
         $profiles = User::query()
             ->where('is_profile_public', true)
-            ->select(['id', 'fio', 'nickname', 'role', 'description'])
+            ->select(['id', 'nickname', 'role', 'description'])
             ->latest('id')
             ->paginate($perPage);
 

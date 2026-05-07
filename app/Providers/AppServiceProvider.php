@@ -25,12 +25,13 @@ use App\Policies\TeamApplicationPolicy;
 use App\Policies\TeamPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -84,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureDefaults();
         $this->configureRateLimiting();
+        $this->configureCatalogCacheInvalidation();
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('yandex', Provider::class);
             $event->extendSocialite('vkontakte', VkontakteProvider::class);
@@ -132,5 +134,37 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('bulk-actions', fn (Request $request) => Limit::perMinute(15)->by($request->user()?->id ?: $request->ip()));
 
         RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(8)->by($request->user()?->id ?: $request->ip()));
+
+        RateLimiter::for('creations', fn (Request $request) => Limit::perMinute(5)->by($request->user()?->id ?: $request->ip()));
+
+        RateLimiter::for('applications', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
+
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(3)->by($request->input('email') ?: $request->ip());
+        });
+    }
+
+    protected function configureCatalogCacheInvalidation(): void
+    {
+        $bumpCatalogVersion = static function (): void {
+            Cache::add('api:v1:catalog:hackatons:version', 1);
+            Cache::increment('api:v1:catalog:hackatons:version');
+        };
+
+        $refreshCatalogVersion = static function (Hackaton $hackaton) use ($bumpCatalogVersion): void {
+            if (
+                ! $hackaton->wasRecentlyCreated
+                && ! $hackaton->wasChanged(['title', 'is_public', 'start_at', 'end_at', 'image_url'])
+            ) {
+                return;
+            }
+
+            $bumpCatalogVersion();
+        };
+
+        Hackaton::saved($refreshCatalogVersion);
+        Hackaton::deleted(static function () use ($bumpCatalogVersion): void {
+            $bumpCatalogVersion();
+        });
     }
 }

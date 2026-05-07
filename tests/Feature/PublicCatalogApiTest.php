@@ -6,6 +6,7 @@ use App\Models\Hackaton;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 
 uses(RefreshDatabase::class);
 
@@ -74,4 +75,20 @@ test('hackaton policy allows team member to view non-public hackaton', function 
     $this->actingAs($member)
         ->get(route('hackatons.show', $hackaton))
         ->assertSuccessful();
+});
+
+test('saving public hackaton bumps catalog cache version key', function () {
+    Cache::put('api:v1:catalog:hackatons:version', 1);
+
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create([
+        'is_public' => true,
+        'title' => 'Before',
+    ]);
+
+    expect(Cache::get('api:v1:catalog:hackatons:version'))->toBe(2);
+
+    $hackaton->update(['title' => 'After']);
+
+    expect(Cache::get('api:v1:catalog:hackatons:version'))->toBe(3);
 });

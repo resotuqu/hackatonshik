@@ -36,8 +36,13 @@ class SocialAuthController extends Controller
         }
 
         $driver = $this->resolveDriver($provider);
-        $providerId = (string) $oauthUser->getId();
-        $email = $oauthUser->getEmail() ?: "{$driver}_{$providerId}@oauth.local";
+        $email = mb_strtolower((string) $oauthUser->getEmail());
+        if ($email === '') {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Провайдер не передал email. Выберите другой способ входа или укажите email у провайдера.');
+        }
+
         $name = $oauthUser->getName() ?: $oauthUser->getNickname() ?: 'OAuth пользователь';
 
         /** @var Authenticatable $user */

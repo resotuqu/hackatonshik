@@ -28,7 +28,7 @@ test('yandex callback creates local user and logs in', function () {
     ]);
 });
 
-test('yandex callback uses fallback email when provider has no email', function () {
+test('yandex callback redirects to login when provider has no email', function () {
     $socialiteUser = mock(SocialiteUserContract::class);
     $socialiteUser->shouldReceive('getEmail')->andReturnNull();
     $socialiteUser->shouldReceive('getName')->andReturnNull();
@@ -45,10 +45,10 @@ test('yandex callback uses fallback email when provider has no email', function 
 
     $response = $this->get('/auth/yandex/callback');
 
-    $response->assertRedirect(route('phone.verify.notice'));
-    $this->assertDatabaseHas('users', [
-        'email' => 'yandex_12345@oauth.local',
-    ]);
+    $response->assertRedirect(route('login'));
+    $response->assertSessionHas('error');
+    $this->assertGuest();
+    $this->assertDatabaseCount('users', 0);
 });
 
 test('vk callback creates local user and logs in', function () {

@@ -79,28 +79,44 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/teams/{team}/roles/{teamRole}/participant', [TeamController::class, 'destroyParticipant'])
         ->name('teams.participants.destroy');
 
-    Route::post('/team-applications', [TeamApplicationController::class, 'store'])->name('team.applications.store');
+    Route::post('/team-applications', [TeamApplicationController::class, 'store'])
+        ->middleware('throttle:applications')
+        ->name('team.applications.store');
     Route::patch('/team-applications/{application}', [TeamApplicationController::class, 'update'])->name('team.applications.update');
     Route::delete('/team-applications/{application}', [TeamApplicationController::class, 'destroy'])->name('team.applications.destroy');
 
-    Route::post('/hackaton-applications', [HackatonApplicationController::class, 'store'])->name('hackaton.applications.store');
+    Route::post('/hackaton-applications', [HackatonApplicationController::class, 'store'])
+        ->middleware('throttle:applications')
+        ->name('hackaton.applications.store');
     Route::patch('/hackaton-applications/{application}', [HackatonApplicationController::class, 'update'])->name('hackaton.applications.update');
     Route::patch('/hackatons/{hackaton}/applications/bulk', [HackatonApplicationController::class, 'bulkUpdate'])
         ->middleware('throttle:bulk-actions')
         ->name('hackaton.applications.bulk-update');
     Route::delete('/hackaton-applications/{application}', [HackatonApplicationController::class, 'destroy'])->name('hackaton.applications.destroy');
 
-    Route::post('/hackatons/{hackaton}/cases', [HackatonCaseController::class, 'store'])->name('hackatons.cases.store');
+    Route::post('/hackatons/{hackaton}/cases', [HackatonCaseController::class, 'store'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.cases.store');
     Route::delete('/hackatons/{hackaton}/cases/{case}', [HackatonCaseController::class, 'destroy'])->name('hackatons.cases.destroy');
-    Route::post('/hackatons/{hackaton}/cases/{case}/fields', [HackatonCaseFieldController::class, 'store'])->name('hackatons.cases.fields.store');
+    Route::post('/hackatons/{hackaton}/cases/{case}/fields', [HackatonCaseFieldController::class, 'store'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.cases.fields.store');
     Route::delete('/hackatons/{hackaton}/cases/{case}/fields/{field}', [HackatonCaseFieldController::class, 'destroy'])->name('hackatons.cases.fields.destroy');
-    Route::post('/hackatons/{hackaton}/cases/{case}/submissions', [HackatonCaseSubmissionController::class, 'store'])->name('hackatons.cases.submissions.store');
-    Route::post('/hackatons/{hackaton}/scores', [HackatonCaseScoreController::class, 'store'])->name('hackatons.scores.store');
+    Route::post('/hackatons/{hackaton}/cases/{case}/submissions', [HackatonCaseSubmissionController::class, 'store'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.cases.submissions.store');
+    Route::post('/hackatons/{hackaton}/scores', [HackatonCaseScoreController::class, 'store'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.scores.store');
 
-    Route::post('/hackatons/{hackaton}/announcements', [HackatonAnnouncementController::class, 'store'])->name('hackatons.announcements.store');
+    Route::post('/hackatons/{hackaton}/announcements', [HackatonAnnouncementController::class, 'store'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.announcements.store');
     Route::delete('/hackatons/{hackaton}/announcements/{announcement}', [HackatonAnnouncementController::class, 'destroy'])->name('hackatons.announcements.destroy');
 
-    Route::post('/hackatons/{hackaton}/certificates', [HackatonCertificateController::class, 'store'])->name('hackatons.certificates.store');
+    Route::post('/hackatons/{hackaton}/certificates', [HackatonCertificateController::class, 'store'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.certificates.store');
     Route::delete('/hackatons/{hackaton}/certificates/{certificate}', [HackatonCertificateController::class, 'destroy'])->name('hackatons.certificates.destroy');
     Route::get('/certificates/{certificate}/download', [HackatonCertificateController::class, 'download'])->name('certificates.download');
     Route::get('/hackatons/{hackaton}/export/teams', [HackatonExportController::class, 'teams'])
@@ -116,5 +132,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/hackatons/{hackaton}/judges/invite', [JudgeManagementController::class, 'invite'])->name('hackatons.judges.invite');
     Route::post('/hackatons/{hackaton}/judges/assign', [JudgeManagementController::class, 'assign'])->name('hackatons.judges.assign');
     Route::delete('/hackatons/{hackaton}/judges/{judge}', [JudgeManagementController::class, 'unassign'])->name('hackatons.judges.unassign');
-    Route::get('/judge-invitations/{token}/accept', [JudgeManagementController::class, 'accept'])->name('judges.invitations.accept');
+    Route::get('/judge-invitations/{token}', [JudgeManagementController::class, 'showAccept'])->name('judges.invitations.accept');
+    Route::post('/judge-invitations/{token}/accept', [JudgeManagementController::class, 'accept'])->name('judges.invitations.accept.store');
 });

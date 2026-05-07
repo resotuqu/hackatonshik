@@ -62,7 +62,7 @@ test('organizer can assign registered judge to hackaton', function () {
     expect($hackaton->fresh()->judges()->where('users.id', $judge->id)->exists())->toBeTrue();
 });
 
-test('judge can accept invitation and gets assigned', function () {
+test('judge can open invitation page and accept invitation', function () {
     $organizer = User::factory()->partner()->create();
     $judge = User::factory()->create(['role' => 'user']);
     $hackaton = Hackaton::factory()->for($organizer)->create();
@@ -75,11 +75,17 @@ test('judge can accept invitation and gets assigned', function () {
         'status' => JudgeInvitation::STATUS_PENDING,
     ]);
 
-    $response = $this
+    $previewResponse = $this
         ->actingAs($judge)
         ->get(route('judges.invitations.accept', $invitation->token));
 
-    $response->assertRedirect(route('hackatons.show', $hackaton));
+    $previewResponse->assertOk()->assertSee('Подтвердите приглашение');
+
+    $acceptResponse = $this
+        ->actingAs($judge)
+        ->post(route('judges.invitations.accept.store', $invitation->token));
+
+    $acceptResponse->assertRedirect(route('hackatons.show', $hackaton));
     expect($judge->fresh()->role)->toBe('judge');
     expect($hackaton->fresh()->judges()->where('users.id', $judge->id)->exists())->toBeTrue();
 });

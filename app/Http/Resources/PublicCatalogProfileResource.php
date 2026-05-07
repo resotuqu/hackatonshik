@@ -20,7 +20,7 @@ class PublicCatalogProfileResource extends JsonResource
     {
         return [
             'nickname' => $this->nickname,
-            'display_name' => $this->fio ?: $this->nickname,
+            'display_name' => $this->nickname,
             'role' => $this->role,
             'description' => $this->description,
         ];

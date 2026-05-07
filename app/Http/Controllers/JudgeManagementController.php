@@ -10,6 +10,7 @@ use App\Mail\JudgeInvitationMail;
 use App\Models\Hackaton;
 use App\Models\JudgeInvitation;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -64,13 +65,19 @@ class JudgeManagementController extends Controller
         return back()->with('success', 'Судья снят с хакатона.');
     }
 
+    public function showAccept(string $token): View
+    {
+        $invitation = $this->resolvePendingInvitation($token);
+
+        return view('pages.judges.accept-invitation', [
+            'invitation' => $invitation,
+            'hackaton' => $invitation->hackaton,
+        ]);
+    }
+
     public function accept(string $token): RedirectResponse
     {
-        /** @var JudgeInvitation $invitation */
-        $invitation = JudgeInvitation::query()
-            ->where('token', $token)
-            ->where('status', JudgeInvitation::STATUS_PENDING)
-            ->firstOrFail();
+        $invitation = $this->resolvePendingInvitation($token);
 
         /** @var User|null $user */
         $user = Auth::user();
@@ -99,5 +106,17 @@ class JudgeManagementController extends Controller
         return redirect()
             ->route('hackatons.show', $invitation->hackaton)
             ->with('success', 'Вы подтверждены как судья и назначены на хакатон.');
+    }
+
+    private function resolvePendingInvitation(string $token): JudgeInvitation
+    {
+        /** @var JudgeInvitation $invitation */
+        $invitation = JudgeInvitation::query()
+            ->with('hackaton:id,title')
+            ->where('token', $token)
+            ->where('status', JudgeInvitation::STATUS_PENDING)
+            ->firstOrFail();
+
+        return $invitation;
     }
 }
