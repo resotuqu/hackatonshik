@@ -542,6 +542,7 @@ new #[Layout('layouts::app', [
     @endphp
     <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 </div>
+    @include('pages.home.guest')
 @endguest
 
 @auth
@@ -742,4 +743,5 @@ new #[Layout('layouts::app', [
         </div>
     @endif
 </section>
+    @include('pages.home.dashboard')
 @endauth

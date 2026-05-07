@@ -83,9 +83,12 @@ class extends Component {
         $user = Auth::user();
         $this->fio = $user->fio;
         $this->nickname = $user->nickname;
-        $this->role = $user->role == 'user'
-            ? 'Участник'
-            : ($user->role == 'partner' ? 'Партнёр' : ($user->role == 'judge' ? 'Судья' : 'Администратор'));
+        $this->role = match ($user->role) {
+            'user' => 'Участник',
+            'partner' => 'Партнёр',
+            'judge' => 'Судья',
+            default => 'Администратор',
+        };
         $this->date_of_birth = $user->date_of_birth;
         $this->description = $this->normalizedProfileDescription($user->description);
         $this->is_profile_public = (bool) $user->is_profile_public;
@@ -577,27 +580,42 @@ class extends Component {
             ->distinct('teams.hackaton_id')
             ->count('teams.hackaton_id');
     }
+
+    #[Computed]
+    public function currentAvatarUrl(): string
+    {
+        $authUser = Auth::user();
+        
+        if ($this->avatar) {
+            return $this->avatar->temporaryUrl();
+        }
+        if ($this->selected_preset_path) {
+            return asset('storage/'.$this->selected_preset_path);
+        }
+        if ($this->avatar_path) {
+            return asset('storage/'.$this->avatar_path);
+        }
+        
+        return 'https://ui-avatars.com/api/?name='.urlencode($authUser->fio).'&background=random';
+    }
+
+    #[Computed]
+    public function missingProfileTips(): array
+    {
+        $authUser = Auth::user();
+        $tips = [];
+        
+        if (! filled($authUser->fio)) { $tips[] = 'Укажите ФИО'; }
+        if (! filled($authUser->date_of_birth)) { $tips[] = 'Заполните дату рождения'; }
+        if (! filled($authUser->avatar_path)) { $tips[] = 'Добавьте аватар'; }
+        if (! filled($authUser->description)) { $tips[] = 'Добавьте описание о себе'; }
+        if (is_null($authUser->email_verified_at)) { $tips[] = 'Подтвердите электронную почту'; }
+        if (is_null($authUser->phone_verified_at)) { $tips[] = 'Подтвердите номер телефона'; }
+        
+        return $tips;
+    }
 };
 ?>
-
-@php
-    $authUser = auth()->user();
-    $avatarUrl = $avatar
-        ? $avatar->temporaryUrl()
-        : ($selected_preset_path
-            ? asset('storage/'.$selected_preset_path)
-            : ($avatar_path
-                ? asset('storage/'.$avatar_path)
-                : 'https://ui-avatars.com/api/?name='.urlencode($authUser->fio).'&background=random'));
-    $completeness = $this->profileCompletenessPercent;
-    $tips = [];
-    if (! filled($authUser->fio)) { $tips[] = 'Укажите ФИО'; }
-    if (! filled($authUser->date_of_birth)) { $tips[] = 'Заполните дату рождения'; }
-    if (! filled($authUser->avatar_path)) { $tips[] = 'Добавьте аватар'; }
-    if (! filled($authUser->description)) { $tips[] = 'Добавьте описание о себе'; }
-    if (is_null($authUser->email_verified_at)) { $tips[] = 'Подтвердите электронную почту'; }
-    if (is_null($authUser->phone_verified_at)) { $tips[] = 'Подтвердите номер телефона'; }
-@endphp
 
 <div class="mx-auto w-full max-w-6xl space-y-6">
     <x-marytoast />
@@ -625,7 +643,7 @@ class extends Component {
             <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
                 <div class="avatar">
                     <div class="w-32 rounded-full ring-2 ring-secondary/40 ring-offset-2 ring-offset-base-100 sm:w-36">
-                        <img src="{{ $avatarUrl }}" alt="Аватар пользователя" />
+                        <img src="{{ $this->currentAvatarUrl }}" alt="Аватар пользователя" />
                     </div>
                 </div>
                 <div class="space-y-2">
@@ -649,10 +667,10 @@ class extends Component {
             </div>
 
             <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-5 md:flex-col md:items-end">
-                <div class="radial-progress text-secondary" style="--value:{{ $completeness }};--size:5rem;--thickness:6px" role="progressbar" aria-valuenow="{{ $completeness }}" aria-valuemin="0" aria-valuemax="100">
-                    <span class="text-sm font-semibold text-base-content">{{ $completeness }}%</span>
+                <div class="radial-progress text-secondary" style="--value:{{ $this->profileCompletenessPercent }};--size:5rem;--thickness:6px" role="progressbar" aria-valuenow="{{ $this->profileCompletenessPercent }}" aria-valuemin="0" aria-valuemax="100">
+                    <span class="text-sm font-semibold text-base-content">{{ $this->profileCompletenessPercent }}%</span>
                 </div>
-                <a href="{{ route('profile.public.show', ['user' => $authUser->nickname]) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline btn-secondary">
+                <a href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline btn-secondary">
                     <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
                     Посмотреть как другие
                 </a>
@@ -662,9 +680,9 @@ class extends Component {
         <div class="relative mt-6 space-y-2">
             <div class="flex items-center justify-between text-sm">
                 <span class="text-base-content/70">Заполненность профиля</span>
-                <span class="font-medium text-secondary">{{ $completeness }}%</span>
+                <span class="font-medium text-secondary">{{ $this->profileCompletenessPercent }}%</span>
             </div>
-            <progress class="progress progress-secondary w-full" value="{{ $completeness }}" max="100"></progress>
+            <progress class="progress progress-secondary w-full" value="{{ $this->profileCompletenessPercent }}" max="100"></progress>
         </div>
     </section>
 
@@ -720,7 +738,7 @@ class extends Component {
                         <div class="flex flex-col items-start gap-4 rounded-2xl border border-dashed border-base-300 p-4 transition hover:border-primary/50 sm:flex-row sm:items-center">
                             <div class="avatar">
                                 <div class="w-24 rounded-full ring-1 ring-base-300">
-                                    <img src="{{ $avatarUrl }}" alt="Текущий аватар" />
+                                    <img src="{{ $this->currentAvatarUrl }}" alt="Текущий аватар" />
                                 </div>
                             </div>
                             <div class="w-full flex-1">
@@ -800,7 +818,7 @@ class extends Component {
                                         type="text"
                                         readonly
                                         class="input input-bordered w-full min-w-0 flex-1 cursor-default bg-base-200/40"
-                                        value="{{ $authUser->email }}"
+                                        value="{{ auth()->user()->email }}"
                                     />
                                     <button type="button" wire:click="openEmailChangeModal" class="btn btn-ghost btn-square btn-sm shrink-0 border border-base-300 md:btn-md" title="Изменить email">
                                         <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
@@ -817,7 +835,7 @@ class extends Component {
                                         type="text"
                                         readonly
                                         class="input input-bordered w-full min-w-0 flex-1 cursor-default bg-base-200/40"
-                                        value="{{ $authUser->phone }}"
+                                        value="{{ auth()->user()->phone }}"
                                     />
                                     <button type="button" wire:click="openPhoneChangeModal" class="btn btn-ghost btn-square btn-sm shrink-0 border border-base-300 md:btn-md" title="Изменить номер">
                                         <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
@@ -899,13 +917,13 @@ class extends Component {
                     </h2>
 
                     <div class="flex items-start gap-3 rounded-xl border border-base-300 p-3">
-                        @if ($authUser->email_verified_at)
+                        @if (auth()->user()->email_verified_at)
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
                                 <x-app-icon icon="heroicons:check-circle" class="h-5 w-5" />
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium">Email подтверждён</p>
-                                <p class="truncate text-xs text-base-content/70">{{ $authUser->email }}</p>
+                                <p class="truncate text-xs text-base-content/70">{{ auth()->user()->email }}</p>
                             </div>
                         @else
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
@@ -919,13 +937,13 @@ class extends Component {
                     </div>
 
                     <div class="flex items-start gap-3 rounded-xl border border-base-300 p-3">
-                        @if ($authUser->phone_verified_at)
+                        @if (auth()->user()->phone_verified_at)
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
                                 <x-app-icon icon="heroicons:check-circle" class="h-5 w-5" />
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium">Телефон подтверждён</p>
-                                <p class="truncate text-xs text-base-content/70">{{ $authUser->phone }}</p>
+                                <p class="truncate text-xs text-base-content/70">{{ auth()->user()->phone }}</p>
                             </div>
                         @else
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
@@ -951,7 +969,7 @@ class extends Component {
                         <div class="flex items-center gap-3">
                             <div class="avatar">
                                 <div class="w-14 rounded-full ring-1 ring-secondary/30">
-                                    <img src="{{ $avatarUrl }}" alt="Превью аватара" />
+                                    <img src="{{ $this->currentAvatarUrl }}" alt="Превью аватара" />
                                 </div>
                             </div>
                             <div class="min-w-0 flex-1">
@@ -968,7 +986,7 @@ class extends Component {
                             {{ $description ?: 'Описание пока не заполнено.' }}
                         </p>
                     </div>
-                    <a href="{{ route('profile.public.show', ['user' => $authUser->nickname]) }}" target="_blank" rel="noopener" class="btn btn-block btn-sm btn-outline">
+                    <a href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener" class="btn btn-block btn-sm btn-outline">
                         <x-app-icon icon="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
                         Открыть публичную страницу
                     </a>
@@ -976,7 +994,7 @@ class extends Component {
             </section>
 
             {{-- Tips --}}
-            @if (! empty($tips))
+            @if (! empty($this->missingProfileTips))
                 <section class="card border border-secondary/20 bg-secondary/5">
                     <div class="card-body gap-3">
                         <h2 class="card-title text-base">
@@ -984,7 +1002,7 @@ class extends Component {
                             Что добавить
                         </h2>
                         <ul class="space-y-2 text-sm">
-                            @foreach ($tips as $tip)
+                            @foreach ($this->missingProfileTips as $tip)
                                 <li class="flex items-start gap-2">
                                     <x-app-icon icon="heroicons:plus-circle" class="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                                     <span>{{ $tip }}</span>
