@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureContactChannelsVerified;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: $at);
 
         $middleware->web(append: [
+            SecurityHeaders::class,
             EnsureContactChannelsVerified::class,
         ]);
     })
