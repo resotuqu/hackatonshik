@@ -111,13 +111,21 @@
 
         @if ($daysToDeadline !== null)
             <div @class([
-                'flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
+                'flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold relative overflow-hidden',
                 $deadlineClasses,
+                'animate-pulse shadow-sm shadow-error/20' => $deadlineUrgency === 'critical',
             ])>
-                <x-app-icon icon="heroicons:bolt" class="h-4 w-4" />
+                @if($deadlineUrgency === 'critical')
+                    <span class="absolute -left-1 top-0 h-full w-1.5 bg-error"></span>
+                @endif
+                <x-app-icon icon="{{ $deadlineUrgency === 'critical' ? 'heroicons:fire' : 'heroicons:bolt' }}" class="h-4 w-4" />
                 <span>
-                    До дедлайна:
-                    <span class="tabular-nums">{{ $daysToDeadline }} {{ $deadlineWord }}</span>
+                    @if($deadlineUrgency === 'critical')
+                        Регистрация закроется скоро!
+                    @else
+                        До дедлайна:
+                        <span class="tabular-nums">{{ $daysToDeadline }} {{ $deadlineWord }}</span>
+                    @endif
                 </span>
             </div>
         @endif
@@ -184,8 +192,11 @@
                     type="button"
                     class="ui-cta-primary btn-sm sm:btn-md sm:flex-1"
                     wire:click="openHackaton({{ $hackaton->id }})"
+                    wire:loading.attr="disabled"
+                    wire:target="openHackaton({{ $hackaton->id }})"
                 >
-                    Подробнее
+                    <span wire:loading.remove wire:target="openHackaton({{ $hackaton->id }})">Подробнее</span>
+                    <span wire:loading wire:target="openHackaton({{ $hackaton->id }})" class="loading loading-spinner loading-sm"></span>
                 </button>
             @endif
             @if ($canQuickApply && ! $isFinished)

@@ -77,19 +77,28 @@
             <div class="flex items-center gap-2 pt-1">
                 <span class="text-xs font-medium uppercase tracking-wide text-base-content/50">Участники</span>
                 <div class="flex -space-x-2">
-                    @foreach ($participants as $member)
+                    @foreach ($participants->take(5) as $member)
                         @php
                             $avatarUrl = filled($member->avatar_path)
                                 ? asset('storage/' . $member->avatar_path)
                                 : 'https://ui-avatars.com/api/?name=' . urlencode($member->fio ?: $member->nickname ?: 'U') . '&background=6366f1&color=fff&size=64';
                         @endphp
-                        <img
-                            src="{{ $avatarUrl }}"
-                            alt=""
-                            class="relative h-9 w-9 rounded-full border-2 border-base-100 object-cover ring-2 ring-base-200"
-                            loading="lazy"
-                        />
+                        <div class="relative group/avatar">
+                            <img
+                                src="{{ $avatarUrl }}"
+                                alt="{{ $member->fio }}"
+                                title="{{ $member->fio }}"
+                                class="relative h-9 w-9 rounded-full border-2 border-base-100 object-cover ring-2 ring-base-200 transition-transform group-hover/avatar:scale-110 group-hover/avatar:z-10"
+                                loading="lazy"
+                            />
+                        </div>
                     @endforeach
+
+                    @if ($participants->count() > 5)
+                        <div class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-base-100 bg-base-300 text-[10px] font-bold ring-2 ring-base-200">
+                            +{{ $participants->count() - 5 }}
+                        </div>
+                    @endif
                 </div>
             </div>
         @endif

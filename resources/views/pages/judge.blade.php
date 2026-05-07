@@ -1,36 +1,103 @@
-@if ($judgeHackatonsCount === 0)
-    <div class="rounded-xl border border-base-200 bg-base-100 p-6 text-center shadow-sm" data-test="judge-dashboard-empty">
-        <p class="text-base-content/80">У вас пока нет назначенных хакатонов. Когда организатор добавит вас в судьи, события появятся здесь.</p>
-        <a href="/hackatons" class="btn btn-primary mt-4">Каталог хакатонов</a>
-    </div>
-@else
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <x-marycard title="Назначенные хакатоны" class="card card-border bg-base-100 shadow-sm">
-            <p class="text-3xl font-semibold tabular-nums">{{ $judgeHackatonsCount }}</p>
-            <x-slot:menu>
-                <a href="/hackatons" class="btn btn-ghost btn-sm">Каталог</a>
-            </x-slot:menu>
-        </x-marycard>
-    </div>
-    @if (count($judgeHackatonsPreview) > 0)
-        <x-marycard title="Ближайшие по дате начала" class="card card-border bg-base-100 shadow-sm w-full max-w-2xl">
-            <ul class="space-y-2">
-                @foreach ($judgeHackatonsPreview as $row)
-                    <li class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 pb-2 last:border-0">
-                        <div class="flex min-w-0 flex-1 flex-wrap items-baseline gap-2">
-                            <a href="{{ route('hackatons.show', $row['id']) }}" class="link link-primary font-medium">{{ $row['title'] }}</a>
-                            @if ($row['start_at'])
-                                <span class="text-sm text-base-content/70">{{ $row['start_at'] }}</span>
-                            @endif
+@php
+    $loadingTargets = 'nextPage,previousPage,gotoPage,setPage';
+@endphp
+
+<div class="space-y-8">
+    <section class="ui-page-hero">
+        <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
+            <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-warning/20 blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl"></div>
+        </div>
+
+        <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div class="min-w-0 space-y-3">
+                <div class="inline-flex items-center gap-2 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-warning">
+                    <x-app-icon icon="heroicons:scale" class="h-3.5 w-3.5" />
+                    Панель судьи
+                </div>
+                <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
+                    <span class="bg-linear-to-r from-warning via-accent to-primary bg-clip-text text-transparent">
+                        Ваша экспертиза
+                    </span>
+                </h1>
+                <p class="max-w-2xl text-base text-base-content/70">Оценивайте проекты участников и помогайте определять победителей.</p>
+            </div>
+            <div class="flex shrink-0 flex-wrap gap-3">
+                <a href="/hackatons" class="ui-cta-primary">
+                    <x-app-icon icon="heroicons:trophy" class="h-5 w-5" />
+                    Каталог событий
+                </a>
+            </div>
+        </div>
+    </section>
+
+    @if ($judgeHackatonsCount === 0)
+        <x-empty-state
+            title="Нет назначенных хакатонов"
+            description="Когда организатор добавит вас в состав жюри, события появятся в этой панели."
+            icon="heroicons:user-group"
+            action-href="/hackatons"
+            action-label="Посмотреть хакатоны"
+        />
+    @else
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="lg:col-span-1">
+                <div class="ui-surface-card h-full p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-sm font-medium text-base-content/60">Всего хакатонов</p>
+                            <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $judgeHackatonsCount }}</p>
                         </div>
-                        <a href="{{ route('hackatons.show', $row['id']) }}#hackaton-cases" class="btn btn-ghost btn-xs shrink-0">К кейсам</a>
-                    </li>
-                @endforeach
-            </ul>
-        </x-marycard>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                            <x-app-icon icon="heroicons:briefcase" class="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <a href="/hackatons" class="btn btn-ghost btn-sm btn-block justify-between border-base-300">
+                            Все события
+                            <x-app-icon icon="heroicons:chevron-right" class="h-4 w-4" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="ui-surface-card h-full overflow-hidden">
+                    <div class="border-b border-base-300 bg-base-200/30 px-6 py-4">
+                        <h2 class="font-display text-lg font-bold">Ближайшие события</h2>
+                    </div>
+                    <div class="divide-y divide-base-300">
+                        @foreach ($judgeHackatonsPreview as $row)
+                            <div class="group flex items-center justify-between gap-4 p-4 transition-colors hover:bg-base-200/50">
+                                <div class="min-w-0 flex-1 space-y-1">
+                                    <a href="{{ route('hackatons.show', $row['id']) }}" class="ui-heading-display block truncate font-bold hover:text-primary transition-colors">
+                                        {{ $row['title'] }}
+                                    </a>
+                                    @if ($row['start_at'])
+                                        <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+                                            <x-app-icon icon="heroicons:calendar" class="h-3.5 w-3.5" />
+                                            {{ $row['start_at'] }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="flex shrink-0 gap-2">
+                                    <a href="{{ route('hackatons.show', $row['id']) }}#hackaton-cases" class="btn btn-primary btn-sm rounded-xl">
+                                        К кейсам
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
-@endif
-<div class="flex flex-wrap gap-3">
-    <a href="/hackatons" class="btn btn-primary">Все хакатоны</a>
-    <a href="/profile" class="btn btn-outline">Профиль</a>
+
+    <div class="flex items-center justify-between rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+        <p class="text-sm text-base-content/70">Нужна помощь в оценке?</p>
+        <a href="/profile" class="ui-cta-outline btn-sm">
+            <x-app-icon icon="heroicons:user-circle" class="h-4 w-4" />
+            Профиль
+        </a>
+    </div>
 </div>
