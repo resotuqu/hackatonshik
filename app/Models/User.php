@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Support\InitialsGenerator;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,53 +11,71 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property string $fio
+ * @property string $email
+ * @property UserRole $role
+ * @property string|null $phone
+ * @property \Illuminate\Support\Carbon|null $phone_verified_at
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string|null $avatar_path
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /** @return HasMany<Team, $this> */
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
     }
 
+    /** @return HasMany<Hackaton, $this> */
     public function hackatons(): HasMany
     {
         return $this->hasMany(Hackaton::class);
     }
 
+    /** @return HasMany<TeamRole, $this> */
     public function teamRoles(): HasMany
     {
         return $this->hasMany(TeamRole::class);
     }
 
+    /** @return HasMany<UserHackatonDocument, $this> */
     public function userDocuments(): HasMany
     {
         return $this->hasMany(UserHackatonDocument::class);
     }
 
+    /** @return HasMany<TeamApplication, $this> */
     public function teamApplications(): HasMany
     {
         return $this->hasMany(TeamApplication::class);
     }
 
+    /** @return HasMany<HackatonCaseSubmission, $this> */
     public function caseSubmissions(): HasMany
     {
         return $this->hasMany(HackatonCaseSubmission::class);
     }
 
+    /** @return HasMany<HackatonCertificate, $this> */
     public function certificates(): HasMany
     {
         return $this->hasMany(HackatonCertificate::class);
     }
 
+    /** @return HasMany<HackatonJudge, $this> */
     public function judgeAssignments(): HasMany
     {
         return $this->hasMany(HackatonJudge::class);
     }
 
+    /** @return BelongsToMany<Hackaton, $this> */
     public function judgedHackatons(): BelongsToMany
     {
         return $this->belongsToMany(Hackaton::class, 'hackaton_judges')
@@ -63,11 +83,13 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 
+    /** @return HasMany<JudgeInvitation, $this> */
     public function sentJudgeInvitations(): HasMany
     {
         return $this->hasMany(JudgeInvitation::class, 'invited_by');
     }
 
+    /** @return HasMany<JudgeInvitation, $this> */
     public function receivedJudgeInvitations(): HasMany
     {
         return $this->hasMany(JudgeInvitation::class, 'invited_user_id');
@@ -114,6 +136,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
             'is_profile_public' => 'boolean',
             'show_email_on_profile' => 'boolean',
             'show_phone_on_profile' => 'boolean',
@@ -126,30 +149,26 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function initials(): string
     {
-        return Str::of($this->fio)
-            ->explode(' ')
-            ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
-            ->implode('');
+        return InitialsGenerator::generate($this->fio);
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === UserRole::ADMIN;
     }
 
     public function isOrganizer(): bool
     {
-        return $this->role === 'partner';
+        return $this->role === UserRole::PARTNER;
     }
 
     public function isJudge(): bool
     {
-        return $this->role === 'judge';
+        return $this->role === UserRole::JUDGE;
     }
 
     public function isParticipant(): bool
     {
-        return $this->role === 'user';
+        return $this->role === UserRole::USER;
     }
 }
