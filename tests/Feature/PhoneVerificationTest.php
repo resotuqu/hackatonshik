@@ -6,6 +6,33 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 
+beforeEach(function (): void {
+    /** @var array{enabled: mixed, base_url: mixed, token: mixed, client_id: mixed} $config */
+    $config = [
+        'enabled' => config('services.plusofon_flash_call.enabled'),
+        'base_url' => config('services.plusofon_flash_call.base_url'),
+        'token' => config('services.plusofon_flash_call.token'),
+        'client_id' => config('services.plusofon_flash_call.client_id'),
+    ];
+
+    $this->plusofonFlashCallConfig = $config;
+});
+
+afterEach(function (): void {
+    /** @var array{enabled: mixed, base_url: mixed, token: mixed, client_id: mixed} $config */
+    $config = is_array($this->plusofonFlashCallConfig ?? null) ? $this->plusofonFlashCallConfig : [
+        'enabled' => false,
+        'base_url' => 'https://restapi.plusofon.ru/api/v1',
+        'token' => null,
+        'client_id' => '10553',
+    ];
+
+    config()->set('services.plusofon_flash_call.enabled', (bool) $config['enabled']);
+    config()->set('services.plusofon_flash_call.base_url', $config['base_url']);
+    config()->set('services.plusofon_flash_call.token', $config['token']);
+    config()->set('services.plusofon_flash_call.client_id', $config['client_id']);
+});
+
 test('authenticated user can request flash call verification code', function () {
     config()->set('services.plusofon_flash_call.enabled', true);
     config()->set('services.plusofon_flash_call.base_url', 'https://restapi.plusofon.ru/api/v1');

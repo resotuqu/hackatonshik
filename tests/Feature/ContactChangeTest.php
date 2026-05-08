@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
+beforeEach(function (): void {
+    config()->set('services.plusofon_flash_call.enabled', false);
+});
+
 test('email change completes after old and new codes', function () {
     Notification::fake();
 
