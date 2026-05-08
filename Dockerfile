@@ -66,8 +66,12 @@ RUN chown -R nobody:nobody /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Конфиги
-COPY . /etc/nginx/http.d/default.conf
-COPY . /etc/php85/conf.d/99-laravel.ini
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN touch /etc/php85/conf.d/99-laravel.ini
+
+# Устанавливаем Linux-бинарник RoadRunner в образе
+RUN php vendor/bin/rr get-binary --location /usr/local/bin/rr \
+    && chmod +x /usr/local/bin/rr
 
 # OPcache
 RUN echo -e "opcache.enable=1\n\
@@ -78,6 +82,6 @@ RUN echo -e "opcache.enable=1\n\
 # Возвращаемся к non-root пользователю (рекомендуется)
 USER nobody
 
-EXPOSE 8080
+EXPOSE 8000
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

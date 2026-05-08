@@ -18,6 +18,16 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     environment: Testing
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     strategy:
       matrix:
         php-version: ['8.4', '8.5']
@@ -90,6 +100,21 @@ jobs:
           DB_DATABASE: ':memory:'
           DB_FOREIGN_KEYS: 'true'
         run: vendor/bin/pest --compact --testsuite=Browser
+
+      - name: Run Performance Smoke Tests (optional)
+        if: github.event_name == 'pull_request'
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          DB_FOREIGN_KEYS: 'true'
+          CACHE_STORE: redis
+          SESSION_DRIVER: redis
+          QUEUE_CONNECTION: redis
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+        run: |
+          vendor/bin/pest --compact tests/Feature/HomeIndexCacheTest.php tests/Feature/PublicProfileShowPageTest.php
 
       - name: Upload coverage report
         if: always()

@@ -170,7 +170,7 @@
                         <x-app-icon icon="heroicons:scale" class="h-4 w-4 text-secondary" />
                         Назначения судьей
                     </p>
-                    <p class="text-3xl font-semibold text-secondary">{{ $profileUser->judgeAssignments->count() }}</p>
+                    <p class="text-3xl font-semibold text-secondary">{{ (int) ($profileUser->judge_assignments_count ?? 0) }}</p>
                 </div>
             </article>
         </section>

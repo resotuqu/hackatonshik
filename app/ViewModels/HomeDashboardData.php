@@ -60,7 +60,10 @@ final class HomeDashboardData
     public static function fromUser(User $user): self
     {
         $cacheKey = "home-dashboard:user:{$user->id}:v1";
-        $payload = Cache::remember($cacheKey, now()->addSeconds(60), function () use ($user): array {
+        $cache = Cache::supportsTags()
+            ? Cache::tags(['dashboard', "dashboard:user:{$user->id}"])
+            : Cache::store();
+        $payload = $cache->remember($cacheKey, now()->addSeconds(60), function () use ($user): array {
             return self::buildForUser($user)->toLivewireArray();
         });
 

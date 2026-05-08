@@ -57,7 +57,7 @@ class Index extends Component
     #[Computed]
     public function hackatons()
     {
-        return Hackaton::query()
+        $buildQuery = fn () => Hackaton::query()
             ->select([
                 'id', 'title', 'image_url', 'start_at', 'end_at', 'is_public', 'status',
                 'prize_fund', 'prize_places_count', 'level', 'registration_deadline_at',
@@ -91,6 +91,23 @@ class Index extends Component
             ->when($this->sort === 'newest', fn (Builder $query) => $query->orderByDesc('id'))
             ->when($this->sort === 'biggest_prize', fn (Builder $query) => $query->orderByDesc('prize_fund')->orderByDesc('id'))
             ->paginate(9);
+
+        if (! app()->isProduction()) {
+            return $buildQuery();
+        }
+
+        $cacheKey = sprintf(
+            'livewire:hackatons:index:v1:p%s:q%s:s%s:l%s:pr%s:so%s',
+            $this->getPage(),
+            md5(json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
+            $this->status,
+            $this->level,
+            (int) $this->with_prizes,
+            $this->sort
+        );
+        $cache = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:hackatons']) : Cache::store();
+
+        return $cache->remember($cacheKey, now()->addMinutes(2), $buildQuery);
     }
 
     #[Computed]

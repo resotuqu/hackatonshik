@@ -15,6 +15,7 @@
         "laravel-best-practices",
         "socialite-development",
         "livewire-development",
+        "pulse-development",
         "pest-testing",
         "tailwindcss-development",
         "blaze-optimize"

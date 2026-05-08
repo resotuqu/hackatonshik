@@ -16,7 +16,8 @@ class Show extends Component
     public function mount(Team $team): void
     {
         $this->authorize('view', $team);
-        $team->loadShowRelations();
+        $isOwner = auth()->id() !== null && (int) $team->user_id === (int) auth()->id();
+        $team->loadShowRelations($isOwner);
         $this->team = $team;
     }
 

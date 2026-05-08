@@ -91,7 +91,7 @@ class Index extends Component
         $roleIdInts = $this->normalizedRoleIds();
         $needsOpen = $this->needsOpenRolesFilter();
 
-        return Team::query()
+        $buildQuery = fn () => Team::query()
             ->select(['id', 'user_id', 'title', 'description', 'image_url', 'cover_image', 'hackaton_id'])
             ->where('teams.is_public', true)
             ->with([
@@ -139,6 +139,21 @@ class Index extends Component
             ->when($this->sort === 'start_soonest', fn ($query) => $query->join('hackatons', 'hackatons.id', '=', 'teams.hackaton_id')->orderBy('hackatons.start_at')->select('teams.*'))
             ->when($this->sort === 'newest', fn ($query) => $query->orderByDesc('id'))
             ->paginate(9);
+
+        if (! app()->isProduction()) {
+            return $buildQuery();
+        }
+
+        $cacheKey = sprintf(
+            'livewire:teams:index:v1:p%s:q%s:sort%s:tab%s',
+            $this->getPage(),
+            md5(json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
+            $this->sort,
+            $this->catalog_tab
+        );
+        $cache = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:teams']) : Cache::store();
+
+        return $cache->remember($cacheKey, now()->addMinutes(2), $buildQuery);
     }
 
     #[Computed]

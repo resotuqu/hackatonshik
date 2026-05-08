@@ -14,6 +14,13 @@ class HackatonAnnouncementPublished extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    public function backoff(): array
+    {
+        return [5, 30, 120];
+    }
+
     public function __construct(private readonly HackatonAnnouncement $announcement) {}
 
     public function via(object $notifiable): array
@@ -23,8 +30,7 @@ class HackatonAnnouncementPublished extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $hackaton = Hackaton::query()->find($this->announcement->hackaton_id);
-        $hackatonTitle = $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон';
+        $hackatonTitle = $this->resolveHackatonTitle();
         $url = route('hackatons.show', $this->announcement->hackaton_id);
 
         return (new MailMessage)
@@ -36,17 +42,22 @@ class HackatonAnnouncementPublished extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        $hackaton = Hackaton::query()->find($this->announcement->hackaton_id);
-
         return [
             'announcement_id' => $this->announcement->id,
             'hackaton_id' => $this->announcement->hackaton_id,
-            'hackaton_title' => $hackaton instanceof Hackaton ? $hackaton->title : null,
+            'hackaton_title' => $this->resolveHackatonTitle(),
             'title' => $this->announcement->title,
             'message' => $this->announcement->body,
             'body' => $this->announcement->body,
             'published_at' => Carbon::parse((string) $this->announcement->published_at)->toIso8601String(),
             'url' => route('hackatons.show', $this->announcement->hackaton_id),
         ];
+    }
+
+    private function resolveHackatonTitle(): string
+    {
+        $hackaton = Hackaton::query()->find($this->announcement->hackaton_id);
+
+        return $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон';
     }
 }

@@ -146,9 +146,17 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureCatalogCacheInvalidation(): void
     {
+        $cache = Cache::supportsTags() ? Cache::tags(['catalog']) : Cache::store();
         $bumpCatalogVersion = static function (): void {
-            Cache::add('api:v1:catalog:hackatons:version', 1);
-            Cache::increment('api:v1:catalog:hackatons:version');
+            $cacheStore = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:hackatons']) : Cache::store();
+            $cacheStore->add('api:v1:catalog:hackatons:version', 1);
+            $cacheStore->increment('api:v1:catalog:hackatons:version');
+            $cacheStore = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:teams']) : Cache::store();
+            $cacheStore->add('api:v1:catalog:teams:version', 1);
+            $cacheStore->increment('api:v1:catalog:teams:version');
+            $cacheStore = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:profiles']) : Cache::store();
+            $cacheStore->add('api:v1:catalog:profiles:version', 1);
+            $cacheStore->increment('api:v1:catalog:profiles:version');
         };
 
         $refreshCatalogVersion = static function (Hackaton $hackaton) use ($bumpCatalogVersion): void {
@@ -165,6 +173,20 @@ class AppServiceProvider extends ServiceProvider
         Hackaton::saved($refreshCatalogVersion);
         Hackaton::deleted(static function () use ($bumpCatalogVersion): void {
             $bumpCatalogVersion();
+        });
+        Team::saved(static function () use ($bumpCatalogVersion): void {
+            $bumpCatalogVersion();
+        });
+        Team::deleted(static function () use ($bumpCatalogVersion): void {
+            $bumpCatalogVersion();
+        });
+        User::saved(static function (User $user) use ($cache): void {
+            if ($user->wasChanged(['nickname', 'role', 'description', 'is_profile_public'])) {
+                $cache->forget("profile:public-show:{$user->id}:v2");
+            }
+        });
+        User::deleted(static function (User $user) use ($cache): void {
+            $cache->forget("profile:public-show:{$user->id}:v2");
         });
     }
 }

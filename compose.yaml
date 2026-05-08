@@ -1,4 +1,37 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      OCTANE_SERVER: ${OCTANE_SERVER:-roadrunner}
+      OCTANE_HOST: ${OCTANE_HOST:-0.0.0.0}
+      OCTANE_PORT: ${OCTANE_PORT:-8000}
+      OCTANE_WORKERS: ${OCTANE_WORKERS:-auto}
+      OCTANE_TASK_WORKERS: ${OCTANE_TASK_WORKERS:-auto}
+      OCTANE_MAX_REQUESTS: ${OCTANE_MAX_REQUESTS:-500}
+      CACHE_STORE: ${CACHE_STORE:-redis}
+      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
+services:
     laravel.test:
         build:
             context: './vendor/laravel/sail/runtimes/8.5'

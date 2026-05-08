@@ -14,6 +14,13 @@ class ApplicationStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    public function backoff(): array
+    {
+        return [5, 30, 120];
+    }
+
     public function __construct(
         private readonly Hackaton $hackaton,
         private readonly Team $team,

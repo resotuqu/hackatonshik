@@ -31,7 +31,14 @@ final class BuildHackatonShowPageData
         $isAssignedJudge = $user !== null && $hackaton->isJudge($user);
         $needsOrganizationInsights = $isOrganizer || $isAssignedJudge;
 
-        $hackaton->loadShowRelations();
+        $hackaton->load([
+            'user:id,nickname,name,email',
+            'documents',
+            'teams:id,hackaton_id,user_id,title',
+            'teams.roles:id,team_id,user_id',
+            'images:id,hackaton_id,path,alt,sort_order',
+            'judges:id,fio,email',
+        ]);
         $hackaton->setRelation('announcements', $hackaton->announcements()
             ->with('images')
             ->when(! $isOrganizer, fn (Builder $query) => $query
@@ -58,7 +65,12 @@ final class BuildHackatonShowPageData
                     }
                 },
             ])
-            ->with(['submissions.answers.field', 'submissions.score'])
+            ->with([
+                'submissions.team:id,title',
+                'submissions.user:id,nickname,email,fio',
+                'submissions.answers.field',
+                'submissions.score',
+            ])
             ->when(! $isOrganizer, fn (Builder $query) => $query
                 ->where('is_published', true)
                 ->where(function (Builder $scheduleQuery): void {

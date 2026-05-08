@@ -24,7 +24,7 @@ final class BuildParticipantHackatonHubPageData
                     ->where('user_id', $user->id)
                     ->orWhereHas('roles', fn (Builder $rolesQuery) => $rolesQuery->where('user_id', $user->id));
             })
-            ->with(['roles.user:id,fio', 'hackatonApplications'])
+            ->with(['roles.user:id,fio'])
             ->get();
 
         if ($teams->isEmpty()) {

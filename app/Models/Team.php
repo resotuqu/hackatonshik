@@ -17,13 +17,16 @@ class Team extends Model
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
 
-    private const SHOW_RELATIONS = [
+    private const SHOW_BASE_RELATIONS = [
         'user',
         'hackaton',
         'socialLinks',
         'roles.role',
         'roles.skills',
         'roles.user',
+    ];
+
+    private const SHOW_OWNER_RELATIONS = [
         'applications.user',
         'applications.teamRole.role',
         'applications.reviewer',
@@ -114,9 +117,14 @@ class Team extends Model
         return $this->hasMany(HackatonCaseSubmission::class);
     }
 
-    public function loadShowRelations(): self
+    public function loadShowRelations(bool $includeOwnerRelations = false): self
     {
-        $this->load(self::SHOW_RELATIONS);
+        $relations = self::SHOW_BASE_RELATIONS;
+        if ($includeOwnerRelations) {
+            $relations = [...$relations, ...self::SHOW_OWNER_RELATIONS];
+        }
+
+        $this->load($relations);
 
         return $this;
     }

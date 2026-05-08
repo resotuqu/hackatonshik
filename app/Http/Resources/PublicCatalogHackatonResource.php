@@ -18,16 +18,14 @@ class PublicCatalogHackatonResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $firstGalleryImage = $this->images->first();
-
         return [
             'id' => $this->id,
             'title' => $this->title,
             'start_at' => $this->start_at->toIso8601String(),
             'end_at' => $this->end_at->toIso8601String(),
             'image_url' => $this->image_url,
-            'gallery_preview' => $firstGalleryImage?->path,
-            'gallery_count' => $this->images->count(),
+            'gallery_preview' => $this->gallery_preview,
+            'gallery_count' => (int) ($this->images_count ?? 0),
         ];
     }
 }

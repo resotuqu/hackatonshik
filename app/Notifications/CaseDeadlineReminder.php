@@ -16,6 +16,13 @@ class CaseDeadlineReminder extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    public function backoff(): array
+    {
+        return [5, 30, 120];
+    }
+
     public function __construct(private readonly HackatonCase $case) {}
 
     public function via(object $notifiable): array
@@ -25,8 +32,7 @@ class CaseDeadlineReminder extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $hackaton = Hackaton::query()->find($this->case->hackaton_id);
-        $hackatonTitle = $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон';
+        $hackatonTitle = $this->resolveHackatonTitle();
         $deadline = Carbon::parse((string) $this->case->deadline_at)->format('d.m.Y H:i');
 
         return (new MailMessage)
@@ -47,5 +53,12 @@ class CaseDeadlineReminder extends Notification implements ShouldQueue
             'case_id' => $this->case->id,
             'url' => route('hackatons.show', $this->case->hackaton_id),
         ];
+    }
+
+    private function resolveHackatonTitle(): string
+    {
+        $hackaton = Hackaton::query()->find($this->case->hackaton_id);
+
+        return $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон';
     }
 }

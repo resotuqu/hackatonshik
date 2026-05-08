@@ -14,9 +14,18 @@ final class InvalidateHomeCaches
     public function handle(HackatonApplicationChanged|TeamApplicationChanged $event): void
     {
         Cache::forget('home-public-totals-v3');
+        Cache::forget('home-public-totals-v4');
 
         if ($event instanceof HackatonApplicationChanged && $event->invalidateHomeFeatured) {
             Cache::forget('home-featured-hackatons-v1');
+            Cache::forget('home-featured-hackatons-v2');
+        }
+
+        if (Cache::supportsTags()) {
+            Cache::tags(['home', 'home:totals'])->flush();
+            if ($event instanceof HackatonApplicationChanged && $event->invalidateHomeFeatured) {
+                Cache::tags(['home', 'home:featured'])->flush();
+            }
         }
 
         $team = Team::query()
@@ -49,6 +58,9 @@ final class InvalidateHomeCaches
 
         foreach ($userIds->unique()->all() as $userId) {
             Cache::forget("home-dashboard:user:{$userId}:v1");
+            if (Cache::supportsTags()) {
+                Cache::tags(['dashboard', "dashboard:user:{$userId}"])->flush();
+            }
         }
     }
 }
