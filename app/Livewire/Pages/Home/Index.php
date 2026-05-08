@@ -154,7 +154,7 @@ class Index extends Component
 
     public function placeholder()
     {
-        return view('pages.home.placeholder');
+        return view('pages.home.index-skeleton');
     }
 
     public function render()

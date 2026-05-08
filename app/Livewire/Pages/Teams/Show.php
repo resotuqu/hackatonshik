@@ -22,7 +22,7 @@ class Show extends Component
 
     public function placeholder(array $params = []): ViewContract
     {
-        return view('pages.teams.show-placeholder', $params);
+        return view('pages.teams.show-skeleton', $params);
     }
 
     #[Layout('layouts::app')]

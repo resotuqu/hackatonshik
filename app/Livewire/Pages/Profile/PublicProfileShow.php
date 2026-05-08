@@ -28,7 +28,7 @@ class PublicProfileShow extends Component
 
     public function placeholder(array $params = []): ViewContract
     {
-        return view('pages.profile.public-profile-placeholder', $params);
+        return view('pages.profile.public-profile-skeleton', $params);
     }
 
     #[Layout('layouts::app')]

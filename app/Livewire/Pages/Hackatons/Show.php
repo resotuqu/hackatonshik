@@ -21,7 +21,7 @@ class Show extends Component
 
     public function placeholder(array $params = []): ViewContract
     {
-        return view('pages.hackatons.show-placeholder', $params);
+        return view('pages.hackatons.show-skeleton', $params);
     }
 
     public function render(BuildHackatonShowPageData $pageData): View

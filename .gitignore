@@ -38,3 +38,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Keep .agents/skills as single source of truth.
+/.claude/skills/
+/.cursor/skills/
+/.github/skills/

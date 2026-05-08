@@ -21,7 +21,7 @@ class Hub extends Component
 
     public function placeholder(array $params = []): ViewContract
     {
-        return view('pages.profile.hackatons.hub-placeholder', $params);
+        return view('pages.profile.hackatons.hub-skeleton', $params);
     }
 
     #[Layout('layouts::app')]
