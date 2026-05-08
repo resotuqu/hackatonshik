@@ -17,7 +17,6 @@ use App\Http\Controllers\TeamController;
 use App\Livewire\Pages\About\Index as AboutIndex;
 use App\Livewire\Pages\Admin\AvatarPresets as AdminAvatarPresets;
 use App\Livewire\Pages\Admin\Index as AdminIndex;
-use App\Livewire\Pages\Admin\Login as AdminLogin;
 use App\Livewire\Pages\Auth\Login as AuthLogin;
 use App\Livewire\Pages\Auth\Register as AuthRegister;
 use App\Livewire\Pages\Contacts\Index as ContactsIndex;
@@ -41,14 +40,12 @@ use App\Livewire\Pages\Teams\Create as TeamsCreate;
 use App\Livewire\Pages\Teams\Edit as TeamsEdit;
 use App\Livewire\Pages\Teams\Index as TeamsIndex;
 use App\Livewire\Pages\Teams\Show as TeamsShow;
-use App\Models\NewsPost;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeIndex::class)->name('home');
 
 Route::get('/about', AboutIndex::class);
 Route::get('/news', NewsIndex::class);
-...
 Route::get('/news/{post:slug}', NewsShow::class)->name('news.show');
 Route::get('/contacts', ContactsIndex::class);
 Route::get('/privacy-policy', PrivacyPolicyIndex::class);

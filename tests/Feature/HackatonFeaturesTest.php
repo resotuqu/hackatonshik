@@ -297,6 +297,36 @@ test('duplicate certificate title for same user is ignored', function () {
         ->count())->toBe(1);
 });
 
+test('bulk certificate upload stores one file path for multiple users', function () {
+    Storage::fake('local');
+
+    $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participantA = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $participantB = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    $response = $this
+        ->actingAs($organizer)
+        ->post(route('hackatons.certificates.store', $hackaton), [
+            'user_id' => $participantA->id,
+            'user_ids' => [$participantA->id, $participantB->id],
+            'title' => 'Финалист',
+            'file' => UploadedFile::fake()->create('bulk-certificate.pdf', 50, 'application/pdf'),
+        ]);
+
+    $response->assertRedirect();
+
+    $certificates = HackatonCertificate::query()
+        ->where('hackaton_id', $hackaton->id)
+        ->whereIn('user_id', [$participantA->id, $participantB->id])
+        ->where('title', 'Финалист')
+        ->get();
+
+    expect($certificates)->toHaveCount(2);
+    expect($certificates->pluck('file_path')->unique())->toHaveCount(1);
+    expect(Storage::disk('local')->allFiles('hackaton_certificates'))->toHaveCount(1);
+});
+
 test('organizer can score a case submission', function () {
     $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);

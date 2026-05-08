@@ -9,6 +9,7 @@ use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseField;
 use App\Models\HackatonCaseSubmission;
+use App\Models\Team;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;

@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\Hackatons;
 use App\Enums\HackatonLevel;
 use App\Models\Hackaton;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -14,7 +15,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Изменение хакатона'])]
 class Edit extends Component
 {
-    use WithFileUploads, Toast;
+    use Toast, WithFileUploads;
 
     public Hackaton $hackaton;
 
@@ -163,7 +164,7 @@ class Edit extends Component
     {
         try {
             $this->validate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->error('Ошибка заполнения полей !', position: 'toast-center toast-top');
             throw $e;
         }
@@ -221,6 +222,7 @@ class Edit extends Component
                 ]);
 
                 $savedDocumentIds[] = $document->id;
+
                 continue;
             }
 
@@ -255,7 +257,7 @@ class Edit extends Component
 
         $this->success('Хакатон обновлён !', position: 'toast-center toast-top');
 
-        return $this->redirect('/profile/hackatons');
+        $this->redirect('/profile/hackatons');
     }
 
     /**

@@ -24,6 +24,8 @@ class HackatonCertificateController extends Controller
 
         $createdCount = 0;
         DB::transaction(function () use ($request, $hackaton, $validated, $userIds, &$createdCount): void {
+            $filePath = $request->file('file')->store('hackaton_certificates', 'local');
+
             foreach ($userIds as $userId) {
                 $alreadyExists = HackatonCertificate::query()
                     ->where('hackaton_id', $hackaton->id)
@@ -35,7 +37,6 @@ class HackatonCertificateController extends Controller
                     continue;
                 }
 
-                $filePath = $request->file('file')->store('hackaton_certificates', 'local');
                 $hackaton->certificates()->create([
                     'user_id' => $userId,
                     'uploaded_by' => $request->user()->id,

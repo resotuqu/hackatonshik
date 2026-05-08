@@ -44,3 +44,31 @@ test('a judge can score a submission', function () {
         'comment' => 'Great work!',
     ]);
 });
+
+test('a regular user cannot score a submission', function () {
+    $hackaton = Hackaton::factory()->create();
+    $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+    $team = Team::factory()->create();
+    $submission = HackatonCaseSubmission::factory()->create([
+        'hackaton_case_id' => $case->id,
+        'team_id' => $team->id,
+    ]);
+    $regularUser = User::factory()->create();
+
+    $this->actingAs($regularUser)
+        ->post(route('hackatons.scores.store', $hackaton), [
+            'hackaton_case_submission_id' => $submission->id,
+            'score' => 60,
+        ])
+        ->assertForbidden();
+});
+
+test('score submission endpoint uses csrf middleware in web group', function () {
+    $webMiddleware = app('router')->getMiddlewareGroups()['web'] ?? [];
+
+    $containsCsrfMiddleware = collect($webMiddleware)->contains(
+        fn (string $middleware): bool => str_contains($middleware, 'CsrfToken')
+    );
+
+    expect($containsCsrfMiddleware)->toBeTrue();
+});
