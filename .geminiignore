@@ -35,7 +35,6 @@
 
 # Тесты и отладка (можно оставить, если нужно анализировать тесты)
 # /tests/
-/phpunit.xml
 /.phpunit.result.cache
 
 # Бинарные и медиа-файлы
@@ -79,6 +78,3 @@ supervisord.conf
 .agents/skills/
 
 # Другое
-phpstan.neon.dist
-pint.json
-eslint.config.js

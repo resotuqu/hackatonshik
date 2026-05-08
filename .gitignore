@@ -6,6 +6,9 @@
 /node_modules
 /junit.xml
 /junit-profile.xml
+/clover.xml
+/coverage
+/*.coverage
 /out.log
 /database/database.sqlite
 /storage/phpstan
@@ -28,6 +31,8 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 /auth.json
+/.DS_Store
+/Thumbs.db
 /.fleet
 /.idea
 /.nova
