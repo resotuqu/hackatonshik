@@ -2,22 +2,22 @@
 
 namespace App\Livewire\Pages\Profile\Hackatons;
 
-use App\Models\Team;
+use App\Models\Hackaton;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Carbon;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\Attributes\Computed;
 
 class Index extends Component
 {
     #[Computed]
     public function hackatons()
     {
-        return \App\Models\Hackaton::query()->where('user_id', '=', Auth::user()->id)->get();
+        return Hackaton::query()->where('user_id', '=', Auth::user()->id)->get();
     }
 
     public bool $deleteHackatonModal = false;
+
     public ?int $deleteHackatonId = null;
 
     public function showDeleteHackatonModal(int $hackatonId): void
@@ -32,18 +32,20 @@ class Index extends Component
             return;
         }
 
-        $hackaton = \App\Models\Hackaton::find($this->deleteHackatonId);
+        $hackaton = Hackaton::find($this->deleteHackatonId);
         $hackaton?->delete();
         $this->deleteHackatonId = null;
         $this->deleteHackatonModal = false;
     }
 
-    public function editHackaton($id) {
-        return redirect('/hackatons/' . $id . '/edit');
+    public function editHackaton($id)
+    {
+        return redirect('/hackatons/'.$id.'/edit');
     }
 
-    public function participantsHackaton($id) {
-        return redirect('/profile/hackatons/' . $id . '/participants');
+    public function participantsHackaton($id)
+    {
+        return redirect('/profile/hackatons/'.$id.'/participants');
     }
 
     #[Layout('layouts::app', ['title' => 'Мои хакатоны'])]

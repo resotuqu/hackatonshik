@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -18,8 +19,8 @@ use Illuminate\Notifications\Notifiable;
  * @property string $email
  * @property UserRole $role
  * @property string|null $phone
- * @property \Illuminate\Support\Carbon|null $phone_verified_at
- * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property Carbon|null $phone_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string|null $avatar_path
  */
 class User extends Authenticatable implements MustVerifyEmail

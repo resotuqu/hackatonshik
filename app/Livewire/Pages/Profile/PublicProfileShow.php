@@ -5,8 +5,8 @@ namespace App\Livewire\Pages\Profile;
 use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class PublicProfileShow extends Component
 {

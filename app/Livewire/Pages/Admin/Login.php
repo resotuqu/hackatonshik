@@ -13,6 +13,7 @@ class Login extends Component
     use Toast;
 
     public string $login = '';
+
     public string $password = '';
 
     public function mount()
@@ -35,6 +36,7 @@ class Login extends Component
 
             $this->success('Вход выполнен.', position: 'toast-center toast-top');
             $this->redirect('/admin');
+
             return;
         }
 

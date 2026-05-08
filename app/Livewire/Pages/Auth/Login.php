@@ -4,8 +4,8 @@ namespace App\Livewire\Pages\Auth;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -39,7 +39,7 @@ class Login extends Component
     {
         try {
             $this->validate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->error('Проверьте заполнение полей формы.', position: 'toast-center toast-top');
             throw $e;
         }

@@ -6,6 +6,7 @@ use App\Actions\Fortify\PasswordValidationRules;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Mary\Traits\Toast;
@@ -13,7 +14,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Регистрация'])]
 class Register extends Component
 {
-    use Toast, PasswordValidationRules;
+    use PasswordValidationRules, Toast;
 
     public int $step = 1;
 
@@ -102,7 +103,7 @@ class Register extends Component
 
         try {
             $this->validate($this->allRules());
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->error('Ошибка заполнения полей !', position: 'toast-center toast-top');
             throw $e;
         }

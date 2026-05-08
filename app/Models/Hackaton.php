@@ -11,14 +11,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $user_id
  * @property string $title
  * @property HackatonStatus $status
- * @property \Illuminate\Support\Carbon $start_at
- * @property \Illuminate\Support\Carbon $end_at
+ * @property Carbon $start_at
+ * @property Carbon $end_at
  * @property bool $is_public
  * @property-read User|null $user
  */

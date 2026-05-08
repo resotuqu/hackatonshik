@@ -6,8 +6,8 @@ use App\Actions\Hackaton\BuildParticipantHackatonHubPageData;
 use App\Models\Hackaton;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class Hub extends Component
 {
