@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreHackatonCaseScoreRequest;
 use App\Models\Hackaton;
+use App\Models\HackatonCase;
 use App\Models\HackatonCaseScore;
 use App\Models\HackatonCaseSubmission;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +25,8 @@ class HackatonCaseScoreController extends Controller
             ->with('case')
             ->findOrFail($validated['hackaton_case_submission_id']);
 
-        abort_unless((int) $submission->case->hackaton_id === (int) $hackaton->id, 404);
+        $case = HackatonCase::query()->find($submission->hackaton_case_id);
+        abort_unless($case instanceof HackatonCase && (int) $case->hackaton_id === (int) $hackaton->id, 404);
 
         HackatonCaseScore::query()->updateOrCreate(
             ['hackaton_case_submission_id' => $submission->id],

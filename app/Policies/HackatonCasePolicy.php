@@ -18,7 +18,9 @@ class HackatonCasePolicy
             return false;
         }
 
-        return $hackatonCase->hackaton->user_id === $user->id;
+        $hackaton = Hackaton::query()->find($hackatonCase->hackaton_id);
+
+        return $hackaton instanceof Hackaton && $hackaton->user_id === $user->id;
     }
 
     public function create(User $user, Hackaton $hackaton): bool
@@ -28,11 +30,15 @@ class HackatonCasePolicy
 
     public function update(User $user, HackatonCase $hackatonCase): bool
     {
-        return $hackatonCase->hackaton->user_id === $user->id;
+        $hackaton = Hackaton::query()->find($hackatonCase->hackaton_id);
+
+        return $hackaton instanceof Hackaton && $hackaton->user_id === $user->id;
     }
 
     public function delete(User $user, HackatonCase $hackatonCase): bool
     {
-        return $hackatonCase->hackaton->user_id === $user->id;
+        $hackaton = Hackaton::query()->find($hackatonCase->hackaton_id);
+
+        return $hackaton instanceof Hackaton && $hackaton->user_id === $user->id;
     }
 }

@@ -134,9 +134,9 @@ class Index extends Component
             ];
         });
 
-        $this->publicHackatonsCount = (int) ($totals['hackatons'] ?? 0);
-        $this->publicParticipantsCount = (int) ($totals['participants'] ?? 0);
-        $this->publicTeamsCount = (int) ($totals['teams'] ?? 0);
+        $this->publicHackatonsCount = (int) $totals['hackatons'];
+        $this->publicParticipantsCount = (int) $totals['participants'];
+        $this->publicTeamsCount = (int) $totals['teams'];
 
         if (! Auth::check()) {
             return;

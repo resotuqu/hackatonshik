@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Pages\Admin\AvatarPresets;
 use App\Models\AvatarPreset;
 use App\Models\AvatarPresetPack;
 use App\Models\User;
@@ -18,7 +19,7 @@ test('admin can create avatar preset pack', function () {
     $admin = User::factory()->admin()->create();
 
     Livewire::actingAs($admin)
-        ->test('pages::admin.avatar-presets')
+        ->test(AvatarPresets::class)
         ->set('new_pack_name', 'Тестовый пак')
         ->set('new_pack_slug', 'test-pack-admin')
         ->set('new_pack_sort_order', 5)
@@ -44,7 +45,7 @@ test('admin can upload multiple preset images to pack via Livewire', function ()
     $two = UploadedFile::fake()->image('c2.jpg', 100, 100);
 
     Livewire::actingAs($admin)
-        ->test('pages::admin.avatar-presets')
+        ->test(AvatarPresets::class)
         ->set('upload_pack_id', $pack->id)
         ->set('upload_files', [$one, $two])
         ->call('uploadToPack')

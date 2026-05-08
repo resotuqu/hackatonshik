@@ -50,7 +50,7 @@ class HackatonApplicationController extends Controller
     public function update(UpdateApplicationStatusRequest $request, HackatonApplication $application): RedirectResponse
     {
         Gate::authorize('update', $application);
-        $status = $request->validated('status');
+        $status = ApplicationStatus::from($request->validated('status'));
         /** @var User $reviewer */
         $reviewer = $request->user();
 
@@ -59,11 +59,11 @@ class HackatonApplicationController extends Controller
                 ->lockForUpdate()
                 ->findOrFail($application->id);
 
-            if (! $lockedApplication->status->isPending()) {
+            if ($this->resolveApplicationStatus($lockedApplication) !== ApplicationStatus::PENDING) {
                 abort(422, 'Заявка уже рассмотрена.');
             }
 
-            if ($status === ApplicationStatus::ACCEPTED->value) {
+            if ($status === ApplicationStatus::ACCEPTED) {
                 $this->acceptApplication($lockedApplication, $reviewer);
 
                 return;
@@ -72,17 +72,22 @@ class HackatonApplicationController extends Controller
             $lockedApplication->markAsRejected($reviewer);
         });
 
-        $flashMessage = $status === ApplicationStatus::ACCEPTED->value
+        $flashMessage = $status === ApplicationStatus::ACCEPTED
             ? 'Заявка команды принята.'
             : 'Заявка команды отклонена.';
 
-        $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
-        $updatedApplication = $application->fresh(['hackaton']);
+        $updatedApplication = HackatonApplication::query()
+            ->with(['hackaton', 'team'])
+            ->findOrFail($application->id);
+        $organizerId = Hackaton::query()
+            ->whereKey($updatedApplication->hackaton_id)
+            ->value('user_id');
+        $this->notifyTeamAboutStatus($updatedApplication);
         event(new HackatonApplicationChanged(
             teamId: (int) $application->team_id,
             hackatonId: (int) $application->hackaton_id,
-            organizerId: $updatedApplication?->hackaton?->user_id !== null ? (int) $updatedApplication->hackaton->user_id : null,
-            invalidateHomeFeatured: $status === ApplicationStatus::ACCEPTED->value,
+            organizerId: $organizerId !== null ? (int) $organizerId : null,
+            invalidateHomeFeatured: $status === ApplicationStatus::ACCEPTED,
         ));
 
         return back()->with('success', $flashMessage);
@@ -105,7 +110,7 @@ class HackatonApplicationController extends Controller
     {
         Gate::authorize('delete', $application);
         $teamId = (int) $application->team_id;
-        $hackaton = $application->hackaton()->first(['id', 'user_id']);
+        $hackaton = Hackaton::query()->find($application->hackaton_id, ['id', 'user_id']);
         $application->delete();
         event(new HackatonApplicationChanged(
             teamId: $teamId,
@@ -124,7 +129,7 @@ class HackatonApplicationController extends Controller
 
         $validated = $request->validated();
         $applicationIds = $validated['application_ids'];
-        $status = $validated['status'];
+        $status = ApplicationStatus::from($validated['status']);
         /** @var User $reviewer */
         $reviewer = $request->user();
 
@@ -137,10 +142,12 @@ class HackatonApplicationController extends Controller
                 ->get();
 
             foreach ($applications as $application) {
-                if ($status === ApplicationStatus::ACCEPTED->value) {
+                if ($status === ApplicationStatus::ACCEPTED) {
                     $this->acceptApplication($application, $reviewer);
 
-                    $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+                    $this->notifyTeamAboutStatus(
+                        HackatonApplication::query()->with(['hackaton', 'team'])->findOrFail($application->id)
+                    );
                     event(new HackatonApplicationChanged(
                         teamId: (int) $application->team_id,
                         hackatonId: (int) $application->hackaton_id,
@@ -152,7 +159,9 @@ class HackatonApplicationController extends Controller
                 }
 
                 $application->markAsRejected($reviewer);
-                $this->notifyTeamAboutStatus($application->fresh(['hackaton', 'team']));
+                $this->notifyTeamAboutStatus(
+                    HackatonApplication::query()->with(['hackaton', 'team'])->findOrFail($application->id)
+                );
                 event(new HackatonApplicationChanged(
                     teamId: (int) $application->team_id,
                     hackatonId: (int) $application->hackaton_id,
@@ -166,8 +175,10 @@ class HackatonApplicationController extends Controller
 
     private function notifyTeamAboutStatus(HackatonApplication $application): void
     {
-        $team = $application->team()->with(['roles:id,team_id,user_id', 'roles.user:id,email'])->first();
-        $hackaton = $application->hackaton;
+        $team = Team::query()
+            ->with(['roles:id,team_id,user_id', 'roles.user:id,email'])
+            ->find($application->team_id);
+        $hackaton = Hackaton::query()->find($application->hackaton_id);
 
         if (! $team || ! $hackaton) {
             return;
@@ -192,7 +203,12 @@ class HackatonApplicationController extends Controller
 
         Notification::send(
             $users,
-            new ApplicationStatusUpdated($hackaton, $team, $application->status)
+            new ApplicationStatusUpdated($hackaton, $team, $this->resolveApplicationStatus($application))
         );
+    }
+
+    private function resolveApplicationStatus(HackatonApplication $application): ApplicationStatus
+    {
+        return ApplicationStatus::from((string) $application->getRawOriginal('status'));
     }
 }

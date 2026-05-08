@@ -7,11 +7,13 @@ use App\Enums\HackatonStatus;
 use App\Http\Requests\StoreHackatonCaseSubmissionRequest;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
+use App\Models\HackatonCaseAnswer;
 use App\Models\HackatonCaseField;
 use App\Models\HackatonCaseSubmission;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -30,8 +32,14 @@ class HackatonCaseSubmissionController extends Controller
         $scope = $validated['scope'];
         $teamId = $scope === 'team' ? (int) ($validated['team_id'] ?? 0) : null;
         $userId = $scope === 'user' ? (int) $request->user()->id : null;
+        /** @var array<int|string, string|null> $answers */
         $answers = $validated['answers'] ?? [];
+        /** @var array<int|string, UploadedFile> $uploadedFiles */
         $uploadedFiles = $request->file('files', []);
+        $caseFields = HackatonCaseField::query()
+            ->where('hackaton_case_id', $case->id)
+            ->orderBy('sort_order')
+            ->get();
 
         if ($scope === 'team') {
             $team = Team::find($teamId);
@@ -67,28 +75,29 @@ class HackatonCaseSubmissionController extends Controller
 
         // Check hackathon status for link submissions
         if ($hackaton->status !== HackatonStatus::IN_PROGRESS) {
-            foreach ($case->fields as $field) {
+            foreach ($caseFields as $field) {
                 if ($field->type === HackatonCaseField::TYPE_URL && filled($answers[$field->id] ?? '')) {
                     return back()->with('error', 'Загрузка ссылок (репозиторий, Figma и т.д.) доступна только после перехода хакатона в статус активной разработки.')->withInput();
                 }
             }
         }
 
-        $case->loadMissing('fields');
-        $requiredErrors = $this->validateCaseAnswers($case, $answers, $uploadedFiles);
+        $requiredErrors = $this->validateCaseAnswers($caseFields->all(), $answers, $uploadedFiles);
 
         if ($requiredErrors !== []) {
             return back()->withErrors($requiredErrors)->withInput();
         }
 
-        DB::transaction(function () use ($case, $request, $teamId, $userId, $answers, $uploadedFiles): void {
-            $submission = $case->submissions()
+        DB::transaction(function () use ($case, $request, $teamId, $userId, $answers, $uploadedFiles, $caseFields): void {
+            $submission = HackatonCaseSubmission::query()
+                ->where('hackaton_case_id', $case->id)
                 ->where('team_id', $teamId)
                 ->where('user_id', $userId)
                 ->first();
 
             if (! $submission) {
-                $submission = $case->submissions()->create([
+                $submission = HackatonCaseSubmission::query()->create([
+                    'hackaton_case_id' => $case->id,
                     'team_id' => $teamId,
                     'user_id' => $userId,
                     'submitted_by_user_id' => $request->user()->id,
@@ -101,7 +110,7 @@ class HackatonCaseSubmissionController extends Controller
                 ]);
             }
 
-            foreach ($case->fields as $field) {
+            foreach ($caseFields as $field) {
                 $rawAnswer = (string) ($answers[$field->id] ?? '');
                 $newFilePath = isset($uploadedFiles[$field->id])
                     ? $uploadedFiles[$field->id]->store('hackaton_case_answers', 'local')
@@ -115,8 +124,11 @@ class HackatonCaseSubmissionController extends Controller
                     $payload['file_path'] = $newFilePath;
                 }
 
-                $submission->answers()->updateOrCreate(
-                    ['hackaton_case_field_id' => $field->id],
+                HackatonCaseAnswer::query()->updateOrCreate(
+                    [
+                        'hackaton_case_submission_id' => $submission->id,
+                        'hackaton_case_field_id' => $field->id,
+                    ],
                     $payload,
                 );
             }
@@ -143,28 +155,17 @@ class HackatonCaseSubmissionController extends Controller
             ->exists();
     }
 
-    private function isUserInApprovedTeam(Hackaton $hackaton, int $userId): bool
-    {
-        return $hackaton->teams()
-            ->where(function (Builder $query) use ($userId): void {
-                $query
-                    ->where('teams.user_id', $userId)
-                    ->orWhereHas('roles', function (Builder $rolesQuery) use ($userId): void {
-                        $rolesQuery->where('team_roles.user_id', $userId);
-                    });
-            })
-            ->whereHas('hackatonApplications', function (Builder $query) use ($hackaton): void {
-                $query->where('hackaton_id', $hackaton->id)
-                    ->where('status', ApplicationStatus::ACCEPTED);
-            })
-            ->exists();
-    }
-
-    private function validateCaseAnswers(HackatonCase $case, array $answers, array $uploadedFiles): array
+    /**
+     * @param  list<HackatonCaseField>  $caseFields
+     * @param  array<int|string, string|null>  $answers
+     * @param  array<int|string, UploadedFile>  $uploadedFiles
+     * @return array<string, string>
+     */
+    private function validateCaseAnswers(array $caseFields, array $answers, array $uploadedFiles): array
     {
         $errors = [];
 
-        foreach ($case->fields as $field) {
+        foreach ($caseFields as $field) {
             $rawAnswer = (string) ($answers[$field->id] ?? '');
             $hasTextAnswer = filled(trim($rawAnswer));
             $hasFileAnswer = isset($uploadedFiles[$field->id]);

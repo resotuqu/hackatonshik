@@ -20,11 +20,15 @@ class HackatonAnnouncementPolicy
 
     public function update(User $user, HackatonAnnouncement $hackatonAnnouncement): bool
     {
-        return $hackatonAnnouncement->hackaton->user_id === $user->id;
+        $hackaton = Hackaton::query()->find($hackatonAnnouncement->hackaton_id);
+
+        return $hackaton instanceof Hackaton && $hackaton->user_id === $user->id;
     }
 
     public function delete(User $user, HackatonAnnouncement $hackatonAnnouncement): bool
     {
-        return $hackatonAnnouncement->hackaton->user_id === $user->id;
+        $hackaton = Hackaton::query()->find($hackatonAnnouncement->hackaton_id);
+
+        return $hackaton instanceof Hackaton && $hackaton->user_id === $user->id;
     }
 }

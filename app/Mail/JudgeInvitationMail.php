@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Models\Hackaton;
 use App\Models\JudgeInvitation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -25,7 +26,8 @@ class JudgeInvitationMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $hackatonTitle = $this->invitation->hackaton?->title ?? 'Хакатон';
+        $hackaton = Hackaton::query()->find($this->invitation->hackaton_id);
+        $hackatonTitle = $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон';
 
         return new Envelope(
             subject: 'Приглашение судьёй — '.$hackatonTitle.' — Хакатонщик',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseSubmission;
@@ -86,7 +87,7 @@ test('judge can open invitation page and accept invitation', function () {
         ->post(route('judges.invitations.accept.store', $invitation->token));
 
     $acceptResponse->assertRedirect(route('hackatons.show', $hackaton));
-    expect($judge->fresh()->role)->toBe('judge');
+    expect($judge->fresh()->role)->toBe(UserRole::JUDGE);
     expect($hackaton->fresh()->judges()->where('users.id', $judge->id)->exists())->toBeTrue();
 });
 

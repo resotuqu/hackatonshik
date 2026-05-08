@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Profile;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\UserRole;
 use App\Models\TeamApplication;
 use App\Services\ContactChangeService;
 use App\Support\PresetAvatar;
@@ -12,10 +13,11 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Mary\Traits\Toast;
 
 class Index extends Component
 {
-    use \Mary\Traits\Toast, WithFileUploads;
+    use Toast, WithFileUploads;
 
     public array $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview', 'side-by-side'],
@@ -23,17 +25,29 @@ class Index extends Component
     ];
 
     public string $fio = '';
+
     public string $nickname = '';
+
     public string $role = '';
+
     public string $date_of_birth = '';
+
     public ?string $description = null;
+
     public string $current_password = '';
+
     public string $new_password = '';
+
     public string $new_password_confirmation = '';
+
     public bool $is_profile_public = true;
+
     public bool $show_email_on_profile = false;
+
     public bool $show_phone_on_profile = false;
+
     public $avatar = null;
+
     public ?string $avatar_path = null;
 
     public ?string $selected_preset_path = null;
@@ -78,7 +92,7 @@ class Index extends Component
 
     public function mount()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect('/login');
         }
 
@@ -86,9 +100,9 @@ class Index extends Component
         $this->fio = $user->fio;
         $this->nickname = $user->nickname;
         $this->role = match ($user->role) {
-            'user' => 'Участник',
-            'partner' => 'Партнёр',
-            'judge' => 'Судья',
+            UserRole::USER => 'Участник',
+            UserRole::PARTNER => 'Партнёр',
+            UserRole::JUDGE => 'Судья',
             default => 'Администратор',
         };
         $this->date_of_birth = $user->date_of_birth;
@@ -587,7 +601,7 @@ class Index extends Component
     public function currentAvatarUrl(): string
     {
         $authUser = Auth::user();
-        
+
         if ($this->avatar) {
             return $this->avatar->temporaryUrl();
         }
@@ -597,7 +611,7 @@ class Index extends Component
         if ($this->avatar_path) {
             return asset('storage/'.$this->avatar_path);
         }
-        
+
         return 'https://ui-avatars.com/api/?name='.urlencode($authUser->fio).'&background=random';
     }
 
@@ -606,14 +620,26 @@ class Index extends Component
     {
         $authUser = Auth::user();
         $tips = [];
-        
-        if (! filled($authUser->fio)) { $tips[] = 'Укажите ФИО'; }
-        if (! filled($authUser->date_of_birth)) { $tips[] = 'Заполните дату рождения'; }
-        if (! filled($authUser->avatar_path)) { $tips[] = 'Добавьте аватар'; }
-        if (! filled($authUser->description)) { $tips[] = 'Добавьте описание о себе'; }
-        if (is_null($authUser->email_verified_at)) { $tips[] = 'Подтвердите электронную почту'; }
-        if (is_null($authUser->phone_verified_at)) { $tips[] = 'Подтвердите номер телефона'; }
-        
+
+        if (! filled($authUser->fio)) {
+            $tips[] = 'Укажите ФИО';
+        }
+        if (! filled($authUser->date_of_birth)) {
+            $tips[] = 'Заполните дату рождения';
+        }
+        if (! filled($authUser->avatar_path)) {
+            $tips[] = 'Добавьте аватар';
+        }
+        if (! filled($authUser->description)) {
+            $tips[] = 'Добавьте описание о себе';
+        }
+        if (is_null($authUser->email_verified_at)) {
+            $tips[] = 'Подтвердите электронную почту';
+        }
+        if (is_null($authUser->phone_verified_at)) {
+            $tips[] = 'Подтвердите номер телефона';
+        }
+
         return $tips;
     }
 

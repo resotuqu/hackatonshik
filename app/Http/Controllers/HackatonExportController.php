@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Hackaton;
+use App\Models\HackatonDocument;
+use App\Models\User;
 use App\Models\UserHackatonDocument;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
 
@@ -28,11 +31,12 @@ class HackatonExportController extends Controller
             fputcsv($stream, ['team_id', 'team_title', 'owner', 'owner_email', 'members_count']);
 
             foreach ($teams as $team) {
+                $owner = User::query()->find($team->user_id);
                 fputcsv($stream, [
                     $team->id,
                     $team->title,
-                    $team->user?->fio,
-                    $team->user?->email,
+                    $owner?->fio,
+                    $owner?->email,
                     $team->roles->whereNotNull('user_id')->count(),
                 ]);
             }
@@ -68,7 +72,7 @@ class HackatonExportController extends Controller
         }, $filename, ['Content-Type' => 'text/csv']);
     }
 
-    public function documentsZip(Hackaton $hackaton): StreamedResponse|RedirectResponse
+    public function documentsZip(Hackaton $hackaton): StreamedResponse|RedirectResponse|BinaryFileResponse
     {
         $this->authorizeOrganizer($hackaton);
 
@@ -98,8 +102,10 @@ class HackatonExportController extends Controller
                 continue;
             }
 
-            $name = $document->hackatonDocument?->name ?? 'document';
-            $user = $document->user?->fio ?? "user_{$document->user_id}";
+            $hackatonDocument = $document->hackatonDocument;
+            $name = $hackatonDocument instanceof HackatonDocument ? $hackatonDocument->name : 'document';
+            $documentUser = $document->user;
+            $user = $documentUser instanceof User ? $documentUser->fio : "user_{$document->user_id}";
             $extension = pathinfo($document->file_url, PATHINFO_EXTENSION);
             $filename = "documents/{$user}/{$name}_{$document->id}.{$extension}";
 
@@ -117,16 +123,17 @@ class HackatonExportController extends Controller
 
         return $teams
             ->flatMap(function ($team): Collection {
-                $owner = $team->user ? collect([$team->user]) : collect();
+                $ownerModel = $team->user;
+                $owner = $ownerModel instanceof User ? collect([$ownerModel]) : collect();
 
                 return $owner->merge($team->roles->pluck('user')->filter());
             })
             ->groupBy('id')
             ->map(fn (Collection $rows, $id) => [
                 'id' => $id,
-                'fio' => $rows->first()->fio,
-                'email' => $rows->first()->email,
-                'nickname' => $rows->first()->nickname,
+                'fio' => ($rows->first() instanceof User) ? $rows->first()->fio : null,
+                'email' => ($rows->first() instanceof User) ? $rows->first()->email : null,
+                'nickname' => ($rows->first() instanceof User) ? $rows->first()->nickname : null,
                 'teams_count' => $rows->count(),
             ])
             ->values();

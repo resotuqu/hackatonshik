@@ -40,12 +40,53 @@ use App\Livewire\Pages\Teams\Create as TeamsCreate;
 use App\Livewire\Pages\Teams\Edit as TeamsEdit;
 use App\Livewire\Pages\Teams\Index as TeamsIndex;
 use App\Livewire\Pages\Teams\Show as TeamsShow;
+use App\Models\NewsPost;
+use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeIndex::class)->name('home');
 
 Route::get('/about', AboutIndex::class);
 Route::get('/news', NewsIndex::class);
+Route::get('/news/rss', function (): Response {
+    $posts = NewsPost::query()
+        ->published()
+        ->latest('published_at')
+        ->limit(50)
+        ->get(['title', 'slug', 'excerpt', 'published_at']);
+
+    $items = $posts->map(function (NewsPost $post): string {
+        $title = e($post->title);
+        $link = route('news.show', ['post' => $post->slug]);
+        $description = e((string) ($post->excerpt ?? ''));
+        $pubDate = Carbon::parse((string) $post->published_at)->toRfc2822String();
+
+        return <<<XML
+<item>
+  <title>{$title}</title>
+  <link>{$link}</link>
+  <guid>{$link}</guid>
+  <description>{$description}</description>
+  <pubDate>{$pubDate}</pubDate>
+</item>
+XML;
+    })->implode("\n");
+
+    $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>Herd News</title>
+  <link>{route('home')}</link>
+  <description>Новости платформы Herd</description>
+  {$items}
+</channel>
+</rss>
+XML;
+
+    return response($xml, 200, ['Content-Type' => 'application/rss+xml; charset=UTF-8']);
+})->name('news.rss');
 Route::get('/news/{post:slug}', NewsShow::class)->name('news.show');
 Route::get('/contacts', ContactsIndex::class);
 Route::get('/privacy-policy', PrivacyPolicyIndex::class);

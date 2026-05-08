@@ -3,7 +3,11 @@
 namespace App\Livewire\Pages\Teams;
 
 use App\Models\Hackaton;
+use App\Models\Role;
+use App\Models\Skill;
 use App\Models\Team;
+use App\Models\TeamRole;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -39,7 +43,7 @@ class Create extends Component
     ];
 
     /**
-     * @return array<string, list<string>|\Illuminate\Contracts\Validation\Rule|string>
+     * @return array<string, list<string>|Rule|string>
      */
     protected function rulesForStep(int $step): array
     {
@@ -67,7 +71,7 @@ class Create extends Component
     }
 
     /**
-     * @return array<string, list<string>|\Illuminate\Contracts\Validation\Rule|string>
+     * @return array<string, list<string>|Rule|string>
      */
     protected function allRules(): array
     {
@@ -277,7 +281,7 @@ class Create extends Component
         }
 
         foreach ($this->roles as $role) {
-            $newRole = $team->roles()->create([
+            $newRole = TeamRole::query()->create([
                 'title' => $role['title'],
                 'description' => $role['description'],
                 'team_id' => $team->id,
@@ -320,7 +324,7 @@ class Create extends Component
         $roles[] = [
             'name' => 'Выберите категорию роли',
         ];
-        foreach (\App\Models\Role::all() as $role) {
+        foreach (Role::all() as $role) {
             $roles[] = [
                 'id' => $role->id,
                 'name' => $role->name,
@@ -333,7 +337,7 @@ class Create extends Component
     #[Computed]
     public function skillsData()
     {
-        return \App\Models\Skill::all();
+        return Skill::all();
     }
 
     /**

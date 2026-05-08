@@ -6,16 +6,13 @@ namespace App\Models;
 
 use App\Enums\ApplicationStatus;
 use App\Models\Concerns\HasApplicationReview;
-use Database\Factories\TeamApplicationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TeamApplication extends Model
 {
-    /** @use HasFactory<TeamApplicationFactory> */
     use HasApplicationReview;
-
     use HasFactory;
 
     protected $fillable = [

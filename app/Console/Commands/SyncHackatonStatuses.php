@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
+use App\Models\Team;
 use App\Models\User;
 use App\Notifications\CaseDeadlineReminder;
 use Illuminate\Console\Command;
@@ -50,7 +51,10 @@ class SyncHackatonStatuses extends Command
             ->whereBetween('deadline_at', [now(), now()->addDay()])
             ->chunkById(50, function ($cases) use (&$deadlineRemindersSent): void {
                 foreach ($cases as $case) {
-                    $participantIds = $case->hackaton->teams
+                    $participantIds = Team::query()
+                        ->with('roles')
+                        ->where('hackaton_id', $case->hackaton_id)
+                        ->get()
                         ->flatMap(fn ($team) => collect([$team->user_id])->merge($team->roles->pluck('user_id')))
                         ->filter()
                         ->unique()

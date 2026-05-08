@@ -23,8 +23,8 @@ class PublicCatalogHackatonResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
-            'start_at' => $this->start_at?->toIso8601String(),
-            'end_at' => $this->end_at?->toIso8601String(),
+            'start_at' => $this->start_at->toIso8601String(),
+            'end_at' => $this->end_at->toIso8601String(),
             'image_url' => $this->image_url,
             'gallery_preview' => $firstGalleryImage?->path,
             'gallery_count' => $this->images->count(),

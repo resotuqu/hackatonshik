@@ -415,7 +415,6 @@ class ContactChangeService
 
         $validator->validate();
 
-        /** @var string */
         return strtolower($validator->validated()['email']);
     }
 }

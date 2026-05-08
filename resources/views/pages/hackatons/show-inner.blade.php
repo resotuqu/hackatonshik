@@ -789,7 +789,7 @@
                                             <td>{{ $row['team']->title }}</td>
                                             <td>{{ $row['total_score'] }}</td>
                                             <td>{{ $row['max_score'] }}</td>
-                                            <td>{{ $row['progress_percent'] }}%</td>
+                                            <td>{{ $row['completion_percent'] }}%</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

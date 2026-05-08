@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Pages\Hackatons;
 
+use App\Enums\ApplicationStatus;
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\ListAnalyticsEvent;
 use App\Models\SavedListFilter;
+use App\Models\Team;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -162,7 +164,7 @@ class Index extends Component
         $teamId = Cache::remember(
             "quick-hackaton-team-{$hackatonId}-".Auth::id(),
             now()->addMinutes(5),
-            fn () => \App\Models\Team::query()
+            fn () => Team::query()
                 ->where('user_id', Auth::id())
                 ->where('hackaton_id', $hackatonId)
                 ->value('id')
@@ -180,7 +182,7 @@ class Index extends Component
         ]);
 
         $application->fill([
-            'status' => \App\Enums\ApplicationStatus::PENDING,
+            'status' => ApplicationStatus::PENDING,
             'reviewed_at' => null,
             'reviewed_by' => null,
             'message' => null,
@@ -228,7 +230,8 @@ class Index extends Component
             return;
         }
 
-        $payload = $filter->filters ?? [];
+        $decoded = json_decode((string) $filter->filters, true);
+        $payload = is_array($decoded) ? $decoded : [];
         $this->q = (string) ($payload['q'] ?? '');
         $this->start_at = (string) ($payload['start_at'] ?? '');
         $this->status = (string) ($payload['status'] ?? 'all');

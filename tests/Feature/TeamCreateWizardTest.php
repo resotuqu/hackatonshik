@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Pages\Teams\Create as TeamsCreate;
 use App\Models\Hackaton;
 use App\Models\Role;
 use App\Models\Team;
@@ -16,7 +17,7 @@ test('team create wizard completes all steps and redirects to profile teams', fu
     $teamTitle = 'Wizard Team '.uniqid();
 
     Livewire::actingAs($user)
-        ->test('pages::teams.create')
+        ->test(TeamsCreate::class)
         ->set('title', $teamTitle)
         ->set('description', 'Описание команды для теста.')
         ->call('nextStep')
@@ -42,7 +43,7 @@ test('team create wizard stays on step one when title and description are empty'
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::teams.create')
+        ->test(TeamsCreate::class)
         ->set('title', '')
         ->set('description', '')
         ->call('nextStep')

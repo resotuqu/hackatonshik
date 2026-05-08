@@ -140,13 +140,18 @@ final class HomeDashboardData
 
         $this->pendingHackatonApplicationsCount = (clone $pendingQuery)->count();
 
-        $this->hackatonApplicationsPreview = $pendingHackatonApps->map(fn (HackatonApplication $app): array => [
-            'id' => $app->id,
-            'hackaton_id' => $app->hackaton_id,
-            'title' => $app->hackaton?->title ?? 'Хакатон',
-            'team_title' => $app->team?->title ?? 'Команда',
-            'status_label' => $app->status->label(),
-        ])->all();
+        $this->hackatonApplicationsPreview = $pendingHackatonApps->map(function (HackatonApplication $app): array {
+            $hackaton = $app->hackaton;
+            $team = $app->team;
+
+            return [
+                'id' => $app->id,
+                'hackaton_id' => $app->hackaton_id,
+                'title' => $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон',
+                'team_title' => $team instanceof Team ? $team->title : 'Команда',
+                'status_label' => $this->applicationStatusLabel($app),
+            ];
+        })->all();
 
         $this->participantHackatonsPreview = $this->buildParticipantHackatonsPreview($user);
 
@@ -167,8 +172,6 @@ final class HomeDashboardData
 
     /**
      * Teams the participant captains or belongs to (same rule as hub / submissions).
-     *
-     * @param  Builder<Team>  $teamQuery
      */
     private function scopeParticipantTeams(Builder $teamQuery, User $user): void
     {
@@ -191,7 +194,7 @@ final class HomeDashboardData
             ->pluck('hackaton')
             ->filter()
             ->unique('id')
-            ->sortBy(fn ($h) => $h->start_at?->timestamp ?? 0)
+            ->sortBy(fn ($h) => $h->start_at->timestamp)
             ->values();
 
         $ids = $fromTeams->pluck('id')->all();
@@ -213,7 +216,7 @@ final class HomeDashboardData
             ->map(fn (Hackaton $hackaton): array => [
                 'id' => $hackaton->id,
                 'title' => $hackaton->title,
-                'start_at' => $hackaton->start_at?->translatedFormat('d.m.Y H:i'),
+                'start_at' => $hackaton->start_at->translatedFormat('d.m.Y H:i'),
             ])
             ->values()
             ->all();
@@ -240,11 +243,9 @@ final class HomeDashboardData
         }
 
         if ($this->pendingHackatonApplicationsCount > 0) {
-            $first = (clone $pendingHackatonAppsQuery)
+            $hid = (clone $pendingHackatonAppsQuery)
                 ->orderByDesc('created_at')
-                ->first();
-
-            $hid = $first?->hackaton_id;
+                ->value('hackaton_id');
             $this->participantNextStepTitle = 'Заявки команд на хакатоны';
             $this->participantNextStepHint = 'Организатор рассматривает заявки ваших команд. Статус можно посмотреть на странице хакатона.';
             $this->participantNextStepHref = $hid !== null
@@ -289,7 +290,7 @@ final class HomeDashboardData
             ->map(fn (Hackaton $hackaton): array => [
                 'id' => $hackaton->id,
                 'title' => $hackaton->title,
-                'start_at' => $hackaton->start_at?->translatedFormat('d.m.Y H:i'),
+                'start_at' => $hackaton->start_at->translatedFormat('d.m.Y H:i'),
             ])
             ->all();
     }
@@ -302,5 +303,10 @@ final class HomeDashboardData
         $this->adminPendingApplicationsCount = HackatonApplication::query()
             ->where('status', ApplicationStatus::PENDING)
             ->count();
+    }
+
+    private function applicationStatusLabel(HackatonApplication $application): string
+    {
+        return ApplicationStatus::from((string) $application->getRawOriginal('status'))->label();
     }
 }

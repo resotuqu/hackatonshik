@@ -15,18 +15,24 @@ class HackatonCertificatePolicy
 
     public function view(User $user, HackatonCertificate $hackatonCertificate): bool
     {
+        $hackaton = Hackaton::query()->find($hackatonCertificate->hackaton_id);
+
         return $hackatonCertificate->user_id === $user->id
-            || $hackatonCertificate->hackaton->user_id === $user->id;
+            || ($hackaton instanceof Hackaton && $hackaton->user_id === $user->id);
     }
 
     public function download(User $user, HackatonCertificate $hackatonCertificate): bool
     {
+        $hackaton = Hackaton::query()->find($hackatonCertificate->hackaton_id);
+
         return $hackatonCertificate->user_id === $user->id
-            || $hackatonCertificate->hackaton->user_id === $user->id;
+            || ($hackaton instanceof Hackaton && $hackaton->user_id === $user->id);
     }
 
     public function delete(User $user, HackatonCertificate $hackatonCertificate): bool
     {
-        return $hackatonCertificate->hackaton->user_id === $user->id;
+        $hackaton = Hackaton::query()->find($hackatonCertificate->hackaton_id);
+
+        return $hackaton instanceof Hackaton && $hackaton->user_id === $user->id;
     }
 }

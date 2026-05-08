@@ -77,6 +77,7 @@ test('required case fields are validated on team submission', function () {
     ]);
 
     $case = HackatonCase::factory()->for($hackaton)->create(['is_published' => true]);
+    $team->update(['hackaton_case_id' => $case->id]);
     $requiredField = HackatonCaseField::factory()->create([
         'hackaton_case_id' => $case->id,
         'type' => HackatonCaseField::TYPE_TEXT,

@@ -34,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SecurityHeaders::class,
-            // EnsureContactChannelsVerified::class,
+            EnsureContactChannelsVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

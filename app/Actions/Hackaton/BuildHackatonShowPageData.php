@@ -12,7 +12,6 @@ use App\Models\HackatonCaseSubmission;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -41,11 +40,9 @@ final class BuildHackatonShowPageData
                 ->where('published_at', '<=', now()))
             ->get());
         $hackaton->setRelation('cases', $hackaton->cases()
+            ->with(['fields', 'images', 'teams'])
             ->with([
-                'fields',
-                'images',
-                'teams',
-                'submissions' => function (HasMany $query) use ($user, $isOrganizer, $isAssignedJudge): void {
+                'submissions' => function ($query) use ($user, $isOrganizer, $isAssignedJudge): void {
                     if (! $isOrganizer && ! $isAssignedJudge) {
                         if ($user === null) {
                             $query->whereRaw('1 = 0');
@@ -60,9 +57,8 @@ final class BuildHackatonShowPageData
                         });
                     }
                 },
-                'submissions.answers.field',
-                'submissions.score',
             ])
+            ->with(['submissions.answers.field', 'submissions.score'])
             ->when(! $isOrganizer, fn (Builder $query) => $query
                 ->where('is_published', true)
                 ->where(function (Builder $scheduleQuery): void {
@@ -150,8 +146,8 @@ final class BuildHackatonShowPageData
             ->selectRaw('COUNT(*) as submissions_total, SUM(CASE WHEN '.$scoreTable.'.id IS NOT NULL THEN 1 ELSE 0 END) as submissions_scored')
             ->first();
 
-        $submissionsTotal = (int) ($submissionStats?->submissions_total ?? 0);
-        $submissionsScored = (int) ($submissionStats?->submissions_scored ?? 0);
+        $submissionsTotal = (int) ($submissionStats->submissions_total ?? 0);
+        $submissionsScored = (int) ($submissionStats->submissions_scored ?? 0);
 
         $metrics = [
             'applications_total' => (int) $statusCounts->sum(),
@@ -168,9 +164,6 @@ final class BuildHackatonShowPageData
         return $metrics;
     }
 
-    /**
-     * @return Collection<int, array{team: ?Team, total_score: int, max_score: int, progress_percent: int}>
-     */
     private function buildLeaderboard(Hackaton $hackaton): Collection
     {
         $submissionTable = (new HackatonCaseSubmission)->getTable();
@@ -198,18 +191,32 @@ final class BuildHackatonShowPageData
             ->get()
             ->keyBy('id');
 
-        return $rows->map(function ($row) use ($teams): array {
-            $team = $teams->get($row->team_id);
-            $totalScore = (int) $row->total_score;
-            $maxScore = (int) $row->max_score;
+        return $rows->map(
+            fn ($row): array => $this->mapLeaderboardRow($row, $teams)
+        )->values();
+    }
 
-            return [
-                'team' => $team,
-                'total_score' => $totalScore,
-                'max_score' => $maxScore,
-                'progress_percent' => $maxScore > 0 ? (int) round(($totalScore / $maxScore) * 100) : 0,
-            ];
-        })->values();
+    /**
+     * @param  object{team_id: int|string|null, total_score: int|string|float, max_score: int|string|float}  $row
+     * @param  Collection<int, Team>  $teams
+     * @return array{team: ?Team, total_score: int, max_score: int, completion_percent: int}
+     */
+    private function mapLeaderboardRow(object $row, Collection $teams): array
+    {
+        $team = $teams->get((int) $row->team_id);
+        if (! $team instanceof Team) {
+            $team = null;
+        }
+
+        $totalScore = (int) $row->total_score;
+        $maxScore = (int) $row->max_score;
+
+        return [
+            'team' => $team,
+            'total_score' => $totalScore,
+            'max_score' => $maxScore,
+            'completion_percent' => $maxScore > 0 ? (int) round(($totalScore / $maxScore) * 100) : 0,
+        ];
     }
 
     /**

@@ -20,6 +20,7 @@ test('a team can submit a case solution', function () {
     $team = Team::factory()->create([
         'user_id' => $user->id,
         'hackaton_id' => $hackaton->id,
+        'hackaton_case_id' => null,
     ]);
 
     // Create an accepted application for the team to the hackaton
@@ -30,6 +31,7 @@ test('a team can submit a case solution', function () {
     ]);
 
     $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id, 'is_published' => true]);
+    $team->update(['hackaton_case_id' => $case->id]);
     $field = HackatonCaseField::factory()->create([
         'hackaton_case_id' => $case->id,
         'type' => HackatonCaseField::TYPE_TEXT,

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
 
 class CaseDeadlineReminder extends Notification implements ShouldQueue
 {
@@ -23,14 +25,16 @@ class CaseDeadlineReminder extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $hackaton = $this->case->hackaton;
+        $hackaton = Hackaton::query()->find($this->case->hackaton_id);
+        $hackatonTitle = $hackaton instanceof Hackaton ? $hackaton->title : 'Хакатон';
+        $deadline = Carbon::parse((string) $this->case->deadline_at)->format('d.m.Y H:i');
 
         return (new MailMessage)
             ->subject("Дедлайн кейса: {$this->case->title}")
             ->line("Напоминание: по кейсу «{$this->case->title}» скоро дедлайн.")
-            ->line("Хакатон: {$hackaton->title}")
-            ->line('Дедлайн: '.$this->case->deadline_at?->format('d.m.Y H:i'))
-            ->action('Открыть хакатон', route('hackatons.show', $hackaton));
+            ->line("Хакатон: {$hackatonTitle}")
+            ->line('Дедлайн: '.$deadline)
+            ->action('Открыть хакатон', route('hackatons.show', $this->case->hackaton_id));
     }
 
     public function toArray(object $notifiable): array
@@ -38,7 +42,7 @@ class CaseDeadlineReminder extends Notification implements ShouldQueue
         return [
             'type' => 'case_deadline_reminder',
             'title' => 'Напоминание о дедлайне кейса',
-            'message' => "Кейс «{$this->case->title}»: дедлайн {$this->case->deadline_at?->format('d.m.Y H:i')}.",
+            'message' => "Кейс «{$this->case->title}»: дедлайн ".Carbon::parse((string) $this->case->deadline_at)->format('d.m.Y H:i').'.',
             'hackaton_id' => $this->case->hackaton_id,
             'case_id' => $this->case->id,
             'url' => route('hackatons.show', $this->case->hackaton_id),

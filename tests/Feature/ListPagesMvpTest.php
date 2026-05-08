@@ -2,6 +2,8 @@
 
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
+use App\Livewire\Pages\Hackatons\Index as HackatonsIndex;
+use App\Livewire\Pages\Teams\Index as TeamsIndex;
 use App\Models\Hackaton;
 use App\Models\ListAnalyticsEvent;
 use App\Models\Role;
@@ -31,7 +33,7 @@ test('hackatons page supports status filter and quick apply', function () {
     $ownedTeam = Team::factory()->for($user)->for($upcoming)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::hackatons.index')
+        ->test(HackatonsIndex::class)
         ->set('status', HackatonStatus::REGISTRATION_OPEN->value)
         ->call('search')
         ->call('quickApplyHackaton', $upcoming->id)
@@ -49,7 +51,7 @@ test('teams page renders catalog hero and tabs', function () {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::teams.index')
+        ->test(TeamsIndex::class)
         ->assertSee('Открытые команды')
         ->assertSee('Все команды')
         ->assertSee('Найдено')
@@ -69,13 +71,13 @@ test('teams catalog all tab shows full teams when open roles filter off', functi
     TeamRole::factory()->for($team)->for($role)->create(['user_id' => $member->id]);
 
     Livewire::actingAs($viewer)
-        ->test('pages::teams.index')
+        ->test(TeamsIndex::class)
         ->set('catalog_tab', 'all')
         ->set('only_open_roles', false)
         ->assertSee('FullyStaffedUniqueXYZ');
 
     Livewire::actingAs($viewer)
-        ->test('pages::teams.index')
+        ->test(TeamsIndex::class)
         ->set('catalog_tab', 'all')
         ->set('only_open_roles', true)
         ->assertDontSee('FullyStaffedUniqueXYZ');
@@ -90,7 +92,7 @@ test('teams page quick apply creates pending application', function () {
     $teamRole = TeamRole::factory()->for($team)->for($role)->create(['user_id' => null]);
 
     Livewire::actingAs($applicant)
-        ->test('pages::teams.index')
+        ->test(TeamsIndex::class)
         ->call('quickApplyTeam', $team->id);
 
     expect(TeamApplication::query()
@@ -104,7 +106,7 @@ test('authenticated user can save list filters', function () {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::teams.index')
+        ->test(TeamsIndex::class)
         ->set('q', 'frontend')
         ->set('saved_filter_name', 'Frontend search')
         ->call('saveCurrentFilter');
@@ -119,8 +121,8 @@ test('authenticated user can save list filters', function () {
 test('list pages record analytics events', function () {
     $user = User::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::hackatons.index');
-    Livewire::actingAs($user)->test('pages::teams.index')->call('search');
+    Livewire::actingAs($user)->test(HackatonsIndex::class);
+    Livewire::actingAs($user)->test(TeamsIndex::class)->call('search');
 
     expect(ListAnalyticsEvent::query()->where('list_key', 'hackatons')->where('event_name', 'list_view')->exists())
         ->toBeTrue();
@@ -129,7 +131,7 @@ test('list pages record analytics events', function () {
 });
 
 test('hackatons page renders hero, filters and presets', function () {
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->assertSee('Каталог хакатонов')
         ->assertSee('Активные сейчас')
         ->assertSee('Завершённые')
@@ -150,12 +152,12 @@ test('hackatons preset filters by status group', function () {
         'is_public' => true,
     ]);
 
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->call('setPreset', 'active_now')
         ->assertSee('ActiveHackUnique')
         ->assertDontSee('FinishedHackUnique');
 
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->call('setPreset', 'finished')
         ->assertSee('FinishedHackUnique')
         ->assertDontSee('ActiveHackUnique');
@@ -173,7 +175,7 @@ test('hackatons with prizes preset only shows hackatons with prize fund', functi
         'prize_fund' => null,
     ]);
 
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->call('setPreset', 'with_prizes')
         ->assertSee('PrizedHackUnique')
         ->assertDontSee('NoPrizeHackUnique');
@@ -191,14 +193,14 @@ test('hackatons beginner preset filters by level', function () {
         'level' => HackatonLevel::Advanced,
     ]);
 
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->call('setPreset', 'beginner')
         ->assertSee('BeginnerHackUnique')
         ->assertDontSee('AdvancedHackUnique');
 });
 
 test('hackatons status chip overrides preset', function () {
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->call('setPreset', 'active_now')
         ->assertSet('preset', 'active_now')
         ->call('setStatusChip', HackatonStatus::FINISHED->value)
@@ -218,7 +220,7 @@ test('hackaton card displays prize fund and dates for active hackaton', function
         'registration_deadline_at' => now()->addDays(2),
     ]);
 
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->assertSee('CardMetricsHack')
         ->assertSee('Команд')
         ->assertSee('Участников')
@@ -234,13 +236,13 @@ test('finished hackatons render finished overlay marker', function () {
         'status' => HackatonStatus::FINISHED,
     ]);
 
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->assertSee('OverlayFinishedHack')
         ->assertSee('Завершён');
 });
 
 test('clearFilters resets new metric filters too', function () {
-    Livewire::test('pages::hackatons.index')
+    Livewire::test(HackatonsIndex::class)
         ->set('q', 'something')
         ->set('level', HackatonLevel::Beginner->value)
         ->set('with_prizes', true)
@@ -268,6 +270,6 @@ test('hackaton can be created with new metric fields', function () {
 });
 
 test('teams page hero shows brand badge', function () {
-    Livewire::test('pages::teams.index')
+    Livewire::test(TeamsIndex::class)
         ->assertSee('Каталог команд');
 });

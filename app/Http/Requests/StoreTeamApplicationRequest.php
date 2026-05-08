@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\ApplicationStatus;
+use App\Models\Team;
 use App\Models\TeamApplication;
 use App\Models\TeamRole;
 use Illuminate\Foundation\Http\FormRequest;
@@ -54,7 +55,8 @@ class StoreTeamApplicationRequest extends FormRequest
                     $validator->errors()->add('team_role_id', 'Эта роль уже занята.');
                 }
 
-                if ($teamRole->team->user_id === $user->id) {
+                $team = Team::query()->find($teamRole->team_id);
+                if ($team instanceof Team && $team->user_id === $user->id) {
                     $validator->errors()->add('team_role_id', 'Владелец команды не может подать заявку в свою команду.');
                 }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Pages\Auth\Register as RegisterPage;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Livewire;
@@ -10,7 +11,7 @@ test('registration wizard completes all steps and redirects to phone verificatio
     $nickname = "nick_{$suffix}";
     $phone = '79'.str_pad((string) random_int(0, 999999999), 9, '0', STR_PAD_LEFT);
 
-    Livewire::test('pages::auth.register')
+    Livewire::test(RegisterPage::class)
         ->set('fio', 'Тестов Пользователь Иванович')
         ->set('date_of_birth', '1995-06-15')
         ->call('nextStep')
@@ -39,7 +40,7 @@ test('registration wizard completes all steps and redirects to phone verificatio
 });
 
 test('registration wizard stays on step one when personal data is invalid', function () {
-    Livewire::test('pages::auth.register')
+    Livewire::test(RegisterPage::class)
         ->set('fio', '')
         ->set('date_of_birth', '')
         ->call('nextStep')

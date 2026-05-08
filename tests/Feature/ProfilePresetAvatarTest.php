@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Pages\Profile\Index as ProfileIndex;
 use App\Models\AvatarPreset;
 use App\Models\AvatarPresetPack;
 use App\Models\User;
@@ -30,7 +31,7 @@ test('select preset persists avatar path without global save', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::profile.index')
+        ->test(ProfileIndex::class)
         ->call('selectPreset', $path)
         ->assertSet('selected_preset_path', $path)
         ->assertHasNoErrors();
@@ -62,7 +63,7 @@ test('tampered selected preset path does not change stored avatar', function () 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::profile.index')
+        ->test(ProfileIndex::class)
         ->set('selected_preset_path', '../../../etc/passwd');
 
     expect($user->fresh()->avatar_path)->toBe($current);
@@ -78,7 +79,7 @@ test('selectPreset ignores unknown path', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::profile.index')
+        ->test(ProfileIndex::class)
         ->call('selectPreset', 'preset_avatars/packs/nope/nope.svg')
         ->assertSet('selected_preset_path', null);
 });
@@ -100,7 +101,7 @@ test('legacy flat preset path still selectable when file exists on disk', functi
     $path = 'preset_avatars/legacy-face.svg';
 
     Livewire::actingAs($user)
-        ->test('pages::profile.index')
+        ->test(ProfileIndex::class)
         ->call('selectPreset', $path)
         ->assertSet('selected_preset_path', $path);
 

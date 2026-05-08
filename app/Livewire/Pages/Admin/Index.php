@@ -17,12 +17,19 @@ class Index extends Component
     use Toast;
 
     public string $fio = '';
+
     public string $date_of_birth = '';
+
     public string $email = '';
+
     public string $nickname = '';
+
     public string $phone = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
+
     public ?string $description = null;
 
     public function dashboardStats(): array
@@ -43,7 +50,7 @@ class Index extends Component
             ->orderByDesc('total')
             ->limit(5)
             ->get()
-            ->map(fn ($row) => ['name' => (string) $row->event_name, 'total' => (int) $row->total])
+            ->map(fn ($row) => ['name' => (string) data_get($row, 'event_name', ''), 'total' => (int) data_get($row, 'total', 0)])
             ->all();
     }
 

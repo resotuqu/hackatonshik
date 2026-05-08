@@ -3,7 +3,11 @@
 namespace App\Livewire\Pages\Profile\Hackatons;
 
 use App\Models\Hackaton;
+use App\Models\HackatonDocument;
+use App\Models\Role;
 use App\Models\Team;
+use App\Models\TeamRole;
+use App\Models\User;
 use App\Models\UserHackatonDocument;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +18,7 @@ use Livewire\Component;
 class Participants extends Component
 {
     public Hackaton $hackaton;
+
     public array $expandedTeams = [];
 
     public array $teamHeaders = [
@@ -25,7 +30,7 @@ class Participants extends Component
 
     public function mount(Hackaton $hackaton): void
     {
-        if (!Auth::check() || Auth::id() !== $hackaton->user_id) {
+        if (! Auth::check() || Auth::id() !== $hackaton->user_id) {
             $this->redirect('/profile/hackatons');
 
             return;
@@ -36,7 +41,7 @@ class Participants extends Component
 
     public function downloadParticipantFile(int $documentId): mixed
     {
-        if (!Auth::check() || Auth::id() !== $this->hackaton->user_id) {
+        if (! Auth::check() || Auth::id() !== $this->hackaton->user_id) {
             return null;
         }
 
@@ -49,7 +54,7 @@ class Participants extends Component
             ->whereIn('hackaton_document_id', $requiredDocumentIds)
             ->first();
 
-        if (!$document) {
+        if (! $document) {
             return null;
         }
 
@@ -71,7 +76,7 @@ class Participants extends Component
             ->get()
             ->keyBy('hackaton_document_id');
 
-        return $requiredDocuments->map(function ($doc) use ($uploaded) {
+        return $requiredDocuments->map(function (HackatonDocument $doc) use ($uploaded) {
             $userDoc = $uploaded->get($doc->id);
 
             return [
@@ -89,24 +94,31 @@ class Participants extends Component
      */
     public function getTeamParticipants(int $teamId): array
     {
-        $team = Team::with(['roles.user', 'roles.role'])->find($teamId);
+        $team = Team::query()->with(['roles.user', 'roles.role'])->find($teamId);
 
-        if (!$team) {
+        if (! $team instanceof Team) {
             return [];
         }
 
         return $team->roles
-            ->filter(fn ($role) => $role->user_id !== null)
-            ->map(fn ($role) => [
-                'id' => $role->id,
-                'user_id' => $role->user_id,
-                'fio' => $role->user?->fio,
-                'nickname' => $role->user?->nickname,
-                'email' => $role->user?->email,
-                'phone' => $role->user?->phone,
-                'date_of_birth' => $role->user?->date_of_birth,
-                'role' => $role->role?->name,
-            ])
+            ->filter(function ($role): bool {
+                return $role instanceof TeamRole && $role->user_id !== null;
+            })
+            ->map(function (TeamRole $role): array {
+                $user = User::query()->find($role->user_id);
+                $roleModel = Role::query()->find($role->role_id);
+
+                return [
+                    'id' => $role->id,
+                    'user_id' => $role->user_id,
+                    'fio' => $user?->fio,
+                    'nickname' => $user?->nickname,
+                    'email' => $user?->email,
+                    'phone' => $user?->phone,
+                    'date_of_birth' => $user?->date_of_birth,
+                    'role' => $roleModel?->name,
+                ];
+            })
             ->values()
             ->all();
     }
@@ -142,7 +154,7 @@ class Participants extends Component
                     'title' => $team->title,
                     'participants_count' => $participantsCount,
                     'files_progress' => $totalRequired > 0
-                        ? $totalUploaded . '/' . $totalRequired
+                        ? $totalUploaded.'/'.$totalRequired
                         : '—',
                 ];
             })

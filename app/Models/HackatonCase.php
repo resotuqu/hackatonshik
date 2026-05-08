@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class HackatonCase extends Model
 {
@@ -68,7 +69,11 @@ class HackatonCase extends Model
             return false;
         }
 
-        return $this->deadline_at === null || $this->deadline_at->isFuture();
+        if ($this->deadline_at === null || $this->deadline_at === '') {
+            return true;
+        }
+
+        return Carbon::parse((string) $this->deadline_at)->isFuture();
     }
 
     public function isPublishedNow(): bool
@@ -77,6 +82,10 @@ class HackatonCase extends Model
             return false;
         }
 
-        return $this->publish_at === null || $this->publish_at->isPast();
+        if ($this->publish_at === null || $this->publish_at === '') {
+            return true;
+        }
+
+        return Carbon::parse((string) $this->publish_at)->isPast();
     }
 }

@@ -8,6 +8,7 @@ use App\Enums\ApplicationStatus;
 use App\Events\TeamApplicationChanged;
 use App\Http\Requests\StoreTeamApplicationRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
+use App\Models\Team;
 use App\Models\TeamApplication;
 use App\Models\TeamRole;
 use App\Models\User;
@@ -37,10 +38,11 @@ class TeamApplicationController extends Controller
             'reviewed_by' => null,
         ]);
         $application->save();
+        $captainId = Team::query()->whereKey($role->team_id)->value('user_id');
         event(new TeamApplicationChanged(
             teamId: (int) $role->team_id,
             applicantId: Auth::id() !== null ? (int) Auth::id() : null,
-            captainId: $role->team?->user_id !== null ? (int) $role->team->user_id : null,
+            captainId: $captainId !== null ? (int) $captainId : null,
         ));
 
         return back()->with('success', 'Заявка подана. Ожидайте решения создателя команды.');
@@ -49,7 +51,7 @@ class TeamApplicationController extends Controller
     public function update(UpdateApplicationStatusRequest $request, TeamApplication $application): RedirectResponse
     {
         Gate::authorize('update', $application);
-        $status = $request->validated('status');
+        $status = ApplicationStatus::from($request->validated('status'));
         /** @var User $reviewer */
         $reviewer = $request->user();
 
@@ -59,11 +61,11 @@ class TeamApplicationController extends Controller
                 ->lockForUpdate()
                 ->findOrFail($application->id);
 
-            if (! $lockedApplication->status->isPending()) {
+            if ($this->resolveApplicationStatus($lockedApplication) !== ApplicationStatus::PENDING) {
                 abort(422, 'Заявка уже рассмотрена.');
             }
 
-            if ($status === ApplicationStatus::ACCEPTED->value) {
+            if ($status === ApplicationStatus::ACCEPTED) {
                 $this->acceptApplication($lockedApplication, $reviewer);
 
                 return;
@@ -72,15 +74,19 @@ class TeamApplicationController extends Controller
             $lockedApplication->markAsRejected($reviewer);
         });
 
-        $flashMessage = $status === ApplicationStatus::ACCEPTED->value
+        $flashMessage = $status === ApplicationStatus::ACCEPTED
             ? 'Заявка принята. Участник добавлен в команду.'
             : 'Заявка отклонена.';
-        $updated = $application->fresh(['teamRole.team']);
-        event(new TeamApplicationChanged(
-            teamId: (int) $updated->teamRole->team_id,
-            applicantId: (int) $updated->user_id,
-            captainId: $updated->teamRole->team?->user_id !== null ? (int) $updated->teamRole->team->user_id : null,
-        ));
+        $updated = TeamApplication::query()->with(['teamRole.team'])->findOrFail($application->id);
+        $updatedTeamRole = TeamRole::query()->find($updated->team_role_id);
+        if ($updatedTeamRole instanceof TeamRole) {
+            $captainId = Team::query()->whereKey($updatedTeamRole->team_id)->value('user_id');
+            event(new TeamApplicationChanged(
+                teamId: (int) $updatedTeamRole->team_id,
+                applicantId: (int) $updated->user_id,
+                captainId: $captainId !== null ? (int) $captainId : null,
+            ));
+        }
 
         return back()->with('success', $flashMessage);
     }
@@ -115,10 +121,14 @@ class TeamApplicationController extends Controller
     public function destroy(TeamApplication $application): RedirectResponse
     {
         Gate::authorize('delete', $application);
-        $teamRole = $application->teamRole()->with('team:id,user_id')->first();
+        $teamRole = TeamRole::query()->find($application->team_role_id);
         $teamId = $teamRole?->team_id !== null ? (int) $teamRole->team_id : null;
-        $applicantId = $application->user_id !== null ? (int) $application->user_id : null;
-        $captainId = $teamRole?->team?->user_id !== null ? (int) $teamRole->team->user_id : null;
+        $applicantId = (int) $application->user_id;
+        $captainId = null;
+        if ($teamRole instanceof TeamRole) {
+            $captainId = Team::query()->whereKey($teamRole->team_id)->value('user_id');
+            $captainId = $captainId !== null ? (int) $captainId : null;
+        }
         $application->delete();
         if ($teamId !== null) {
             event(new TeamApplicationChanged(
@@ -129,5 +139,10 @@ class TeamApplicationController extends Controller
         }
 
         return back()->with('success', 'Заявка удалена.');
+    }
+
+    private function resolveApplicationStatus(TeamApplication $application): ApplicationStatus
+    {
+        return ApplicationStatus::from((string) $application->getRawOriginal('status'));
     }
 }

@@ -122,7 +122,7 @@ final class PresetAvatar
 
         foreach ($packs as $pack) {
             $presets = [];
-            foreach ($pack->presets as $preset) {
+            foreach (AvatarPreset::query()->where('avatar_preset_pack_id', $pack->id)->get() as $preset) {
                 $presets[] = [
                     'path' => $preset->storage_path,
                     'url' => asset('storage/'.$preset->storage_path),

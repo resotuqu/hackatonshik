@@ -4,7 +4,10 @@ namespace App\Livewire\Pages\Teams;
 
 use App\Models\Hackaton;
 use App\Models\Role;
+use App\Models\Skill;
 use App\Models\Team;
+use App\Models\TeamRole;
+use App\Models\TeamSocialLink;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -16,13 +19,13 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Изменение команды'])]
 class Edit extends Component
 {
-    use WithFileUploads, Toast;
+    use Toast, WithFileUploads;
 
     public Team $team;
 
     public string $teamInitials = '';
 
-    //----------------------------------------------------------------
+    // ----------------------------------------------------------------
     #[Validate(['title' => 'required'], message: ['title.required' => 'Заголовок должен быть заполнен'])]
     public string $title = '';
 
@@ -40,7 +43,7 @@ class Edit extends Component
 
     public bool $is_public = true;
 
-    //----------------------------------------------------------------
+    // ----------------------------------------------------------------
     #[Validate([
         'roles.*.title' => ['required', 'min:3'],
         'roles.*.description' => ['required', 'max:255'],
@@ -87,7 +90,7 @@ class Edit extends Component
         $this->roles[$index]['title'] = $title;
     }
 
-    //----------------------------------------------------------------
+    // ----------------------------------------------------------------
     #[Validate(rule: [
         'socialLinks.*.name' => ['required', 'min:2'],
         'socialLinks.*.url' => ['required'],
@@ -200,7 +203,7 @@ class Edit extends Component
         return 'heroicons:link';
     }
 
-    //----------------------------------------------------------------
+    // ----------------------------------------------------------------
 
     public function save()
     {
@@ -230,8 +233,10 @@ class Edit extends Component
         foreach ($this->socialLinks as $socialLink) {
             $existingSocialLinkId = $socialLink['db_id'] ?? null;
             if (! empty($existingSocialLinkId)) {
-                $existingSocialLink = $this->team->socialLinks()->whereKey($existingSocialLinkId)->first();
-                if ($existingSocialLink) {
+                $existingSocialLink = TeamSocialLink::query()
+                    ->where('team_id', $this->team->id)
+                    ->find($existingSocialLinkId);
+                if ($existingSocialLink instanceof TeamSocialLink) {
                     $existingSocialLink->update([
                         'name' => $socialLink['name'],
                         'url' => $socialLink['url'],
@@ -242,7 +247,8 @@ class Edit extends Component
                 }
             }
 
-            $newSocialLink = $this->team->socialLinks()->create([
+            $newSocialLink = TeamSocialLink::query()->create([
+                'team_id' => $this->team->id,
                 'name' => $socialLink['name'],
                 'url' => $socialLink['url'],
             ]);
@@ -255,12 +261,19 @@ class Edit extends Component
         }
         $socialLinksToDelete->delete();
 
-        $teamRolesById = $this->team->roles()->with('skills')->get()->keyBy('id');
+        $teamRolesById = TeamRole::query()
+            ->where('team_id', $this->team->id)
+            ->with('skills')
+            ->get()
+            ->keyBy('id');
         $savedRoleIds = [];
         foreach ($this->roles as $role) {
             $existingRoleId = $role['db_id'] ?? null;
             if (! empty($existingRoleId) && $teamRolesById->has($existingRoleId)) {
                 $existingRole = $teamRolesById->get($existingRoleId);
+                if (! $existingRole instanceof TeamRole) {
+                    continue;
+                }
                 $existingRole->update([
                     'title' => $role['title'],
                     'description' => $role['description'],
@@ -272,7 +285,7 @@ class Edit extends Component
                 continue;
             }
 
-            $newRole = $this->team->roles()->create([
+            $newRole = TeamRole::query()->create([
                 'title' => $role['title'],
                 'description' => $role['description'],
                 'team_id' => $this->team->id,
@@ -292,7 +305,7 @@ class Edit extends Component
         $this->redirect('/profile/teams');
     }
 
-    //----------------------------------------------------------------
+    // ----------------------------------------------------------------
     #[Computed]
     public function hackatons()
     {
@@ -333,7 +346,7 @@ class Edit extends Component
     #[Computed]
     public function skillsData()
     {
-        return \App\Models\Skill::all();
+        return Skill::all();
     }
 
     /**
@@ -369,7 +382,7 @@ class Edit extends Component
         ];
     }
 
-    //----------------------------------------------------------------
+    // ----------------------------------------------------------------
 
     private function teamInitialsFromTitle(string $title): string
     {
@@ -379,8 +392,11 @@ class Edit extends Component
         }
 
         $parts = preg_split('/\s+/u', $title, -1, PREG_SPLIT_NO_EMPTY);
+        if ($parts === false) {
+            $parts = [];
+        }
         $initials = '';
-        foreach (array_slice($parts ?? [], 0, 2) as $part) {
+        foreach (array_slice($parts, 0, 2) as $part) {
             $initials .= mb_strtoupper(mb_substr((string) $part, 0, 1));
         }
 
@@ -405,7 +421,7 @@ class Edit extends Component
         $this->hackaton_id = $team->hackaton_id;
         $this->teamInitials = $this->teamInitialsFromTitle((string) $team->title);
 
-        foreach ($team->socialLinks as $socialLink) {
+        foreach (TeamSocialLink::query()->where('team_id', $team->id)->get(['id', 'name', 'url']) as $socialLink) {
             $this->socialLinks[] = [
                 'id' => uniqid(),
                 'db_id' => $socialLink->id,
@@ -413,7 +429,7 @@ class Edit extends Component
                 'url' => $socialLink->url,
             ];
         }
-        foreach ($team->roles as $role) {
+        foreach (TeamRole::query()->with('skills')->where('team_id', $team->id)->get() as $role) {
             $skillIds = $role->skills->pluck('id')->toArray();
 
             $this->roles[] = [

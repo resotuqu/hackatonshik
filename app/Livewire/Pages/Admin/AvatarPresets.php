@@ -48,7 +48,11 @@ class AvatarPresets extends Component
     public function syncPackFormFromDatabase(): void
     {
         $this->packForm = [];
-        foreach ($this->packs as $pack) {
+        $packs = AvatarPresetPack::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+        foreach ($packs as $pack) {
             $this->packForm[$pack->id] = [
                 'name' => $pack->name,
                 'sort_order' => (int) $pack->sort_order,
@@ -110,7 +114,7 @@ class AvatarPresets extends Component
     {
         $pack = AvatarPresetPack::query()->with('presets')->findOrFail($id);
 
-        foreach ($pack->presets as $preset) {
+        foreach (AvatarPreset::query()->where('avatar_preset_pack_id', $pack->id)->get() as $preset) {
             if (PresetAvatar::isPathUnderPack($preset->storage_path, $pack->slug)) {
                 Storage::disk('public')->delete($preset->storage_path);
             }
@@ -168,7 +172,11 @@ class AvatarPresets extends Component
     public function deletePreset(int $id): void
     {
         $preset = AvatarPreset::query()->with('pack')->findOrFail($id);
-        $slug = $preset->pack->slug;
+        $pack = AvatarPresetPack::query()->find($preset->avatar_preset_pack_id);
+        if (! $pack instanceof AvatarPresetPack) {
+            return;
+        }
+        $slug = $pack->slug;
 
         if (PresetAvatar::isPathUnderPack($preset->storage_path, $slug)) {
             Storage::disk('public')->delete($preset->storage_path);

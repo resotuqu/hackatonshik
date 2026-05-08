@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Pages\Profile\Index as ProfileIndex;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +19,7 @@ test('uploaded avatar persists when file is set on component', function () {
     $file = UploadedFile::fake()->image('cropped.jpg', 400, 400);
 
     Livewire::actingAs($user)
-        ->test('pages::profile.index')
+        ->test(ProfileIndex::class)
         ->set('avatar', $file)
         ->assertHasNoErrors();
 

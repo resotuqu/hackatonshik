@@ -118,7 +118,7 @@ class Edit extends Component
         $this->is_public = (bool) $hackaton->is_public;
         $this->prize_fund = $hackaton->prize_fund;
         $this->prize_places_count = $hackaton->prize_places_count;
-        $this->level = $hackaton->level?->value;
+        $this->level = is_string($hackaton->level) ? $hackaton->level : null;
         $this->registration_deadline_at = $hackaton->registration_deadline_at;
 
         foreach ($hackaton->documents as $document) {

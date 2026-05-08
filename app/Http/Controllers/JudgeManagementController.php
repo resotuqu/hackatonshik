@@ -95,7 +95,12 @@ class JudgeManagementController extends Controller
             'accepted_at' => now(),
         ]);
 
-        $invitation->hackaton->judgeAssignments()->updateOrCreate(
+        $hackaton = Hackaton::query()->find($invitation->hackaton_id);
+        if (! $hackaton instanceof Hackaton) {
+            abort(404);
+        }
+
+        $hackaton->judgeAssignments()->updateOrCreate(
             ['user_id' => $user->id],
             [
                 'assigned_by' => $invitation->invited_by,
@@ -104,7 +109,7 @@ class JudgeManagementController extends Controller
         );
 
         return redirect()
-            ->route('hackatons.show', $invitation->hackaton)
+            ->route('hackatons.show', $hackaton)
             ->with('success', 'Вы подтверждены как судья и назначены на хакатон.');
     }
 

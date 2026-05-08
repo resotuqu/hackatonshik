@@ -10,7 +10,7 @@ use App\Models\SavedListFilter;
 use App\Models\Skill;
 use App\Models\Team;
 use App\Models\TeamApplication;
-use Illuminate\Support\Carbon;
+use App\Models\TeamRole;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
@@ -224,7 +224,7 @@ class Index extends Component
         if (in_array($roleId, $ids, true)) {
             $this->role_ids = array_values(array_diff($ids, [$roleId]));
         } else {
-            $this->role_ids = array_values([...$ids, $roleId]);
+            $this->role_ids = [...$ids, $roleId];
         }
         $this->resetPage();
         $this->trackListEvent('filter_apply', $this->currentFilters());
@@ -288,8 +288,10 @@ class Index extends Component
             return;
         }
 
-        $role = $team->roles->firstWhere('user_id', null);
-        if (! $role) {
+        $role = $team->roles->first(function ($candidate): bool {
+            return $candidate instanceof TeamRole && $candidate->user_id === null;
+        });
+        if (! $role instanceof TeamRole) {
             return;
         }
 
@@ -346,7 +348,8 @@ class Index extends Component
             return;
         }
 
-        $payload = $filter->filters ?? [];
+        $decoded = json_decode((string) $filter->filters, true);
+        $payload = is_array($decoded) ? $decoded : [];
         $this->q = (string) ($payload['q'] ?? '');
         $this->hackaton_id = (string) ($payload['hackaton_id'] ?? '0');
         $this->skills = (array) ($payload['skills'] ?? []);
@@ -359,8 +362,8 @@ class Index extends Component
         }
         $this->only_open_roles = (bool) ($payload['only_open_roles'] ?? true);
         $this->role_ids = array_values(array_map('intval', (array) ($payload['role_ids'] ?? [])));
-        $legacyRole = (string) ($payload['role_id'] ?? '0');
-        if ($legacyRole !== '0' && $this->role_ids === []) {
+        $legacyRole = (int) ($payload['role_id'] ?? 0);
+        if ($legacyRole > 0 && $this->role_ids === []) {
             $this->role_ids = [(int) $legacyRole];
         }
         $this->search();

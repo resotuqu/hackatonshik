@@ -83,7 +83,7 @@ class PlusofonFlashCallSender implements VerificationSender
                 return true;
             }
 
-            if ($httpOk && ! $businessOk) {
+            if ($httpOk) {
                 Log::warning('Plusofon Flash Call: HTTP 200, но в теле ответа ошибка (success=false или code>=400).', [
                     'phone' => $phone,
                     'http_status' => $response->status(),
