@@ -45,6 +45,9 @@ jobs:
       - name: Install Node Dependencies
         run: npm i
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
@@ -60,10 +63,40 @@ jobs:
       - name: Build Assets
         run: npm run build
 
-      - name: Run Tests
+      - name: Run Unit and Feature Tests with Coverage
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
           DB_FOREIGN_KEYS: 'true'
-        run: php artisan test --compact
+        run: |
+          mkdir -p coverage
+          vendor/bin/pest --compact --testsuite=Unit,Feature \
+            --coverage \
+            --coverage-clover=coverage/clover.xml \
+            --coverage-text=coverage/coverage.txt
+
+      - name: Print coverage summary
+        if: always()
+        run: |
+          if [ -f coverage/coverage.txt ]; then
+            tail -n 40 coverage/coverage.txt
+          fi
+
+      - name: Run Browser Tests
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          DB_FOREIGN_KEYS: 'true'
+        run: vendor/bin/pest --compact --testsuite=Browser
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-php${{ matrix.php-version }}
+          path: |
+            coverage/clover.xml
+            coverage/coverage.txt
+          if-no-files-found: ignore

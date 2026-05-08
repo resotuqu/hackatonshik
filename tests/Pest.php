@@ -19,6 +19,12 @@ pest()->extend(TestCase::class)->in('Feature', 'Unit');
 // Keep DB state isolated for every test suite folder.
 pest()->use(RefreshDatabase::class)->in('Feature', 'Unit');
 
+// Browser tests use the same TestCase + RefreshDatabase, but rely on a
+// real (file-based) sqlite connection that is shared between the test
+// runner and the spawned HTTP server (see phpunit.xml Browser suite).
+pest()->extend(TestCase::class)->in('Browser');
+pest()->use(RefreshDatabase::class)->in('Browser');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations
