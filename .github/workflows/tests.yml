@@ -61,4 +61,9 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        run: ./vendor/bin/pest
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          DB_FOREIGN_KEYS: 'true'
+        run: php artisan test --compact

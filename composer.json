@@ -85,6 +85,11 @@
             "@lint:check",
             "@php artisan test"
         ],
+        "test:rebuild": [
+            "@php artisan config:clear --ansi",
+            "@php artisan cache:clear --ansi",
+            "@php artisan test --compact"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

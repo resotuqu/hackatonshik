@@ -16,7 +16,8 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)->in('Feature', 'Unit');
 
-pest()->use(RefreshDatabase::class)->in('Feature');
+// Keep DB state isolated for every test suite folder.
+pest()->use(RefreshDatabase::class)->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
