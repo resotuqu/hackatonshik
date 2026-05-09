@@ -63,27 +63,22 @@
         </div>
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             @forelse ($featuredHackatons as $hackaton)
-                <x-hackaton-card
-                    :hackaton="$hackaton"
-                    :can-quick-apply="false"
-                    href="{{ route('hackatons.show', $hackaton) }}"
-                />
+                <div class="motion-safe:animate-card-enter delay-{{ ($loop->index % 5) * 100 }}">
+                    <x-hackaton-card
+                        :hackaton="$hackaton"
+                        :can-quick-apply="false"
+                        href="{{ route('hackatons.show', $hackaton) }}"
+                    />
+                </div>
             @empty
                 <div class="sm:col-span-2">
-                    <div class="card card-border border-base-300 border-dashed bg-base-100/80 bg-gradient-to-br from-base-200/80 to-base-100 shadow-sm">
-                        <div class="card-body flex flex-col items-center gap-6 px-6 py-14 text-center sm:flex-row sm:text-left">
-                            <div class="flex h-36 w-36 shrink-0 items-center justify-center rounded-3xl bg-secondary/10 ring-1 ring-secondary/25">
-                                <x-app-icon icon="heroicons:rocket-launch" class="h-16 w-16 text-secondary" label="Скоро новые хакатоны" />
-                            </div>
-                            <div class="max-w-lg space-y-4">
-                                <h3 class="font-display text-xl font-bold sm:text-2xl">{{ __('ui.home.featured_empty_title') }}</h3>
-                                <p class="text-base leading-relaxed text-base-content/75">{{ __('ui.home.featured_empty_description') }}</p>
-                                <a href="/hackatons" class="btn btn-secondary btn-lg mt-2 w-full shadow-md shadow-secondary/25 ring-2 ring-secondary/25 ring-offset-2 ring-offset-base-100 transition-transform hover:scale-[1.02] active:scale-[0.99] sm:mt-0 sm:w-auto">
-                                    {{ __('ui.home.open_catalog') }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <x-empty-state
+                        :title="__('ui.home.featured_empty_title')"
+                        :description="__('ui.home.featured_empty_description')"
+                        icon="heroicons:rocket-launch"
+                        :actionHref="'/hackatons'"
+                        :actionLabel="__('ui.home.open_catalog')"
+                    />
                 </div>
             @endforelse
         </div>
@@ -392,10 +387,10 @@
     data-test="home-dashboard"
     aria-labelledby="dashboard-heading"
 >
-    <header class="space-y-2">
-        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
-        <p class="text-base-content/80">
-            Здравствуйте, {{ auth()->user()->fio }}.
+    <header class="flex flex-col gap-1">
+        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-black sm:text-4xl">Краткая сводка</h1>
+        <p class="text-base-content/60 font-medium">
+            Здравствуйте, <span class="text-base-content font-bold">{{ auth()->user()->fio }}</span>. Рады вас видеть!
         </p>
     </header>
 
@@ -426,34 +421,65 @@
         @endif
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <x-marycard title="Мои команды" class="card card-border bg-base-100 shadow-sm">
-                <p class="text-3xl font-semibold tabular-nums">{{ $teamsCount }}</p>
-                <x-slot:menu>
-                    <a href="/profile/teams" class="btn btn-ghost btn-sm">Открыть</a>
-                </x-slot:menu>
-            </x-marycard>
-            <x-marycard title="Сертификаты" class="card card-border bg-base-100 shadow-sm">
-                <p class="text-3xl font-semibold tabular-nums">{{ $certificatesCount }}</p>
-                <x-slot:menu>
-                    <a href="/profile/certificates" class="btn btn-ghost btn-sm">Открыть</a>
-                </x-slot:menu>
-            </x-marycard>
-            <x-marycard title="Заявки в команду на рассмотрении" class="card card-border bg-base-100 shadow-sm">
-                <p class="text-3xl font-semibold tabular-nums">{{ $pendingTeamApplicationsCount }}</p>
-                <p class="mt-2 text-sm text-base-content/70">Заявки, которые вы подали на участие в ролях команд.</p>
-                <x-slot:menu>
-                    <a href="/profile/teams#pending-team-role-applications" class="btn btn-ghost btn-sm">Открыть</a>
-                </x-slot:menu>
-            </x-marycard>
-            <x-marycard title="Заявки команд на хакатоны (ожидают)" class="card card-border bg-base-100 shadow-sm">
-                <p class="text-3xl font-semibold tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
-                <p class="mt-2 text-sm text-base-content/70">По вашим командам, ожидающие решения организатора.</p>
-                @if ($pendingHackatonApplicationsCount > 0)
-                    <x-slot:menu>
-                        <a href="/hackatons" class="btn btn-ghost btn-sm">Каталог</a>
-                    </x-slot:menu>
-                @endif
-            </x-marycard>
+            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+                <div class="flex flex-col h-full justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Мои команды</span>
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                            <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $teamsCount }}</p>
+                    </div>
+                    <a href="/profile/teams" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
+                </div>
+            </div>
+
+            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+                <div class="flex flex-col h-full justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Сертификаты</span>
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-content transition-colors">
+                            <x-app-icon icon="heroicons:academic-cap" class="h-4 w-4" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $certificatesCount }}</p>
+                    </div>
+                    <a href="/profile/certificates" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
+                </div>
+            </div>
+
+            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+                <div class="flex flex-col h-full justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Заявки в команды</span>
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content transition-colors">
+                            <x-app-icon icon="heroicons:envelope" class="h-4 w-4" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $pendingTeamApplicationsCount }}</p>
+                    </div>
+                    <a href="/profile/teams#pending-team-role-applications" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
+                </div>
+            </div>
+
+            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+                <div class="flex flex-col h-full justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Заявки на хакатоны</span>
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                            <x-app-icon icon="heroicons:rocket-launch" class="h-4 w-4" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
+                    </div>
+                    <a href="/hackatons" class="ui-cta-ghost btn-xs mt-4 self-end">Каталог</a>
+                </div>
+            </div>
         </div>
 
         @if (count($hackatonApplicationsPreview) > 0)

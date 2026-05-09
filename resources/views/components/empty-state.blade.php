@@ -50,16 +50,18 @@
                 ? 'h-9 w-9 text-base-content/60'
                 : ($compact ? 'h-10 w-10 text-primary' : 'h-14 w-14 text-primary');
         @endphp
-            <x-app-icon :icon="$icon" class="relative {{ $iconSizeClass }}" />
+            <div class="relative motion-safe:animate-[bounce_3s_infinite] [animation-delay:150ms]">
+                <x-app-icon :icon="$icon" class="relative {{ $iconSizeClass }}" />
+            </div>
         </div>
 
-        <div class="space-y-2">
+        <div class="space-y-3">
             <h3 @class([
-                'ui-heading-display font-bold',
-                $embedded ? 'text-base sm:text-lg' : 'text-xl sm:text-2xl',
+                'ui-heading-display font-black leading-tight',
+                $embedded ? 'text-lg' : 'text-2xl sm:text-3xl',
             ])>{{ $title }}</h3>
             @if ($description)
-                <p class="text-pretty text-sm leading-relaxed text-base-content/70 sm:text-base">{{ $description }}</p>
+                <p class="mx-auto max-w-sm text-pretty text-sm leading-relaxed text-base-content/70 sm:text-base">{{ $description }}</p>
             @endif
         </div>
 

@@ -314,33 +314,16 @@
                 </div>
             @empty
                 <div class="col-span-full">
-                    <div class="mx-auto flex max-w-lg flex-col items-center gap-6 rounded-3xl border border-base-300 bg-base-100 px-6 py-12 text-center shadow-sm">
-                        <div class="text-primary" aria-hidden="true">
-                            <svg class="h-40 w-full max-w-56" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="tg" x1="0" y1="0" x2="200" y2="160" gradientUnits="userSpaceOnUse">
-                                        <stop stop-color="currentColor" stop-opacity="0.35" />
-                                        <stop offset="1" stop-color="currentColor" stop-opacity="0.05" />
-                                    </linearGradient>
-                                </defs>
-                                <rect width="200" height="160" rx="16" fill="url(#tg)" />
-                                <path d="M20 40h160M20 80h160M20 120h160" stroke="currentColor" stroke-opacity="0.2" stroke-width="1" />
-                                <path d="M40 20v120M80 20v120M120 20v120M160 20v120" stroke="currentColor" stroke-opacity="0.15" stroke-width="1" />
-                                <circle cx="100" cy="78" r="28" stroke="currentColor" stroke-opacity="0.5" stroke-width="2" fill="none" />
-                                <path d="M88 78l8 8 16-16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                        <div class="space-y-2">
-                            <h2 class="font-display text-xl font-semibold text-base-content">{{ __('ui.teams.empty_title') }}</h2>
-                            <p class="text-sm leading-relaxed text-base-content/70">
-                                {{ __('ui.teams.empty_description') }}
-                            </p>
-                        </div>
-                        <div class="flex flex-col gap-2 sm:flex-row">
-                            <a href="/teams/create" wire:navigate class="ui-cta-primary">{{ __('ui.teams.create_team') }}</a>
-                            <button type="button" class="btn btn-outline" wire:click="clearFilters">{{ __('ui.teams.reset_filters') }}</button>
-                        </div>
-                    </div>
+                    <x-empty-state
+                        :title="__('ui.teams.empty_title')"
+                        :description="__('ui.teams.empty_description')"
+                        icon="heroicons:user-group"
+                        :actionHref="'/teams/create'"
+                        :actionLabel="__('ui.teams.create_team')"
+                        :secondaryActionHref="'javascript:void(0)'"
+                        :secondaryActionLabel="__('ui.teams.reset_filters')"
+                        @click="$wire.clearFilters()"
+                    />
                 </div>
             @endforelse
         </div>
