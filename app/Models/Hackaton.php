@@ -34,8 +34,14 @@ class Hackaton extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::increment('api:v1:catalog:hackatons:version'));
-        static::deleted(fn () => Cache::increment('api:v1:catalog:hackatons:version'));
+        static::saved(function () {
+            Cache::increment('api:v1:catalog:hackatons:version');
+            Cache::tags(['catalog', 'home'])->flush();
+        });
+        static::deleted(function () {
+            Cache::increment('api:v1:catalog:hackatons:version');
+            Cache::tags(['catalog', 'home'])->flush();
+        });
     }
 
     private const SHOW_RELATIONS = [

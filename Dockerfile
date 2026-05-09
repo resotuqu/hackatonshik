@@ -3,8 +3,9 @@ FROM composer:latest AS composer
 
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts --prefer-dist \
+RUN composer install --no-dev --optimize-autoloader --no-scripts --prefer-dist --ignore-platform-reqs \
     && rm -rf /root/.composer/cache
+
 
 # ====================== FRONTEND STAGE (поддерживает pnpm / yarn / npm) ======================
 FROM node:22-alpine AS frontend
@@ -53,7 +54,16 @@ RUN apk add --no-cache \
     icu-libs \
     postgresql-libs \
     php85-pecl-redis \
+    php85-pdo \
+    php85-pdo_sqlite \
+    php85-pdo_pgsql \
+    php85-pcntl \
+    php85-posix \
     && rm -rf /var/cache/apk/*
+
+
+
+
 
 WORKDIR /var/www/html
 
@@ -62,16 +72,21 @@ COPY --from=frontend /app/public/build/ ./public/build/
 COPY . .
 
 # Права для Laravel
-RUN chown -R nobody:nobody /var/www/html/storage /var/www/html/bootstrap/cache \
+RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs \
+    && chown -R nobody:nobody /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
 
 # Конфиги
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir -p /var/log/supervisor && chown -R nobody:nobody /var/log/supervisor
 RUN touch /etc/php85/conf.d/99-laravel.ini
 
-# Устанавливаем Linux-бинарник RoadRunner в образе
-RUN php vendor/bin/rr get-binary --location /usr/local/bin/rr \
+
+USER root
+RUN php vendor/bin/rr get-binary --location /usr/local/bin \
     && chmod +x /usr/local/bin/rr
+
 
 # OPcache
 RUN echo -e "opcache.enable=1\n\

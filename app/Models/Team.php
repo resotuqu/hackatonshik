@@ -20,8 +20,14 @@ class Team extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::increment('api:v1:catalog:teams:version'));
-        static::deleted(fn () => Cache::increment('api:v1:catalog:teams:version'));
+        static::saved(function () {
+            Cache::increment('api:v1:catalog:teams:version');
+            Cache::tags(['catalog', 'home'])->flush();
+        });
+        static::deleted(function () {
+            Cache::increment('api:v1:catalog:teams:version');
+            Cache::tags(['catalog', 'home'])->flush();
+        });
     }
 
     private const SHOW_BASE_RELATIONS = [

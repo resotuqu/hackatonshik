@@ -107,6 +107,8 @@ class Index extends Component
             ])
             ->withCount('roles')
             ->withCount(['roles as empty_roles_count' => fn ($query) => $query->whereNull('user_id')])
+            ->withCount(['roles as participants_count' => fn ($query) => $query->whereNotNull('user_id')])
+
             ->when($needsOpen, fn ($q) => $q->whereHas('roles', fn ($r) => $r->whereNull('user_id')))
             ->when($this->q !== '', function ($query) {
                 $query->where(function ($subQuery) {

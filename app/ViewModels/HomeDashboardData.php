@@ -87,12 +87,30 @@ final class HomeDashboardData
     private static function buildForUser(User $user): self
     {
         $self = new self;
-        $self->unreadNotificationsCount = $user->unreadNotifications()->count();
+
+        $userWithCounts = User::query()
+            ->where('id', $user->id)
+            ->withCount([
+                'unreadNotifications',
+                'teams',
+                'certificates',
+                'teamApplications' => fn (Builder $q) => $q->where('status', ApplicationStatus::PENDING),
+            ])
+            ->first();
+
+        if (! $userWithCounts) {
+            return $self;
+        }
+
+        $self->unreadNotificationsCount = (int) $userWithCounts->unread_notifications_count;
         $self->showPhoneVerificationBanner = $user->phone !== null
             && $user->phone !== ''
             && $user->phone_verified_at === null;
 
         if ($user->isParticipant()) {
+            $self->teamsCount = (int) $userWithCounts->teams_count;
+            $self->certificatesCount = (int) $userWithCounts->certificates_count;
+            $self->pendingTeamApplicationsCount = (int) $userWithCounts->team_applications_count;
             $self->fillParticipant($user);
 
             return $self;
@@ -127,12 +145,6 @@ final class HomeDashboardData
 
     private function fillParticipant(User $user): void
     {
-        $this->teamsCount = $user->teams()->count();
-        $this->certificatesCount = $user->certificates()->count();
-        $this->pendingTeamApplicationsCount = $user->teamApplications()
-            ->where('status', ApplicationStatus::PENDING)
-            ->count();
-
         $pendingQuery = $this->participantPendingHackatonApplicationsQuery($user);
 
         $pendingHackatonApps = (clone $pendingQuery)

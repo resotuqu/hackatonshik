@@ -75,7 +75,7 @@ class Index extends Component
 
     public function mount(): void
     {
-        $this->featuredHackatons = Cache::remember('home-featured-hackatons-v1', now()->addMinutes(10), function (): array {
+        $this->featuredHackatons = Cache::tags(['home', 'catalog'])->remember('home-featured-hackatons-v2', now()->addMinutes(10), function (): array {
             return Hackaton::query()
                 ->select('hackatons.*')
                 ->selectSub(function ($query) {
@@ -100,7 +100,8 @@ class Index extends Component
         });
 
         // Все публичные события кроме черновика (в т.ч. завершённые и в архиве) + суммарно команды и участники по ним.
-        $totals = Cache::remember('home-public-totals-v3', now()->addMinutes(10), function (): array {
+        $totals = Cache::tags(['home', 'catalog'])->remember('home-public-totals-v4', now()->addMinutes(10), function (): array {
+
             $hackatonsCount = Hackaton::query()
                 ->where('is_public', true)
                 ->whereNot('status', HackatonStatus::DRAFT)

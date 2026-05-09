@@ -63,9 +63,8 @@ class Index extends Component
                 'prize_fund', 'prize_places_count', 'level', 'registration_deadline_at',
             ])
             ->withCount('teams')
-            ->withCount(['teams as participants_count' => fn (Builder $query) => $query
-                ->join('team_roles', 'team_roles.team_id', '=', 'teams.id')
-                ->whereNotNull('team_roles.user_id')])
+            ->withCount(['roles as participants_count' => fn (Builder $query) => $query->whereNotNull('team_roles.user_id')])
+
             ->when($this->q !== '', function (Builder $query): void {
                 $query->where('title', 'like', '%'.$this->q.'%');
             })

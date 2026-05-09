@@ -9,6 +9,7 @@ services:
       - .env
     environment:
       OCTANE_SERVER: ${OCTANE_SERVER:-roadrunner}
+
       OCTANE_HOST: ${OCTANE_HOST:-0.0.0.0}
       OCTANE_PORT: ${OCTANE_PORT:-8000}
       OCTANE_WORKERS: ${OCTANE_WORKERS:-auto}
@@ -21,8 +22,11 @@ services:
     depends_on:
       - redis
     volumes:
-      - .:/var/www/html
+      # - .:/var/www/html
       - storage-data:/var/www/html/storage
+
+    networks:
+      - app-network
 
   redis:
     image: redis:7-alpine
@@ -31,64 +35,68 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis-data:/data
+    networks:
+      - app-network
+
+  laravel.test:
+    build:
+      context: './vendor/laravel/sail/runtimes/8.5'
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP:-1000}'
+    image: 'sail-8.5/app'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${APP_PORT:-80}:80'
+      - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+    environment:
+      WWWUSER: '${WWWUSER:-1000}'
+      LARAVEL_SAIL: 1
+      XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+    volumes:
+      - '.:/var/www/html'
+    networks:
+      - app-network
+    depends_on:
+      - pgsql
+      - redis
+
+  pgsql:
+    image: 'postgres:17-alpine'
+
+    ports:
+      - '${FORWARD_DB_PORT:-5432}:5432'
+    environment:
+      PGPASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_DB: '${DB_DATABASE:-laravel}'
+      POSTGRES_USER: '${DB_USERNAME:-sail}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - 'sail-pgsql:/var/lib/postgresql'
+      - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-q'
+        - '-d'
+        - '${DB_DATABASE:-laravel}'
+        - '-U'
+        - '${DB_USERNAME:-sail}'
+      retries: 3
+      timeout: 5s
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   redis-data:
   storage-data:
-services:
-    laravel.test:
-        build:
-            context: './vendor/laravel/sail/runtimes/8.5'
-            # context: . 
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.5/app'
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-            IGNITION_LOCAL_SITES_PATH: '${PWD}'
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - sail
-        depends_on:
-            - pgsql
-    pgsql:
-        image: 'postgres:18-alpine'
-        ports:
-            - '${FORWARD_DB_PORT:-5432}:5432'
-        environment:
-            PGPASSWORD: '${DB_PASSWORD:-secret}'
-            POSTGRES_DB: '${DB_DATABASE}'
-            POSTGRES_USER: '${DB_USERNAME}'
-            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
-        volumes:
-            - 'sail-pgsql:/var/lib/postgresql'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
-        networks:
-            - sail
-        healthcheck:
-            test:
-                - CMD
-                - pg_isready
-                - '-q'
-                - '-d'
-                - '${DB_DATABASE}'
-                - '-U'
-                - '${DB_USERNAME}'
-            retries: 3
-            timeout: 5s
-networks:
-    sail:
-        driver: bridge
-volumes:
-    sail-pgsql:
-        driver: local
+  sail-pgsql:
+    driver: local

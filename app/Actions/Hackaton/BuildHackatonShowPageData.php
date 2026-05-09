@@ -203,7 +203,7 @@ final class BuildHackatonShowPageData
 
         $teams = Team::query()
             ->whereIn('id', $rows->pluck('team_id'))
-            ->get()
+            ->get(['id', 'title', 'image_url'])
             ->keyBy('id');
 
         return $rows->map(
@@ -279,19 +279,19 @@ final class BuildHackatonShowPageData
      */
     private function resolveParticipantUsers(Hackaton $hackaton): Collection
     {
-        /** @var Collection<int, User> $participants */
-        $participants = $hackaton->teams()
-            ->with(['user:id,email,fio,nickname', 'roles.user:id,email,fio,nickname'])
-            ->get()
-            ->flatMap(function ($team) {
-                $users = collect([$team->user])->merge($team->roles->pluck('user'));
+        $participantIds = $hackaton->teams()->pluck('user_id')
+            ->merge($hackaton->roles()->whereNotNull('user_id')->pluck('user_id'))
+            ->unique()
+            ->filter();
 
-                return $users->filter();
-            })
-            ->unique('id')
-            ->values();
+        if ($participantIds->isEmpty()) {
+            return collect();
+        }
 
-        return $participants;
+        return User::query()
+            ->whereIn('id', $participantIds)
+            ->orderBy('fio')
+            ->get(['id', 'email', 'fio', 'nickname']);
     }
 
     private function hydrateHackatonApplicationsRelation(Hackaton $hackaton, ?User $user, bool $isOrganizer): void
