@@ -96,6 +96,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(JudgeInvitation::class, 'invited_user_id');
     }
 
+    /** @return HasMany<TeamMessage, $this> */
+    public function teamMessages(): HasMany
+    {
+        return $this->hasMany(TeamMessage::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *

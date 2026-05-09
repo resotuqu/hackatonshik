@@ -117,6 +117,12 @@ class Team extends Model
         return $this->hasMany(HackatonCaseSubmission::class);
     }
 
+    /** @return HasMany<TeamMessage, $this> */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(TeamMessage::class);
+    }
+
     public function loadShowRelations(bool $includeOwnerRelations = false): self
     {
         $relations = self::SHOW_BASE_RELATIONS;

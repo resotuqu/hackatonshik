@@ -172,5 +172,11 @@
                     @endif
                 </div>
             </article>
+
+            <article>
+                @if($teams->isNotEmpty())
+                    <livewire:team-chat :team="$teams->first()" />
+                @endif
+            </article>
         </section>
     </div>
