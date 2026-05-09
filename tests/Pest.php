@@ -1,7 +1,13 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\DuskTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+pest()->extend(TestCase::class)->in('Feature', 'Unit');
+pest()->extend(DuskTestCase::class)->in('Browser');
+
+pest()->use(RefreshDatabase::class)->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -22,8 +28,7 @@ pest()->use(RefreshDatabase::class)->in('Feature', 'Unit');
 // Browser tests use the same TestCase + RefreshDatabase, but rely on a
 // real (file-based) sqlite connection that is shared between the test
 // runner and the spawned HTTP server (see phpunit.xml Browser suite).
-pest()->extend(TestCase::class)->in('Browser');
-pest()->use(RefreshDatabase::class)->in('Browser');
+pest()->extend(DuskTestCase::class)->in('Browser');
 
 /*
 |--------------------------------------------------------------------------

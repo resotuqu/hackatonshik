@@ -42,8 +42,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('hackatons', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        // Schema::table('hackatons', function (Blueprint $table) {
+        //     $table->dropColumn('status');
+        // });
     }
 };

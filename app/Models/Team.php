@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\Cache;
 
 class Team extends Model
 {
@@ -16,6 +17,12 @@ class Team extends Model
 
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::increment('api:v1:catalog:teams:version'));
+        static::deleted(fn () => Cache::increment('api:v1:catalog:teams:version'));
+    }
 
     private const SHOW_BASE_RELATIONS = [
         'user',

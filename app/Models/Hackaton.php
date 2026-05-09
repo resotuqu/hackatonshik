@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property int $id
@@ -30,6 +31,12 @@ class Hackaton extends Model
 {
     /** @use HasFactory<HackatonFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::increment('api:v1:catalog:hackatons:version'));
+        static::deleted(fn () => Cache::increment('api:v1:catalog:hackatons:version'));
+    }
 
     private const SHOW_RELATIONS = [
         'user',

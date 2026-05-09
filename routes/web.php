@@ -93,15 +93,15 @@ Route::get('/privacy-policy', PrivacyPolicyIndex::class);
 Route::get('/cookie-policy', CookiePolicyIndex::class);
 
 Route::get('/login', AuthLogin::class)->name('login');
-Route::get('/register', AuthRegister::class);
-Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified']);
+Route::get('/register', AuthRegister::class)->name('register');
+Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified'])->name('profile');
 Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/admin/avatar-presets', AdminAvatarPresets::class)->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
 Route::get('/teams', TeamsIndex::class)->name('teams.index');
-Route::get('/teams/create', TeamsCreate::class)->middleware(['auth', 'verified']);
-Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware(['auth', 'verified']);
+Route::get('/teams/create', TeamsCreate::class)->middleware(['auth', 'verified'])->name('teams.create');
+Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware(['auth', 'verified'])->name('profile.teams');
 
 Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
 Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified']);
