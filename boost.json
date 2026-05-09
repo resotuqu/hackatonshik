@@ -17,6 +17,7 @@
         "livewire-development",
         "pulse-development",
         "pest-testing",
+        "echo-development",
         "tailwindcss-development",
         "blaze-optimize"
     ]

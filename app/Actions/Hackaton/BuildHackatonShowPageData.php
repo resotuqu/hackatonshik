@@ -176,6 +176,9 @@ final class BuildHackatonShowPageData
         return $metrics;
     }
 
+    /**
+     * @return Collection<int, mixed>
+     */
     private function buildLeaderboard(Hackaton $hackaton): Collection
     {
         $submissionTable = (new HackatonCaseSubmission)->getTable();
@@ -204,7 +207,8 @@ final class BuildHackatonShowPageData
             ->keyBy('id');
 
         return $rows->map(
-            fn ($row): array => $this->mapLeaderboardRow($row, $teams)
+            /** @param object{team_id: int|string|null, total_score: float|int|string, max_score: float|int|string} $row */
+            fn (object $row): array => $this->mapLeaderboardRow($row, $teams)
         )->values();
     }
 
@@ -236,11 +240,13 @@ final class BuildHackatonShowPageData
      */
     private function resolveAvailableTeams(): Collection
     {
-        if (! Auth::check()) {
+        $user = Auth::user();
+
+        if ($user === null) {
             return collect();
         }
 
-        return Auth::user()->teams()->select(['id', 'title'])->orderBy('title')->get();
+        return $user->teams()->select(['id', 'title'])->orderBy('title')->get();
     }
 
     /**

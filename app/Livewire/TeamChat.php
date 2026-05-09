@@ -9,9 +9,11 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 
+/**
+ * @property-read Collection<int, TeamMessage> $messages
+ */
 class TeamChat extends Component
 {
     use WithFileUploads;

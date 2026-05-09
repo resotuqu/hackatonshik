@@ -27,6 +27,7 @@
         "spiral/roadrunner-http": "^4.1"
     },
     "require-dev": {
+        "enlightn/security-checker": "^2.0",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^3.0",
         "laravel/boost": "^2.2",

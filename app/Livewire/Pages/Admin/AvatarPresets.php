@@ -6,6 +6,7 @@ use App\Models\AvatarPreset;
 use App\Models\AvatarPresetPack;
 use App\Support\PresetAvatar;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
@@ -33,6 +34,7 @@ class AvatarPresets extends Component
 
     public function mount(): void
     {
+        Gate::authorize('access-admin');
         $this->syncPackFormFromDatabase();
     }
 

@@ -7,6 +7,7 @@ use App\Models\ListAnalyticsEvent;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Mary\Traits\Toast;
@@ -15,6 +16,11 @@ use Mary\Traits\Toast;
 class Index extends Component
 {
     use Toast;
+
+    public function mount(): void
+    {
+        Gate::authorize('access-admin');
+    }
 
     public string $fio = '';
 

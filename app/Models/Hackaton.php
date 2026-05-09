@@ -17,10 +17,13 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $user_id
  * @property string $title
+ * @property string|null $image_url
  * @property HackatonStatus $status
  * @property Carbon $start_at
  * @property Carbon $end_at
  * @property bool $is_public
+ * @property string|null $gallery_preview
+ * @property int|null $images_count
  * @property-read User|null $user
  */
 class Hackaton extends Model
