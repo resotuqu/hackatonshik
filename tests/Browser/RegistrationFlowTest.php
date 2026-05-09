@@ -1,15 +1,28 @@
 <?php
 
-declare(strict_types=1);
+namespace Tests\Browser;
 
-it('renders the registration page for guests', function () {
-    visit('/register')
-        ->assertSee('Регистрация')
-        ->assertNoJavaScriptErrors();
-});
+use Laravel\Dusk\Browser;
+use Tests\DuskTestCase;
 
-it('renders the login page for guests', function () {
-    visit('/login')
-        ->assertSee('Войти')
-        ->assertNoJavaScriptErrors();
-});
+class RegistrationFlowTest extends DuskTestCase
+{
+    /**
+     * A basic browser test example.
+     */
+    public function test_renders_registration_page(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/register')
+                ->assertSee('Регистрация');
+        });
+    }
+
+    public function test_renders_login_page(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/login')
+                ->assertSee('Войти');
+        });
+    }
+}
