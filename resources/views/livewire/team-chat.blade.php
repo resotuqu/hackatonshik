@@ -1,7 +1,7 @@
 <div class="flex flex-col h-[500px] bg-base-100 border border-base-200 rounded-xl overflow-hidden shadow-sm">
     <div class="p-4 border-b border-base-200 bg-base-200/30 flex items-center justify-between">
         <h3 class="font-bold flex items-center gap-2">
-            <x-app-icon name="heroicons:chat-bubble-left-right" class="w-5 h-5 text-primary" />
+            <x-app-icon icon="heroicons:chat-bubble-left-right" class="w-5 h-5 text-primary" />
             Командный чат
         </h3>
         <span class="badge badge-sm badge-outline">{{ $team->title }}</span>
@@ -36,7 +36,7 @@
                         </a>
                     @elseif($msg->type === 'file')
                         <div class="flex items-center gap-2">
-                            <x-app-icon name="heroicons:document" class="w-5 h-5" />
+                            <x-app-icon icon="heroicons:document" class="w-5 h-5" />
                             <a href="{{ asset('storage/' . $msg->content) }}" target="_blank" class="link link-hover break-all">
                                 {{ basename($msg->content) }}
                             </a>
@@ -48,7 +48,7 @@
             </div>
         @empty
             <div class="flex flex-col items-center justify-center h-full text-base-content/30 space-y-2">
-                <x-app-icon name="heroicons:chat-bubble-oval-left" class="w-12 h-12 opacity-20" />
+                <x-app-icon icon="heroicons:chat-bubble-oval-left" class="w-12 h-12 opacity-20" />
                 <p class="text-sm">Здесь пока нет сообщений. Начните общение!</p>
             </div>
         @endforelse
@@ -58,11 +58,11 @@
         @if($file)
             <div class="mb-2 p-2 bg-base-200 rounded-lg flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2">
-                    <x-app-icon name="heroicons:paper-clip" class="w-4 h-4" />
+                    <x-app-icon icon="heroicons:paper-clip" class="w-4 h-4" />
                     <span>{{ $file->getClientOriginalName() }}</span>
                 </div>
                 <button type="button" wire:click="$set('file', null)" class="btn btn-ghost btn-xs btn-circle">
-                    <x-app-icon name="heroicons:x-mark" class="w-4 h-4" />
+                    <x-app-icon icon="heroicons:x-mark" class="w-4 h-4" />
                 </button>
             </div>
         @endif
@@ -78,11 +78,11 @@
                 />
                 <label class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors">
                     <input type="file" wire:model="file" class="hidden" />
-                    <x-app-icon name="heroicons:paper-clip" class="w-4 h-4" />
+                    <x-app-icon icon="heroicons:paper-clip" class="w-4 h-4" />
                 </label>
             </div>
             <button type="submit" class="btn btn-primary btn-sm btn-square" wire:loading.attr="disabled">
-                <x-app-icon name="heroicons:paper-airplane" class="w-4 h-4" />
+                <x-app-icon icon="heroicons:paper-airplane" class="w-4 h-4" />
             </button>
         </form>
         <div wire:loading wire:target="file" class="text-[10px] text-primary mt-1">Загрузка файла...</div>

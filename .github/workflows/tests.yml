@@ -98,13 +98,25 @@ jobs:
             tail -n 40 coverage/coverage.txt
           fi
 
-      - name: Run Browser Tests
+      - name: Upgrade Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Run Browser Tests (Dusk)
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
-          DB_FOREIGN_KEYS: 'true'
-        run: vendor/bin/pest --compact --testsuite=Browser
+          DB_DATABASE: database/dusk.sqlite
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+        run: |
+          touch database/dusk.sqlite
+          php artisan migrate --force --env=testing
+          php artisan dusk:chrome-driver --detect
+          php artisan serve --no-reload --env=testing > /dev/null 2>&1 &
+          sleep 5
+          php artisan dusk
 
       - name: Run Performance Smoke Tests (optional)
         if: github.event_name == 'pull_request'
