@@ -13,9 +13,10 @@
     "skills": [
         "fortify-development",
         "laravel-best-practices",
+        "configuring-horizon",
+        "pulse-development",
         "socialite-development",
         "livewire-development",
-        "pulse-development",
         "pest-testing",
         "echo-development",
         "tailwindcss-development",

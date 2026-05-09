@@ -20,6 +20,9 @@ services:
       REDIS_HOST: redis
     depends_on:
       - redis
+    volumes:
+      - .:/var/www/html
+      - storage-data:/var/www/html/storage
 
   redis:
     image: redis:7-alpine
@@ -31,6 +34,7 @@ services:
 
 volumes:
   redis-data:
+  storage-data:
 services:
     laravel.test:
         build:
