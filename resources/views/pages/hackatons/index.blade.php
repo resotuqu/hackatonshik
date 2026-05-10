@@ -14,6 +14,9 @@
     $statusChips = [
         ['value' => 'all', 'label' => 'Любой'],
         ['value' => \App\Enums\HackatonStatus::REGISTRATION_OPEN->value, 'label' => 'Регистрация'],
+        ['value' => \App\Enums\HackatonStatus::REGISTRATION_CLOSED->value, 'label' => 'Регистрация закрыта'],
+        ['value' => \App\Enums\HackatonStatus::WAITING_START->value, 'label' => 'Ожидание старта'],
+        ['value' => \App\Enums\HackatonStatus::CASES_ANNOUNCED->value, 'label' => 'Кейсы объявлены'],
         ['value' => \App\Enums\HackatonStatus::IN_PROGRESS->value, 'label' => 'Идёт'],
         ['value' => \App\Enums\HackatonStatus::JUDGING->value, 'label' => 'Судейство'],
         ['value' => \App\Enums\HackatonStatus::FINISHED->value, 'label' => 'Завершён'],

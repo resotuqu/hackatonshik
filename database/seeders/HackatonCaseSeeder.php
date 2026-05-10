@@ -4,80 +4,148 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseField;
 use App\Models\HackatonCaseImage;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class HackatonCaseSeeder extends Seeder
 {
     public function run(): void
     {
         foreach (Hackaton::query()->orderBy('id')->get() as $hackaton) {
-            $cases = [
-                [
-                    'title' => 'Кейс: разработка системы мониторинга',
-                    'description' => "## Задача\nРазработать прототип системы мониторинга городских ресурсов. \n\n### Ожидаемый результат\n- Веб-панель управления\n- API для сенсоров\n- Мобильное приложение для граждан",
-                    'resources_json' => [
-                        ['label' => 'Чат в Telegram для обсуждения', 'url' => 'https://t.me/hackaton_monitoring_chat'],
-                        ['label' => 'Техническое задание (PDF)', 'url' => 'https://example.com/tz_monitoring.pdf'],
-                    ],
-                    'fields' => [
-                        ['label' => 'Название проекта', 'key' => 'solution_title', 'type' => HackatonCaseField::TYPE_TEXT],
-                        ['label' => 'Ссылка на GitHub', 'key' => 'repo_url', 'type' => HackatonCaseField::TYPE_URL],
-                        ['label' => 'Ссылка на Figma', 'key' => 'figma_url', 'type' => HackatonCaseField::TYPE_URL],
-                        ['label' => 'Техническое описание', 'key' => 'details', 'type' => HackatonCaseField::TYPE_TEXTAREA],
-                    ],
-                ],
-                [
-                    'title' => 'Кейс: ИИ-помощник для студентов',
-                    'description' => 'Создайте чат-бота или платформу, которая помогает студентам ориентироваться в учебном процессе с помощью LLM.',
-                    'resources_json' => [
-                        ['label' => 'Доступ к API (Discord)', 'url' => 'https://discord.gg/ai_student_helper'],
-                    ],
-                    'fields' => [
-                        ['label' => 'Ссылка на презентацию', 'key' => 'presentation_url', 'type' => HackatonCaseField::TYPE_URL],
-                        ['label' => 'Комментарий к решению', 'key' => 'demo_notes', 'type' => HackatonCaseField::TYPE_TEXTAREA],
-                    ],
-                ],
-            ];
+            $slug = pathinfo((string) $hackaton->image_url, PATHINFO_FILENAME);
+            $markdownPath = base_path("placeholders/{$slug}.md");
+            if (! File::exists($markdownPath)) {
+                continue;
+            }
+
+            $cases = $this->extractCases((string) File::get($markdownPath));
+            if ($cases === []) {
+                continue;
+            }
+
+            $hackaton->cases()->delete();
+            $caseImages = $this->discoverCaseImages($slug);
+            $isCasePublicationStage = in_array($hackaton->status, [
+                HackatonStatus::CASES_ANNOUNCED,
+                HackatonStatus::IN_PROGRESS,
+                HackatonStatus::JUDGING,
+                HackatonStatus::FINISHED,
+                HackatonStatus::ARCHIVED,
+            ], true);
 
             foreach ($cases as $order => $caseData) {
-                $fields = $caseData['fields'];
-                unset($caseData['fields']);
-
                 $case = HackatonCase::query()->create([
                     'hackaton_id' => $hackaton->id,
                     'title' => $caseData['title'],
                     'description' => $caseData['description'],
-                    'resources_json' => $caseData['resources_json'] ?? null,
+                    'resources_json' => null,
                     'sort_order' => $order,
-                    'is_published' => true,
+                    'is_published' => $isCasePublicationStage,
+                    'publish_at' => $isCasePublicationStage ? now()->subMinutes(10) : now()->addDays(3),
                 ]);
 
-                // Create dummy images
-                for ($i = 1; $i <= 3; $i++) {
+                if ($slug === 'smartomega-gamejab-2026' && isset($caseImages[$order])) {
+                    $storedPath = $this->storeCaseImage($slug, $caseImages[$order]);
                     HackatonCaseImage::query()->create([
                         'hackaton_case_id' => $case->id,
-                        'path' => 'case_photos/default.png',
-                        'alt' => "Изображение {$i} для кейса {$case->title}",
-                        'sort_order' => $i,
+                        'path' => $storedPath,
+                        'alt' => "Обложка кейса {$case->title}",
+                        'sort_order' => 1,
                     ]);
                 }
 
-                foreach ($fields as $i => $field) {
+                foreach ($this->defaultFields() as $i => $field) {
                     HackatonCaseField::query()->create([
                         'hackaton_case_id' => $case->id,
                         'label' => $field['label'],
                         'key' => $field['key'].'_'.$case->id,
                         'type' => $field['type'],
-                        'is_required' => $i === 0,
+                        'is_required' => $i < 2,
                         'sort_order' => $i,
                         'options_json' => null,
                     ]);
                 }
             }
         }
+    }
+
+    /**
+     * @return list<array{title: string, description: string}>
+     */
+    private function extractCases(string $markdown): array
+    {
+        preg_match_all('/^##\s+Кейс\s+\d+\.\s*(.+)$/mu', $markdown, $matches, PREG_OFFSET_CAPTURE);
+        if (! isset($matches[1]) || $matches[1] === []) {
+            return [];
+        }
+
+        $result = [];
+        $total = count($matches[0]);
+        for ($i = 0; $i < $total; $i++) {
+            $fullHeader = $matches[0][$i][0];
+            $title = trim((string) $matches[1][$i][0]);
+            $sectionStart = (int) $matches[0][$i][1] + strlen($fullHeader);
+            $sectionEnd = $i < $total - 1 ? (int) $matches[0][$i + 1][1] : strlen($markdown);
+
+            $description = trim(substr($markdown, $sectionStart, $sectionEnd - $sectionStart));
+            if ($description === '') {
+                $description = 'Описание кейса будет опубликовано организатором.';
+            }
+
+            $result[] = [
+                'title' => $title !== '' ? $title : 'Кейс',
+                'description' => $description,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function discoverCaseImages(string $slug): array
+    {
+        $imagesPath = base_path("placeholders/{$slug}");
+        if (! File::isDirectory($imagesPath)) {
+            return [];
+        }
+
+        $imagePaths = array_values(array_filter(
+            array_map(static fn ($file): string => $file->getRealPath() ?: '', File::files($imagesPath)),
+            static fn (string $path): bool => $path !== '' && Str::endsWith(Str::lower($path), '.jpg'),
+        ));
+
+        sort($imagePaths);
+
+        return $imagePaths;
+    }
+
+    /**
+     * @return list<array{label: string, key: string, type: string}>
+     */
+    private function defaultFields(): array
+    {
+        return [
+            ['label' => 'Название проекта', 'key' => 'solution_title', 'type' => HackatonCaseField::TYPE_TEXT],
+            ['label' => 'Ссылка на репозиторий', 'key' => 'repo_url', 'type' => HackatonCaseField::TYPE_URL],
+            ['label' => 'Описание решения', 'key' => 'solution_description', 'type' => HackatonCaseField::TYPE_TEXTAREA],
+        ];
+    }
+
+    private function storeCaseImage(string $slug, string $sourcePath): string
+    {
+        $filename = pathinfo($sourcePath, PATHINFO_BASENAME);
+        $targetPath = "case_photos/{$slug}/".Str::slug((string) pathinfo($filename, PATHINFO_FILENAME)).'.jpg';
+        Storage::disk('public')->put($targetPath, (string) File::get($sourcePath));
+
+        return $targetPath;
     }
 }

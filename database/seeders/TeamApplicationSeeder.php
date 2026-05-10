@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\HackatonStatus;
 use App\Models\TeamApplication;
 use App\Models\TeamRole;
 use App\Models\User;
@@ -22,13 +23,22 @@ class TeamApplicationSeeder extends Seeder
         $openRoles = TeamRole::query()
             ->whereNull('user_id')
             ->orderBy('id')
-            ->take(20)
             ->get();
 
         $i = 0;
         foreach ($openRoles as $role) {
             $user = $applicants[$i % $applicants->count()];
             $i++;
+            $status = $role->team->hackaton->status;
+            $isReviewStage = in_array($status, [
+                HackatonStatus::REGISTRATION_CLOSED,
+                HackatonStatus::WAITING_START,
+                HackatonStatus::CASES_ANNOUNCED,
+                HackatonStatus::IN_PROGRESS,
+                HackatonStatus::JUDGING,
+                HackatonStatus::FINISHED,
+                HackatonStatus::ARCHIVED,
+            ], true);
 
             TeamApplication::query()->firstOrCreate(
                 [
@@ -37,9 +47,9 @@ class TeamApplicationSeeder extends Seeder
                 ],
                 [
                     'message' => 'Хочу присоединиться к команде в указанной роли.',
-                    'status' => ApplicationStatus::ACCEPTED,
-                    'reviewed_at' => now()->subDay(),
-                    'reviewed_by' => $role->team->user_id,
+                    'status' => $isReviewStage ? ApplicationStatus::ACCEPTED : ApplicationStatus::PENDING,
+                    'reviewed_at' => $isReviewStage ? now()->subDay() : null,
+                    'reviewed_by' => $isReviewStage ? $role->team->user_id : null,
                 ],
             );
         }

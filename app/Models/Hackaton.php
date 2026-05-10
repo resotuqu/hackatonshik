@@ -177,11 +177,16 @@ class Hackaton extends Model
         }
 
         $now = now();
+        $registrationDeadlineAt = $this->registration_deadline_at;
+        $hasPublishedCases = $this->cases()->where('is_published', true)->exists();
+        $daysBeforeStart = $now->diffInDays($this->start_at, false);
 
         $nextStatus = match (true) {
             ! $this->is_public => HackatonStatus::DRAFT,
-            $now->lt($this->start_at) && $this->status === HackatonStatus::PUBLISHED => HackatonStatus::PUBLISHED,
-            $now->lt($this->start_at) => HackatonStatus::REGISTRATION_OPEN,
+            $now->lt($this->start_at) && ($registrationDeadlineAt === null || $now->lte($registrationDeadlineAt)) => HackatonStatus::REGISTRATION_OPEN,
+            $now->lt($this->start_at) && $hasPublishedCases => HackatonStatus::CASES_ANNOUNCED,
+            $now->lt($this->start_at) && $daysBeforeStart <= 2 => HackatonStatus::WAITING_START,
+            $now->lt($this->start_at) => HackatonStatus::REGISTRATION_CLOSED,
             $now->between($this->start_at, $this->end_at) => HackatonStatus::IN_PROGRESS,
             $now->gt($this->end_at) && $this->status === HackatonStatus::JUDGING => HackatonStatus::JUDGING,
             default => HackatonStatus::FINISHED,

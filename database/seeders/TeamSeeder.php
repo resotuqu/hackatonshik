@@ -21,8 +21,11 @@ class TeamSeeder extends Seeder
         }
 
         $i = 0;
-        foreach (Hackaton::query()->orderBy('id')->get() as $hackaton) {
-            foreach (range(1, 2) as $_) {
+        foreach (Hackaton::query()->with('cases')->orderBy('id')->get() as $hackaton) {
+            $teamsToCreate = (int) ceil($this->targetParticipantsCount($hackaton->id) / 4);
+            $cases = $hackaton->cases->values();
+
+            foreach (range(1, $teamsToCreate) as $teamIndex) {
                 $captain = $captains[$i % $captains->count()];
                 $i++;
 
@@ -33,9 +36,15 @@ class TeamSeeder extends Seeder
                     'image_url' => 'team_photos/default.png',
                     'cover_image' => null,
                     'hackaton_id' => $hackaton->id,
+                    'hackaton_case_id' => $cases->isNotEmpty() ? $cases[($teamIndex - 1) % $cases->count()]->id : null,
                     'is_public' => true,
                 ]);
             }
         }
+    }
+
+    private function targetParticipantsCount(int $hackatonId): int
+    {
+        return 20 + ($hackatonId % 21);
     }
 }

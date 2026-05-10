@@ -34,6 +34,9 @@
         $status === \App\Enums\HackatonStatus::DRAFT => 'Подготовка',
         $status === \App\Enums\HackatonStatus::PUBLISHED => 'Анонс',
         $status === \App\Enums\HackatonStatus::REGISTRATION_OPEN => 'Регистрация',
+        $status === \App\Enums\HackatonStatus::REGISTRATION_CLOSED => 'Регистрация закрыта',
+        $status === \App\Enums\HackatonStatus::WAITING_START => 'Ожидание старта',
+        $status === \App\Enums\HackatonStatus::CASES_ANNOUNCED => 'Кейсы объявлены',
         $status === \App\Enums\HackatonStatus::IN_PROGRESS => 'Идёт сейчас',
         $status === \App\Enums\HackatonStatus::JUDGING => 'Судейство',
         $status === \App\Enums\HackatonStatus::FINISHED => 'Завершён',
@@ -44,7 +47,11 @@
     $progressBarClass = match (true) {
         $status === \App\Enums\HackatonStatus::IN_PROGRESS => 'progress-primary',
         $status === \App\Enums\HackatonStatus::JUDGING => 'progress-warning',
-        $status === \App\Enums\HackatonStatus::REGISTRATION_OPEN, $status === \App\Enums\HackatonStatus::PUBLISHED => 'progress-success',
+        $status === \App\Enums\HackatonStatus::REGISTRATION_OPEN,
+        $status === \App\Enums\HackatonStatus::PUBLISHED => 'progress-success',
+        $status === \App\Enums\HackatonStatus::REGISTRATION_CLOSED,
+        $status === \App\Enums\HackatonStatus::WAITING_START,
+        $status === \App\Enums\HackatonStatus::CASES_ANNOUNCED => 'progress-info',
         $isFinished => 'progress-neutral',
         default => 'progress-info',
     };

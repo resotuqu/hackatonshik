@@ -10,120 +10,198 @@ use App\Models\Hackaton;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class HackatonSeeder extends Seeder
 {
     public function run(): void
     {
-        $partners = User::query()->where('role', 'partner')->orderBy('id')->get();
-        if ($partners->isEmpty()) {
-            $this->command?->warn('Нет пользователей с ролью partner — пропуск HackatonSeeder.');
+        $placeholders = $this->loadPlaceholders();
+        if ($placeholders === []) {
+            $this->command?->warn('Не найдены пары *.md + *.jpg в placeholders — пропуск HackatonSeeder.');
 
             return;
         }
 
-        $p0 = $partners[0];
-        $p1 = $partners->get(1, $p0);
+        $partners = User::query()->where('role', 'partner')->orderBy('id')->get();
+        if ($partners->count() < count($placeholders)) {
+            $this->command?->warn('Недостаточно организаторов partner для сидирования хакатонов из placeholders.');
+
+            return;
+        }
 
         $now = Carbon::now()->startOfDay();
-
-        $definitions = [
-            [
-                'user_id' => $p0->id,
-                'title' => 'Внутренний черновик: лаборатория идей',
-                'description' => 'Черновик хакатона для команды организаторов. Описание и регламент ещё уточняются.',
-                'start_at' => $now->copy()->addDays(14),
-                'end_at' => $now->copy()->addDays(15),
-                'is_public' => false,
-                'status' => HackatonStatus::DRAFT,
-                'prize_fund' => null,
-                'prize_places_count' => null,
-                'level' => HackatonLevel::Beginner,
-                'registration_deadline_at' => $now->copy()->addDays(7),
-            ],
-            [
-                'user_id' => $p0->id,
-                'title' => 'Спринт «Один день — один продукт»',
-                'description' => 'Короткий формат: за сутки команды собирают MVP и презентуют жюри.',
-                'start_at' => $now->copy()->subDays(45),
-                'end_at' => $now->copy()->subDays(44),
-                'is_public' => true,
-                'status' => HackatonStatus::FINISHED,
-                'prize_fund' => 150000,
-                'prize_places_count' => 3,
-                'level' => HackatonLevel::Intermediate,
-                'registration_deadline_at' => $now->copy()->subDays(50),
-            ],
-            [
-                'user_id' => $p1->id,
-                'title' => 'Уикенд-код: цифровые сервисы для города',
-                'description' => 'Три дня непрерывной разработки решений для умного города и гражданских инициатив.',
-                'start_at' => $now->copy()->subDays(25),
-                'end_at' => $now->copy()->subDays(22),
-                'is_public' => true,
-                'status' => HackatonStatus::FINISHED,
-                'prize_fund' => 500000,
-                'prize_places_count' => 5,
-                'level' => HackatonLevel::Advanced,
-                'registration_deadline_at' => $now->copy()->subDays(28),
-            ],
-            [
-                'user_id' => $p0->id,
-                'title' => 'Неделя инноваций в образовании',
-                'description' => 'Семь дней на прототипы платформ обучения, трекеров прогресса и инструментов для преподавателей.',
-                'start_at' => $now->copy()->subDays(3),
-                'end_at' => $now->copy()->addDays(4),
-                'is_public' => true,
-                'status' => HackatonStatus::IN_PROGRESS,
-                'prize_fund' => 750000,
-                'prize_places_count' => 10,
-                'level' => HackatonLevel::Intermediate,
-                'registration_deadline_at' => $now->copy()->subDays(5),
-            ],
-            [
-                'user_id' => $p1->id,
-                'title' => 'Двухнедельный марафон FinTech',
-                'description' => 'Четырнадцать дней на полноценный бэкенд, интеграции и демо-сценарии для финансовых сервисов.',
-                'start_at' => $now->copy()->addDays(20),
-                'end_at' => $now->copy()->addDays(34),
-                'is_public' => true,
-                'status' => HackatonStatus::REGISTRATION_OPEN,
-                'prize_fund' => 1200000,
-                'prize_places_count' => 5,
-                'level' => HackatonLevel::Pro,
-                'registration_deadline_at' => $now->copy()->addDays(15),
-            ],
-            [
-                'user_id' => $p1->id,
-                'title' => 'Месяц устойчивых ИТ-решений',
-                'description' => 'Длинный формат: тридцать дней на исследование, разработку и пилот экологичных и социальных продуктов.',
-                'start_at' => $now->copy()->addDays(45),
-                'end_at' => $now->copy()->addDays(75),
-                'is_public' => true,
-                'status' => HackatonStatus::PUBLISHED,
-                'prize_fund' => 2000000,
-                'prize_places_count' => 7,
-                'level' => HackatonLevel::Advanced,
-                'registration_deadline_at' => $now->copy()->addDays(40),
-            ],
-            [
-                'user_id' => $p0->id,
-                'title' => 'Судейский этап: HealthTech 2025',
-                'description' => 'Событие завершило основную фазу; команды ожидают финальных оценок экспертного жюри.',
-                'start_at' => $now->copy()->subDays(18),
-                'end_at' => $now->copy()->subDays(4),
-                'is_public' => true,
-                'status' => HackatonStatus::JUDGING,
-                'prize_fund' => 900000,
-                'prize_places_count' => 3,
-                'level' => HackatonLevel::Pro,
-                'registration_deadline_at' => $now->copy()->subDays(22),
-            ],
+        $statusCycle = [
+            HackatonStatus::REGISTRATION_OPEN,
+            HackatonStatus::REGISTRATION_CLOSED,
+            HackatonStatus::WAITING_START,
+            HackatonStatus::CASES_ANNOUNCED,
+            HackatonStatus::IN_PROGRESS,
+            HackatonStatus::JUDGING,
+            HackatonStatus::FINISHED,
+            HackatonStatus::ARCHIVED,
+        ];
+        $levelCycle = [
+            HackatonLevel::Beginner,
+            HackatonLevel::Intermediate,
+            HackatonLevel::Advanced,
+            HackatonLevel::Pro,
         ];
 
-        foreach ($definitions as $data) {
-            $data['image_url'] = 'hackaton_photos/default.png';
-            Hackaton::query()->create($data);
+        foreach ($placeholders as $index => $placeholder) {
+            $status = $statusCycle[$index % count($statusCycle)];
+            ['start_at' => $startAt, 'end_at' => $endAt, 'registration_deadline_at' => $deadlineAt] = $this->timelineForStatus($status, $now);
+            $coverPath = $this->storeCover($placeholder['slug'], $placeholder['image_path']);
+
+            Hackaton::query()->updateOrCreate(
+                ['title' => $placeholder['title']],
+                [
+                    'user_id' => $partners[$index]->id,
+                    'title' => $placeholder['title'],
+                    'description' => $placeholder['description'],
+                    'start_at' => $startAt,
+                    'end_at' => $endAt,
+                    'is_public' => true,
+                    'status' => $status,
+                    'prize_fund' => 150000 + ($index * 100000),
+                    'prize_places_count' => 3 + ($index % 3),
+                    'level' => $levelCycle[$index % count($levelCycle)],
+                    'registration_deadline_at' => $deadlineAt,
+                    'image_url' => $coverPath,
+                ],
+            );
         }
+    }
+
+    /**
+     * @return list<array{slug: string, title: string, description: string, image_path: string}>
+     */
+    private function loadPlaceholders(): array
+    {
+        $placeholdersPath = base_path('placeholders');
+        if (! File::isDirectory($placeholdersPath)) {
+            return [];
+        }
+
+        $result = [];
+        foreach (File::files($placeholdersPath) as $file) {
+            if ($file->getExtension() !== 'md') {
+                continue;
+            }
+
+            $slug = $file->getFilenameWithoutExtension();
+            $imagePath = $placeholdersPath.DIRECTORY_SEPARATOR.$slug.'.jpg';
+            if (! File::exists($imagePath)) {
+                continue;
+            }
+
+            $markdown = trim((string) File::get($file->getRealPath()));
+            [$title, $description] = $this->extractTitleAndDescription($slug, $markdown);
+
+            $result[] = [
+                'slug' => $slug,
+                'title' => $title,
+                'description' => $description,
+                'image_path' => $imagePath,
+            ];
+        }
+
+        usort($result, fn (array $a, array $b): int => $a['slug'] <=> $b['slug']);
+
+        return $result;
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function extractTitleAndDescription(string $slug, string $markdown): array
+    {
+        $lines = preg_split('/\R/u', $markdown) ?: [];
+        $normalized = array_values(array_filter(array_map(
+            static fn (string $line): string => trim($line),
+            $lines,
+        ), static fn (string $line): bool => $line !== ''));
+
+        $title = Str::headline(str_replace('-', ' ', $slug));
+        foreach ($normalized as $index => $line) {
+            if (preg_match('/^#*\s*\*{0,2}\s*Название хакатона\s*:\s*\*{0,2}$/iu', $line) === 1) {
+                $candidate = $normalized[$index + 1] ?? '';
+                $candidate = trim((string) preg_replace('/^[#\*\-\s]+|[#\*]+$/u', '', $candidate));
+                if ($candidate !== '') {
+                    $title = $candidate;
+                    break;
+                }
+            }
+        }
+
+        if ($title === Str::headline(str_replace('-', ' ', $slug))) {
+            foreach ($normalized as $line) {
+                if (preg_match('/^#+\s*(.+)$/u', $line, $matches) === 1) {
+                    $title = trim((string) preg_replace('/[*_`]/u', '', $matches[1]));
+                    break;
+                }
+            }
+        }
+
+        return [$title, $markdown];
+    }
+
+    private function storeCover(string $slug, string $sourceImagePath): string
+    {
+        $targetPath = "hackaton_photos/{$slug}.jpg";
+        Storage::disk('public')->put($targetPath, (string) File::get($sourceImagePath));
+
+        return $targetPath;
+    }
+
+    /**
+     * @return array{start_at: Carbon, end_at: Carbon, registration_deadline_at: Carbon}
+     */
+    private function timelineForStatus(HackatonStatus $status, Carbon $now): array
+    {
+        return match ($status) {
+            HackatonStatus::REGISTRATION_OPEN => [
+                'start_at' => $now->copy()->addDays(20),
+                'end_at' => $now->copy()->addDays(24),
+                'registration_deadline_at' => $now->copy()->addDays(12),
+            ],
+            HackatonStatus::REGISTRATION_CLOSED => [
+                'start_at' => $now->copy()->addDays(10),
+                'end_at' => $now->copy()->addDays(13),
+                'registration_deadline_at' => $now->copy()->subDay(),
+            ],
+            HackatonStatus::WAITING_START => [
+                'start_at' => $now->copy()->addDay(),
+                'end_at' => $now->copy()->addDays(4),
+                'registration_deadline_at' => $now->copy()->subDays(5),
+            ],
+            HackatonStatus::CASES_ANNOUNCED => [
+                'start_at' => $now->copy()->addDays(3),
+                'end_at' => $now->copy()->addDays(6),
+                'registration_deadline_at' => $now->copy()->subDays(4),
+            ],
+            HackatonStatus::IN_PROGRESS => [
+                'start_at' => $now->copy()->subDay(),
+                'end_at' => $now->copy()->addDays(2),
+                'registration_deadline_at' => $now->copy()->subDays(7),
+            ],
+            HackatonStatus::JUDGING => [
+                'start_at' => $now->copy()->subDays(8),
+                'end_at' => $now->copy()->subDay(),
+                'registration_deadline_at' => $now->copy()->subDays(14),
+            ],
+            HackatonStatus::ARCHIVED => [
+                'start_at' => $now->copy()->subDays(120),
+                'end_at' => $now->copy()->subDays(110),
+                'registration_deadline_at' => $now->copy()->subDays(130),
+            ],
+            default => [
+                'start_at' => $now->copy()->subDays(20),
+                'end_at' => $now->copy()->subDays(10),
+                'registration_deadline_at' => $now->copy()->subDays(30),
+            ],
+        };
     }
 }

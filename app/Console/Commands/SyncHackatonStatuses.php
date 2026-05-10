@@ -36,7 +36,7 @@ class SyncHackatonStatuses extends Command
         $deadlineRemindersSent = 0;
 
         Hackaton::query()
-            ->select(['id', 'is_public', 'start_at', 'end_at', 'status'])
+            ->select(['id', 'is_public', 'start_at', 'end_at', 'status', 'registration_deadline_at'])
             ->chunkById(100, function ($hackatons) use (&$updated): void {
                 foreach ($hackatons as $hackaton) {
                     if ($hackaton->syncStatusByTimeline()) {

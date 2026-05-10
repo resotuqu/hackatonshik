@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\Hackaton;
 use App\Models\Role;
-use App\Models\Team;
 use App\Models\TeamRole;
 use App\Models\User;
 use Faker\Factory as FakerFactory;
@@ -22,20 +22,35 @@ class TeamRoleSeeder extends Seeder
             return;
         }
 
-        $p = 0;
-        foreach (Team::query()->orderBy('id')->get() as $team) {
-            foreach ($roles as $idx => $role) {
-                TeamRole::query()->create([
-                    'title' => $role->name.' в команде',
-                    'description' => $faker->sentence(10),
-                    'team_id' => $team->id,
-                    'role_id' => $role->id,
-                    'user_id' => $idx < 2 ? $participants[$p % $participants->count()]->id : null,
-                ]);
-                if ($idx < 2) {
-                    $p++;
+        $participantIndex = 0;
+        $hackatons = Hackaton::query()->with('teams')->orderBy('id')->get();
+        foreach ($hackatons as $hackaton) {
+            $assignedForHackaton = 0;
+            $targetForHackaton = $this->targetParticipantsCount($hackaton->id);
+
+            foreach ($hackaton->teams()->orderBy('id')->get() as $team) {
+                foreach ($roles as $role) {
+                    $userId = null;
+                    if ($assignedForHackaton < $targetForHackaton) {
+                        $userId = $participants[$participantIndex % $participants->count()]->id;
+                        $participantIndex++;
+                        $assignedForHackaton++;
+                    }
+
+                    TeamRole::query()->create([
+                        'title' => $role->name.' в команде',
+                        'description' => $faker->sentence(10),
+                        'team_id' => $team->id,
+                        'role_id' => $role->id,
+                        'user_id' => $userId,
+                    ]);
                 }
             }
         }
+    }
+
+    private function targetParticipantsCount(int $hackatonId): int
+    {
+        return 20 + ($hackatonId % 21);
     }
 }

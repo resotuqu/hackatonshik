@@ -77,6 +77,9 @@ class Index extends Component
             ->when($this->public_only, fn (Builder $query) => $query->where('is_public', true))
             ->when($this->preset === 'active_now', fn (Builder $query) => $query->whereIn('status', [
                 HackatonStatus::REGISTRATION_OPEN->value,
+                HackatonStatus::REGISTRATION_CLOSED->value,
+                HackatonStatus::WAITING_START->value,
+                HackatonStatus::CASES_ANNOUNCED->value,
                 HackatonStatus::IN_PROGRESS->value,
                 HackatonStatus::PUBLISHED->value,
             ]))

@@ -93,6 +93,9 @@ class Index extends Component
                 ->whereIn('status', [
                     HackatonStatus::PUBLISHED,
                     HackatonStatus::REGISTRATION_OPEN,
+                    HackatonStatus::REGISTRATION_CLOSED,
+                    HackatonStatus::WAITING_START,
+                    HackatonStatus::CASES_ANNOUNCED,
                     HackatonStatus::IN_PROGRESS,
                     HackatonStatus::JUDGING,
                 ])

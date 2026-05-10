@@ -27,6 +27,40 @@ test('sync command transitions registration_open to in_progress when window open
     expect($hackaton->fresh()->status)->toBe(HackatonStatus::IN_PROGRESS);
 });
 
+test('sync command transitions to registration_closed when deadline has passed', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create([
+        'is_public' => true,
+        'status' => HackatonStatus::REGISTRATION_OPEN,
+        'registration_deadline_at' => now()->subDay(),
+        'start_at' => now()->addDays(6),
+        'end_at' => now()->addDays(7),
+    ]);
+
+    Artisan::call('hackatons:sync-statuses');
+
+    expect($hackaton->fresh()->status)->toBe(HackatonStatus::REGISTRATION_CLOSED);
+});
+
+test('sync command transitions to cases_announced when cases are published before start', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create([
+        'is_public' => true,
+        'status' => HackatonStatus::REGISTRATION_CLOSED,
+        'registration_deadline_at' => now()->subDays(3),
+        'start_at' => now()->addDays(4),
+        'end_at' => now()->addDays(6),
+    ]);
+    HackatonCase::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'is_published' => true,
+    ]);
+
+    Artisan::call('hackatons:sync-statuses');
+
+    expect($hackaton->fresh()->status)->toBe(HackatonStatus::CASES_ANNOUNCED);
+});
+
 test('sync command transitions in_progress to finished after end_at', function () {
     $organizer = User::factory()->partner()->create();
     $hackaton = Hackaton::factory()->for($organizer)->create([
