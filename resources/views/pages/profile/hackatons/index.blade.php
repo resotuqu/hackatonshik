@@ -36,8 +36,7 @@
                     <x-mary-card class="card card-border bg-base-200">
                         <p>Принимает участие: {{$hackaton->participantsCount()}} команд</p>
                         <p>Даты проведения:
-                            {{ Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }} &DownLeftVectorBar;
-                            {{ Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}</p>
+                            {{ $hackaton->start_at->format('d.m.Y H:i') }} — {{ $hackaton->end_at->format('d.m.Y H:i') }}</p>
                     </x-mary-card>
                 </div>
 

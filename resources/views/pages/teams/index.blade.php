@@ -216,7 +216,7 @@
                             <span class="badge badge-primary badge-outline">{{ $skill->name }}</span>
                         @endforeach
                         @if (filled($start_from))
-                            <span class="badge badge-primary badge-outline">Старт от: {{ Carbon::parse($start_from)->format('d.m.Y H:i') }}</span>
+                            <span class="badge badge-primary badge-outline">Старт от: {{ \Illuminate\Support\Carbon::parse($start_from)->format('d.m.Y H:i') }}</span>
                         @endif
                         @if ($team_size !== 'all')
                             <span class="badge badge-primary badge-outline">Размер: от {{ $team_size }} ролей</span>

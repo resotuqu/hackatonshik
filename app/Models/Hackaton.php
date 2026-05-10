@@ -36,11 +36,21 @@ class Hackaton extends Model
     {
         static::saved(function () {
             Cache::increment('api:v1:catalog:hackatons:version');
-            Cache::tags(['catalog', 'home'])->flush();
+            if (Cache::supportsTags()) {
+                Cache::tags(['catalog', 'home'])->flush();
+            } else {
+                Cache::forget('home-featured-hackatons-v2');
+                Cache::forget('home-public-totals-v4');
+            }
         });
         static::deleted(function () {
             Cache::increment('api:v1:catalog:hackatons:version');
-            Cache::tags(['catalog', 'home'])->flush();
+            if (Cache::supportsTags()) {
+                Cache::tags(['catalog', 'home'])->flush();
+            } else {
+                Cache::forget('home-featured-hackatons-v2');
+                Cache::forget('home-public-totals-v4');
+            }
         });
     }
 
@@ -77,7 +87,7 @@ class Hackaton extends Model
 
     public function participantsCount(): int
     {
-        return $this->roles()->whereNotNull('user_id')->count();
+        return $this->roles()->whereNotNull('team_roles.user_id')->count();
     }
 
     /** @return BelongsTo<User, $this> */

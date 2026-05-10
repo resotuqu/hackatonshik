@@ -280,7 +280,7 @@ final class BuildHackatonShowPageData
     private function resolveParticipantUsers(Hackaton $hackaton): Collection
     {
         $participantIds = $hackaton->teams()->pluck('user_id')
-            ->merge($hackaton->roles()->whereNotNull('user_id')->pluck('user_id'))
+            ->merge($hackaton->roles()->whereNotNull('team_roles.user_id')->pluck('team_roles.user_id'))
             ->unique()
             ->filter();
 

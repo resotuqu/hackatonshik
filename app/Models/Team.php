@@ -22,11 +22,21 @@ class Team extends Model
     {
         static::saved(function () {
             Cache::increment('api:v1:catalog:teams:version');
-            Cache::tags(['catalog', 'home'])->flush();
+            if (Cache::supportsTags()) {
+                Cache::tags(['catalog', 'home'])->flush();
+            } else {
+                Cache::forget('home-featured-hackatons-v2');
+                Cache::forget('home-public-totals-v4');
+            }
         });
         static::deleted(function () {
             Cache::increment('api:v1:catalog:teams:version');
-            Cache::tags(['catalog', 'home'])->flush();
+            if (Cache::supportsTags()) {
+                Cache::tags(['catalog', 'home'])->flush();
+            } else {
+                Cache::forget('home-featured-hackatons-v2');
+                Cache::forget('home-public-totals-v4');
+            }
         });
     }
 

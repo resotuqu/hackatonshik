@@ -238,7 +238,7 @@
                             <span class="badge badge-primary badge-outline">Поиск: {{ $q }}</span>
                         @endif
                         @if (filled($start_at))
-                            <span class="badge badge-primary badge-outline">Старт от: {{ Carbon::parse($start_at)->format('d.m.Y H:i') }}</span>
+                            <span class="badge badge-primary badge-outline">Старт от: {{ \Illuminate\Support\Carbon::parse($start_at)->format('d.m.Y H:i') }}</span>
                         @endif
                         @if ($status !== 'all')
                             @php $statusLabel = collect($statusChips)->firstWhere('value', $status)['label'] ?? $status; @endphp
