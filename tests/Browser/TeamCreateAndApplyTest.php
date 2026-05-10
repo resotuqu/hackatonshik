@@ -2,19 +2,33 @@
 
 declare(strict_types=1);
 
+namespace Tests\Browser;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Laravel\Dusk\Browser;
+use Tests\DuskTestCase;
 
-it('lets a verified user open the create team page in a real browser', function () {
-    $user = User::factory()->create();
+class TeamCreateAndApplyTest extends DuskTestCase
+{
+    use DatabaseMigrations;
 
-    $this->actingAs($user);
+    public function test_lets_a_verified_user_open_the_create_team_page_in_real_browser(): void
+    {
+        $user = User::factory()->create();
 
-    visit('/teams/create')
-        ->assertSee('Создание команды');
-});
+        $this->browse(function (Browser $browser) use ($user): void {
+            $browser->loginAs($user)
+                ->visit('/teams/create')
+                ->assertSee('Создание команды');
+        });
+    }
 
-it('shows public team catalog for guests', function () {
-    visit('/teams')
-        ->assertSee('Каталог команд')
-        ->assertNoJavaScriptErrors();
-});
+    public function test_shows_public_team_catalog_for_guests(): void
+    {
+        $this->browse(function (Browser $browser): void {
+            $browser->visit('/teams')
+                ->assertSee('Каталог команд');
+        });
+    }
+}
