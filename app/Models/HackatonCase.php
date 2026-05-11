@@ -17,6 +17,7 @@ class HackatonCase extends Model
         'title',
         'description',
         'resources_json',
+        'rubric_json',
         'sort_order',
         'is_published',
         'publish_at',
@@ -35,6 +36,7 @@ class HackatonCase extends Model
             'publish_at' => 'datetime',
             'deadline_at' => 'datetime',
             'resources_json' => 'array',
+            'rubric_json' => 'array',
         ];
     }
 

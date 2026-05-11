@@ -175,6 +175,11 @@ new #[Lazy] class extends Component
                                         <option value="{{ $candidate->id }}">{{ $candidate->fio }} ({{ $candidate->email }})</option>
                                     @endforeach
                                 </select>
+                                <select name="domain" class="select select-bordered w-full">
+                                    <option value="dev">Разработка</option>
+                                    <option value="design">Дизайн</option>
+                                    <option value="business">Бизнес</option>
+                                </select>
                                 <button class="btn btn-outline btn-sm">Назначить</button>
                             </form>
                         </x-organizer-action-modal>
@@ -187,6 +192,7 @@ new #[Lazy] class extends Component
                                 <tr>
                                     <th>Судья</th>
                                     <th>Email</th>
+                                    <th>Домен</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -195,6 +201,7 @@ new #[Lazy] class extends Component
                                     <tr>
                                         <td>{{ $judge->fio }}</td>
                                         <td>{{ $judge->email }}</td>
+                                        <td class="text-xs">{{ $judge->pivot->domain ?? 'dev' }}</td>
                                         <td class="text-right">
                                             <form method="POST" action="{{ route('hackatons.judges.unassign', [$hackaton, $judge]) }}">
                                                 @csrf

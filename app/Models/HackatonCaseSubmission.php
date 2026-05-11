@@ -52,8 +52,13 @@ class HackatonCaseSubmission extends Model
         return $this->hasMany(HackatonCaseAnswer::class);
     }
 
+    public function scores(): HasMany
+    {
+        return $this->hasMany(HackatonCaseScore::class);
+    }
+
     public function score(): HasOne
     {
-        return $this->hasOne(HackatonCaseScore::class);
+        return $this->hasOne(HackatonCaseScore::class)->latestOfMany('reviewed_at');
     }
 }

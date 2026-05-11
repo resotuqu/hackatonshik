@@ -26,6 +26,10 @@ use App\Livewire\Pages\Hackatons\Edit as HackatonsEdit;
 use App\Livewire\Pages\Hackatons\Index as HackatonsIndex;
 use App\Livewire\Pages\Hackatons\Show as HackatonsShow;
 use App\Livewire\Pages\Home\Index as HomeIndex;
+use App\Livewire\Pages\Judge\Dashboard as JudgeDashboard;
+use App\Livewire\Pages\Judge\EvaluateSubmission as JudgeEvaluateSubmission;
+use App\Livewire\Pages\Judge\HackatonShow as JudgeHackatonShow;
+use App\Livewire\Pages\Judge\SubmissionList as JudgeSubmissionList;
 use App\Livewire\Pages\News\Index as NewsIndex;
 use App\Livewire\Pages\News\Show as NewsShow;
 use App\Livewire\Pages\PrivacyPolicy\Index as PrivacyPolicyIndex;
@@ -128,6 +132,11 @@ Route::get('/auth/vk/redirect', [SocialAuthController::class, 'redirect'])->defa
 Route::get('/auth/vk/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'vk');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/judge', JudgeDashboard::class)->name('judge.dashboard');
+    Route::get('/judge/hackatons/{hackaton}', JudgeHackatonShow::class)->name('judge.hackatons.show');
+    Route::get('/judge/hackatons/{hackaton}/cases/{case}', JudgeSubmissionList::class)->name('judge.cases.submissions');
+    Route::get('/judge/submissions/{submission}', JudgeEvaluateSubmission::class)->name('judge.submissions.evaluate');
+
     Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
     Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');

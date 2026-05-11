@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\JudgeDomain;
 use App\Models\Hackaton;
 use App\Models\HackatonJudge;
 use App\Models\User;
@@ -29,6 +30,7 @@ class HackatonJudgeSeeder extends Seeder
                     [
                         'assigned_by' => $organizer->id,
                         'assigned_at' => now()->subDays(3),
+                        'domain' => JudgeDomain::DEV->value,
                     ],
                 );
             }

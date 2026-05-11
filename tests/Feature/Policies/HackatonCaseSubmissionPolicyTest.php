@@ -59,6 +59,7 @@ it('allows organizer, captain and team member to view a submission', function ()
     $organizer = User::factory()->partner()->create();
     $captain = User::factory()->create();
     $member = User::factory()->create();
+    $judge = User::factory()->judge()->create();
     $outsider = User::factory()->create();
     $hackaton = Hackaton::factory()->for($organizer)->create();
     $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
@@ -69,8 +70,15 @@ it('allows organizer, captain and team member to view a submission', function ()
         'team_id' => $team->id,
     ]);
 
+    $hackaton->judgeAssignments()->create([
+        'user_id' => $judge->id,
+        'assigned_by' => $organizer->id,
+        'assigned_at' => now(),
+    ]);
+
     $policy = new HackatonCaseSubmissionPolicy;
     expect($policy->view($organizer, $submission))->toBeTrue();
+    expect($policy->view($judge, $submission))->toBeTrue();
     expect($policy->view($captain, $submission))->toBeTrue();
     expect($policy->view($member, $submission))->toBeTrue();
     expect($policy->view($outsider, $submission))->toBeFalse();

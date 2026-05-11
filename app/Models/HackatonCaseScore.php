@@ -15,7 +15,11 @@ class HackatonCaseScore extends Model
         'reviewed_by',
         'score',
         'max_score',
-        'comment',
+        'criteria_scores',
+        'field_comments',
+        'general_comment',
+        'is_final',
+        'draft_saved_at',
         'reviewed_at',
     ];
 
@@ -23,6 +27,10 @@ class HackatonCaseScore extends Model
     {
         return [
             'reviewed_at' => 'datetime',
+            'draft_saved_at' => 'datetime',
+            'criteria_scores' => 'array',
+            'field_comments' => 'array',
+            'is_final' => 'boolean',
         ];
     }
 

@@ -21,7 +21,8 @@ class HackatonCaseScoreFactory extends Factory
             'reviewed_by' => User::factory()->judge(),
             'score' => fake()->numberBetween(40, 100),
             'max_score' => 100,
-            'comment' => fake()->optional(0.7)->paragraph(),
+            'general_comment' => fake()->optional(0.7)->paragraph(),
+            'is_final' => true,
             'reviewed_at' => now(),
         ];
     }

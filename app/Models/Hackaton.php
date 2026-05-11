@@ -148,7 +148,7 @@ class Hackaton extends Model
     public function judges(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'hackaton_judges')
-            ->withPivot(['assigned_by', 'assigned_at'])
+            ->withPivot(['assigned_by', 'assigned_at', 'domain'])
             ->withTimestamps();
     }
 

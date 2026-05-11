@@ -87,7 +87,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function judgedHackatons(): BelongsToMany
     {
         return $this->belongsToMany(Hackaton::class, 'hackaton_judges')
-            ->withPivot(['assigned_by', 'assigned_at'])
+            ->withPivot(['assigned_by', 'assigned_at', 'domain'])
             ->withTimestamps();
     }
 

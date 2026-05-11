@@ -52,6 +52,10 @@ class HackatonCaseSubmissionPolicy
             return true;
         }
 
+        if ($hackaton instanceof Hackaton && $hackaton->isJudge($user)) {
+            return true;
+        }
+
         if ($hackatonCaseSubmission->user_id === $user->id) {
             return true;
         }

@@ -29,12 +29,15 @@ class HackatonCaseScoreController extends Controller
         abort_unless($case instanceof HackatonCase && (int) $case->hackaton_id === (int) $hackaton->id, 404);
 
         HackatonCaseScore::query()->updateOrCreate(
-            ['hackaton_case_submission_id' => $submission->id],
             [
+                'hackaton_case_submission_id' => $submission->id,
                 'reviewed_by' => $request->user()->id,
+            ],
+            [
                 'score' => (int) $validated['score'],
                 'max_score' => (int) ($validated['max_score'] ?? 100),
-                'comment' => $validated['comment'] ?? null,
+                'general_comment' => $validated['comment'] ?? null,
+                'is_final' => true,
                 'reviewed_at' => now(),
             ],
         );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\JudgeDomain;
 use App\Http\Requests\AssignHackatonJudgeRequest;
 use App\Http\Requests\StoreJudgeInvitationRequest;
 use App\Mail\JudgeInvitationMail;
@@ -41,12 +42,14 @@ class JudgeManagementController extends Controller
     public function assign(AssignHackatonJudgeRequest $request, Hackaton $hackaton): RedirectResponse
     {
         $judgeId = (int) $request->validated('user_id');
+        $domain = (string) ($request->validated('domain') ?? JudgeDomain::DEV->value);
 
         $hackaton->judgeAssignments()->updateOrCreate(
             ['user_id' => $judgeId],
             [
                 'assigned_by' => $request->user()->id,
                 'assigned_at' => now(),
+                'domain' => $domain,
             ],
         );
 

@@ -87,6 +87,7 @@ test('judge can grade a team submission', function () {
         'hackaton_case_submission_id' => $submission->id,
         'reviewed_by' => $judge->id,
         'score' => 85,
-        'comment' => 'Great work!',
+        'general_comment' => 'Great work!',
+        'is_final' => 1,
     ]);
 });

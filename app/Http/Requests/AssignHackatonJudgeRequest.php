@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\JudgeDomain;
 use App\Models\Hackaton;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AssignHackatonJudgeRequest extends FormRequest
 {
@@ -23,6 +25,7 @@ class AssignHackatonJudgeRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'integer', 'exists:users,id'],
+            'domain' => ['nullable', 'string', Rule::in(array_column(JudgeDomain::cases(), 'value'))],
         ];
     }
 

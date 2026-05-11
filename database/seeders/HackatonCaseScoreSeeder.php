@@ -34,12 +34,15 @@ class HackatonCaseScoreSeeder extends Seeder
 
         foreach ($submissionIds->take(25) as $submissionId) {
             HackatonCaseScore::query()->firstOrCreate(
-                ['hackaton_case_submission_id' => $submissionId],
                 [
+                    'hackaton_case_submission_id' => $submissionId,
                     'reviewed_by' => $judge->id,
+                ],
+                [
                     'score' => random_int(55, 98),
                     'max_score' => 100,
-                    'comment' => $faker->optional(0.8)->realText(200),
+                    'general_comment' => $faker->optional(0.8)->realText(200),
+                    'is_final' => true,
                     'reviewed_at' => now()->subHours(random_int(1, 72)),
                 ],
             );

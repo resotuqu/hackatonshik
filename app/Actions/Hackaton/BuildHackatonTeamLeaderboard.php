@@ -28,6 +28,7 @@ final class BuildHackatonTeamLeaderboard
             ->join($scoreTable, "{$scoreTable}.hackaton_case_submission_id", '=', "{$submissionTable}.id")
             ->where("{$caseTable}.hackaton_id", $hackaton->id)
             ->whereNotNull("{$submissionTable}.team_id")
+            ->where("{$scoreTable}.is_final", true)
             ->groupBy("{$submissionTable}.team_id")
             ->orderByDesc(DB::raw('SUM('.$scoreTable.'.score)'))
             ->selectRaw(

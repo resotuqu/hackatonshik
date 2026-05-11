@@ -332,58 +332,47 @@ new #[Lazy] class extends Component
 
                                 @if(($isOrganizer || $isAssignedJudge) && $case->submissions->isNotEmpty())
                                     <div class="rounded-xl border border-base-300 p-3 space-y-3">
-                                        <p class="font-medium">Оценивание решений</p>
-                                        @foreach($case->submissions as $submission)
-                                            <div class="rounded-lg border border-base-200 p-3 bg-base-50/50">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <span class="font-medium text-sm">
-                                                        {{ $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение') }}
-                                                    </span>
-                                                    <span class="text-xs text-base-content/50">
-                                                        {{ $submission->submitted_at?->format('d.m.Y H:i') }}
-                                                    </span>
-                                                </div>
+                                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                            <p class="font-medium">Оценивание решений</p>
+                                            <a href="{{ route('judge.cases.submissions', [$hackaton, $case]) }}" class="btn btn-sm btn-primary">
+                                                Открыть интерфейс оценивания
+                                            </a>
+                                        </div>
 
-                                                @if($submission->answers->isNotEmpty())
-                                                    <div class="space-y-2 mb-4">
-                                                        @foreach($submission->answers as $answer)
-                                                            <div class="text-sm">
-                                                                <p class="text-xs font-semibold text-base-content/60">{{ $answer->field->label }}:</p>
-                                                                @if($answer->field->type === 'file' && $answer->file_path)
-                                                                    <a href="{{ asset('storage/' . $answer->file_path) }}" target="_blank" class="link link-primary flex items-center gap-1 mt-1">
-                                                                        <x-app-icon icon="heroicons:document-arrow-down" class="h-4 w-4" />
-                                                                        Скачать файл
-                                                                    </a>
-                                                                @elseif($answer->field->type === 'url' && $answer->value_text)
-                                                                    <a href="{{ $answer->value_text }}" target="_blank" class="link link-primary break-all">
-                                                                        {{ $answer->value_text }}
-                                                                    </a>
-                                                                @else
-                                                                    <p class="mt-1 whitespace-pre-wrap">{{ $answer->value_text ?? '—' }}</p>
-                                                                @endif
+                                        <details class="rounded-lg border border-base-200 bg-base-50/50 p-3">
+                                            <summary class="cursor-pointer text-sm font-medium">Быстрое оценивание (legacy)</summary>
+                                            <div class="mt-3 space-y-3">
+                                                @foreach($case->submissions as $submission)
+                                                    <div class="rounded-lg border border-base-200 p-3 bg-base-100">
+                                                        <div class="flex items-center justify-between mb-2">
+                                                            <span class="font-medium text-sm">
+                                                                {{ $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение') }}
+                                                            </span>
+                                                            <span class="text-xs text-base-content/50">
+                                                                {{ $submission->submitted_at?->format('d.m.Y H:i') }}
+                                                            </span>
+                                                        </div>
+
+                                                        <form method="POST" action="{{ route('hackatons.scores.store', $hackaton) }}" class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                                            @csrf
+                                                            <input type="hidden" name="hackaton_case_submission_id" value="{{ $submission->id }}">
+                                                            <div class="md:col-span-2 flex items-center gap-2">
+                                                                <input name="score" type="number" min="0" max="100" class="input input-bordered input-sm w-full"
+                                                                    placeholder="Балл"
+                                                                    value="{{ $submission->score?->score }}">
+                                                                <span class="text-base-content/50">/</span>
+                                                                <input name="max_score" type="number" min="1" max="100" class="input input-bordered input-sm w-full"
+                                                                    placeholder="Макс"
+                                                                    value="{{ $submission->score?->max_score ?? 100 }}">
                                                             </div>
-                                                        @endforeach
+                                                            <button class="btn btn-sm btn-primary md:col-span-2">Сохранить оценку</button>
+                                                            <textarea name="comment" rows="1" class="textarea textarea-bordered textarea-sm md:col-span-4"
+                                                                placeholder="Комментарий к оценке">{{ $submission->score?->general_comment }}</textarea>
+                                                        </form>
                                                     </div>
-                                                @endif
-
-                                                <form method="POST" action="{{ route('hackatons.scores.store', $hackaton) }}" class="grid grid-cols-1 md:grid-cols-4 gap-2">
-                                                    @csrf
-                                                    <input type="hidden" name="hackaton_case_submission_id" value="{{ $submission->id }}">
-                                                    <div class="md:col-span-2 flex items-center gap-2">
-                                                        <input name="score" type="number" min="0" max="100" class="input input-bordered input-sm w-full"
-                                                            placeholder="Балл"
-                                                            value="{{ $submission->score?->score }}">
-                                                        <span class="text-base-content/50">/</span>
-                                                        <input name="max_score" type="number" min="1" max="100" class="input input-bordered input-sm w-full"
-                                                            placeholder="Макс"
-                                                            value="{{ $submission->score?->max_score ?? 100 }}">
-                                                    </div>
-                                                    <button class="btn btn-sm btn-primary md:col-span-2">Сохранить оценку</button>
-                                                    <textarea name="comment" rows="1" class="textarea textarea-bordered textarea-sm md:col-span-4"
-                                                        placeholder="Комментарий к оценке">{{ $submission->score?->comment }}</textarea>
-                                                </form>
+                                                @endforeach
                                             </div>
-                                        @endforeach
+                                        </details>
                                     </div>
                                 @endif
 

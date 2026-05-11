@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\JudgeDomain;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,12 +18,14 @@ class HackatonJudge extends Model
         'user_id',
         'assigned_by',
         'assigned_at',
+        'domain',
     ];
 
     protected function casts(): array
     {
         return [
             'assigned_at' => 'datetime',
+            'domain' => JudgeDomain::class,
         ];
     }
 
