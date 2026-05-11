@@ -4,6 +4,7 @@ use App\Enums\ApplicationStatus;
 use App\Events\HackatonApplicationChanged;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
+use App\Models\HackatonCase;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
@@ -29,6 +30,7 @@ test('a user can apply to a hackaton', function () {
         'team_id' => $team->id,
         'message' => 'We want to win!',
         'status' => ApplicationStatus::PENDING->value,
+        'hackaton_cases_count_when_applied' => 0,
     ]);
 
     Event::assertDispatched(HackatonApplicationChanged::class);
@@ -108,4 +110,92 @@ test('organizer can bulk update applications', function () {
     foreach ($apps as $app) {
         expect($app->refresh()->status)->toBe(ApplicationStatus::ACCEPTED);
     }
+});
+
+test('accepting application assigns team to the only case when cases existed at apply time', function () {
+    $organizer = User::factory()->partner()->create();
+    $member = User::factory()->create();
+    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+    $team = Team::factory()->create(['user_id' => $member->id]);
+
+    $this->actingAs($member)
+        ->from(route('hackatons.show', $hackaton))
+        ->post(route('hackaton.applications.store'), [
+            'hackaton_id' => $hackaton->id,
+            'team_id' => $team->id,
+        ])
+        ->assertRedirect();
+
+    $application = HackatonApplication::query()
+        ->where('hackaton_id', $hackaton->id)
+        ->where('team_id', $team->id)
+        ->firstOrFail();
+
+    $this->actingAs($organizer)
+        ->patch(route('hackaton.applications.update', $application), [
+            'status' => ApplicationStatus::ACCEPTED->value,
+        ])
+        ->assertRedirect();
+
+    expect($team->fresh()->hackaton_case_id)->toBe($case->id);
+});
+
+test('accepting application does not assign case when team applied before any cases existed', function () {
+    $organizer = User::factory()->partner()->create();
+    $member = User::factory()->create();
+    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    $team = Team::factory()->create(['user_id' => $member->id]);
+
+    $this->actingAs($member)
+        ->from(route('hackatons.show', $hackaton))
+        ->post(route('hackaton.applications.store'), [
+            'hackaton_id' => $hackaton->id,
+            'team_id' => $team->id,
+        ])
+        ->assertRedirect();
+
+    HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+
+    $application = HackatonApplication::query()
+        ->where('hackaton_id', $hackaton->id)
+        ->where('team_id', $team->id)
+        ->firstOrFail();
+
+    $this->actingAs($organizer)
+        ->patch(route('hackaton.applications.update', $application), [
+            'status' => ApplicationStatus::ACCEPTED->value,
+        ])
+        ->assertRedirect();
+
+    expect($team->fresh()->hackaton_case_id)->toBeNull();
+});
+
+test('accepting application does not assign case when hackathon has multiple cases', function () {
+    $organizer = User::factory()->partner()->create();
+    $member = User::factory()->create();
+    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    HackatonCase::factory()->count(2)->create(['hackaton_id' => $hackaton->id]);
+    $team = Team::factory()->create(['user_id' => $member->id]);
+
+    $this->actingAs($member)
+        ->from(route('hackatons.show', $hackaton))
+        ->post(route('hackaton.applications.store'), [
+            'hackaton_id' => $hackaton->id,
+            'team_id' => $team->id,
+        ])
+        ->assertRedirect();
+
+    $application = HackatonApplication::query()
+        ->where('hackaton_id', $hackaton->id)
+        ->where('team_id', $team->id)
+        ->firstOrFail();
+
+    $this->actingAs($organizer)
+        ->patch(route('hackaton.applications.update', $application), [
+            'status' => ApplicationStatus::ACCEPTED->value,
+        ])
+        ->assertRedirect();
+
+    expect($team->fresh()->hackaton_case_id)->toBeNull();
 });

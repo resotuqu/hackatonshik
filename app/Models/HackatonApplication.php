@@ -19,6 +19,7 @@ class HackatonApplication extends Model
         'team_id',
         'hackaton_id',
         'message',
+        'hackaton_cases_count_when_applied',
         'status',
         'reviewed_at',
         'reviewed_by',
@@ -29,6 +30,7 @@ class HackatonApplication extends Model
         return [
             'status' => ApplicationStatus::class,
             'reviewed_at' => 'datetime',
+            'hackaton_cases_count_when_applied' => 'integer',
         ];
     }
 

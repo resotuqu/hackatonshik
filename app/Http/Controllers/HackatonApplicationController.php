@@ -11,6 +11,7 @@ use App\Http\Requests\StoreHackatonApplicationRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
+use App\Models\HackatonCase;
 use App\Models\Team;
 use App\Models\User;
 use App\Notifications\ApplicationStatusUpdated;
@@ -31,8 +32,11 @@ class HackatonApplicationController extends Controller
             'hackaton_id' => $hackaton->id,
         ]);
 
+        $casesCountWhenApplied = $hackaton->cases()->count();
+
         $application->fill([
             'message' => $validated['message'] ?? null,
+            'hackaton_cases_count_when_applied' => $casesCountWhenApplied,
             'status' => ApplicationStatus::PENDING,
             'reviewed_at' => null,
             'reviewed_by' => null,
@@ -103,7 +107,38 @@ class HackatonApplicationController extends Controller
             'hackaton_id' => $lockedApplication->hackaton_id,
         ]);
 
+        $this->maybeAssignTeamToSingleCase($team, $lockedApplication);
+
         $lockedApplication->markAsAccepted($reviewer);
+    }
+
+    /**
+     * If the hackathon had at least one case when the team applied and now has exactly one case,
+     * attach the team to that case.
+     */
+    private function maybeAssignTeamToSingleCase(Team $team, HackatonApplication $lockedApplication): void
+    {
+        $whenApplied = $lockedApplication->hackaton_cases_count_when_applied;
+        if ($whenApplied === null || $whenApplied < 1) {
+            return;
+        }
+
+        $hackatonId = $lockedApplication->hackaton_id;
+
+        $caseIds = HackatonCase::query()
+            ->where('hackaton_id', $hackatonId)
+            ->lockForUpdate()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('id');
+
+        if ($caseIds->count() !== 1) {
+            return;
+        }
+
+        $team->update([
+            'hackaton_case_id' => $caseIds->first(),
+        ]);
     }
 
     public function destroy(HackatonApplication $application): RedirectResponse
