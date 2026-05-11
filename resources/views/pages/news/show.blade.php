@@ -22,7 +22,7 @@
             <img src="{{ $post->cover_image ?: '/logo.svg' }}" alt="Изображение новости {{ $post->title }}" class="h-full w-full object-cover">
         </figure>
 
-        <div class="prose prose-sm mt-5 max-w-none sm:prose-base">
+        <div class="markdown-body mt-5">
             {!! \App\Support\SafeMarkdown::toHtml($post->body) !!}
         </div>
 

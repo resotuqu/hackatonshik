@@ -31,4 +31,25 @@ final class SafeMarkdown
 
         return Str::markdown($text, self::OPTIONS);
     }
+
+    /**
+     * Plain-text excerpt for cards and meta (Markdown rendered then tags stripped).
+     */
+    public static function toPlainExcerpt(?string $markdown, int $maxChars = 160): string
+    {
+        $html = self::toHtml($markdown ?? '');
+        if ($html === '') {
+            return '';
+        }
+
+        $plain = strip_tags($html);
+        $plain = preg_replace('/\s+/u', ' ', $plain) ?? '';
+        $plain = trim($plain);
+
+        if ($plain === '') {
+            return '';
+        }
+
+        return Str::limit($plain, $maxChars, '…');
+    }
 }

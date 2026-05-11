@@ -5,7 +5,7 @@
     </header>
 
     <article class="card card-border bg-base-100 p-6 sm:p-8">
-        <div class="prose prose-sm max-w-none sm:prose-base">
+        <div class="markdown-body">
             <h2>1. Общие положения</h2>
             <p>Мы обрабатываем персональные данные пользователей в соответствии с законодательством Российской Федерации и используем их только для работы платформы Хакатонщик.</p>
 

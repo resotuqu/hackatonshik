@@ -90,7 +90,7 @@
                                 </a>
                             @endguest
                         </div>
-                        <div class="prose prose-sm mt-1 max-w-none text-base-content/90 sm:prose-base">
+                        <div class="markdown-body mt-1">
                             {!! \App\Support\SafeMarkdown::toHtml($team->description ?? 'Описание отсутствует.') !!}
                         </div>
                     </div>
@@ -231,7 +231,7 @@
                                         @endif
                                     @endauth
                                 </div>
-                                <div class="prose prose-sm max-w-none text-base-content/90">
+                                <div class="markdown-body">
                                     {!! \App\Support\SafeMarkdown::toHtml($role->description ?? 'Описание роли отсутствует.') !!}
                                 </div>
                                 @if ($role->skills->isNotEmpty())

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Hackaton;
+use App\Models\HackatonDocument;
 use App\Models\Team;
 use App\Models\User;
 use App\Support\SafeMarkdown;
@@ -65,6 +66,23 @@ test('hackaton public page does not echo raw script from description markdown', 
     $response->assertSuccessful();
     $response->assertDontSee('<script>hackatonDescXssProbeZ9q', false);
     $response->assertSee('<strong>bold</strong>', false);
+});
+
+test('hackaton documents tab renders description markdown as html', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create(['is_public' => true]);
+    HackatonDocument::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'name' => 'DocMarkdownProbeNameK7m',
+        'description' => 'Описание **жирный** фрагмент',
+    ]);
+
+    $response = $this->get(route('hackatons.show', $hackaton));
+
+    $response->assertSuccessful();
+    $response->assertSee('DocMarkdownProbeNameK7m');
+    $response->assertSee('<strong>жирный</strong>', false);
+    $response->assertDontSee('**жирный**', false);
 });
 
 test('application creation routes are explicitly rate limited', function () {

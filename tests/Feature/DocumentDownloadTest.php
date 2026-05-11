@@ -16,3 +16,13 @@ test('document download component renders document title', function () {
         ->assertSee('Уникальное имя документа теста')
         ->assertSee('Скачать');
 });
+
+test('document download component renders description markdown safely', function () {
+    $document = HackatonDocument::factory()->create([
+        'name' => 'DocLivewireMdTitle',
+        'description' => 'Текст **выделение** конец',
+    ]);
+
+    Livewire::test(DocumentDownload::class, ['hackatonDocument' => $document])
+        ->assertSeeHtml('<strong>выделение</strong>');
+});

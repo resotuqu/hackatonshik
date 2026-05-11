@@ -37,6 +37,8 @@ return [
      * More info: https://spatie.be/docs/laravel-markdown/v1/using-the-blade-component/passing-options-to-commonmark
      */
     'commonmark_options' => [
+        'html_input' => 'strip',
+        'allow_unsafe_links' => false,
         'renderer' => [
             'block_separator' => "  \n",
             'inner_separator' => "  \n",

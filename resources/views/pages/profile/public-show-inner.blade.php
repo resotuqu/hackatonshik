@@ -115,7 +115,7 @@
                         <x-app-icon icon="heroicons:document-text" class="h-5 w-5 text-primary" />
                         О себе
                     </h2>
-                    <div class="prose prose-sm max-w-none text-base-content">
+                    <div class="markdown-body">
                         {!! \App\Support\SafeMarkdown::toHtml($profileUser->description) !!}
                     </div>
                 </div>

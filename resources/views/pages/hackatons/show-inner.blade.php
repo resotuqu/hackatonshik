@@ -114,6 +114,7 @@
         </div>
 
         <section id="hackaton-panel-description" role="tabpanel" data-tab-panel="hackaton" data-tab-value="description">
+        <div id="hackaton-tab-description" class="scroll-mt-24" tabindex="-1"></div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 card bg-base-100 border border-base-200 shadow-sm">
                 <div class="p-4 pb-0">
@@ -125,7 +126,7 @@
                 </div>
                 <div class="card-body">
                     <h1 class="card-title text-3xl">{{ $hackaton->title }}</h1>
-                    <div class="prose max-w-none prose-sm sm:prose-base">
+                    <div class="markdown-body">
                         {!! \App\Support\SafeMarkdown::toHtml($hackaton->description ?? 'Описание отсутствует.') !!}
                     </div>
                 </div>
@@ -247,7 +248,7 @@
                         @foreach ($hackaton->documents as $document)
                             <div class="rounded-xl border border-base-300 p-4">
                                 <p class="font-semibold">{{ $document->name }}</p>
-                                <p class="text-sm text-base-content/70 mt-1">{{ $document->description }}</p>
+                                <x-safe-markdown :content="$document->description ?? ''" class="mt-1 text-base-content/80" />
                                 <div class="mt-3">
                                     <a class="btn btn-sm btn-outline"
                                         href="{{ asset('storage/' . $document->file_url) }}"
@@ -338,7 +339,7 @@
                                         </form>
                                     @endif
                                 </div>
-                                <div class="prose max-w-none prose-sm mt-2">
+                                <div class="markdown-body mt-2">
                                     {!! \App\Support\SafeMarkdown::toHtml($announcement->body) !!}
                                 </div>
                                 @if ($announcement->images->isNotEmpty())
@@ -388,7 +389,7 @@
                                             @endif
                                             <div>
                                                 <h3 class="text-xl font-bold">{{ $case->title }}</h3>
-                                                <div class="prose prose-sm max-w-none text-base-content/80">
+                                                <div class="markdown-body">
                                                     {!! \App\Support\SafeMarkdown::toHtml($case->description ?? 'Описание отсутствует.') !!}
                                                 </div>
                                                 <p class="text-xs text-base-content/50 mt-2">

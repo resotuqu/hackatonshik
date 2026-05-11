@@ -39,7 +39,7 @@
                 {{ $team->title }}
             </h3>
             <p class="line-clamp-2 text-sm leading-relaxed text-base-content/70">
-                {{ $team->description ?? '—' }}
+                {{ \App\Support\SafeMarkdown::toPlainExcerpt($team->description ?? '') ?: '—' }}
             </p>
         </div>
 

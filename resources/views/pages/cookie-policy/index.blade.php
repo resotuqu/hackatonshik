@@ -6,7 +6,7 @@
     </header>
 
     <article class="card card-border bg-base-100 p-6 sm:p-8">
-        <div class="prose prose-sm max-w-none sm:prose-base">
+        <div class="markdown-body">
             <h2>Что такое cookie</h2>
             <p>Cookie — это небольшие файлы, которые сохраняются в браузере и помогают нам запоминать настройки пользователя и улучшать работу сайта.</p>
 
