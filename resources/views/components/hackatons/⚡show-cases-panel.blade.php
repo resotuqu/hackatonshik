@@ -1,7 +1,7 @@
 <?php
 
+use App\Actions\Hackaton\ResolveSubmitterTeamsForHackaton;
 use App\Models\Hackaton;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -14,32 +14,35 @@ new #[Lazy] class extends Component
     public bool $isAssignedJudge = false;
 
     /**
-     * @var Collection<int, mixed>
-     */
-    public Collection $submitterTeams;
-
-    /**
      * @var array<string, string>
      */
     public array $fieldTypeLabels = [];
 
-    /**
-     * @param  Collection<int, mixed>  $submitterTeams
-     * @param  array<string, string>  $fieldTypeLabels
-     */
     public function mount(
         Hackaton $hackaton,
         bool $isOrganizer,
         bool $isAssignedJudge,
-        Collection $submitterTeams,
         array $fieldTypeLabels,
     ): void {
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
         $this->isOrganizer = $isOrganizer;
         $this->isAssignedJudge = $isAssignedJudge;
-        $this->submitterTeams = $submitterTeams;
         $this->fieldTypeLabels = $fieldTypeLabels;
+    }
+
+    /**
+     * @return \Illuminate\View\View
+     */
+    public function render(ResolveSubmitterTeamsForHackaton $resolveSubmitterTeams)
+    {
+        $submitterTeams = auth()->check()
+            ? $resolveSubmitterTeams->handle($this->hackaton)
+            : collect();
+
+        return view('components.hackatons.⚡show-cases-panel', [
+            'submitterTeams' => $submitterTeams,
+        ]);
     }
 };
 ?>

@@ -46,7 +46,6 @@
                 :hackaton="$hackaton"
                 :isOrganizer="$isOrganizer"
                 :isAssignedJudge="$isAssignedJudge"
-                :submitterTeams="$submitterTeams"
                 :fieldTypeLabels="$fieldTypeLabels" />
         </section>
 
@@ -56,12 +55,6 @@
                     :hackaton="$hackaton"
                     :isOrganizer="$isOrganizer"
                     :isAssignedJudge="$isAssignedJudge"
-                    :metrics="$metrics"
-                    :leaderboard="$leaderboard"
-                    :judgeCandidates="$judgeCandidates"
-                    :pendingJudgeInvitations="$pendingJudgeInvitations"
-                    :participantUsers="$participantUsers"
-                    :issuedCertificatesByUser="$issuedCertificatesByUser"
                     :modals="$modals" />
             </section>
         @endif
@@ -70,7 +63,6 @@
             <livewire:hackatons.show-applications-panel
                 :hackaton="$hackaton"
                 :isOrganizer="$isOrganizer"
-                :applications="$applications"
                 :applicationStatusFilter="$applicationStatusFilter" />
         </section>
     </div>

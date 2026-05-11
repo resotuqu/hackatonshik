@@ -1,7 +1,10 @@
 <?php
 
+use App\Actions\Hackaton\BuildHackatonOrganizationMetrics;
+use App\Actions\Hackaton\BuildHackatonTeamLeaderboard;
+use App\Actions\Hackaton\ResolveJudgeManagementDataset;
+use App\Actions\Hackaton\ResolveParticipantUsersForHackatonCertificates;
 use App\Models\Hackaton;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -14,72 +17,58 @@ new #[Lazy] class extends Component
     public bool $isAssignedJudge = false;
 
     /**
-     * @var array<string, int>
-     */
-    public array $metrics = [];
-
-    /**
-     * @var Collection<int, mixed>
-     */
-    public Collection $leaderboard;
-
-    /**
-     * @var Collection<int, mixed>
-     */
-    public Collection $judgeCandidates;
-
-    /**
-     * @var Collection<int, mixed>
-     */
-    public Collection $pendingJudgeInvitations;
-
-    /**
-     * @var Collection<int, mixed>
-     */
-    public Collection $participantUsers;
-
-    /**
-     * @var Collection<int|string, Collection<int, mixed>>
-     */
-    public Collection $issuedCertificatesByUser;
-
-    /**
      * @var array<string, string>
      */
     public array $modals = [];
 
-    /**
-     * @param  Collection<int, mixed>  $leaderboard
-     * @param  Collection<int, mixed>  $judgeCandidates
-     * @param  Collection<int, mixed>  $pendingJudgeInvitations
-     * @param  Collection<int, mixed>  $participantUsers
-     * @param  Collection<int|string, Collection<int, mixed>>  $issuedCertificatesByUser
-     * @param  array<string, int>  $metrics
-     * @param  array<string, string>  $modals
-     */
     public function mount(
         Hackaton $hackaton,
         bool $isOrganizer,
         bool $isAssignedJudge,
-        array $metrics,
-        Collection $leaderboard,
-        Collection $judgeCandidates,
-        Collection $pendingJudgeInvitations,
-        Collection $participantUsers,
-        Collection $issuedCertificatesByUser,
         array $modals,
     ): void {
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
         $this->isOrganizer = $isOrganizer;
         $this->isAssignedJudge = $isAssignedJudge;
-        $this->metrics = $metrics;
-        $this->leaderboard = $leaderboard;
-        $this->judgeCandidates = $judgeCandidates;
-        $this->pendingJudgeInvitations = $pendingJudgeInvitations;
-        $this->participantUsers = $participantUsers;
-        $this->issuedCertificatesByUser = $issuedCertificatesByUser;
         $this->modals = $modals;
+    }
+
+    /**
+     * @return \Illuminate\View\View
+     */
+    public function render(
+        BuildHackatonOrganizationMetrics $buildMetrics,
+        BuildHackatonTeamLeaderboard $buildLeaderboard,
+        ResolveJudgeManagementDataset $resolveJudgeManagement,
+        ResolveParticipantUsersForHackatonCertificates $resolveParticipantUsers,
+    ) {
+        $metrics = ($this->isOrganizer || $this->isAssignedJudge)
+            ? $buildMetrics->handle($this->hackaton)
+            : $buildMetrics->empty();
+
+        $leaderboard = ($this->isOrganizer || $this->isAssignedJudge)
+            ? $buildLeaderboard->handle($this->hackaton)
+            : collect();
+
+        $judgeManagement = $resolveJudgeManagement->handle($this->hackaton, $this->isOrganizer);
+
+        $participantUsers = $this->isOrganizer
+            ? $resolveParticipantUsers->handle($this->hackaton)
+            : collect();
+
+        $issuedCertificatesByUser = $this->isOrganizer
+            ? $this->hackaton->certificates->groupBy('user_id')
+            : collect();
+
+        return view('components.hackatons.⚡show-organization-panel', [
+            'metrics' => $metrics,
+            'leaderboard' => $leaderboard,
+            'judgeCandidates' => $judgeManagement['judgeCandidates'],
+            'pendingJudgeInvitations' => $judgeManagement['pendingJudgeInvitations'],
+            'participantUsers' => $participantUsers,
+            'issuedCertificatesByUser' => $issuedCertificatesByUser,
+        ]);
     }
 };
 ?>

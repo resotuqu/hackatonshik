@@ -1,7 +1,7 @@
 <?php
 
+use App\Actions\Hackaton\ListHackatonApplicationsForOrganizer;
 use App\Models\Hackaton;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -11,27 +11,31 @@ new #[Lazy] class extends Component
 
     public bool $isOrganizer = false;
 
-    /**
-     * @var Collection<int, mixed>
-     */
-    public Collection $applications;
-
     public string $applicationStatusFilter = '';
 
-    /**
-     * @param  Collection<int, mixed>  $applications
-     */
     public function mount(
         Hackaton $hackaton,
         bool $isOrganizer,
-        Collection $applications,
         string $applicationStatusFilter,
     ): void {
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
         $this->isOrganizer = $isOrganizer;
-        $this->applications = $applications;
         $this->applicationStatusFilter = $applicationStatusFilter;
+    }
+
+    /**
+     * @return \Illuminate\View\View
+     */
+    public function render(ListHackatonApplicationsForOrganizer $listApplicationsForOrganizer)
+    {
+        $applications = $this->isOrganizer
+            ? $listApplicationsForOrganizer->handle($this->hackaton, $this->applicationStatusFilter)
+            : collect();
+
+        return view('components.hackatons.⚡show-applications-panel', [
+            'applications' => $applications,
+        ]);
     }
 };
 ?>
