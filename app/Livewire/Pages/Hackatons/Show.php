@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Pages\Hackatons;
 
-use App\Actions\Hackaton\BuildHackatonShowPageData;
+use App\Actions\Hackaton\BuildHackatonShowPresentationData;
+use App\Actions\Hackaton\ComposeHackatonShowPageData;
 use App\Models\Hackaton;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\View;
@@ -24,9 +25,19 @@ class Show extends Component
         return view('pages.hackatons.show-skeleton', $params);
     }
 
-    public function render(BuildHackatonShowPageData $pageData): View
-    {
-        $data = $pageData->build($this->hackaton, request());
+    public function render(
+        ComposeHackatonShowPageData $composePageData,
+        BuildHackatonShowPresentationData $buildPresentationData,
+    ): View {
+        $pageData = $composePageData->build($this->hackaton, request());
+        $presentationData = $buildPresentationData->build(
+            $this->hackaton,
+            $pageData['availableTeams'],
+            $pageData['isOrganizer'],
+            $pageData['isAssignedJudge'],
+        );
+
+        $data = array_merge($pageData, $presentationData);
 
         return view('pages.hackatons.show-inner', array_merge(
             ['hackaton' => $this->hackaton],

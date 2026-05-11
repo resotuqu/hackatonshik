@@ -131,3 +131,17 @@ test('archived hackatons are not auto-synced on show', function () {
 
     expect($hackaton->fresh()->status)->toBe(HackatonStatus::ARCHIVED);
 });
+
+test('show page mounts livewire tab panels for organizer', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create([
+        'is_public' => true,
+    ]);
+
+    actingAs($organizer)
+        ->get(route('hackatons.show', $hackaton))
+        ->assertOk()
+        ->assertSeeLivewire('hackatons.show-cases-panel')
+        ->assertSeeLivewire('hackatons.show-applications-panel')
+        ->assertSeeLivewire('hackatons.show-organization-panel');
+});
