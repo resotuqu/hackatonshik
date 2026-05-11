@@ -13,10 +13,18 @@ class HackatonImageSeeder extends Seeder
     public function run(): void
     {
         foreach (Hackaton::query()->where('is_public', true)->orderBy('id')->get() as $hackaton) {
-            HackatonImage::factory()
-                ->count(2)
-                ->for($hackaton)
-                ->create();
+            $hackaton->images()->delete();
+
+            if (! filled($hackaton->image_url)) {
+                continue;
+            }
+
+            HackatonImage::query()->create([
+                'hackaton_id' => $hackaton->id,
+                'path' => $hackaton->image_url,
+                'sort_order' => 0,
+                'alt' => $hackaton->title,
+            ]);
         }
     }
 }

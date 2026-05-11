@@ -98,7 +98,8 @@ class HackatonSeeder extends Seeder
             }
 
             $markdown = trim((string) File::get($file->getRealPath()));
-            [$title, $description] = $this->extractTitleAndDescription($slug, $markdown);
+            [$title, $rawMarkdown] = $this->extractTitleAndDescription($slug, $markdown);
+            $description = $this->sanitizePublicDescription($rawMarkdown, $title);
 
             $result[] = [
                 'slug' => $slug,
@@ -146,6 +147,69 @@ class HackatonSeeder extends Seeder
         }
 
         return [$title, $markdown];
+    }
+
+    private function sanitizePublicDescription(string $markdown, string $title): string
+    {
+        $md = trim($markdown);
+
+        if (preg_match('/^##\s+Кейс\s+\d+\./m', $md, $matches, PREG_OFFSET_CAPTURE) === 1) {
+            $md = trim(substr($md, 0, $matches[0][1]));
+        }
+
+        $md = $this->stripLeadingHackatonTitleBlock($md, $title);
+
+        $md = preg_replace(
+            '/^\*\*Красивое описание\s*\(для главной страницы и карточки\)\s*:\s*\*\*\s*$/miu',
+            "## О хакатоне\n",
+            $md,
+            1
+        ) ?? $md;
+
+        $md = preg_replace('/^#\s+(?![#])/mu', '## ', $md, 1) ?? $md;
+
+        $md = trim(preg_replace("/\n{3,}/u", "\n\n", $md) ?? $md);
+
+        return $md !== '' ? $md : 'Описание уточняется организатором.';
+    }
+
+    private function stripLeadingHackatonTitleBlock(string $markdown, string $title): string
+    {
+        $lines = preg_split('/\R/u', $markdown) ?: [];
+        $titleNorm = trim($title);
+        $i = 0;
+        $count = count($lines);
+
+        while ($i < $count) {
+            $trimmed = trim((string) $lines[$i]);
+            if ($trimmed === '') {
+                $i++;
+
+                continue;
+            }
+
+            if (preg_match('/^#+\s*\*{0,2}\s*Название хакатона\s*:?\s*\*{0,2}\s*$/iu', $trimmed) === 1) {
+                $i++;
+                while ($i < $count && trim((string) $lines[$i]) === '') {
+                    $i++;
+                }
+                if ($i < $count && trim((string) $lines[$i]) === $titleNorm) {
+                    $i++;
+                }
+
+                continue;
+            }
+
+            if ($trimmed === $titleNorm) {
+                $i++;
+
+                continue;
+            }
+
+            break;
+        }
+
+        return trim(implode("\n", array_slice($lines, $i)));
     }
 
     private function storeCover(string $slug, string $sourceImagePath): string

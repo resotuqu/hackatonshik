@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseField;
@@ -32,13 +31,6 @@ class HackatonCaseSeeder extends Seeder
 
             $hackaton->cases()->delete();
             $caseImages = $this->discoverCaseImages($slug);
-            $isCasePublicationStage = in_array($hackaton->status, [
-                HackatonStatus::CASES_ANNOUNCED,
-                HackatonStatus::IN_PROGRESS,
-                HackatonStatus::JUDGING,
-                HackatonStatus::FINISHED,
-                HackatonStatus::ARCHIVED,
-            ], true);
 
             foreach ($cases as $order => $caseData) {
                 $case = HackatonCase::query()->create([
@@ -47,8 +39,8 @@ class HackatonCaseSeeder extends Seeder
                     'description' => $caseData['description'],
                     'resources_json' => null,
                     'sort_order' => $order,
-                    'is_published' => $isCasePublicationStage,
-                    'publish_at' => $isCasePublicationStage ? now()->subMinutes(10) : now()->addDays(3),
+                    'is_published' => true,
+                    'publish_at' => now()->subMinutes(10),
                 ]);
 
                 if ($slug === 'smartomega-gamejab-2026' && isset($caseImages[$order])) {

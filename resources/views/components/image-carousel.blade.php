@@ -6,19 +6,25 @@
 ])
 
 @php
-    $slides = collect($items)->values();
-    $lightboxSlides = $slides->map(function ($slide): array {
+    $defaultAlt = 'Фото';
+
+    $slideRows = collect($items)->values()->map(function ($slide) use ($defaultAlt): array {
         $slidePath = data_get($slide, 'path');
         $slideAlt = (string) data_get($slide, 'alt', '');
         $slideUrl = filled($slidePath)
-            ? (str_starts_with($slidePath, 'http') ? $slidePath : asset('storage/' . $slidePath))
+            ? (str_starts_with((string) $slidePath, 'http') ? (string) $slidePath : asset('storage/'.$slidePath))
             : null;
 
         return [
             'url' => $slideUrl,
-            'alt' => $slideAlt !== '' ? $slideAlt : 'Изображение',
+            'alt' => $slideAlt !== '' ? $slideAlt : $defaultAlt,
         ];
-    })->filter(fn (array $slide) => filled($slide['url']))->values();
+    })->filter(fn (array $row): bool => filled($row['url']))->values();
+
+    $lightboxSlides = $slideRows->map(fn (array $row): array => [
+        'url' => $row['url'],
+        'alt' => $row['alt'],
+    ])->values();
 @endphp
 
 <div
@@ -48,41 +54,32 @@
         },
     }"
 >
-    @if ($slides->isEmpty())
+    @if ($slideRows->isEmpty())
         <div class="{{ $aspectClass }} flex items-center justify-center text-base-content/60">
             {{ $emptyText }}
         </div>
     @else
         <div class="{{ $aspectClass }} relative">
-            @foreach ($slides as $slideIndex => $slide)
-                @php
-                    $slidePath = data_get($slide, 'path');
-                    $slideAlt = (string) data_get($slide, 'alt', '');
-                    $slideUrl = filled($slidePath)
-                        ? (str_starts_with($slidePath, 'http') ? $slidePath : asset('storage/' . $slidePath))
-                        : null;
-                @endphp
+            @foreach ($slideRows as $slideIndex => $row)
                 <div data-carousel-slide class="{{ $slideIndex === 0 ? '' : 'hidden' }} absolute inset-0">
-                    @if ($slideUrl)
-                        <button
-                            type="button"
-                            class="h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-                            @click="openLightbox({{ $slideIndex }})"
-                            aria-label="Открыть изображение в полноэкранном режиме"
-                        >
-                            <img src="{{ $slideUrl }}" alt="{{ $slideAlt !== '' ? $slideAlt : 'Изображение' }}" class="h-full w-full object-cover" loading="lazy">
-                        </button>
-                    @endif
+                    <button
+                        type="button"
+                        class="h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                        @click="openLightbox({{ $slideIndex }})"
+                        aria-label="Открыть изображение в полноэкранном режиме"
+                    >
+                        <img src="{{ $row['url'] }}" alt="{{ $row['alt'] }}" class="h-full w-full object-cover" loading="lazy">
+                    </button>
                 </div>
             @endforeach
         </div>
 
-        @if ($slides->count() > 1)
-            <button type="button" data-carousel-prev class="btn btn-circle btn-sm absolute left-3 top-1/2 -translate-y-1/2 bg-base-100/90">❮</button>
-            <button type="button" data-carousel-next class="btn btn-circle btn-sm absolute right-3 top-1/2 -translate-y-1/2 bg-base-100/90">❯</button>
+        @if ($slideRows->count() > 1)
+            <button type="button" data-carousel-prev class="btn btn-circle btn-sm absolute left-3 top-1/2 -translate-y-1/2 bg-base-100/90" aria-label="Предыдущий слайд">❮</button>
+            <button type="button" data-carousel-next class="btn btn-circle btn-sm absolute right-3 top-1/2 -translate-y-1/2 bg-base-100/90" aria-label="Следующий слайд">❯</button>
 
             <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
-                @foreach ($slides as $dotIndex => $unusedSlide)
+                @foreach ($slideRows as $dotIndex => $unusedSlide)
                     <button type="button"
                             data-carousel-dot="{{ $dotIndex }}"
                             class="h-2.5 w-2.5 rounded-full border border-base-100 {{ $dotIndex === 0 ? 'bg-base-100' : 'bg-base-100/40' }}"
@@ -122,7 +119,7 @@
 
                 <img
                     :src="slides[index]?.url"
-                    :alt="slides[index]?.alt ?? 'Изображение'"
+                    :alt="slides[index]?.alt ?? 'Фото'"
                     class="max-h-[88vh] max-w-[92vw] rounded-xl object-contain shadow-2xl"
                 />
 
