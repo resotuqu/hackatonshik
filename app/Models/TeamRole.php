@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\TeamRoleFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,6 +38,13 @@ class TeamRole extends Model
     public function applications(): HasMany
     {
         return $this->hasMany(TeamApplication::class);
+    }
+
+    public function scopeWhereCaptain(Builder $query, Team $team): Builder
+    {
+        return $query
+            ->whereBelongsTo($team)
+            ->where('user_id', $team->user_id);
     }
 
     protected function casts(): array

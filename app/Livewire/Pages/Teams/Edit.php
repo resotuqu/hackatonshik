@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Models\TeamRole;
 use App\Models\TeamSocialLink;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -44,11 +45,30 @@ class Edit extends Component
 
     public bool $is_public = true;
 
+    #[Validate([
+        'captainRole.title' => ['required', 'min:3'],
+        'captainRole.description' => ['required', 'max:255'],
+        'captainRole.role' => ['required', 'exists:roles,id'],
+        'captainRole.skills' => ['array'],
+        'captainRole.skills.*' => ['integer', 'exists:skills,id'],
+    ],
+        message: [
+            'captainRole.title.required' => 'Название вашей роли обязательно для заполнения',
+            'captainRole.title.min' => 'Название вашей роли должно содержать минимум 3 символа',
+            'captainRole.description.required' => 'Описание вашей роли обязательно',
+            'captainRole.description.max' => 'Длина описания вашей роли не может быть больше 255 символов',
+            'captainRole.role.required' => 'Выберите свою роль в команде',
+            'captainRole.role.exists' => 'ОШИБКА 19755. Напишите по этому поводу в техподдержку',
+        ])]
+    public array $captainRole = [];
+
     // ----------------------------------------------------------------
     #[Validate([
         'roles.*.title' => ['required', 'min:3'],
         'roles.*.description' => ['required', 'max:255'],
         'roles.*.role' => ['required', 'exists:roles,id'],
+        'roles.*.skills' => ['array'],
+        'roles.*.skills.*' => ['integer', 'exists:skills,id'],
     ],
         message: [
             'roles.*.title.required' => 'Название роли обязательно для заполнения',
@@ -62,15 +82,7 @@ class Edit extends Component
 
     public function addRole(): void
     {
-        $this->roles[] = [
-            'id' => uniqid(),
-            'db_id' => null,
-            'title' => '',
-            'skills' => [],
-            'description' => '',
-            'role' => '',
-            'is_occupied' => false,
-        ];
+        $this->roles[] = $this->emptyRoleState();
     }
 
     public function removeRole($index): void
@@ -89,6 +101,11 @@ class Edit extends Component
             return;
         }
         $this->roles[$index]['title'] = $title;
+    }
+
+    public function fillCaptainRoleTitle(string $title): void
+    {
+        $this->captainRole['title'] = $title;
     }
 
     // ----------------------------------------------------------------
@@ -120,92 +137,102 @@ class Edit extends Component
 
         $this->validate();
 
-        $data = [
-            'title' => $this->title,
-            'description' => $this->description,
-            'hackaton_id' => $this->hackaton_id,
-            'is_public' => $this->is_public,
-        ];
+        DB::transaction(function (): void {
+            $data = [
+                'title' => $this->title,
+                'description' => $this->description,
+                'hackaton_id' => $this->hackaton_id,
+                'is_public' => $this->is_public,
+            ];
 
-        if ($this->photo) {
-            $path = $this->photo->storePublicly('team_photos', 'public');
-            $data['image_url'] = $path;
-        }
-
-        $this->team->update($data);
-
-        $savedSocialLinkIds = [];
-        foreach ($this->socialLinks as $socialLink) {
-            $existingSocialLinkId = $socialLink['db_id'] ?? null;
-            if (! empty($existingSocialLinkId)) {
-                $existingSocialLink = TeamSocialLink::query()
-                    ->where('team_id', $this->team->id)
-                    ->find($existingSocialLinkId);
-                if ($existingSocialLink instanceof TeamSocialLink) {
-                    $existingSocialLink->update([
-                        'name' => $socialLink['name'],
-                        'url' => $socialLink['url'],
-                    ]);
-                    $savedSocialLinkIds[] = $existingSocialLink->id;
-
-                    continue;
-                }
+            if ($this->photo) {
+                $path = $this->photo->storePublicly('team_photos', 'public');
+                $data['image_url'] = $path;
             }
 
-            $newSocialLink = TeamSocialLink::query()->create([
-                'team_id' => $this->team->id,
-                'name' => $socialLink['name'],
-                'url' => $socialLink['url'],
-            ]);
-            $savedSocialLinkIds[] = $newSocialLink->id;
-        }
+            $this->team->update($data);
 
-        $socialLinksToDelete = $this->team->socialLinks();
-        if (! empty($savedSocialLinkIds)) {
-            $socialLinksToDelete->whereNotIn('id', $savedSocialLinkIds);
-        }
-        $socialLinksToDelete->delete();
+            $savedSocialLinkIds = [];
+            foreach ($this->socialLinks as $socialLink) {
+                $existingSocialLinkId = $socialLink['db_id'] ?? null;
+                if (! empty($existingSocialLinkId)) {
+                    $existingSocialLink = TeamSocialLink::query()
+                        ->where('team_id', $this->team->id)
+                        ->find($existingSocialLinkId);
+                    if ($existingSocialLink instanceof TeamSocialLink) {
+                        $existingSocialLink->update([
+                            'name' => $socialLink['name'],
+                            'url' => $socialLink['url'],
+                        ]);
+                        $savedSocialLinkIds[] = $existingSocialLink->id;
 
-        $teamRolesById = TeamRole::query()
-            ->where('team_id', $this->team->id)
-            ->with('skills')
-            ->get()
-            ->keyBy('id');
-        $savedRoleIds = [];
-        foreach ($this->roles as $role) {
-            $existingRoleId = $role['db_id'] ?? null;
-            if (! empty($existingRoleId) && $teamRolesById->has($existingRoleId)) {
-                $existingRole = $teamRolesById->get($existingRoleId);
-                if (! $existingRole instanceof TeamRole) {
+                        continue;
+                    }
+                }
+
+                $newSocialLink = TeamSocialLink::query()->create([
+                    'team_id' => $this->team->id,
+                    'name' => $socialLink['name'],
+                    'url' => $socialLink['url'],
+                ]);
+                $savedSocialLinkIds[] = $newSocialLink->id;
+            }
+
+            $socialLinksToDelete = $this->team->socialLinks();
+            if (! empty($savedSocialLinkIds)) {
+                $socialLinksToDelete->whereNotIn('id', $savedSocialLinkIds);
+            }
+            $socialLinksToDelete->delete();
+
+            $this->team->ensureCaptainHasRole($this->captainRole);
+
+            $teamRolesById = TeamRole::query()
+                ->where('team_id', $this->team->id)
+                ->where(function ($query): void {
+                    $query
+                        ->whereNull('user_id')
+                        ->orWhere('user_id', '!=', $this->team->user_id);
+                })
+                ->with('skills')
+                ->get()
+                ->keyBy('id');
+            $savedRoleIds = [];
+            foreach ($this->roles as $role) {
+                $existingRoleId = $role['db_id'] ?? null;
+                if (! empty($existingRoleId) && $teamRolesById->has($existingRoleId)) {
+                    $existingRole = $teamRolesById->get($existingRoleId);
+                    if (! $existingRole instanceof TeamRole) {
+                        continue;
+                    }
+                    $existingRole->update([
+                        'title' => $role['title'],
+                        'description' => $role['description'],
+                        'role_id' => $role['role'],
+                    ]);
+                    $existingRole->skills()->sync($role['skills'] ?? []);
+                    $savedRoleIds[] = $existingRole->id;
+
                     continue;
                 }
-                $existingRole->update([
+
+                $newRole = TeamRole::query()->create([
                     'title' => $role['title'],
                     'description' => $role['description'],
+                    'team_id' => $this->team->id,
                     'role_id' => $role['role'],
+                    'user_id' => null,
                 ]);
-                $existingRole->skills()->sync($role['skills'] ?? []);
-                $savedRoleIds[] = $existingRole->id;
-
-                continue;
+                $newRole->skills()->sync($role['skills'] ?? []);
+                $savedRoleIds[] = $newRole->id;
             }
 
-            $newRole = TeamRole::query()->create([
-                'title' => $role['title'],
-                'description' => $role['description'],
-                'team_id' => $this->team->id,
-                'role_id' => $role['role'],
-                'user_id' => null,
-            ]);
-            $newRole->skills()->sync($role['skills'] ?? []);
-            $savedRoleIds[] = $newRole->id;
-        }
+            $rolesToDelete = $this->team->roles()->whereNull('user_id');
+            if (! empty($savedRoleIds)) {
+                $rolesToDelete->whereNotIn('id', $savedRoleIds);
+            }
+            $rolesToDelete->delete();
+        });
 
-        $rolesToDelete = $this->team->roles()->whereNull('user_id');
-        if (! empty($savedRoleIds)) {
-            $rolesToDelete->whereNotIn('id', $savedRoleIds);
-        }
-        $rolesToDelete->delete();
         $this->success('Команда обновлена!', position: 'toast-center toast-top');
         $this->redirect('/profile/teams');
     }
@@ -318,18 +345,22 @@ class Edit extends Component
                 'url' => $socialLink->url,
             ];
         }
-        foreach (TeamRole::query()->with('skills')->where('team_id', $team->id)->get() as $role) {
-            $skillIds = $role->skills->pluck('id')->toArray();
+        $teamRoles = TeamRole::query()
+            ->with('skills')
+            ->where('team_id', $team->id)
+            ->get();
 
-            $this->roles[] = [
-                'id' => uniqid(),
-                'db_id' => $role->id,
-                'title' => $role->title,
-                'skills' => $skillIds,
-                'description' => $role->description,
-                'role' => $role->role_id,
-                'is_occupied' => $role->user_id !== null,
-            ];
+        $captainRole = $teamRoles->first(fn (TeamRole $role): bool => $role->user_id === $team->user_id);
+        $this->captainRole = $captainRole instanceof TeamRole
+            ? $this->mapRoleToState($captainRole)
+            : $this->emptyCaptainRoleState();
+
+        foreach ($teamRoles as $role) {
+            if ($captainRole instanceof TeamRole && $role->id === $captainRole->id) {
+                continue;
+            }
+
+            $this->roles[] = $this->mapRoleToState($role, $role->user_id !== null);
         }
     }
 
@@ -341,5 +372,51 @@ class Edit extends Component
     public function render()
     {
         return view('pages.teams.edit');
+    }
+
+    /**
+     * @return array{id:string,db_id:int|null,title:string,skills:list<int>,description:string,role:int|string,is_occupied:bool}
+     */
+    private function emptyRoleState(): array
+    {
+        return [
+            'id' => uniqid(),
+            'db_id' => null,
+            'title' => '',
+            'skills' => [],
+            'description' => '',
+            'role' => '',
+            'is_occupied' => false,
+        ];
+    }
+
+    /**
+     * @return array{db_id:int|null,title:string,skills:list<int>,description:string,role:int|string}
+     */
+    private function emptyCaptainRoleState(): array
+    {
+        return [
+            'db_id' => null,
+            'title' => '',
+            'skills' => [],
+            'description' => '',
+            'role' => '',
+        ];
+    }
+
+    /**
+     * @return array{id:string,db_id:int,title:string,skills:list<int>,description:string,role:int,is_occupied:bool}
+     */
+    private function mapRoleToState(TeamRole $role, bool $isOccupied = false): array
+    {
+        return [
+            'id' => uniqid(),
+            'db_id' => $role->id,
+            'title' => $role->title,
+            'skills' => $role->skills->pluck('id')->map(fn (mixed $id): int => (int) $id)->all(),
+            'description' => $role->description,
+            'role' => $role->role_id,
+            'is_occupied' => $isOccupied,
+        ];
     }
 }

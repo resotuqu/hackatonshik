@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Cache;
+use InvalidArgumentException;
 
 class Team extends Model
 {
@@ -68,6 +69,56 @@ class Team extends Model
     public function roles(): HasMany
     {
         return $this->hasMany(TeamRole::class);
+    }
+
+    public function captainRole(): ?TeamRole
+    {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles
+                ->first(fn (TeamRole $role): bool => $role->user_id === $this->user_id);
+        }
+
+        return TeamRole::query()
+            ->whereCaptain($this)
+            ->first();
+    }
+
+    /**
+     * @param  array{title:mixed,description:mixed,role:mixed,skills?:mixed}  $captainRoleData
+     */
+    public function ensureCaptainHasRole(array $captainRoleData): TeamRole
+    {
+        if (! $this->exists || $this->user_id === null) {
+            throw new InvalidArgumentException('Captain role can only be ensured for a persisted team owner.');
+        }
+
+        $title = trim((string) ($captainRoleData['title'] ?? ''));
+        $description = trim((string) ($captainRoleData['description'] ?? ''));
+        $roleId = (int) ($captainRoleData['role'] ?? 0);
+        $skills = collect($captainRoleData['skills'] ?? [])
+            ->filter(fn (mixed $skillId): bool => filled($skillId))
+            ->map(fn (mixed $skillId): int => (int) $skillId)
+            ->values()
+            ->all();
+
+        if ($title === '' || $description === '' || $roleId === 0) {
+            throw new InvalidArgumentException('Captain role data is incomplete.');
+        }
+
+        $captainRole = TeamRole::query()->firstOrNew([
+            'team_id' => $this->id,
+            'user_id' => $this->user_id,
+        ]);
+
+        $captainRole->fill([
+            'title' => $title,
+            'description' => $description,
+            'role_id' => $roleId,
+        ]);
+        $captainRole->save();
+        $captainRole->skills()->sync($skills);
+
+        return $captainRole;
     }
 
     public function emptyRoles(): int

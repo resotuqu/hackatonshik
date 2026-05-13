@@ -263,103 +263,82 @@
                 @endif
 
                 @if ($step === 4)
-                    <div
-                        class="card rounded-2xl border border-base-200 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
-                    >
-                        <div class="flex flex-col gap-4 border-b border-base-200/80 pb-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div class="min-w-0 space-y-1">
-                                <h2 class="text-xl font-semibold tracking-tight">Роли в команде</h2>
-                                <p class="text-sm text-base-content/65">
-                                    Добавьте вакансии и навыки — участники подадут заявки на выбранные роли.
-                                </p>
-                            </div>
-                            <x-mary-button
-                                type="button"
-                                class="btn-primary btn-sm shrink-0 gap-2 shadow-md shadow-primary/15 motion-safe:transition-transform motion-safe:active:scale-[0.98]"
-                                wire:click="addRole"
-                                label="Добавить роль"
-                                icon="o-plus"
-                            />
-                        </div>
+    <div class="rounded-2xl border border-base-200 bg-base-100 p-6 shadow-sm sm:p-8">
+        
+        {{-- Шапка секции --}}
+        <div class="flex flex-col gap-5 border-b border-base-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0 space-y-1.5">
+                <h2 class="text-xl font-bold tracking-tight text-base-content">Роли и вакансии</h2>
+                <p class="text-sm text-base-content/70">
+                    Определите свою зону ответственности и откройте вакансии для новых участников команды.
+                </p>
+            </div>
+            <x-mary-button
+                type="button"
+                class="btn-primary btn-sm shrink-0 px-4 font-medium shadow-sm transition-transform active:scale-95"
+                wire:click="addRole"
+                label="Добавить вакансию"
+                icon="o-plus"
+            />
+        </div>
 
-                        @if (empty($roles))
-                            <div
-                                class="mt-6 rounded-2xl border border-dashed border-base-300 bg-base-200/25 px-4 py-6 text-center text-sm text-base-content/65"
-                            >
-                                Пока нет ролей. Добавьте хотя бы одну роль для набора участников.
-                            </div>
-                        @endif
+        {{-- Роль капитана (Основа) --}}
+        <div class="mt-8">
+            <x-team-role-form
+                field-prefix="captainRole"
+                heading="Моя роль в команде"
+                description="Эта роль автоматически закрепляется за вами как за создателем команды."
+                badge="Вы — капитан"
+                :highlight="true"
+                locked-label="Нельзя отвязать"
+                :popular-role-titles="$this->popularRoleTitles"
+                :roles-data="$this->rolesData"
+                :skills-data="$this->skillsData"
+                :config="$this->config"
+                quick-fill-method="fillCaptainRoleTitle"
+            />
+        </div>
 
-                        <div class="mt-6 space-y-6">
-                            @foreach ($roles as $index => $role)
-                                <x-mary-card
-                                    class="border border-base-200 bg-base-200/50 shadow-sm transition motion-safe:duration-200 motion-safe:hover:border-primary/20 motion-safe:hover:shadow-md"
-                                    wire:key="role-{{ $role['id'] }}"
-                                >
-                                    <div class="flex flex-wrap items-center justify-between gap-2">
-                                        <x-marybadge
-                                            class="badge-ghost badge-sm font-medium"
-                                            value="Роль #{{ $index + 1 }}"
-                                        />
-                                        <x-mary-button
-                                            type="button"
-                                            wire:click="removeRole({{ $index }})"
-                                            label="Удалить"
-                                            class="btn-ghost btn-xs gap-1 text-base-content/50 hover:bg-error/10 hover:text-error"
-                                            icon="o-x-mark"
-                                        />
-                                    </div>
+        {{-- Секция Вакансий --}}
+        <div class="mb-6 mt-24 flex items-center gap-4">
+            <h3 class="text-lg font-semibold tracking-tight text-base-content">Открытые вакансии</h3>
+            <div class="h-px flex-1 bg-base-200"></div>
+        </div>
 
-                                    <div class="mt-4 space-y-4 border-t border-base-200/70 pt-4">
-                                        <div>
-                                            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/45">
-                                                Быстрый выбор названия
-                                            </p>
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach ($this->popularRoleTitles as $roleTitle)
-                                                    <button
-                                                        type="button"
-                                                        wire:click="fillRoleTitle({{ $index }}, @js($roleTitle))"
-                                                        class="btn btn-ghost btn-xs rounded-full border border-transparent px-3 font-normal text-base-content/80 motion-safe:transition-all motion-safe:hover:border-primary/25 motion-safe:hover:bg-primary/5 motion-safe:active:scale-[0.98]"
-                                                    >
-                                                        {{ $roleTitle }}
-                                                    </button>
-                                                @endforeach
-                                            </div>
-                                        </div>
-
-                                        <x-mary-input wire:model="roles.{{ $index }}.title" label="Название роли" />
-                                        <x-marymarkdown
-                                            disk="public"
-                                            folder="team_markdown"
-                                            wire:model="roles.{{ $index }}.description"
-                                            label="Описание роли"
-                                            :config="$this->config"
-                                        />
-                                        <x-maryselect
-                                            label="Категория роли"
-                                            wire:model="roles.{{ $index }}.role"
-                                            :options="$this->rolesData"
-                                        />
-                                        <div
-                                            class="rounded-xl border border-base-200 bg-base-100 p-2 focus-within:ring-2 focus-within:ring-primary/25 motion-safe:transition-shadow"
-                                        >
-                                            <x-marychoices-offline
-                                                label="Навыки роли"
-                                                wire:model="roles.{{ $index }}.skills"
-                                                :options="$this->skillsData"
-                                                placeholder="Начните вводить название навыка…"
-                                                hint="Поиск по списку навыков платформы. Можно выбрать несколько."
-                                                clearable
-                                                searchable
-                                            />
-                                        </div>
-                                    </div>
-                                </x-mary-card>
-                            @endforeach
-                        </div>
+        @if (empty($roles))
+            {{-- Пустое состояние (Empty State) --}}
+            <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-200/30 px-6 py-10 text-center">
+                <p class="text-sm font-medium text-base-content/80">
+                    В команде пока нет открытых вакансий
+                </p>
+                <p class="mt-1 text-sm text-base-content/60">
+                    Добавьте роли, чтобы другие пользователи платформы могли подать заявку на участие.
+                </p>
+            </div>
+        @else
+            {{-- Список добавленных ролей --}}
+            <div class="space-y-8">
+                @foreach ($roles as $index => $role)
+                    <div class="relative">
+                        <x-team-role-form
+                            wire:key="role-{{ $role['id'] }}"
+                            field-prefix="roles.{{ $index }}"
+                            heading="Вакансия #{{ $index + 1 }}"
+                            description="Укажите специализацию и требования к кандидату на эту позицию."
+                            :remove-action="'removeRole('.$index.')'"
+                            :popular-role-titles="$this->popularRoleTitles"
+                            :roles-data="$this->rolesData"
+                            :skills-data="$this->skillsData"
+                            :config="$this->config"
+                            quick-fill-method="fillRoleTitle"
+                            :quick-fill-index="$index"
+                        />
                     </div>
-                @endif
+                @endforeach
+            </div>
+        @endif
+    </div>
+@endif
             </div>
 
             <x-slot:actions

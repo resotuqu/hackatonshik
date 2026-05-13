@@ -420,7 +420,7 @@
                         <div class="min-w-0 space-y-1">
                             <h2 class="text-xl font-semibold tracking-tight text-base-content">Роли в команде</h2>
                             <p class="text-sm text-base-content/65">
-                                Управляйте вакансиями и навыками — участники подадут заявки на выбранные роли.
+                                Обновите свою роль капитана и управляйте вакансиями, на которые участники подают заявки.
                             </p>
                         </div>
                     </div>
@@ -433,99 +433,49 @@
                     />
                 </div>
 
+                <div class="mt-6">
+                    <x-team-role-form
+                        field-prefix="captainRole"
+                        heading="Моя роль в команде"
+                        description="Эта роль закреплена за владельцем команды. Вы можете изменить её содержание, но не можете отвязать себя от неё."
+                        badge="Вы — капитан"
+                        :highlight="true"
+                        locked-label="Закреплено за вами"
+                        :popular-role-titles="$this->popularRoleTitles"
+                        :roles-data="$this->rolesData"
+                        :skills-data="$this->skillsData"
+                        :config="$this->config"
+                        quick-fill-method="fillCaptainRoleTitle"
+                    />
+                </div>
+
+                <div class="divider my-6 text-xs text-base-content/50">Вакансии команды</div>
+
                 @if (empty($roles))
                     <div
                         class="mt-6 rounded-2xl border border-dashed border-base-300 bg-base-200/25 px-4 py-6 text-center text-sm text-base-content/65"
                     >
-                        Пока нет ролей. Добавьте хотя бы одну роль для набора участников.
+                        Пока нет вакансий. Добавьте роль, если ищете новых участников в команду.
                     </div>
                 @endif
 
                 <div class="mt-6 space-y-6">
                     @foreach ($roles as $index => $role)
-                        <x-mary-card
-                            class="motion-safe:animate-card-enter border border-base-200 bg-base-200/50 shadow-sm motion-safe:transition motion-safe:duration-200 motion-safe:hover:border-primary/20 motion-safe:hover:shadow-md"
+                        <x-team-role-form
                             wire:key="role-{{ $role['id'] }}"
-                        >
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <x-marybadge
-                                        class="badge-ghost badge-sm font-medium"
-                                        value="Роль #{{ $index + 1 }}"
-                                    />
-                                    @if ($role['is_occupied'] ?? false)
-                                        <span
-                                            class="badge badge-sm gap-1 border-0 bg-error/15 text-error ring-1 ring-error/25"
-                                        >
-                                            <x-app-icon icon="heroicons:lock-closed" class="h-3.5 w-3.5" />
-                                            Роль занята
-                                        </span>
-                                    @endif
-                                </div>
-
-                                @if (! ($role['is_occupied'] ?? false))
-                                    <x-mary-button
-                                        type="button"
-                                        wire:click="removeRole({{ $index }})"
-                                        label="Удалить"
-                                        class="btn-ghost btn-xs gap-1 text-base-content/50 hover:bg-error/10 hover:text-error motion-safe:transition-colors"
-                                        icon="o-x-mark"
-                                    />
-                                @endif
-                            </div>
-
-                            <div class="mt-4 space-y-4 border-t border-base-200/70 pt-4">
-                                <div>
-                                    <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/45">
-                                        Быстрый выбор названия
-                                    </p>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($this->popularRoleTitles as $roleTitle)
-                                            <button
-                                                type="button"
-                                                wire:click="fillRoleTitle({{ $index }}, @js($roleTitle))"
-                                                class="btn btn-ghost btn-xs rounded-full border border-transparent px-3 font-normal text-base-content/80 motion-safe:transition-all motion-safe:hover:border-primary/25 motion-safe:hover:bg-primary/5 motion-safe:active:scale-[0.98]"
-                                            >
-                                                {{ $roleTitle }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                <x-mary-input
-                                    wire:model="roles.{{ $index }}.title"
-                                    label="Название роли"
-                                />
-                                <x-marymarkdown
-                                    disk="public"
-                                    folder="team_markdown"
-                                    wire:model="roles.{{ $index }}.description"
-                                    label="Описание роли"
-                                    :config="$this->config"
-                                />
-                                <x-maryselect
-                                    label="Категория роли"
-                                    wire:model="roles.{{ $index }}.role"
-                                    :options="$this->rolesData"
-                                />
-                                <div class="space-y-2">
-                                    <p class="text-xs font-medium text-base-content/70">Подберите технологии и компетенции</p>
-                                    <div
-                                        class="team-edit-skills rounded-xl border border-base-200 bg-base-100 p-2 focus-within:ring-2 focus-within:ring-primary/25 motion-safe:transition-shadow [&_span.mary-choices-element]:rounded-full [&_span.mary-choices-element]:border [&_span.mary-choices-element]:border-primary/30 [&_span.mary-choices-element]:bg-primary/12 [&_span.mary-choices-element]:font-medium [&_span.mary-choices-element]:text-primary"
-                                    >
-                                        <x-marychoices-offline
-                                            label="Навыки роли"
-                                            wire:model="roles.{{ $index }}.skills"
-                                            :options="$this->skillsData"
-                                            placeholder="Начните вводить название навыка…"
-                                            hint="Поиск по списку навыков платформы. Можно выбрать несколько."
-                                            clearable
-                                            searchable
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </x-mary-card>
+                            class="motion-safe:animate-card-enter"
+                            field-prefix="roles.{{ $index }}"
+                            heading="Роль #{{ $index + 1 }}"
+                            description="Отредактируйте роль и навыки для поиска подходящего участника."
+                            :locked-label="($role['is_occupied'] ?? false) ? 'Роль занята' : null"
+                            :remove-action="($role['is_occupied'] ?? false) ? null : 'removeRole('.$index.')'"
+                            :popular-role-titles="$this->popularRoleTitles"
+                            :roles-data="$this->rolesData"
+                            :skills-data="$this->skillsData"
+                            :config="$this->config"
+                            quick-fill-method="fillRoleTitle"
+                            :quick-fill-index="$index"
+                        />
                     @endforeach
                 </div>
             </section>
