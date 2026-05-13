@@ -23,7 +23,7 @@ class BuildHackatonShowPresentationData
      *     teamsWithoutApplication: Collection<int, Team>,
      *     announcementTemplates: array<string, string>,
      *     modals: array<string, string>,
-     *     issuedCertificatesByUser: Collection<int|string, Collection<int, mixed>>,
+     *     issuedCertificatesByUser: Collection<int|string, mixed>,
      *     nextStepTitle: string,
      *     nextStepHint: string,
      *     seoDescription: string,

@@ -6,4 +6,5 @@ parameters:
         - app
         - routes
     level: 5
+    treatPhpDocTypesAsCertain: false
     tmpDir: storage/framework/phpstan
