@@ -149,7 +149,7 @@ class Index extends Component
         $cacheKey = sprintf(
             'livewire:teams:index:v1:p%s:q%s:sort%s:tab%s',
             $this->getPage(),
-            md5(json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
+            hash('sha256', json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
             $this->sort,
             $this->catalog_tab
         );
