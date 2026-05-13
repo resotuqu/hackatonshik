@@ -206,18 +206,6 @@
                     <span wire:loading wire:target="openHackaton({{ $hackaton->id }})" class="loading loading-spinner loading-sm"></span>
                 </button>
             @endif
-            @if ($canQuickApply && ! $isFinished)
-                <button
-                    type="button"
-                    class="ui-cta-outline btn-sm border-base-300 sm:btn-md sm:flex-1"
-                    wire:click="quickApplyHackaton({{ $hackaton->id }})"
-                    wire:loading.attr="disabled"
-                    wire:target="quickApplyHackaton({{ $hackaton->id }})"
-                >
-                    <span wire:loading.remove wire:target="quickApplyHackaton({{ $hackaton->id }})">Подать заявку</span>
-                    <span wire:loading wire:target="quickApplyHackaton({{ $hackaton->id }})" class="loading loading-spinner loading-sm"></span>
-                </button>
-            @endif
         </div>
     </div>
 </article>

@@ -104,22 +104,6 @@
         @endif
 
         <div class="mt-auto flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
-            @if ($canQuickApply && $hasVacancies)
-                <button
-                    type="button"
-                    class="ui-cta-primary btn-sm order-1 sm:order-0 sm:btn-md sm:flex-1"
-                    wire:click="quickApplyTeam({{ $team->id }})"
-                    wire:loading.attr="disabled"
-                    wire:target="quickApplyTeam({{ $team->id }})"
-                >
-                    <span wire:loading.remove wire:target="quickApplyTeam({{ $team->id }})">Откликнуться</span>
-                    <span wire:loading wire:target="quickApplyTeam({{ $team->id }})" class="loading loading-spinner loading-sm"></span>
-                </button>
-            @elseif (! auth()->check() && $hasVacancies)
-                <a href="{{ route('login') }}" class="ui-cta-primary btn-sm order-1 sm:order-0 sm:btn-md sm:flex-1">
-                    Откликнуться
-                </a>
-            @endif
             @if (filled($href))
                 <a
                     href="{{ $href }}"
