@@ -101,7 +101,7 @@ class Index extends Component
         $cacheKey = sprintf(
             'livewire:hackatons:index:v1:p%s:q%s:s%s:l%s:pr%s:so%s',
             $this->getPage(),
-            md5(json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
+            hash('sha256', json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
             $this->status,
             $this->level,
             (int) $this->with_prizes,
