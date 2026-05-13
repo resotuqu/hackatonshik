@@ -24,19 +24,19 @@ class HackathonDiscoveryTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($hackaton) {
             $browser->visit('/')
-                    ->waitForText('Хакатоны', 30)
-                    ->clickLink('Хакатоны')
-                    ->waitForRoute('hackatons.index')
-                    ->assertSee('Хакатоны')
+                ->waitForText('Хакатоны', 30)
+                ->clickLink('Хакатоны')
+                ->waitForRoute('hackatons.index')
+                ->assertSee('Хакатоны')
                     // Search for our hackathon
-                    ->type('input[placeholder*="Название"]', 'Dusk Hackathon')
-                    ->pause(1000) // Wait for Livewire search debounce
-                    ->assertSee($hackaton->title)
-                    ->pause(500)
-                    ->press('Подробнее') // Click the card button
-                    ->waitForRoute('hackatons.show', ['hackaton' => $hackaton->id])
-                    ->assertSee($hackaton->title)
-                    ->assertSee($hackaton->description);
+                ->type('input[placeholder*="Название"]', 'Dusk Hackathon')
+                ->pause(1000) // Wait for Livewire search debounce
+                ->assertSee($hackaton->title)
+                ->pause(500)
+                ->press('Подробнее') // Click the card button
+                ->waitForRoute('hackatons.show', ['hackaton' => $hackaton->id])
+                ->assertSee($hackaton->title)
+                ->assertSee($hackaton->description);
         });
     }
 }

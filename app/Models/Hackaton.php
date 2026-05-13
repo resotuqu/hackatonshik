@@ -25,6 +25,9 @@ use Illuminate\Support\Facades\Cache;
  * @property bool $is_public
  * @property string|null $gallery_preview
  * @property int|null $images_count
+ * @property int|null $pending_applications_count
+ * @property int|null $participants_count
+ * @property int|null $submissions_count
  * @property-read User|null $user
  */
 class Hackaton extends Model

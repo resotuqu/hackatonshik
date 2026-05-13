@@ -13,6 +13,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -31,7 +32,7 @@ class PublicCatalogController extends Controller
                 ->select(['id', 'title', 'start_at', 'end_at', 'image_url'])
                 ->withCount('images')
                 ->selectSub(
-                    fn (\Illuminate\Database\Query\Builder $query) => $query
+                    fn (Builder $query) => $query
                         ->from('hackaton_images')
                         ->whereColumn('hackaton_images.hackaton_id', 'hackatons.id')
                         ->orderBy('sort_order')
