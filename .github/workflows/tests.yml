@@ -65,7 +65,12 @@ jobs:
         run: php artisan key:generate
 
       - name: Clear Config and Cache
+        env:
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+          QUEUE_CONNECTION: sync
         run: |
+          touch database/database.sqlite
           php artisan config:clear
           php artisan cache:clear
 

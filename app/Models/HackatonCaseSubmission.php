@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * @property-read \App\Models\HackatonCase|null $case
+ * @property-read HackatonCase|null $case
  */
 class HackatonCaseSubmission extends Model
 {
