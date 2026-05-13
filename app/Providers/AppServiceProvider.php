@@ -23,10 +23,12 @@ use App\Policies\HackatonCertificatePolicy;
 use App\Policies\HackatonPolicy;
 use App\Policies\TeamApplicationPolicy;
 use App\Policies\TeamPolicy;
+use App\ViewModels\PartnerSidebarCounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
@@ -92,6 +94,17 @@ class AppServiceProvider extends ServiceProvider
         });
         Event::listen(HackatonApplicationChanged::class, InvalidateHomeCaches::class);
         Event::listen(TeamApplicationChanged::class, InvalidateHomeCaches::class);
+
+        View::composer('layouts.app', function ($view): void {
+            $user = Auth::user();
+            if ($user instanceof User && $user->isOrganizer()) {
+                $view->with('partnerSidebarCounts', PartnerSidebarCounts::forUser($user));
+
+                return;
+            }
+
+            $view->with('partnerSidebarCounts', null);
+        });
 
         Gate::policy(Hackaton::class, HackatonPolicy::class);
         Gate::policy(Team::class, TeamPolicy::class);

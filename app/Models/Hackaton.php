@@ -120,6 +120,12 @@ class Hackaton extends Model
         return $this->hasMany(HackatonCase::class)->orderBy('sort_order');
     }
 
+    /** @return HasManyThrough<HackatonCaseSubmission, HackatonCase, $this> */
+    public function caseSubmissions(): HasManyThrough
+    {
+        return $this->hasManyThrough(HackatonCaseSubmission::class, HackatonCase::class);
+    }
+
     /** @return HasMany<HackatonAnnouncement, $this> */
     public function announcements(): HasMany
     {

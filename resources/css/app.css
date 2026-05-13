@@ -506,6 +506,18 @@
     @apply border-primary bg-primary/15 font-semibold text-primary;
 }
 
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta {
+    @apply min-h-[3rem] border-secondary/40 bg-secondary/10 font-semibold text-base-content shadow-sm ring-1 ring-secondary/20;
+}
+
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta:hover {
+    @apply border-secondary/60 bg-secondary/15 text-base-content;
+}
+
+#app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta.active {
+    @apply border-secondary bg-secondary/25 font-bold text-base-content ring-2 ring-secondary/35;
+}
+
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link:focus-visible {
     @apply outline-none ring-2 ring-primary/40 ring-offset-2 ring-offset-base-100;
 }
