@@ -83,7 +83,7 @@ class Scoring extends Component
     public function render(): View
     {
         return view('pages.profile.hackatons.scoring', [
-            'scoringRows' => $this->scoringRows,
+            'scoringRows' => $this->scoringRows(),
         ]);
     }
 }

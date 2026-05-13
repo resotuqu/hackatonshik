@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 final class BuildHackatonTeamLeaderboard
 {
     /**
-     * @return Collection<int, array{team: ?Team, total_score: int, max_score: int, completion_percent: int}>
+     * @return Collection<int, array{team: mixed, total_score: int, max_score: int, completion_percent: int}>
      */
     public function handle(Hackaton $hackaton): Collection
     {
@@ -54,7 +54,7 @@ final class BuildHackatonTeamLeaderboard
     /**
      * @param  object{team_id: int|string|null, total_score: float|int|string, max_score: float|int|string}  $row
      * @param  Collection<int, Team>  $teams
-     * @return array{team: ?Team, total_score: int, max_score: int, completion_percent: int}
+     * @return array{team: mixed, total_score: int, max_score: int, completion_percent: int}
      */
     private function mapRow(object $row, Collection $teams): array
     {
