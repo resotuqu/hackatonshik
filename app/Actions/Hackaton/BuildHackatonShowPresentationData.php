@@ -107,7 +107,7 @@ class BuildHackatonShowPresentationData
     private function buildSeoDescription(Hackaton $hackaton): string
     {
         $plainDescription = strip_tags(SafeMarkdown::toHtml($hackaton->description ?? ''));
-        $plainDescription = preg_replace('/\s+/u', ' ', $plainDescription ?? '') ?? '';
+        $plainDescription = preg_replace('/\s+/u', ' ', $plainDescription) ?? '';
 
         return trim(mb_substr(
             $plainDescription !== '' ? $plainDescription : 'Онлайн и офлайн хакатон на платформе «Хакатонщик».',
