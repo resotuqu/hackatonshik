@@ -117,7 +117,7 @@ Route::get('/profile/hackatons/applications', ProfileHackatonsApplications::clas
 Route::get('/profile/hackatons/scoring', ProfileHackatonsScoring::class)->middleware(['auth', 'verified'])->name('profile.hackatons.scoring');
 Route::get('/profile/hackatons/finished', ProfileHackatonsFinished::class)->middleware(['auth', 'verified'])->name('profile.hackatons.finished');
 Route::get('/profile/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware(['auth', 'verified'])->name('profile.hackatons.participants');
-Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware(['auth', 'verified']);
+Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware(['auth', 'verified'])->name('profile.certificates');
 Route::get('/profile/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
     ->middleware(['auth', 'verified'])
     ->name('profile.hackatons.hub');

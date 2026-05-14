@@ -409,6 +409,7 @@
     @endif
 
     @if (auth()->user()->isParticipant())
+        <div id="participant-hackaton-dashboard" class="scroll-mt-24 space-y-10">
         @if ($participantNextStepTitle !== '')
             <div class="rounded-xl border border-primary/20 bg-primary/10 p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-primary/80">Ваш следующий шаг</p>
@@ -517,6 +518,7 @@
             <a href="/hackatons" class="btn btn-primary">Хакатоны</a>
             <a href="/teams/create" class="btn btn-outline">Создать команду</a>
             <a href="/profile/teams" class="btn btn-outline">Мои команды</a>
+        </div>
         </div>
     @elseif (auth()->user()->isOrganizer())
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

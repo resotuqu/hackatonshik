@@ -134,25 +134,81 @@
                     <x-app-icon icon="heroicons:home" class="h-6 w-6" />
                     <span class="btm-nav-label">Главная</span>
                 </a>
-                <a href="/teams" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
-                    <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
-                    <span class="btm-nav-label">Команды</span>
-                </a>
+                @auth
+                    @php
+                        $btmUser = Auth::user();
+                        $btmStaff = $btmUser->isOrganizer() || $btmUser->isJudge() || $btmUser->isAdmin();
+                    @endphp
+                    @if ($btmStaff)
+                        @if ($btmUser->isOrganizer())
+                            <a href="{{ route('profile.hackatons') }}" wire:navigate @class([request()->is('profile/hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:squares-2x2" class="h-6 w-6" />
+                                <span class="btm-nav-label">Орг.</span>
+                            </a>
+                        @elseif ($btmUser->isJudge())
+                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:scale" class="h-6 w-6" />
+                                <span class="btm-nav-label">Судья</span>
+                            </a>
+                        @else
+                            <a href="{{ url('/admin') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:shield-check" class="h-6 w-6" />
+                                <span class="btm-nav-label">Админ</span>
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
+                            <span class="btm-nav-label">Команды</span>
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
+                        <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
+                        <span class="btm-nav-label">Команды</span>
+                    </a>
+                @endauth
                 <label for="main-nav-drawer" class="flex min-h-14 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-base-content/75">
                     <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
                     <span class="btm-nav-label">Меню</span>
                 </label>
-                <a href="/hackatons" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
-                    <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                    <span class="btm-nav-label">Хакатоны</span>
-                </a>
+                @guest
+                    <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                        <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
+                        <span class="btm-nav-label">Хакатоны</span>
+                    </a>
+                @else
+                    @if ($btmStaff)
+                        @if ($btmUser->isOrganizer())
+                            <a href="{{ route('profile.hackatons') }}" wire:navigate @class([request()->routeIs('profile.hackatons') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
+                                <span class="btm-nav-label">Мои</span>
+                            </a>
+                        @elseif ($btmUser->isJudge())
+                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:clipboard-document-list" class="h-6 w-6" />
+                                <span class="btm-nav-label">Хакатоны</span>
+                            </a>
+                        @else
+                            <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:chart-bar-square" class="h-6 w-6" />
+                                <span class="btm-nav-label">Сводка</span>
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
+                            <span class="btm-nav-label">Хакатоны</span>
+                        </a>
+                    @endif
+                @endguest
                 @auth
-                    <a href="/profile" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/75'])>
+                    <a href="{{ route('profile') }}" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/75'])>
                         <x-app-icon icon="heroicons:user-circle" class="h-6 w-6" />
                         <span class="btm-nav-label">Профиль</span>
                     </a>
                 @else
-                    <a href="/login" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/75'])>
+                    <a href="{{ route('login') }}" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/75'])>
                         <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-6 w-6" />
                         <span class="btm-nav-label">Войти</span>
                     </a>
@@ -252,104 +308,195 @@
                     @endauth
                 </div>
 
-                @auth
-                    @if (Auth::user()->isOrganizer() && isset($partnerSidebarCounts) && $partnerSidebarCounts !== null)
-                        <div class="mt-5 rounded-2xl border border-secondary/25 bg-secondary/[0.07] p-2 ring-1 ring-secondary/15">
-                            <ul class="menu menu-vertical app-sidebar-menu w-full min-w-0 gap-0.5 px-0 py-0" role="navigation" aria-label="Меню организатора">
-                                <li class="menu-title px-1 pt-1 pb-0">
-                                    <span class="font-display text-[0.7rem] font-bold uppercase tracking-[0.14em] text-secondary">Организатор</span>
-                                </li>
+                <ul class="menu menu-vertical app-sidebar-menu mt-5 w-full min-w-0 flex-1 gap-0.5 px-0 py-1" role="navigation" aria-label="Меню сайта">
+                    @guest
+                        <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Навигация</span></li>
+                        <li>
+                            <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                                <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
+                                <span class="min-w-0 flex-1">Главная</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('hackatons.index') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('hackatons.index', 'hackatons.show') || request()->is('hackatons/*') ? 'active' : '' }}">
+                                <x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5 shrink-0" />
+                                <span class="min-w-0 flex-1">Хакатоны</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('teams.index') }}" wire:navigate class="sidebar-nav-link {{ request()->is('teams*') ? 'active' : '' }}">
+                                <x-app-icon icon="heroicons:user-group" class="h-5 w-5 shrink-0" />
+                                <span class="min-w-0 flex-1">Команды</span>
+                            </a>
+                        </li>
+                        <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                        <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Аккаунт</span></li>
+                        <li>
+                            <a href="{{ route('login') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('login') ? 'active' : '' }}">
+                                <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5 shrink-0" />
+                                <span class="min-w-0 flex-1">Войти</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('register') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('register') ? 'active' : '' }}">
+                                <x-app-icon icon="heroicons:user-plus" class="h-5 w-5 shrink-0" />
+                                <span class="min-w-0 flex-1">Регистрация</span>
+                            </a>
+                        </li>
+                    @else
+                        @php
+                            $navUser = Auth::user();
+                            $isPureParticipant = ! $navUser->isOrganizer() && ! $navUser->isJudge() && ! $navUser->isAdmin();
+                        @endphp
+
+                        @if ($isPureParticipant)
+                            <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Навигация</span></li>
+                            <li>
+                                <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Главная</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('hackatons.index') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('hackatons.index', 'hackatons.show') || request()->is('hackatons/*') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Хакатоны</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('teams.index') }}" wire:navigate class="sidebar-nav-link {{ request()->is('teams*') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:user-group" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Команды</span>
+                                </a>
+                            </li>
+                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                            <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Участие</span></li>
+                            <li>
+                                <a href="{{ route('profile.teams') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.teams') || request()->is('profile/teams*') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:users" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Мои команды</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('teams.create') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('teams.create') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Создать команду</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('home') }}#participant-hackaton-dashboard" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:rectangle-stack" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Мои хакатоны и заявки</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('profile.certificates') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.certificates') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:academic-cap" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Сертификаты</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('profile') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Профиль</span>
+                                </a>
+                            </li>
+                        @else
+                            <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Навигация</span></li>
+                            <li>
+                                <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Главная</span>
+                                </a>
+                            </li>
+                            @if ($navUser->isOrganizer() || $navUser->isJudge())
+                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                                <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Хакатоны</span></li>
+                                @if ($navUser->isOrganizer())
+                                    <li>
+                                        <a href="{{ route('profile.hackatons') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons') ? 'active' : '' }}">
+                                            <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0" />
+                                            <span class="min-w-0 flex-1">Мои хакатоны</span>
+                                            @if (isset($partnerSidebarCounts) && $partnerSidebarCounts !== null && $partnerSidebarCounts->totalHackatonsCount > 0)
+                                                <span class="badge badge-sm badge-ghost shrink-0 tabular-nums" title="Активные / всего">
+                                                    {{ $partnerSidebarCounts->activeHackatonsCount }}/{{ $partnerSidebarCounts->totalHackatonsCount }}
+                                                </span>
+                                            @endif
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('hackatons.create') }}" wire:navigate class="sidebar-nav-link sidebar-nav-link--partner-cta {{ request()->routeIs('hackatons.create') ? 'active' : '' }}">
+                                            <x-app-icon icon="heroicons:plus" class="h-5 w-5 shrink-0" />
+                                            <span class="min-w-0 flex-1">Создать новый хакатон</span>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li>
+                                        <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
+                                            <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0" />
+                                            <span class="min-w-0 flex-1">Мои хакатоны</span>
+                                        </a>
+                                    </li>
+                                @endif
+                            @endif
+                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                            <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Кабинет</span></li>
+                            @if ($navUser->isOrganizer())
                                 <li>
-                                    <a
-                                        href="{{ route('profile.hackatons') }}"
-                                        wire:navigate
-                                        class="sidebar-nav-link {{ request()->routeIs('profile.hackatons') ? 'active' : '' }}"
-                                    >
-                                        <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0 text-secondary" />
-                                        <span class="min-w-0 flex-1">Мои хакатоны</span>
-                                        @if($partnerSidebarCounts->totalHackatonsCount > 0)
-                                            <span class="badge badge-sm badge-ghost shrink-0 tabular-nums" title="Активные / всего">
-                                                {{ $partnerSidebarCounts->activeHackatonsCount }}/{{ $partnerSidebarCounts->totalHackatonsCount }}
-                                            </span>
-                                        @endif
+                                    <a href="{{ route('profile.hackatons') }}" wire:navigate class="sidebar-nav-link {{ request()->is('profile/hackatons*') ? 'active' : '' }}">
+                                        <x-app-icon icon="heroicons:squares-2x2" class="h-5 w-5 shrink-0" />
+                                        <span class="min-w-0 flex-1">Организаторский кабинет</span>
                                     </a>
                                 </li>
+                            @elseif ($navUser->isJudge())
                                 <li>
-                                    <a
-                                        href="{{ route('profile.hackatons.applications') }}"
-                                        wire:navigate
-                                        class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.applications') ? 'active' : '' }}"
-                                    >
+                                    <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
+                                        <x-app-icon icon="heroicons:scale" class="h-5 w-5 shrink-0" />
+                                        <span class="min-w-0 flex-1">Панель судьи</span>
+                                    </a>
+                                </li>
+                            @elseif ($navUser->isAdmin())
+                                <li>
+                                    <a href="{{ url('/admin') }}" wire:navigate class="sidebar-nav-link {{ request()->is('admin*') ? 'active' : '' }}">
+                                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 shrink-0" />
+                                        <span class="min-w-0 flex-1">Админ-панель</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @if ($navUser->isOrganizer() && isset($partnerSidebarCounts) && $partnerSidebarCounts !== null)
+                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                                <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Быстрые действия</span></li>
+                                <li>
+                                    <a href="{{ route('profile.hackatons.applications') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.applications') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:inbox" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Заявки на рассмотрении</span>
-                                        @if($partnerSidebarCounts->pendingApplicationsCount > 0)
+                                        @if ($partnerSidebarCounts->pendingApplicationsCount > 0)
                                             <span class="badge badge-sm badge-error shrink-0 tabular-nums">{{ min($partnerSidebarCounts->pendingApplicationsCount, 99) }}</span>
                                         @endif
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="{{ route('profile.hackatons.scoring') }}"
-                                        wire:navigate
-                                        class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.scoring') ? 'active' : '' }}"
-                                    >
+                                    <a href="{{ route('profile.hackatons.scoring') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.scoring') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:clipboard-document-check" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Оценка работ</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="{{ route('profile.hackatons.finished') }}"
-                                        wire:navigate
-                                        class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.finished') ? 'active' : '' }}"
-                                    >
+                                    <a href="{{ route('profile.hackatons.finished') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.finished') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:archive-box" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Завершённые хакатоны</span>
                                     </a>
                                 </li>
-                                <li role="presentation" class="sidebar-nav-divider list-none px-1 py-2">
-                                    <div class="divider my-0 border-base-300/40"></div>
-                                </li>
-                                <li>
-                                    <a
-                                        href="{{ route('hackatons.create') }}"
-                                        wire:navigate
-                                        class="sidebar-nav-link sidebar-nav-link--partner-cta {{ request()->routeIs('hackatons.create') ? 'active' : '' }}"
-                                    >
-                                        <x-app-icon icon="heroicons:plus" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">Создать новый хакатон</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    @endif
-                @endauth
-
-                <ul class="menu menu-vertical app-sidebar-menu mt-5 w-full min-w-0 flex-1 gap-0.5 px-0 py-1" role="navigation" aria-label="Меню сайта">
-                    <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Основное</span></li>
-                    <li><a href="/teams" class="sidebar-nav-link {{ request()->is('teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-5 w-5" />Команды</a></li>
-                    <li><a href="/hackatons" class="sidebar-nav-link {{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5" />Хакатоны</a></li>
-
-                    <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-
-                    <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Мой кабинет</span></li>
-                    @auth
-                        @if (Auth::user()->role === 'user')
-                            <li><a href="/profile/teams" class="sidebar-nav-link {{ request()->is('profile/teams*') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-group" class="h-5 w-5" />Мои команды</a></li>
-                            <li><a href="/teams/create" class="sidebar-nav-link {{ request()->is('teams/create') ? 'active' : '' }}"><x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />Создать команду</a></li>
-                            <li><a href="/profile/certificates" class="sidebar-nav-link {{ request()->is('profile/certificates') ? 'active' : '' }}"><x-app-icon icon="heroicons:academic-cap" class="h-5 w-5" />Сертификаты</a></li>
-                        @elseif (Auth::user()->isOrganizer())
-                            {{-- Хакатоны организатора: блок «Организатор» выше --}}
-                        @elseif (Auth::user()->role === 'judge')
-                            <li><a href="/hackatons" class="sidebar-nav-link {{ request()->is('hackatons*') ? 'active' : '' }}"><x-app-icon icon="heroicons:scale" class="h-5 w-5" />Назначенные хакатоны</a></li>
-                        @elseif (Auth::user()->role === 'admin')
-                            <li><a href="/admin" class="sidebar-nav-link {{ request()->is('admin') ? 'active' : '' }}"><x-app-icon icon="heroicons:chart-bar-square" class="h-5 w-5" />Админ-панель</a></li>
+                            @endif
+                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                            <li>
+                                <a href="{{ route('profile') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
+                                    <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 shrink-0" />
+                                    <span class="min-w-0 flex-1">Профиль</span>
+                                </a>
+                            </li>
                         @endif
-                        <li><a href="/profile" class="sidebar-nav-link {{ request()->is('profile') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-circle" class="h-5 w-5" />Профиль</a></li>
-                    @else
-                        <li><a href="/login" class="sidebar-nav-link {{ request()->is('login') ? 'active' : '' }}"><x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />Авторизироваться</a></li>
-                        <li><a href="/register" class="sidebar-nav-link {{ request()->is('register') ? 'active' : '' }}"><x-app-icon icon="heroicons:user-plus" class="h-5 w-5" />Зарегистрироваться</a></li>
-                    @endauth
+                    @endguest
 
                     <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
 
