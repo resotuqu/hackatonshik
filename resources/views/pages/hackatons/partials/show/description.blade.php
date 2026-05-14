@@ -1,4 +1,4 @@
-<section id="hackaton-panel-description" role="tabpanel" data-tab-panel="hackaton" data-tab-value="description">
+<section id="hackaton-panel-description" role="tabpanel" @class(['hidden' => ($hackatonTabFallback ?? 'description') !== 'description']) data-tab-panel="hackaton" data-tab-value="description">
     <div id="hackaton-tab-description" class="scroll-mt-24" tabindex="-1"></div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 card bg-base-100 border border-base-200 shadow-sm">

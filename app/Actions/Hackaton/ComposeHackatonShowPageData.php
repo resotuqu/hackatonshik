@@ -21,6 +21,9 @@ class ComposeHackatonShowPageData
         private readonly BuildHackatonOrganizationMetrics $buildMetrics,
         private readonly BuildHackatonTeamLeaderboard $buildLeaderboard,
         private readonly ResolveJudgeManagementDataset $resolveJudgeManagementDataset,
+        private readonly BuildOrganizerShowHeaderMetrics $buildOrganizerShowHeaderMetrics,
+        private readonly BuildHackatonLifecyclePresentation $buildHackatonLifecyclePresentation,
+        private readonly BuildOrganizerHackatonReadinessChecklist $buildOrganizerHackatonReadinessChecklist,
     ) {}
 
     /**
@@ -59,6 +62,32 @@ class ComposeHackatonShowPageData
 
         $judgeManagement = $this->resolveJudgeManagementDataset->handle($hackaton, $isOrganizer);
 
+        $hackatonTabFallback = $isOrganizer ? 'organization' : 'description';
+
+        $organizerHeaderMetrics = $isOrganizer
+            ? $this->buildOrganizerShowHeaderMetrics->handle($hackaton, $metrics, $judgeManagement)
+            : null;
+
+        $lifecyclePresentation = $needsOrganizationInsights
+            ? $this->buildHackatonLifecyclePresentation->handle($hackaton)
+            : null;
+
+        $organizerReadinessChecklist = $isOrganizer
+            ? $this->buildOrganizerHackatonReadinessChecklist->handle($hackaton)
+            : null;
+
+        $organizationPreload = null;
+        if ($needsOrganizationInsights) {
+            $organizationPreload = [
+                'metrics' => $metrics,
+                'leaderboard' => $leaderboard,
+                'judgeCandidates' => $judgeManagement['judgeCandidates'],
+                'pendingJudgeInvitations' => $judgeManagement['pendingJudgeInvitations'],
+                'participantUsers' => $participantUsers,
+                'issuedCertificatesByUser' => $hackaton->certificates->groupBy('user_id'),
+            ];
+        }
+
         return [
             'isOrganizer' => $isOrganizer,
             'isAssignedJudge' => $isAssignedJudge,
@@ -71,6 +100,11 @@ class ComposeHackatonShowPageData
             'leaderboard' => $leaderboard,
             'judgeCandidates' => $judgeManagement['judgeCandidates'],
             'pendingJudgeInvitations' => $judgeManagement['pendingJudgeInvitations'],
+            'hackatonTabFallback' => $hackatonTabFallback,
+            'organizerHeaderMetrics' => $organizerHeaderMetrics,
+            'lifecyclePresentation' => $lifecyclePresentation,
+            'organizerReadinessChecklist' => $organizerReadinessChecklist,
+            'organizationPreload' => $organizationPreload,
         ];
     }
 }

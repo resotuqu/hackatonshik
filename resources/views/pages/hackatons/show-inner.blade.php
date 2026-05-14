@@ -1,203 +1,310 @@
-﻿    @section('title', $hackaton->title)
-    @section('meta_description', $seoDescription)
-    @section('canonical_url', route('hackatons.show', $hackaton))
-    @if ($heroImage)
-        @section('og_image', $heroImage)
+﻿@section('title', $hackaton->title)
+@section('meta_description', $seoDescription)
+@section('canonical_url', route('hackatons.show', $hackaton))
+@if ($heroImage)
+    @section('og_image', $heroImage)
+@endif
+
+@php
+    $tabFallback = $hackatonTabFallback ?? 'description';
+    $sidebarOrganizerNav = $isOrganizer && config('hackaton.organizer_show_sidebar');
+
+    $hackatonNavTabs = [
+        ['value' => 'description', 'label' => 'Описание', 'controls' => 'hackaton-panel-description'],
+        ['value' => 'documents', 'label' => 'Документы', 'controls' => 'hackaton-panel-documents'],
+        ['value' => 'announcements', 'label' => 'Анонсы', 'controls' => 'hackaton-panel-announcements'],
+        ['value' => 'cases', 'label' => 'Кейсы', 'controls' => 'hackaton-panel-cases'],
+        ['value' => 'participants', 'label' => 'Участники', 'controls' => 'hackaton-panel-participants'],
+    ];
+    if ($isOrganizer || $isAssignedJudge) {
+        $hackatonNavTabs[] = ['value' => 'organization', 'label' => 'Организация', 'controls' => 'hackaton-panel-organization'];
+    }
+@endphp
+
+<div class="mx-auto w-full max-w-7xl space-y-6">
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/hackatons">Хакатоны</a></li>
+            <li class="opacity-70">{{ $hackaton->title }}</li>
+        </ul>
+    </div>
+
+    @if($isOrganizer && $lifecyclePresentation)
+        <x-hackatons.organizer-lifecycle-bar :presentation="$lifecyclePresentation" />
     @endif
 
-    <div class="mx-auto w-full max-w-7xl space-y-6">
-        <div class="text-sm breadcrumbs">
-            <ul>
-                <li><a href="/">Главная</a></li>
-                <li><a href="/hackatons">Хакатоны</a></li>
-                <li class="opacity-70">{{ $hackaton->title }}</li>
-            </ul>
-        </div>
+    @if($isOrganizer && $organizerHeaderMetrics)
+        <x-hackatons.organizer-header-metrics :metrics="$organizerHeaderMetrics" />
+    @endif
 
-        <div class="tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2" role="tablist" aria-label="Разделы хакатона" data-tab-list="hackaton">
-            <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="hackaton-panel-description" data-tab-trigger="hackaton" data-tab-value="description">
-                Описание
-            </button>
-            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-documents" data-tab-trigger="hackaton" data-tab-value="documents">
-                Документы
-            </button>
-            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-announcements" data-tab-trigger="hackaton" data-tab-value="announcements">
-                Анонсы
-            </button>
-            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-cases" data-tab-trigger="hackaton" data-tab-value="cases">
-                Кейсы
-            </button>
-            <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-participants" data-tab-trigger="hackaton" data-tab-value="participants">
-                Участники
-            </button>
-            @if($isOrganizer || $isAssignedJudge)
-                <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="hackaton-panel-organization" data-tab-trigger="hackaton" data-tab-value="organization">
-                    Организация
-                </button>
-            @endif
-        </div>
+    @if($isOrganizer && ! empty($organizerReadinessChecklist))
+        <x-hackatons.organizer-readiness-checklist :items="$organizerReadinessChecklist" />
+    @endif
 
-        @include('pages.hackatons.partials.show.description')
-        @include('pages.hackatons.partials.show.documents')
-        @include('pages.hackatons.partials.show.announcements')
+    @if($isOrganizer)
+        <x-hackatons.organizer-action-center :hackaton="$hackaton" :modals="$modals" />
+    @endif
 
-        <section id="hackaton-panel-cases" role="tabpanel" class="hidden space-y-4" data-tab-panel="hackaton" data-tab-value="cases">
-            <livewire:hackatons.show-cases-panel
-                :hackaton="$hackaton"
-                :isOrganizer="$isOrganizer"
-                :isAssignedJudge="$isAssignedJudge"
-                :fieldTypeLabels="$fieldTypeLabels" />
-        </section>
+    <div @class(['flex flex-col gap-6', 'lg:flex-row lg:items-start' => $sidebarOrganizerNav])>
+        @if($sidebarOrganizerNav)
+            <nav
+                class="hidden w-full shrink-0 lg:sticky lg:top-20 lg:block lg:w-52"
+                aria-label="Разделы хакатона"
+            >
+                <div class="rounded-2xl border border-base-300/60 bg-base-200/40 p-2">
+                    @foreach($hackatonNavTabs as $tab)
+                        <button
+                            type="button"
+                            role="tab"
+                            @class([
+                                'btn btn-sm mb-1 flex w-full justify-start rounded-xl border-0',
+                                'btn-primary' => $tabFallback === $tab['value'],
+                                'btn-ghost' => $tabFallback !== $tab['value'],
+                            ])
+                            aria-selected="{{ $tabFallback === $tab['value'] ? 'true' : 'false' }}"
+                            aria-controls="{{ $tab['controls'] }}"
+                            data-tab-trigger="hackaton"
+                            data-tab-value="{{ $tab['value'] }}"
+                        >
+                            {{ $tab['label'] }}
+                        </button>
+                    @endforeach
+                </div>
+            </nav>
+        @endif
 
-        @if($isOrganizer || $isAssignedJudge)
-            <section id="hackaton-panel-organization" role="tabpanel" class="hidden space-y-6" data-tab-panel="hackaton" data-tab-value="organization">
-                <livewire:hackatons.show-organization-panel
+        <div class="min-w-0 flex-1 space-y-6">
+            <div
+                @class([
+                    'tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2',
+                    'lg:hidden' => $sidebarOrganizerNav,
+                ])
+                role="tablist"
+                aria-label="Разделы хакатона"
+                data-tab-list="hackaton"
+            >
+                @foreach($hackatonNavTabs as $tab)
+                    <button
+                        type="button"
+                        @class(['tab', 'tab-active' => $tabFallback === $tab['value']])
+                        role="tab"
+                        aria-selected="{{ $tabFallback === $tab['value'] ? 'true' : 'false' }}"
+                        aria-controls="{{ $tab['controls'] }}"
+                        data-tab-trigger="hackaton"
+                        data-tab-value="{{ $tab['value'] }}"
+                    >
+                        {{ $tab['label'] }}
+                    </button>
+                @endforeach
+            </div>
+
+            @include('pages.hackatons.partials.show.description')
+            @include('pages.hackatons.partials.show.documents')
+            @include('pages.hackatons.partials.show.announcements')
+
+            <section id="hackaton-panel-cases" role="tabpanel" @class(['hidden' => $tabFallback !== 'cases', 'space-y-4' => true]) data-tab-panel="hackaton" data-tab-value="cases">
+                <livewire:hackatons.show-cases-panel
                     :hackaton="$hackaton"
                     :isOrganizer="$isOrganizer"
                     :isAssignedJudge="$isAssignedJudge"
-                    :modals="$modals" />
+                    :fieldTypeLabels="$fieldTypeLabels" />
             </section>
-        @endif
 
-        <section id="hackaton-panel-participants" role="tabpanel" class="hidden" data-tab-panel="hackaton" data-tab-value="participants">
-            <livewire:hackatons.show-applications-panel
-                :hackaton="$hackaton"
-                :isOrganizer="$isOrganizer"
-                :applicationStatusFilter="$applicationStatusFilter" />
-        </section>
+            @if($isOrganizer || $isAssignedJudge)
+                <section id="hackaton-panel-organization" role="tabpanel" @class(['hidden' => $tabFallback !== 'organization', 'space-y-6' => true]) data-tab-panel="hackaton" data-tab-value="organization">
+                    <livewire:hackatons.show-organization-panel
+                        :hackaton="$hackaton"
+                        :isOrganizer="$isOrganizer"
+                        :isAssignedJudge="$isAssignedJudge"
+                        :modals="$modals"
+                        :organization-preload="$organizationPreload" />
+                </section>
+            @endif
+
+            <section id="hackaton-panel-participants" role="tabpanel" @class(['hidden' => $tabFallback !== 'participants']) data-tab-panel="hackaton" data-tab-value="participants">
+                <livewire:hackatons.show-applications-panel
+                    :hackaton="$hackaton"
+                    :isOrganizer="$isOrganizer"
+                    :applicationStatusFilter="$applicationStatusFilter" />
+            </section>
+        </div>
     </div>
+</div>
 
-    <script>
-        (function () {
-            const setupTabGroup = (groupName, fallbackTab) => {
-                const triggers = Array.from(document.querySelectorAll(`[data-tab-trigger="${groupName}"]`));
-                const panels = Array.from(document.querySelectorAll(`[data-tab-panel="${groupName}"]`));
+<script>
+    (function () {
+        const setupTabGroup = (groupName, fallbackTab) => {
+            const allTriggers = Array.from(document.querySelectorAll(`[data-tab-trigger="${groupName}"]`));
+            const panels = Array.from(document.querySelectorAll(`[data-tab-panel="${groupName}"]`));
 
-                if (triggers.length === 0 || panels.length === 0) {
+            if (allTriggers.length === 0 || panels.length === 0) {
+                return { setActiveTab: () => {} };
+            }
+
+            const primaryTriggers = (() => {
+                const visible = allTriggers.filter((t) => t.offsetParent !== null);
+                const source = visible.length > 0 ? visible : allTriggers;
+                const byValue = new Map();
+                source.forEach((t) => {
+                    const v = t.dataset.tabValue;
+                    if (v && !byValue.has(v)) {
+                        byValue.set(v, t);
+                    }
+                });
+                return Array.from(byValue.values());
+            })();
+
+            const availableTabs = new Set(allTriggers.map((trigger) => trigger.dataset.tabValue));
+            let hash = window.location.hash;
+            if (hash === '#organizer-team-applications') {
+                hash = '#hackaton-tab-participants';
+            }
+            const hashPrefix = `#${groupName}-tab-`;
+            const requestedTab = hash.startsWith(hashPrefix) ? hash.slice(hashPrefix.length) : null;
+            let activeTab = requestedTab && availableTabs.has(requestedTab) ? requestedTab : fallbackTab;
+
+            if (!availableTabs.has(activeTab)) {
+                activeTab = primaryTriggers[0].dataset.tabValue;
+            }
+
+            const setActiveTab = (tabValue, replace = false) => {
+                if (!availableTabs.has(tabValue)) {
                     return;
                 }
 
-                const availableTabs = new Set(triggers.map((trigger) => trigger.dataset.tabValue));
-                const hash = window.location.hash;
-                const hashPrefix = `#${groupName}-tab-`;
-                const requestedTab = hash.startsWith(hashPrefix) ? hash.slice(hashPrefix.length) : null;
-                let activeTab = requestedTab && availableTabs.has(requestedTab) ? requestedTab : fallbackTab;
-
-                if (!availableTabs.has(activeTab)) {
-                    activeTab = triggers[0].dataset.tabValue;
-                }
-
-                const setActiveTab = (tabValue, replace = false) => {
-                    if (!availableTabs.has(tabValue)) {
-                        return;
-                    }
-
-                    triggers.forEach((trigger) => {
-                        const isActive = trigger.dataset.tabValue === tabValue;
+                allTriggers.forEach((trigger) => {
+                    const isActive = trigger.dataset.tabValue === tabValue;
+                    if (trigger.classList.contains('tab')) {
                         trigger.classList.toggle('tab-active', isActive);
-                        trigger.setAttribute('aria-selected', isActive ? 'true' : 'false');
-                        trigger.tabIndex = isActive ? 0 : -1;
-                    });
-
-                    panels.forEach((panel) => {
-                        panel.classList.toggle('hidden', panel.dataset.tabValue !== tabValue);
-                    });
-
-                    const nextHash = `${hashPrefix}${tabValue}`;
-                    if (replace) {
-                        history.replaceState(null, '', nextHash);
                     } else {
-                        history.pushState(null, '', nextHash);
+                        trigger.classList.toggle('btn-primary', isActive);
+                        trigger.classList.toggle('btn-ghost', !isActive);
                     }
-                };
-
-                triggers.forEach((trigger) => {
-                    trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
-                    trigger.addEventListener('keydown', (event) => {
-                        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) {
-                            return;
-                        }
-                        event.preventDefault();
-                        const index = triggers.indexOf(trigger);
-                        if (index === -1) {
-                            return;
-                        }
-                        let nextIndex = index;
-                        if (event.key === 'ArrowRight') {
-                            nextIndex = (index + 1) % triggers.length;
-                        } else if (event.key === 'ArrowLeft') {
-                            nextIndex = (index - 1 + triggers.length) % triggers.length;
-                        } else if (event.key === 'Home') {
-                            nextIndex = 0;
-                        } else if (event.key === 'End') {
-                            nextIndex = triggers.length - 1;
-                        }
-                        const nextTrigger = triggers[nextIndex];
-                        setActiveTab(nextTrigger.dataset.tabValue);
-                        nextTrigger.focus();
-                    });
+                    trigger.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    trigger.tabIndex = isActive ? 0 : -1;
                 });
 
-                setActiveTab(activeTab, true);
+                panels.forEach((panel) => {
+                    panel.classList.toggle('hidden', panel.dataset.tabValue !== tabValue);
+                });
+
+                const nextHash = `${hashPrefix}${tabValue}`;
+                if (replace) {
+                    history.replaceState(null, '', nextHash);
+                } else {
+                    history.pushState(null, '', nextHash);
+                }
             };
 
-            setupTabGroup('hackaton', 'description');
+            allTriggers.forEach((trigger) => {
+                trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
+            });
 
-            const carousels = document.querySelectorAll('[data-image-carousel]');
+            primaryTriggers.forEach((trigger) => {
+                trigger.addEventListener('keydown', (event) => {
+                    if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    const index = primaryTriggers.indexOf(trigger);
+                    if (index === -1) {
+                        return;
+                    }
+                    let nextIndex = index;
+                    if (event.key === 'ArrowRight') {
+                        nextIndex = (index + 1) % primaryTriggers.length;
+                    } else if (event.key === 'ArrowLeft') {
+                        nextIndex = (index - 1 + primaryTriggers.length) % primaryTriggers.length;
+                    } else if (event.key === 'Home') {
+                        nextIndex = 0;
+                    } else if (event.key === 'End') {
+                        nextIndex = primaryTriggers.length - 1;
+                    }
+                    const nextTrigger = primaryTriggers[nextIndex];
+                    setActiveTab(nextTrigger.dataset.tabValue);
+                    nextTrigger.focus();
+                });
+            });
 
-            carousels.forEach((carousel) => {
-                const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
-                const prevButton = carousel.querySelector('[data-carousel-prev]');
-                const nextButton = carousel.querySelector('[data-carousel-next]');
-                const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+            setActiveTab(activeTab, true);
 
-                if (slides.length <= 1) {
-                    return;
+            return { setActiveTab };
+        };
+
+        const hackatonTabs = setupTabGroup('hackaton', @json($tabFallback));
+
+        document.querySelectorAll('[data-organizer-action="tab"]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const tabValue = btn.getAttribute('data-tab-target');
+                if (tabValue) {
+                    hackatonTabs.setActiveTab(tabValue);
                 }
+                const modalId = btn.getAttribute('data-open-modal');
+                if (modalId) {
+                    const toggle = document.getElementById(modalId);
+                    if (toggle) {
+                        toggle.checked = true;
+                    }
+                }
+            });
+        });
 
-                let currentIndex = 0;
+        const carousels = document.querySelectorAll('[data-image-carousel]');
 
-                const render = (nextIndex) => {
-                    const normalizedIndex = (nextIndex + slides.length) % slides.length;
-                    currentIndex = normalizedIndex;
+        carousels.forEach((carousel) => {
+            const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
+            const prevButton = carousel.querySelector('[data-carousel-prev]');
+            const nextButton = carousel.querySelector('[data-carousel-next]');
+            const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
 
-                    slides.forEach((slide, slideIndex) => {
-                        slide.classList.toggle('hidden', slideIndex !== currentIndex);
-                    });
+            if (slides.length <= 1) {
+                return;
+            }
 
-                    dots.forEach((dot, dotIndex) => {
-                        dot.classList.toggle('bg-base-100', dotIndex === currentIndex);
-                        dot.classList.toggle('bg-base-100/40', dotIndex !== currentIndex);
-                    });
-                };
+            let currentIndex = 0;
 
-                prevButton?.addEventListener('click', () => render(currentIndex - 1));
-                nextButton?.addEventListener('click', () => render(currentIndex + 1));
+            const render = (nextIndex) => {
+                const normalizedIndex = (nextIndex + slides.length) % slides.length;
+                currentIndex = normalizedIndex;
+
+                slides.forEach((slide, slideIndex) => {
+                    slide.classList.toggle('hidden', slideIndex !== currentIndex);
+                });
 
                 dots.forEach((dot, dotIndex) => {
-                    dot.addEventListener('click', () => render(dotIndex));
+                    dot.classList.toggle('bg-base-100', dotIndex === currentIndex);
+                    dot.classList.toggle('bg-base-100/40', dotIndex !== currentIndex);
                 });
+            };
+
+            prevButton?.addEventListener('click', () => render(currentIndex - 1));
+            nextButton?.addEventListener('click', () => render(currentIndex + 1));
+
+            dots.forEach((dot, dotIndex) => {
+                dot.addEventListener('click', () => render(dotIndex));
+            });
+        });
+    })();
+</script>
+
+@if ($errors->any() && filled(old('_open_modal')))
+    <script>
+        (function () {
+            const modalId = @json(old('_open_modal'));
+            const modalToggle = document.getElementById(modalId);
+
+            if (!modalToggle) {
+                return;
+            }
+
+            modalToggle.checked = true;
+
+            window.requestAnimationFrame(() => {
+                const modal = modalToggle.closest('.inline-block');
+                const firstField = modal?.querySelector('input:not([type="hidden"]), textarea, select');
+                firstField?.focus();
             });
         })();
     </script>
-
-    @if ($errors->any() && filled(old('_open_modal')))
-        <script>
-            (function () {
-                const modalId = @json(old('_open_modal'));
-                const modalToggle = document.getElementById(modalId);
-
-                if (!modalToggle) {
-                    return;
-                }
-
-                modalToggle.checked = true;
-
-                window.requestAnimationFrame(() => {
-                    const modal = modalToggle.closest('.inline-block');
-                    const firstField = modal?.querySelector('input:not([type="hidden"]), textarea, select');
-                    firstField?.focus();
-                });
-            })();
-        </script>
-    @endif
+@endif

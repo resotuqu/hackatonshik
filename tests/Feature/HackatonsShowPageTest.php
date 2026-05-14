@@ -143,5 +143,7 @@ test('show page mounts livewire tab panels for organizer', function () {
         ->assertOk()
         ->assertSeeLivewire('hackatons.show-cases-panel')
         ->assertSeeLivewire('hackatons.show-applications-panel')
-        ->assertSeeLivewire('hackatons.show-organization-panel');
+        ->assertSeeLivewire('hackatons.show-organization-panel')
+        ->assertSee('Жизненный цикл', false)
+        ->assertSee('Центр действий', false);
 });

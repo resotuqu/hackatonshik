@@ -533,14 +533,14 @@
                 <p class="mt-2 text-sm text-base-content/70">По всем вашим хакатонам.</p>
                 @if ($pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId)
                     <x-slot:menu>
-                        <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#organizer-team-applications" class="btn btn-ghost btn-sm">Рассмотреть</a>
+                        <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#hackaton-tab-participants" class="btn btn-ghost btn-sm">Рассмотреть</a>
                     </x-slot:menu>
                 @endif
             </x-marycard>
         </div>
         <div class="flex flex-wrap gap-3">
             @if ($pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId)
-                <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#organizer-team-applications" class="btn btn-primary">Рассмотреть заявки</a>
+                <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#hackaton-tab-participants" class="btn btn-primary">Рассмотреть заявки</a>
             @endif
             <a href="/profile/hackatons" class="btn {{ $pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId ? 'btn-outline' : 'btn-primary' }}">Мои хакатоны</a>
             <a href="/hackatons/create" class="btn btn-outline">Создать хакатон</a>

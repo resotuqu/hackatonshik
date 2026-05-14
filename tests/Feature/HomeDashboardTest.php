@@ -66,7 +66,7 @@ test('organizer with pending hackaton application sees review link', function ()
         ->assertOk()
         ->assertSee('Рассмотреть заявки', false)
         ->assertSee('applications_status=pending', false)
-        ->assertSee('organizer-team-applications', false);
+        ->assertSee('hackaton-tab-participants', false);
 });
 
 test('judge without assigned hackatons sees empty state', function () {

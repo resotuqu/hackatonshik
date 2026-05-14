@@ -1,4 +1,4 @@
-<section id="hackaton-panel-announcements" role="tabpanel" class="hidden" data-tab-panel="hackaton" data-tab-value="announcements">
+<section id="hackaton-panel-announcements" role="tabpanel" @class(['hidden' => ($hackatonTabFallback ?? 'description') !== 'announcements']) data-tab-panel="hackaton" data-tab-value="announcements">
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body space-y-4">
             <div class="flex items-center justify-between gap-3">

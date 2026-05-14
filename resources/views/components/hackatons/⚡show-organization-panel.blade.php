@@ -21,17 +21,24 @@ new #[Lazy] class extends Component
      */
     public array $modals = [];
 
+    /**
+     * @var array<string, mixed>|null
+     */
+    public ?array $organizationPreload = null;
+
     public function mount(
         Hackaton $hackaton,
         bool $isOrganizer,
         bool $isAssignedJudge,
         array $modals,
+        ?array $organizationPreload = null,
     ): void {
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
         $this->isOrganizer = $isOrganizer;
         $this->isAssignedJudge = $isAssignedJudge;
         $this->modals = $modals;
+        $this->organizationPreload = $organizationPreload;
     }
 
     /**
@@ -43,6 +50,17 @@ new #[Lazy] class extends Component
         ResolveJudgeManagementDataset $resolveJudgeManagement,
         ResolveParticipantUsersForHackatonCertificates $resolveParticipantUsers,
     ) {
+        if ($this->organizationPreload !== null) {
+            return view('components.hackatons.⚡show-organization-panel', [
+                'metrics' => $this->organizationPreload['metrics'],
+                'leaderboard' => $this->organizationPreload['leaderboard'],
+                'judgeCandidates' => $this->organizationPreload['judgeCandidates'],
+                'pendingJudgeInvitations' => $this->organizationPreload['pendingJudgeInvitations'],
+                'participantUsers' => $this->organizationPreload['participantUsers'],
+                'issuedCertificatesByUser' => $this->organizationPreload['issuedCertificatesByUser'],
+            ]);
+        }
+
         $metrics = ($this->isOrganizer || $this->isAssignedJudge)
             ? $buildMetrics->handle($this->hackaton)
             : $buildMetrics->empty();

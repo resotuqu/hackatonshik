@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
+use App\Livewire\Organizer\Dashboard as OrganizerDashboard;
 use App\Livewire\Pages\About\Index as AboutIndex;
 use App\Livewire\Pages\Admin\AvatarPresets as AdminAvatarPresets;
 use App\Livewire\Pages\Admin\Index as AdminIndex;
@@ -113,6 +114,8 @@ Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware(['auth', 'ver
 Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
 Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified'])->name('hackatons.create');
 Route::get('/profile/hackatons', ProfileHackatonsIndex::class)->middleware(['auth', 'verified'])->name('profile.hackatons');
+Route::get('/organizer', OrganizerDashboard::class)->middleware(['auth', 'verified'])->name('organizer.dashboard');
+Route::get('/profile/organizer', OrganizerDashboard::class)->middleware(['auth', 'verified'])->name('profile.organizer');
 Route::get('/profile/hackatons/applications', ProfileHackatonsApplications::class)->middleware(['auth', 'verified'])->name('profile.hackatons.applications');
 Route::get('/profile/hackatons/scoring', ProfileHackatonsScoring::class)->middleware(['auth', 'verified'])->name('profile.hackatons.scoring');
 Route::get('/profile/hackatons/finished', ProfileHackatonsFinished::class)->middleware(['auth', 'verified'])->name('profile.hackatons.finished');
@@ -177,6 +180,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:creations')
         ->name('hackatons.cases.fields.store');
     Route::delete('/hackatons/{hackaton}/cases/{case}/fields/{field}', [HackatonCaseFieldController::class, 'destroy'])->name('hackatons.cases.fields.destroy');
+    Route::patch('/hackatons/{hackaton}/cases/{case}/fields/reorder', [HackatonCaseFieldController::class, 'reorder'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.cases.fields.reorder');
     Route::post('/hackatons/{hackaton}/cases/{case}/submissions', [HackatonCaseSubmissionController::class, 'store'])
         ->middleware('throttle:creations')
         ->name('hackatons.cases.submissions.store');

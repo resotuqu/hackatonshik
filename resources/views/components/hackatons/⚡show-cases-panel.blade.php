@@ -149,9 +149,15 @@ new #[Lazy] class extends Component
                                             Требования к решению (поля)
                                         </div>
                                         <div class="collapse-content px-0">
+                                            @if($isOrganizer)
+                                                <p class="px-4 pb-2 text-xs text-base-content/60">Меняйте порядок полей в форме участника кнопками «Вверх» / «Вниз».</p>
+                                            @endif
                                             <table class="table table-sm">
                                                 <thead>
                                                     <tr>
+                                                        @if($isOrganizer)
+                                                            <th class="w-24">Порядок</th>
+                                                        @endif
                                                         <th>Поле</th>
                                                         <th>Тип</th>
                                                         <th>Обязательное</th>
@@ -162,7 +168,44 @@ new #[Lazy] class extends Component
                                                 </thead>
                                                 <tbody>
                                                     @foreach($case->fields as $field)
+                                                        @php
+                                                            $orderedIds = $case->fields->pluck('id')->values()->all();
+                                                            $idx = $loop->index;
+                                                            $count = $case->fields->count();
+                                                        @endphp
                                                         <tr>
+                                                            @if($isOrganizer)
+                                                                <td class="whitespace-nowrap">
+                                                                    @if($idx > 0)
+                                                                        @php
+                                                                            $upOrder = $orderedIds;
+                                                                            [$upOrder[$idx - 1], $upOrder[$idx]] = [$upOrder[$idx], $upOrder[$idx - 1]];
+                                                                        @endphp
+                                                                        <form method="POST" action="{{ route('hackatons.cases.fields.reorder', [$hackaton, $case]) }}" class="inline">
+                                                                            @csrf
+                                                                            @method('PATCH')
+                                                                            @foreach($upOrder as $fid)
+                                                                                <input type="hidden" name="field_ids[]" value="{{ $fid }}">
+                                                                            @endforeach
+                                                                            <button type="submit" class="btn btn-ghost btn-xs" title="Выше">↑</button>
+                                                                        </form>
+                                                                    @endif
+                                                                    @if($idx < $count - 1)
+                                                                        @php
+                                                                            $downOrder = $orderedIds;
+                                                                            [$downOrder[$idx], $downOrder[$idx + 1]] = [$downOrder[$idx + 1], $downOrder[$idx]];
+                                                                        @endphp
+                                                                        <form method="POST" action="{{ route('hackatons.cases.fields.reorder', [$hackaton, $case]) }}" class="inline">
+                                                                            @csrf
+                                                                            @method('PATCH')
+                                                                            @foreach($downOrder as $fid)
+                                                                                <input type="hidden" name="field_ids[]" value="{{ $fid }}">
+                                                                            @endforeach
+                                                                            <button type="submit" class="btn btn-ghost btn-xs" title="Ниже">↓</button>
+                                                                        </form>
+                                                                    @endif
+                                                                </td>
+                                                            @endif
                                                             <td>{{ $field->label }}</td>
                                                             <td>{{ $fieldTypeLabels[$field->type] ?? $field->type }}</td>
                                                             <td>{{ $field->is_required ? 'Да' : 'Нет' }}</td>
@@ -180,6 +223,16 @@ new #[Lazy] class extends Component
                                                     @endforeach
                                                 </tbody>
                                             </table>
+                                            @if($isOrganizer && $case->fields->isNotEmpty())
+                                                <div class="border-t border-base-200 bg-base-200/30 px-4 py-3 text-xs text-base-content/70">
+                                                    <span class="font-medium text-base-content">Предпросмотр порядка полей</span>
+                                                    <ul class="mt-2 list-inside list-disc space-y-0.5">
+                                                        @foreach($case->fields as $previewField)
+                                                            <li>{{ $previewField->label }} ({{ $fieldTypeLabels[$previewField->type] ?? $previewField->type }})</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endif

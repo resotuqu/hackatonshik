@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Pages\Profile\Hackatons;
+namespace App\Livewire\Organizer;
 
 use App\Actions\Hackaton\BuildOrganizerHackatonsHubData;
 use App\Models\Hackaton;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Index extends Component
+class Dashboard extends Component
 {
     public bool $deleteHackatonModal = false;
 
@@ -45,12 +45,12 @@ class Index extends Component
         return redirect()->route('profile.hackatons.participants', ['hackaton' => $id]);
     }
 
-    #[Layout('layouts::app', ['title' => 'Мои хакатоны'])]
+    #[Layout('layouts::app', ['title' => 'Организатор'])]
     public function render(BuildOrganizerHackatonsHubData $hubData): View
     {
         $data = $hubData->build(Auth::user());
         abort_if($data === null, 403);
 
-        return view('pages.profile.hackatons.index', $data);
+        return view('pages.organizer.dashboard', $data);
     }
 }

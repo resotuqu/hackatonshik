@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Pages\Hackatons;
 
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -18,17 +21,16 @@ class Create extends Component
 {
     use Toast, WithFileUploads;
 
+    public int $wizardStep = 1;
+
+    public const WIZARD_LAST_STEP = 5;
+
     #[Validate(['title' => 'required'], message: ['title.required' => 'Заголовок должен быть заполнен'])]
     public string $title = '';
 
     #[Validate(['description' => 'required'], message: ['description.required' => 'Описание должно быть заполнено'])]
     public string $description = '';
 
-    #[Validate(['photo' => ['required', 'image', 'max:4096']], message: [
-        'photo.required' => 'Изображение обязательно',
-        'photo.image' => 'Файл должен быть валидным изображением',
-        'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
-    ])]
     public $photo;
 
     #[Validate(['galleryPhotos.*' => ['nullable', 'image', 'max:5120']], message: [
@@ -105,7 +107,7 @@ class Create extends Component
         'uploadImage' => false,
     ];
 
-    public function addHackatonDocument()
+    public function addHackatonDocument(): void
     {
         $this->hackatonDocuments[] = [
             'id' => uniqid(),
@@ -116,16 +118,117 @@ class Create extends Component
         ];
     }
 
-    public function removeHackatonDocument($index)
+    public function removeHackatonDocument($index): void
     {
         unset($this->hackatonDocuments[$index]);
         $this->hackatonDocuments = array_values($this->hackatonDocuments);
     }
 
-    public function save()
+    public function wizardSubmit(): mixed
+    {
+        if ($this->wizardStep < self::WIZARD_LAST_STEP) {
+            $this->nextStep();
+
+            return null;
+        }
+
+        return $this->save();
+    }
+
+    public function nextStep(): void
+    {
+        $stepRules = $this->rulesForWizardStep($this->wizardStep);
+        if ($stepRules !== []) {
+            try {
+                $this->validate($stepRules, $this->messagesForWizardStep($this->wizardStep));
+            } catch (ValidationException $e) {
+                $this->error('Проверьте поля шага', position: 'toast-center toast-top');
+                throw $e;
+            }
+        }
+
+        if ($this->wizardStep < self::WIZARD_LAST_STEP) {
+            $this->wizardStep++;
+        }
+    }
+
+    public function previousStep(): void
+    {
+        if ($this->wizardStep > 1) {
+            $this->wizardStep--;
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function rulesForWizardStep(int $step): array
+    {
+        return match ($step) {
+            1 => [
+                'title' => 'required',
+                'description' => 'required',
+                'start_at' => ['required', 'date', 'after:now'],
+                'end_at' => ['required', 'date', 'after:start_at'],
+                'registration_deadline_at' => ['nullable', 'date', 'before_or_equal:start_at'],
+            ],
+            2 => [
+                'prize_fund' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
+                'prize_places_count' => ['nullable', 'integer', 'min:1', 'max:1000'],
+                'level' => ['nullable', 'string'],
+            ],
+            3 => [],
+            4 => array_merge([
+                'photo' => ['required', 'image', 'max:4096'],
+                'galleryPhotos.*' => ['nullable', 'image', 'max:5120'],
+            ], count($this->hackatonDocuments) > 0 ? [
+                'hackatonDocuments.*.name' => ['required'],
+                'hackatonDocuments.*.description' => ['required'],
+                'hackatonDocuments.*.file_url' => ['required', 'file'],
+                'hackatonDocuments.*.filling_by_team_member' => ['required'],
+            ] : []),
+            default => [],
+        };
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function messagesForWizardStep(int $step): array
+    {
+        return match ($step) {
+            1 => [
+                'title.required' => 'Заголовок должен быть заполнен',
+                'description.required' => 'Описание должно быть заполнено',
+                'start_at.required' => 'Выберите дату начала',
+                'start_at.after' => 'Дата начала может не раньше завтрашнего дня',
+                'end_at.required' => 'Выберите дату конца',
+                'end_at.after' => 'Дата конца не может быть раньше следующего дня после начала',
+            ],
+            4 => [
+                'photo.required' => 'Изображение обязательно',
+                'photo.image' => 'Файл должен быть валидным изображением',
+                'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
+                'hackatonDocuments.*.name.required' => 'Поле названия необходимо для заполнения',
+                'hackatonDocuments.*.description.required' => 'Поле описания необходимо для заполнения',
+                'hackatonDocuments.*.file_url.required' => 'Необходимо загрузить документ',
+                'hackatonDocuments.*.filling_by_team_member.required' => 'Выберите тип документа',
+            ],
+            default => [],
+        };
+    }
+
+    public function save(): mixed
     {
         try {
             $this->validate();
+            $this->validate([
+                'photo' => ['required', 'image', 'max:4096'],
+            ], [
+                'photo.required' => 'Изображение обязательно',
+                'photo.image' => 'Файл должен быть валидным изображением',
+                'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
+            ]);
         } catch (ValidationException $e) {
             $this->error('Ошибка заполнения полей !', position: 'toast-center toast-top');
             throw $e;
@@ -167,7 +270,7 @@ class Create extends Component
 
         $this->success('Хакатон создан !', position: 'toast-center toast-top');
 
-        return $this->redirect('/profile/hackatons');
+        return $this->redirect(route('organizer.dashboard'));
     }
 
     /**
@@ -183,7 +286,7 @@ class Create extends Component
         return $options;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('pages.hackatons.create');
     }

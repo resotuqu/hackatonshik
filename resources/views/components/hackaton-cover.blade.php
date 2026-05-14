@@ -1,5 +1,4 @@
 @props([
-    'title',
     'imageUrl' => null,
     'status' => null,
     'level' => null,
@@ -52,12 +51,7 @@
         </div>
     @endif
 
-    {{-- Title overlay at bottom --}}
-    <div class="absolute inset-x-0 bottom-0 z-10 px-4 pb-3 pt-10">
-        <p class="line-clamp-2 font-display text-xl font-black leading-tight tracking-tight text-base-100 drop-shadow-lg [html[data-theme=hackatonshik-light]_&]:text-base-content sm:text-2xl">
-            {{ $title }}
-        </p>
-    </div>
+ 
 
     {{-- Finished overlay --}}
     @if ($isFinished)

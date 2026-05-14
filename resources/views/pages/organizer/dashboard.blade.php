@@ -10,7 +10,7 @@
             <ul>
                 <li><a href="/">Главная</a></li>
                 <li><a href="{{ route('profile') }}">Профиль</a></li>
-                <li class="opacity-70">Мои хакатоны</li>
+                <li class="opacity-70">Организатор</li>
             </ul>
         </div>
 
@@ -23,6 +23,6 @@
             </x-slot:actions>
         </x-mary-modal>
 
-        @include('pages.profile.hackatons.hub-body', ['showGlobalPendingStrip' => false])
+        @include('pages.profile.hackatons.hub-body', ['showGlobalPendingStrip' => true])
     </div>
 </div>

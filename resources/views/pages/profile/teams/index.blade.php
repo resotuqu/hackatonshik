@@ -1,110 +1,169 @@
-<div class="mx-auto max-w-7xl space-y-8">
-    <div wire:loading class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true" aria-label="Загрузка команд">
+<div class="mx-auto w-full max-w-6xl space-y-10 pb-12">
+
+    {{-- Loading skeletons --}}
+    <div wire:loading class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
         @foreach (range(1, 6) as $_)
             <x-team-card-skeleton />
         @endforeach
     </div>
 
-    <div wire:loading.remove>
-    <nav class="text-sm breadcrumbs" aria-label="Навигация по разделам">
-        <ul>
-            <li><a href="/" class="link link-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">Главная</a></li>
-            <li><a href="/profile" class="link link-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">Профиль</a></li>
-            <li class="opacity-70">Мои команды</li>
-        </ul>
-    </nav>
+    <div wire:loading.remove class="space-y-10">
 
-    <section class="ui-page-hero" aria-labelledby="profile-teams-hero-heading">
-        <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
-            <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-secondary/30 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-primary/25 blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/3 h-40 w-40 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl"></div>
-        </div>
+        {{-- Breadcrumbs --}}
+        <nav class="text-sm breadcrumbs" aria-label="Навигация">
+            <ul>
+                <li><a href="/" class="link link-hover">Главная</a></li>
+                <li><a href="/profile" class="link link-hover">Профиль</a></li>
+                <li class="opacity-70">Мои команды</li>
+            </ul>
+        </nav>
 
-        <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div class="min-w-0 space-y-3">
-                <div class="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
-                    <x-app-icon icon="heroicons:user-group" class="h-3.5 w-3.5" />
-                    Мои команды
+        {{-- Hero --}}
+        <div class="card border border-base-300 bg-base-100 shadow-sm overflow-hidden">
+            <div class="bg-linear-to-br from-primary/5 to-secondary/5 px-8 py-12">
+                <div class="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
+                    <div class="space-y-4">
+                        <div class="inline-flex items-center gap-2 rounded-3xl border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary">
+                            <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
+                            МОИ КОМАНДЫ
+                        </div>
+                        <h1 class="font-display text-4xl font-semibold tracking-tight text-base-content sm:text-5xl">
+                            Ваши команды
+                        </h1>
+                        <p class="max-w-lg text-base text-base-content/70">
+                            Управляйте составом, вакансиями и заявками в одном месте
+                        </p>
+                    </div>
+
+                    <a href="/teams/create" wire:navigate
+                       class="btn btn-primary btn-lg gap-3 shadow-md shadow-primary/20 hover:shadow-lg transition-all">
+                        <x-app-icon icon="heroicons:plus" class="h-5 w-5" />
+                        Создать команду
+                    </a>
                 </div>
-                <h1 id="profile-teams-hero-heading" class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
-                    <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">Ваши команды</span>
-                </h1>
-                <p class="max-w-2xl text-base text-base-content/70">
-                    Управляйте составом, вакансиями и заявками — всё в одном месте.
-                </p>
-            </div>
-            <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
-                <a
-                    href="/teams/create"
-                    wire:navigate
-                    class="ui-cta-primary"
-                >
-                    <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
-                    Создать команду
-                </a>
             </div>
         </div>
-    </section>
 
-    <section
-        id="pending-team-role-applications"
-        class="ui-surface-soft-muted px-5 py-6 sm:px-7 sm:py-7"
-        aria-labelledby="pending-apps-heading"
-    >
-        <div class="pointer-events-none absolute inset-0 opacity-40" aria-hidden="true">
-            <div class="absolute -right-8 top-0 h-32 w-32 rounded-full bg-primary/20 blur-2xl"></div>
-            <div class="absolute -left-4 bottom-0 h-28 w-28 rounded-full bg-accent/15 blur-2xl"></div>
-        </div>
-        <div class="relative">
-            <h2 id="pending-apps-heading" class="ui-heading-display text-lg font-bold sm:text-xl">
-                Заявки на роли в командах
-            </h2>
+        {{-- Заявки на роли --}}
+        <section class="card border border-base-300 bg-base-100 p-6 sm:p-8" aria-labelledby="pending-apps-heading">
+            <h2 id="pending-apps-heading" class="text-2xl font-semibold mb-6">Заявки на роли в командах</h2>
+
             @if ($this->pendingTeamRoleApplications->isEmpty())
-                <p class="mt-3 text-sm text-base-content/70">Нет заявок на рассмотрении.</p>
+                <div class="flex flex-col items-center py-16 text-center">
+                    <x-app-icon icon="heroicons:inbox" class="h-16 w-16 text-base-content/30" />
+                    <p class="mt-5 text-base-content/70">Нет заявок на рассмотрение</p>
+                    <p class="text-sm text-base-content/50 mt-1">Когда участники откликнутся — они появятся здесь</p>
+                </div>
             @else
-                <ul class="mt-4 space-y-3">
+                <div class="grid grid-cols-1 gap-4">
                     @foreach ($this->pendingTeamRoleApplications as $application)
                         @php
                             $appTeam = $application->teamRole?->team;
-                            $role = $application->teamRole?->role;
-                            $hackatonTitle = $appTeam?->hackaton?->title;
+                            $role = $application->teamRole?->role ?? $application->teamRole;
                         @endphp
-                        <li class="ui-surface-card bg-base-100/80 p-4 text-sm backdrop-blur-sm">
-                            <p>
-                                <span class="text-base-content/60">Команда:</span>
-                                @if ($appTeam)
-                                    <a
-                                        href="{{ url('/teams/'.$appTeam->id) }}"
-                                        wire:navigate
-                                        class="link link-primary font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
-                                    >{{ $appTeam->title }}</a>
-                                @else
-                                    <span class="font-medium">—</span>
+                        <div class="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="font-medium">{{ $appTeam?->title ?? '—' }}</p>
+                                @if ($role)
+                                    <p class="text-sm text-base-content/70">Роль: <span class="font-medium">{{ $role->name ?? $role->title }}</span></p>
                                 @endif
-                            </p>
-                            @if ($role)
-                                <p class="mt-1.5"><span class="text-base-content/60">Роль:</span> {{ $role->name }}</p>
-                            @elseif ($application->teamRole?->title)
-                                <p class="mt-1.5"><span class="text-base-content/60">Роль:</span> {{ $application->teamRole->title }}</p>
-                            @endif
-                            @if ($hackatonTitle)
-                                <p class="mt-1.5"><span class="text-base-content/60">Хакатон:</span> {{ $hackatonTitle }}</p>
-                            @endif
-                            <p class="mt-3">
-                                <span class="badge badge-warning badge-sm border-0 font-semibold">{{ $application->status->label() }}</span>
-                            </p>
-                        </li>
+                                @if ($appTeam?->hackaton)
+                                    <p class="text-sm text-base-content/60">{{ $appTeam->hackaton->title }}</p>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="badge badge-warning badge-sm">{{ $application->status->label() }}</span>
+                            </div>
+                        </div>
                     @endforeach
-                </ul>
+                </div>
             @endif
-        </div>
-    </section>
+        </section>
 
-    <x-mary-modal wire:model="deleteTeamModal" title="Удаление команды" class="backdrop-blur">
+        {{-- Список команд --}}
+        <section>
+            <h2 class="text-2xl font-semibold mb-6">Ваши команды</h2>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                @forelse ($this->teams as $team)
+                    @php
+                        $hackaton = $team->hackaton;
+                        $openSlots = (int) ($team->empty_roles_count ?? 0);
+                    @endphp
+
+                    <article wire:key="my-team-{{ $team->id }}"
+                             class="card border border-base-300 bg-base-100 overflow-hidden hover:border-primary/30 hover:shadow-xl transition-all group">
+                        
+                        <x-team-cover
+                            :title="$team->title"
+                            :cover-url="$team->coverImagePublicUrl()"
+                            :initials="$team->initialsForCover()"
+                            :show-recruiting-badge="$openSlots > 0"
+                            :hackaton-title="$hackaton?->title"
+                            :show-brand-strip="true"
+                        />
+
+                        <div class="p-6 flex-1 flex flex-col">
+                            <h3 class="font-semibold text-xl line-clamp-2 mb-4">{{ $team->title }}</h3>
+
+                            @if ($hackaton)
+                                <div class="text-sm text-base-content/70 mb-5">
+                                    {{ $hackaton->start_at?->format('d.m.Y') }} — {{ $hackaton->end_at?->format('d.m.Y') }}
+                                </div>
+                            @endif
+
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="text-center bg-base-200/60 rounded-2xl py-4">
+                                    <div class="text-3xl font-bold text-primary">{{ $team->roles_count ?? $team->roles->count() }}</div>
+                                    <div class="text-xs font-medium uppercase tracking-widest text-base-content/60">Ролей</div>
+                                </div>
+                                <div class="text-center bg-base-200/60 rounded-2xl py-4">
+                                    <div class="text-3xl font-bold text-secondary">{{ $openSlots }}</div>
+                                    <div class="text-xs font-medium uppercase tracking-widest text-base-content/60">Свободно</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto flex flex-col gap-2 sm:flex-row">
+                                <a href="{{ route('teams.show', $team) }}" wire:navigate
+                                   class="btn btn-primary flex-1 gap-2">
+                                    <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
+                                    Просмотреть
+                                </a>
+                                <button wire:click="editTeam({{ $team->id }})"
+                                        class="btn btn-ghost flex-1 gap-2">
+                                    <x-app-icon icon="heroicons:pencil" class="h-4 w-4" />
+                                    Изменить
+                                </button>
+                                <button wire:click="showDeleteTeamModal({{ $team->id }})"
+                                        class="btn btn-ghost text-error hover:bg-error/10 flex-1 gap-2">
+                                    <x-app-icon icon="heroicons:trash" class="h-4 w-4" />
+                                    Удалить
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <div class="col-span-full">
+                        <x-team-empty-state
+                            title="Пока нет команд"
+                            description="Создайте команду для хакатона — настройте роли и пригласите участников."
+                            icon="heroicons:user-group"
+                            action-href="/teams/create"
+                            action-label="Создать команду"
+                        />
+                    </div>
+                @endforelse
+            </div>
+        </section>
+
+    </div>
+
+    {{-- Delete Modal --}}
+    <x-mary-modal wire:model="deleteTeamModal" title="Удаление команды">
         <p class="text-base-content/90">
             @if ($deleteTeamTitle)
-                Вы действительно хотите удалить команду «<span class="font-semibold text-base-content">{{ $deleteTeamTitle }}</span>»? Это действие необратимо.
+                Вы действительно хотите удалить команду «<span class="font-semibold">{{ $deleteTeamTitle }}</span>»?<br>
+                Это действие необратимо.
             @else
                 Вы действительно хотите удалить команду? Это действие необратимо.
             @endif
@@ -116,104 +175,4 @@
         </x-slot:actions>
     </x-mary-modal>
 
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        @forelse ($this->teams as $team)
-            @php
-                $titleId = 'my-team-card-title-'.$team->id;
-                $hackaton = $team->hackaton;
-                $openSlots = (int) ($team->empty_roles_count ?? 0);
-            @endphp
-            <article
-                wire:key="my-team-{{ $team->id }}"
-                class="ui-surface-card ui-surface-card--hover ui-surface-card--team group/card flex h-full flex-col motion-safe:animate-card-enter"
-                style="animation-delay: {{ ($loop->index % 9) * 40 }}ms;"
-                aria-labelledby="{{ $titleId }}"
-            >
-                <x-team-cover
-                    :title="$team->title"
-                    :cover-url="$team->coverImagePublicUrl()"
-                    :initials="$team->initialsForCover()"
-                    :show-recruiting-badge="$openSlots > 0"
-                    :hackaton-title="$hackaton?->title"
-                    :show-brand-strip="true"
-                />
-
-                <div class="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-5">
-                    <h2 id="{{ $titleId }}" class="ui-heading-display text-2xl font-black leading-tight sm:text-3xl">
-                        {{ $team->title }}
-                    </h2>
-
-                    @if ($hackaton)
-                        <div class="ui-stat-tile rounded-2xl p-4">
-                            <div class="flex items-start gap-3">
-                                <span class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                                    <x-app-icon icon="heroicons:calendar-days" class="h-5 w-5" />
-                                </span>
-                                <div class="min-w-0 space-y-1">
-                                    <p class="text-xs font-bold uppercase tracking-wide text-base-content/50">Хакатон</p>
-                                    <p class="ui-heading-display text-base font-bold leading-snug text-base-content sm:text-lg">
-                                        {{ $hackaton->title }}
-                                    </p>
-                                    <p class="text-sm tabular-nums text-base-content/70">
-                                        {{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }}
-                                        <span class="mx-1 text-base-content/40" aria-hidden="true">→</span>
-                                        {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
-                    <div class="grid grid-cols-2 gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3">
-                        <div class="text-center sm:text-left">
-                            <p class="ui-heading-display text-2xl font-black tabular-nums text-primary sm:text-3xl">{{ (int) ($team->roles_count ?? $team->roles->count()) }}</p>
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/60">Ролей</p>
-                        </div>
-                        <div class="text-center sm:text-left">
-                            <p class="ui-heading-display text-2xl font-black tabular-nums text-secondary sm:text-3xl">{{ $openSlots }}</p>
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/60">Свободно</p>
-                        </div>
-                    </div>
-
-                    <div class="mt-auto flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
-                        <a
-                            href="{{ route('teams.show', $team) }}"
-                            wire:navigate
-                            class="ui-cta-primary order-first w-full gap-2 sm:order-none sm:flex-1"
-                        >
-                            <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
-                            Просмотреть
-                        </a>
-                        <button
-                            type="button"
-                            class="ui-cta-outline w-full border-base-300 sm:flex-1"
-                            wire:click="editTeam({{ $team->id }})"
-                        >
-                            <x-app-icon icon="heroicons:pencil-square" class="h-4 w-4" />
-                            Изменить
-                        </button>
-                        <button
-                            type="button"
-                            class="ui-cta-danger w-full sm:flex-1"
-                            wire:click="showDeleteTeamModal({{ $team->id }})"
-                        >
-                            <x-app-icon icon="heroicons:trash" class="h-4 w-4" />
-                            Удалить
-                        </button>
-                    </div>
-                </div>
-            </article>
-        @empty
-            <div class="col-span-full">
-                <x-team-empty-state
-                    title="Пока нет команд"
-                    description="Создайте команду для хакатона — настройте роли и пригласите участников через каталог."
-                    icon="heroicons:user-group"
-                    action-href="/teams/create"
-                    action-label="Создать команду"
-                />
-            </div>
-        @endforelse
-    </div>
 </div>
-    </div>

@@ -41,7 +41,7 @@ new #[Lazy] class extends Component
 ?>
 
 @if($isOrganizer)
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card bg-base-100 border border-base-200 shadow-sm" id="organizer-team-applications">
             <div class="card-body">
                 <h2 class="card-title text-xl">Заявки команд</h2>
                 <form method="GET" class="my-3 flex items-center gap-2">

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReorderHackatonCaseFieldsRequest;
 use App\Http\Requests\StoreHackatonCaseFieldRequest;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseField;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -52,5 +54,29 @@ class HackatonCaseFieldController extends Controller
         $field->delete();
 
         return back()->with('success', 'Поле кейса удалено.');
+    }
+
+    public function reorder(ReorderHackatonCaseFieldsRequest $request, Hackaton $hackaton, HackatonCase $case): RedirectResponse
+    {
+        abort_unless($case->hackaton_id === $hackaton->id, 404);
+        Gate::authorize('update', $case);
+
+        $fieldIds = $request->validated('field_ids');
+        $validIds = $case->fields()->whereIn('id', $fieldIds)->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        if (count($validIds) !== count($fieldIds) || count($validIds) !== $case->fields()->count()) {
+            return back()->with('error', 'Неверный набор полей для сортировки.');
+        }
+
+        DB::transaction(function () use ($fieldIds, $case): void {
+            foreach (array_values($fieldIds) as $index => $fieldId) {
+                HackatonCaseField::query()
+                    ->where('hackaton_case_id', $case->id)
+                    ->where('id', $fieldId)
+                    ->update(['sort_order' => $index]);
+            }
+        });
+
+        return back()->with('success', 'Порядок полей обновлён.');
     }
 }

@@ -51,7 +51,7 @@
                                 Подана: {{ $application->created_at?->format('d.m.Y H:i') ?? '—' }}
                             </p>
                             <a
-                                href="{{ route('hackatons.show', $application->hackaton) }}?applications_status=pending#organizer-team-applications"
+                                href="{{ route('hackatons.show', $application->hackaton) }}?applications_status=pending#hackaton-tab-participants"
                                 class="ui-cta-outline btn-sm w-fit gap-2"
                                 wire:navigate
                             >

@@ -141,7 +141,7 @@
                     @endphp
                     @if ($btmStaff)
                         @if ($btmUser->isOrganizer())
-                            <a href="{{ route('profile.hackatons') }}" wire:navigate @class([request()->is('profile/hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:squares-2x2" class="h-6 w-6" />
                                 <span class="btm-nav-label">Орг.</span>
                             </a>
@@ -443,7 +443,7 @@
                             <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Кабинет</span></li>
                             @if ($navUser->isOrganizer())
                                 <li>
-                                    <a href="{{ route('profile.hackatons') }}" wire:navigate class="sidebar-nav-link {{ request()->is('profile/hackatons*') ? 'active' : '' }}">
+                                    <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:squares-2x2" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Организаторский кабинет</span>
                                     </a>
