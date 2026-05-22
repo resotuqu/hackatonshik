@@ -21,6 +21,11 @@ class Create extends Component
 {
     use Toast, WithFileUploads;
 
+    public function mount(): void
+    {
+        abort_unless(Auth::user()?->isOrganizer(), 403);
+    }
+
     public int $wizardStep = 1;
 
     public const WIZARD_LAST_STEP = 5;

@@ -38,7 +38,6 @@ use App\Livewire\Pages\Profile\Certificates\Index as ProfileCertificatesIndex;
 use App\Livewire\Pages\Profile\Hackatons\Applications as ProfileHackatonsApplications;
 use App\Livewire\Pages\Profile\Hackatons\Finished as ProfileHackatonsFinished;
 use App\Livewire\Pages\Profile\Hackatons\Hub as ProfileHackatonsHub;
-use App\Livewire\Pages\Profile\Hackatons\Index as ProfileHackatonsIndex;
 use App\Livewire\Pages\Profile\Hackatons\Participants as ProfileHackatonsParticipants;
 use App\Livewire\Pages\Profile\Hackatons\Scoring as ProfileHackatonsScoring;
 use App\Livewire\Pages\Profile\Index as ProfileIndex;
@@ -112,14 +111,17 @@ Route::get('/teams/create', TeamsCreate::class)->middleware(['auth', 'verified']
 Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware(['auth', 'verified'])->name('profile.teams');
 
 Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
-Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified'])->name('hackatons.create');
-Route::get('/profile/hackatons', ProfileHackatonsIndex::class)->middleware(['auth', 'verified'])->name('profile.hackatons');
-Route::get('/organizer', OrganizerDashboard::class)->middleware(['auth', 'verified'])->name('organizer.dashboard');
-Route::get('/profile/organizer', OrganizerDashboard::class)->middleware(['auth', 'verified'])->name('profile.organizer');
-Route::get('/profile/hackatons/applications', ProfileHackatonsApplications::class)->middleware(['auth', 'verified'])->name('profile.hackatons.applications');
-Route::get('/profile/hackatons/scoring', ProfileHackatonsScoring::class)->middleware(['auth', 'verified'])->name('profile.hackatons.scoring');
-Route::get('/profile/hackatons/finished', ProfileHackatonsFinished::class)->middleware(['auth', 'verified'])->name('profile.hackatons.finished');
-Route::get('/profile/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware(['auth', 'verified'])->name('profile.hackatons.participants');
+Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified', 'organizer'])->name('hackatons.create');
+
+$organizerMiddleware = ['auth', 'verified', 'organizer'];
+
+Route::redirect('/profile/hackatons', '/organizer')->middleware($organizerMiddleware)->name('profile.hackatons');
+Route::redirect('/profile/organizer', '/organizer')->middleware($organizerMiddleware)->name('profile.organizer');
+Route::get('/organizer', OrganizerDashboard::class)->middleware($organizerMiddleware)->name('organizer.dashboard');
+Route::get('/profile/hackatons/applications', ProfileHackatonsApplications::class)->middleware($organizerMiddleware)->name('profile.hackatons.applications');
+Route::get('/profile/hackatons/scoring', ProfileHackatonsScoring::class)->middleware($organizerMiddleware)->name('profile.hackatons.scoring');
+Route::get('/profile/hackatons/finished', ProfileHackatonsFinished::class)->middleware($organizerMiddleware)->name('profile.hackatons.finished');
+Route::get('/profile/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware($organizerMiddleware)->name('profile.hackatons.participants');
 Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware(['auth', 'verified'])->name('profile.certificates');
 Route::get('/profile/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
     ->middleware(['auth', 'verified'])

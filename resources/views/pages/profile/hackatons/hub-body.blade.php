@@ -28,9 +28,19 @@
                     </a>
                 @endif
                 @if(($globalPending['judgeInvitations'] ?? 0) > 0)
-                    <span class="font-medium text-base-content/80">
-                        Приглашения судей (ожидают): {{ $globalPending['judgeInvitations'] }}
-                    </span>
+                    @if(! empty($judgeInvitationsFocusHackatonId))
+                        <a
+                            href="{{ route('hackatons.show', $judgeInvitationsFocusHackatonId) }}#hackaton-tab-organization"
+                            class="link link-hover font-medium"
+                            wire:navigate
+                        >
+                            Приглашения судей (ожидают): {{ $globalPending['judgeInvitations'] }}
+                        </a>
+                    @else
+                        <span class="font-medium text-base-content/80">
+                            Приглашения судей (ожидают): {{ $globalPending['judgeInvitations'] }}
+                        </span>
+                    @endif
                 @endif
             </div>
             <p class="mt-2 text-xs text-base-content/60">Откройте страницу хакатона — вкладка «Организация» — чтобы обработать приглашения.</p>
@@ -212,7 +222,13 @@
         @foreach($hackatons as $hackaton)
             <x-marycard wire:key="hackaton-card-{{ $hackaton->id }}" class="card card-border @if($hackaton->pending_applications_count > 0) border-error/40 ring-1 ring-error/20 @endif">
                 <div class="aspect-video overflow-hidden rounded-xl bg-base-200">
-                    <img src="/uploads/{{ $hackaton->image_url }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}">
+                    @if(filled($hackaton->image_url))
+                        <img src="/uploads/{{ $hackaton->image_url }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}">
+                    @else
+                        <div class="flex h-full w-full items-center justify-center bg-linear-to-br from-secondary/15 to-primary/10">
+                            <x-app-icon icon="heroicons:photo" class="h-12 w-12 text-base-content/30" />
+                        </div>
+                    @endif
                 </div>
                 <div class="mt-2 space-y-2">
                     <div class="flex flex-wrap items-center gap-2">

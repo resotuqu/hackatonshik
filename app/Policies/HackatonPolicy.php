@@ -41,6 +41,15 @@ class HackatonPolicy
         return (int) $hackaton->user_id === (int) $user->id;
     }
 
+    public function delete(User $user, Hackaton $hackaton): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $this->update($user, $hackaton);
+    }
+
     /**
      * Организатор или назначенный судья (вкладки кейсов / оценки).
      */

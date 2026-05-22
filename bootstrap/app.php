@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureContactChannelsVerified;
+use App\Http\Middleware\EnsureOrganizer;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Signed mail links must validate after HTTPS redirects / proxies; relative signatures ignore scheme & host.
         $middleware->alias([
             'signed' => ValidateSignature::class.':relative',
+            'organizer' => EnsureOrganizer::class,
         ]);
 
         $appEnv = (string) env('APP_ENV', 'production');

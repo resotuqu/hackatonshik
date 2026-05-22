@@ -9,8 +9,6 @@ use App\Models\Hackaton;
 
 final class BuildOrganizerHackatonReadinessChecklist
 {
-    private const MIN_APPLICATIONS_THRESHOLD = 3;
-
     /**
      * @return list<array{done: bool, label: string, href: string|null}>
      */
@@ -24,7 +22,8 @@ final class BuildOrganizerHackatonReadinessChecklist
         $casesWithFields = $hackaton->cases->filter(fn ($c) => $c->fields->isNotEmpty())->count();
         $hasJudges = $hackaton->judges->isNotEmpty();
         $applicationsAccepted = $hackaton->applications->where('status', ApplicationStatus::ACCEPTED)->count();
-        $enoughApplications = $applicationsAccepted >= self::MIN_APPLICATIONS_THRESHOLD;
+        $minAccepted = (int) config('hackaton.organizer_readiness_min_accepted_applications', 3);
+        $enoughApplications = $applicationsAccepted >= $minAccepted;
 
         return [
             [
@@ -49,7 +48,7 @@ final class BuildOrganizerHackatonReadinessChecklist
             ],
             [
                 'done' => $enoughApplications,
-                'label' => 'Минимум '.self::MIN_APPLICATIONS_THRESHOLD.' принятых команд',
+                'label' => 'Минимум '.$minAccepted.' принятых команд',
                 'href' => '#hackaton-tab-participants',
             ],
         ];

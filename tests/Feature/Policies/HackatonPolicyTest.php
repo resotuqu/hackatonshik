@@ -78,6 +78,18 @@ it('allows only the organizer to update a hackaton', function () {
     expect((new HackatonPolicy)->update($other, $hackaton))->toBeFalse();
 });
 
+it('allows owner and admin to delete a hackaton', function () {
+    $organizer = User::factory()->partner()->create();
+    $other = User::factory()->partner()->create();
+    $admin = User::factory()->admin()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    $policy = new HackatonPolicy;
+    expect($policy->delete($organizer, $hackaton))->toBeTrue();
+    expect($policy->delete($other, $hackaton))->toBeFalse();
+    expect($policy->delete($admin, $hackaton))->toBeTrue();
+});
+
 it('viewOrganizationDashboard allows organizer and assigned judge', function () {
     $organizer = User::factory()->partner()->create();
     $judge = User::factory()->judge()->create();

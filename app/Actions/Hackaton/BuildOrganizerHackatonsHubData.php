@@ -20,7 +20,8 @@ final class BuildOrganizerHackatonsHubData
      *     hackatons: Collection<int, Hackaton>,
      *     summary: array{activeHackatons: int, pendingApplications: int, participantsTotal: int, hackatonsTotal: int},
      *     featuredHackaton: Hackaton|null,
-     *     globalPending: array{applications: int, judgeInvitations: int}
+     *     globalPending: array{applications: int, judgeInvitations: int},
+     *     judgeInvitationsFocusHackatonId: int|null
      * }|null
      */
     public function build(?User $user): ?array
@@ -67,21 +68,34 @@ final class BuildOrganizerHackatonsHubData
         }
 
         $globalPending = [
-            'applications' => HackatonApplication::query()
-                ->where('status', ApplicationStatus::PENDING)
-                ->whereHas('hackaton', fn ($q) => $q->where('user_id', $userId))
-                ->count(),
+            'applications' => $summary['pendingApplications'],
             'judgeInvitations' => JudgeInvitation::query()
                 ->where('status', JudgeInvitation::STATUS_PENDING)
                 ->whereHas('hackaton', fn ($q) => $q->where('user_id', $userId))
                 ->count(),
         ];
 
+        $judgeInvitationsFocusHackatonId = null;
+        if ($globalPending['judgeInvitations'] > 0) {
+            $focusHackatonId = JudgeInvitation::query()
+                ->selectRaw('hackaton_id, COUNT(*) as pending_count')
+                ->where('status', JudgeInvitation::STATUS_PENDING)
+                ->whereHas('hackaton', fn ($q) => $q->where('user_id', $userId))
+                ->groupBy('hackaton_id')
+                ->orderByDesc('pending_count')
+                ->value('hackaton_id');
+
+            if (is_numeric($focusHackatonId)) {
+                $judgeInvitationsFocusHackatonId = (int) $focusHackatonId;
+            }
+        }
+
         return [
             'hackatons' => $hackatons,
             'summary' => $summary,
             'featuredHackaton' => $featuredHackaton,
             'globalPending' => $globalPending,
+            'judgeInvitationsFocusHackatonId' => $judgeInvitationsFocusHackatonId,
         ];
     }
 

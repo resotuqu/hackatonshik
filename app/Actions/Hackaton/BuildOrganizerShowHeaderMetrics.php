@@ -57,25 +57,31 @@ final class BuildOrganizerShowHeaderMetrics
         $now = now();
         $candidates = [];
 
-        if ($hackaton->registration_deadline_at instanceof Carbon && $hackaton->registration_deadline_at->isFuture()) {
-            $candidates['Регистрация'] = $hackaton->registration_deadline_at;
+        $registrationDeadline = $this->asCarbon($hackaton->registration_deadline_at);
+        if ($registrationDeadline?->isFuture()) {
+            $candidates['Регистрация'] = $registrationDeadline;
         }
 
         foreach ($hackaton->cases as $case) {
-            if ($case->publish_at instanceof Carbon && $case->publish_at->isFuture()) {
-                $candidates['Публикация кейса: '.$case->title] = $case->publish_at;
+            $publishAt = $this->asCarbon($case->publish_at);
+            if ($publishAt?->isFuture()) {
+                $candidates['Публикация кейса: '.$case->title] = $publishAt;
             }
-            if ($case->deadline_at instanceof Carbon && $case->deadline_at->isFuture()) {
-                $candidates['Дедлайн кейса: '.$case->title] = $case->deadline_at;
+
+            $deadlineAt = $this->asCarbon($case->deadline_at);
+            if ($deadlineAt?->isFuture()) {
+                $candidates['Дедлайн кейса: '.$case->title] = $deadlineAt;
             }
         }
 
-        if ($hackaton->start_at instanceof Carbon && $hackaton->start_at->isFuture()) {
-            $candidates['Старт хакатона'] = $hackaton->start_at;
+        $startAt = $this->asCarbon($hackaton->start_at);
+        if ($startAt?->isFuture()) {
+            $candidates['Старт хакатона'] = $startAt;
         }
 
-        if ($hackaton->end_at instanceof Carbon && $hackaton->end_at->isFuture()) {
-            $candidates['Финиш хакатона'] = $hackaton->end_at;
+        $endAt = $this->asCarbon($hackaton->end_at);
+        if ($endAt?->isFuture()) {
+            $candidates['Финиш хакатона'] = $endAt;
         }
 
         if ($candidates === []) {
@@ -84,12 +90,18 @@ final class BuildOrganizerShowHeaderMetrics
 
         uasort($candidates, fn (Carbon $a, Carbon $b): int => $a <=> $b);
 
-        foreach ($candidates as $label => $at) {
-            if ($at->isAfter($now)) {
-                return [$label, $at];
-            }
+        $label = array_key_first($candidates);
+        $at = $candidates[$label];
+
+        return [$label, $at];
+    }
+
+    private function asCarbon(mixed $value): ?Carbon
+    {
+        if ($value === null || $value === '') {
+            return null;
         }
 
-        return [null, null];
+        return $value instanceof Carbon ? $value : Carbon::parse((string) $value);
     }
 }

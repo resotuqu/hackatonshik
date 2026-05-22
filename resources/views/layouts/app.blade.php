@@ -180,7 +180,7 @@
                 @else
                     @if ($btmStaff)
                         @if ($btmUser->isOrganizer())
-                            <a href="{{ route('profile.hackatons') }}" wire:navigate @class([request()->routeIs('profile.hackatons') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                                 <span class="btm-nav-label">Мои</span>
                             </a>
@@ -414,7 +414,7 @@
                                 <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Хакатоны</span></li>
                                 @if ($navUser->isOrganizer())
                                     <li>
-                                        <a href="{{ route('profile.hackatons') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons') ? 'active' : '' }}">
+                                        <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer') ? 'active' : '' }}">
                                             <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0" />
                                             <span class="min-w-0 flex-1">Мои хакатоны</span>
                                             @if (isset($partnerSidebarCounts) && $partnerSidebarCounts !== null && $partnerSidebarCounts->totalHackatonsCount > 0)

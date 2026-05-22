@@ -13,4 +13,11 @@ return [
     |
     */
     'organizer_show_sidebar' => env('ORGANIZER_SHOW_SIDEBAR', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Organizer readiness checklist
+    |--------------------------------------------------------------------------
+    */
+    'organizer_readiness_min_accepted_applications' => (int) env('ORGANIZER_READINESS_MIN_ACCEPTED_APPLICATIONS', 3),
 ];

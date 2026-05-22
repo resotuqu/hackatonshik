@@ -2,17 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Pages\Profile\Hackatons;
+namespace App\Livewire\Concerns;
 
-use App\Actions\Hackaton\BuildOrganizerHackatonsHubData;
 use App\Models\Hackaton;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
-use Livewire\Component;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class Index extends Component
+trait ManagesOwnedHackatons
 {
+    use AuthorizesRequests;
+
     public bool $deleteHackatonModal = false;
 
     public ?int $deleteHackatonId = null;
@@ -30,7 +28,16 @@ class Index extends Component
         }
 
         $hackaton = Hackaton::query()->find($this->deleteHackatonId);
-        $hackaton?->delete();
+        if ($hackaton === null) {
+            $this->deleteHackatonId = null;
+            $this->deleteHackatonModal = false;
+
+            return;
+        }
+
+        $this->authorize('delete', $hackaton);
+        $hackaton->delete();
+
         $this->deleteHackatonId = null;
         $this->deleteHackatonModal = false;
     }
@@ -43,14 +50,5 @@ class Index extends Component
     public function participantsHackaton(int $id): mixed
     {
         return redirect()->route('profile.hackatons.participants', ['hackaton' => $id]);
-    }
-
-    #[Layout('layouts::app', ['title' => 'Мои хакатоны'])]
-    public function render(BuildOrganizerHackatonsHubData $hubData): View
-    {
-        $data = $hubData->build(Auth::user());
-        abort_if($data === null, 403);
-
-        return view('pages.profile.hackatons.index', $data);
     }
 }

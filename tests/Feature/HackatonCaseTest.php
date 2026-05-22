@@ -7,8 +7,8 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 
 it('allows organizers to create cases for their hackatons', function () {
-    $organizer = User::factory()->create();
-    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
 
     actingAs($organizer)
         ->post(route('hackatons.cases.store', $hackaton), [
@@ -26,7 +26,8 @@ it('allows organizers to create cases for their hackatons', function () {
 
 it('prevents non-organizers from creating cases', function () {
     $stranger = User::factory()->create();
-    $hackaton = Hackaton::factory()->create(); // Owner is someone else
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
 
     actingAs($stranger)
         ->post(route('hackatons.cases.store', $hackaton), [
@@ -36,8 +37,8 @@ it('prevents non-organizers from creating cases', function () {
 });
 
 it('allows organizers to add fields to cases', function () {
-    $organizer = User::factory()->create();
-    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
     $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
 
     actingAs($organizer)

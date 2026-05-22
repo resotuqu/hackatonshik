@@ -17,11 +17,10 @@ test('organizer dashboard is reachable for partner', function () {
         ->assertSeeLivewire('organizer.dashboard');
 });
 
-test('profile organizer route serves same dashboard', function () {
+test('profile organizer route redirects to organizer dashboard', function () {
     $organizer = User::factory()->partner()->create();
 
     actingAs($organizer)
         ->get(route('profile.organizer'))
-        ->assertOk()
-        ->assertSeeLivewire('organizer.dashboard');
+        ->assertRedirect(route('organizer.dashboard'));
 });
