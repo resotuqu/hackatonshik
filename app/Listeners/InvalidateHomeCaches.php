@@ -7,6 +7,7 @@ namespace App\Listeners;
 use App\Events\HackatonApplicationChanged;
 use App\Events\TeamApplicationChanged;
 use App\Models\Team;
+use App\ViewModels\PartnerSidebarCounts;
 use Illuminate\Support\Facades\Cache;
 
 final class InvalidateHomeCaches
@@ -45,6 +46,7 @@ final class InvalidateHomeCaches
 
         if ($event instanceof HackatonApplicationChanged && $event->organizerId !== null) {
             $userIds->push($event->organizerId);
+            PartnerSidebarCounts::forgetForUser($event->organizerId);
         }
 
         if ($event instanceof TeamApplicationChanged) {

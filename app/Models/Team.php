@@ -28,8 +28,14 @@ class Team extends Model
 
     protected static function booted(): void
     {
-        static::saved(function () {
-            Cache::increment('api:v1:catalog:teams:version');
+        static::saved(function (Team $team): void {
+            if (
+                ! $team->wasRecentlyCreated
+                && ! $team->wasChanged(['title', 'is_public', 'image_url', 'hackaton_id'])
+            ) {
+                return;
+            }
+
             if (Cache::supportsTags()) {
                 Cache::tags(['catalog', 'home'])->flush();
             } else {
@@ -37,8 +43,7 @@ class Team extends Model
                 Cache::forget('home-public-totals-v4');
             }
         });
-        static::deleted(function () {
-            Cache::increment('api:v1:catalog:teams:version');
+        static::deleted(function (): void {
             if (Cache::supportsTags()) {
                 Cache::tags(['catalog', 'home'])->flush();
             } else {

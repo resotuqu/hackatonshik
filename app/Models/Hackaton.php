@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
+use App\ViewModels\PartnerSidebarCounts;
 use Database\Factories\HackatonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,23 +38,32 @@ class Hackaton extends Model
 
     protected static function booted(): void
     {
-        static::saved(function () {
-            Cache::increment('api:v1:catalog:hackatons:version');
+        static::saved(function (Hackaton $hackaton): void {
+            if (
+                ! $hackaton->wasRecentlyCreated
+                && ! $hackaton->wasChanged(['title', 'is_public', 'start_at', 'end_at', 'image_url', 'status'])
+            ) {
+                return;
+            }
+
             if (Cache::supportsTags()) {
                 Cache::tags(['catalog', 'home'])->flush();
             } else {
                 Cache::forget('home-featured-hackatons-v2');
                 Cache::forget('home-public-totals-v4');
             }
+
+            PartnerSidebarCounts::forgetForUser($hackaton->user_id);
         });
-        static::deleted(function () {
-            Cache::increment('api:v1:catalog:hackatons:version');
+        static::deleted(function (Hackaton $hackaton): void {
             if (Cache::supportsTags()) {
                 Cache::tags(['catalog', 'home'])->flush();
             } else {
                 Cache::forget('home-featured-hackatons-v2');
                 Cache::forget('home-public-totals-v4');
             }
+
+            PartnerSidebarCounts::forgetForUser($hackaton->user_id);
         });
     }
 

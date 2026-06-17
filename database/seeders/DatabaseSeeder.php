@@ -10,6 +10,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment('local', 'testing')) {
+            $this->command?->warn('DatabaseSeeder skipped: demo seeders are only allowed in local/testing environments.');
+
+            return;
+        }
+
         $this->call([
             UserSeeder::class,
             RoleSeeder::class,

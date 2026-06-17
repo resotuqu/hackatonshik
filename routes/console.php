@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('hackatons:sync-statuses')
     ->everyTenMinutes()
     ->withoutOverlapping();
+
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
+
+Schedule::command('queue:prune-failed --hours=168')->daily();

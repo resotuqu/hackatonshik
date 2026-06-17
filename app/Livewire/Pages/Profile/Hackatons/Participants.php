@@ -4,10 +4,8 @@ namespace App\Livewire\Pages\Profile\Hackatons;
 
 use App\Models\Hackaton;
 use App\Models\HackatonDocument;
-use App\Models\Role;
 use App\Models\Team;
 use App\Models\TeamRole;
-use App\Models\User;
 use App\Models\UserHackatonDocument;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -103,8 +101,8 @@ class Participants extends Component
         return $team->roles
             ->filter(fn (TeamRole $role): bool => $role->user_id !== null)
             ->map(function (TeamRole $role): array {
-                $user = User::query()->find($role->user_id);
-                $roleModel = Role::query()->find($role->role_id);
+                $user = $role->user;
+                $roleModel = $role->role;
 
                 return [
                     'id' => $role->id,
@@ -130,22 +128,34 @@ class Participants extends Component
 
         $requiredCount = $requiredDocumentIds->count();
 
-        return $this->hackaton->teams()
+        $teams = $this->hackaton->teams()
             ->with(['roles' => fn ($q) => $q->whereNotNull('user_id')])
-            ->get()
-            ->map(function (Team $team) use ($requiredDocumentIds, $requiredCount) {
+            ->get();
+
+        $allParticipantIds = $teams
+            ->flatMap(fn (Team $team) => $team->roles->pluck('user_id'))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $uploadedCountsByUser = $allParticipantIds->isEmpty() || $requiredDocumentIds->isEmpty()
+            ? collect()
+            : UserHackatonDocument::query()
+                ->whereIn('user_id', $allParticipantIds)
+                ->whereIn('hackaton_document_id', $requiredDocumentIds)
+                ->selectRaw('user_id, COUNT(*) as uploaded_count')
+                ->groupBy('user_id')
+                ->pluck('uploaded_count', 'user_id');
+
+        return $teams
+            ->map(function (Team $team) use ($requiredCount, $uploadedCountsByUser) {
                 $participantIds = $team->roles->pluck('user_id')->filter();
                 $participantsCount = $participantIds->count();
 
-                $totalUploaded = 0;
+                $totalUploaded = $participantIds->sum(
+                    fn (int $userId): int => (int) ($uploadedCountsByUser[$userId] ?? 0)
+                );
                 $totalRequired = $participantsCount * $requiredCount;
-
-                if ($totalRequired > 0) {
-                    $totalUploaded = UserHackatonDocument::query()
-                        ->whereIn('user_id', $participantIds)
-                        ->whereIn('hackaton_document_id', $requiredDocumentIds)
-                        ->count();
-                }
 
                 return [
                     'id' => $team->id,

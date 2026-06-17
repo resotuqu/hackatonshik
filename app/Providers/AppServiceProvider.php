@@ -27,6 +27,7 @@ use App\ViewModels\PartnerSidebarCounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -35,7 +36,9 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -88,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureRateLimiting();
         $this->configureCatalogCacheInvalidation();
+        $this->configureHealthChecks();
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('yandex', Provider::class);
             $event->extendSocialite('vkontakte', VkontakteProvider::class);
@@ -118,14 +122,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', fn ($user): bool => $user->isAdmin());
         Gate::define('viewHorizon', fn ($user): bool => $user->isAdmin());
         Gate::define('viewTelescope', fn ($user): bool => $user->isAdmin() || app()->isLocal());
-
-        Password::defaults(function () {
-            $rule = Password::min(8);
-
-            return app()->isProduction()
-                ? $rule->mixedCase()->uncompromised()->numbers()->symbols()
-                : $rule;
-        });
     }
 
     /**
@@ -165,6 +161,23 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('password-reset', function (Request $request) {
             return Limit::perMinute(3)->by($request->input('email') ?: $request->ip());
+        });
+
+        RateLimiter::for('judge-management', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
+    }
+
+    protected function configureHealthChecks(): void
+    {
+        Event::listen(DiagnosingHealth::class, function (): void {
+            if (config('cache.default') === 'redis' || config('session.driver') === 'redis') {
+                Redis::connection()->ping();
+            }
+
+            if (config('queue.default') === 'redis') {
+                Redis::connection(config('queue.connections.redis.connection', 'default'))->ping();
+            } elseif (config('queue.default') === 'database') {
+                Queue::connection('database')->size();
+            }
         });
     }
 

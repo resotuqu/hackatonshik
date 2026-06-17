@@ -6,10 +6,15 @@ use App\Providers\HorizonServiceProvider;
 use App\Providers\TelescopeServiceProvider;
 use SocialiteProviders\Manager\ServiceProvider;
 
-return [
+$providers = [
     AppServiceProvider::class,
     FortifyServiceProvider::class,
     HorizonServiceProvider::class,
-    TelescopeServiceProvider::class,
     ServiceProvider::class,
 ];
+
+if (class_exists(TelescopeServiceProvider::class)) {
+    $providers[] = TelescopeServiceProvider::class;
+}
+
+return $providers;

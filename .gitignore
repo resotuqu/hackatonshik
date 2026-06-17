@@ -44,5 +44,4 @@ yarn-error.log
 /.claude/skills/
 /.cursor/skills/
 /.github/skills/
-rr
-.rr.yaml
+/chrome

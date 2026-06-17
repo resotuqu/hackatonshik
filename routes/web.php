@@ -173,7 +173,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('hackaton.applications.bulk-update');
     Route::delete('/hackaton-applications/{application}', [HackatonApplicationController::class, 'destroy'])->name('hackaton.applications.destroy');
 
-    Route::post('/hackatons/{hackaton}/cases/{case}/join', [HackatonCaseController::class, 'join'])->name('hackatons.cases.join');
+    Route::post('/hackatons/{hackaton}/cases/{case}/join', [HackatonCaseController::class, 'join'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.cases.join');
     Route::post('/hackatons/{hackaton}/cases', [HackatonCaseController::class, 'store'])
         ->middleware('throttle:creations')
         ->name('hackatons.cases.store');
@@ -212,8 +214,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:exports')
         ->name('hackatons.export.documents-zip');
 
-    Route::post('/hackatons/{hackaton}/judges/invite', [JudgeManagementController::class, 'invite'])->name('hackatons.judges.invite');
-    Route::post('/hackatons/{hackaton}/judges/assign', [JudgeManagementController::class, 'assign'])->name('hackatons.judges.assign');
+    Route::post('/hackatons/{hackaton}/judges/invite', [JudgeManagementController::class, 'invite'])
+        ->middleware('throttle:judge-management')
+        ->name('hackatons.judges.invite');
+    Route::post('/hackatons/{hackaton}/judges/assign', [JudgeManagementController::class, 'assign'])
+        ->middleware('throttle:judge-management')
+        ->name('hackatons.judges.assign');
     Route::delete('/hackatons/{hackaton}/judges/{judge}', [JudgeManagementController::class, 'unassign'])->name('hackatons.judges.unassign');
     Route::get('/judge-invitations/{token}', [JudgeManagementController::class, 'showAccept'])->name('judges.invitations.accept');
     Route::post('/judge-invitations/{token}/accept', [JudgeManagementController::class, 'accept'])->name('judges.invitations.accept.store');

@@ -41,8 +41,11 @@ class TeamChat extends Component
     {
         return $this->team->messages()
             ->with('user')
-            ->oldest()
-            ->get();
+            ->latest()
+            ->limit(50)
+            ->get()
+            ->reverse()
+            ->values();
     }
 
     public function sendMessage(): void
@@ -51,7 +54,7 @@ class TeamChat extends Component
 
         $this->validate([
             'message' => 'required_without:file|string|max:2000',
-            'file' => 'nullable|file|max:10240', // 10MB limit
+            'file' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip',
         ]);
 
         $type = 'text';

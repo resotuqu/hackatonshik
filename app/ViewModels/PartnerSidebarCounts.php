@@ -9,6 +9,7 @@ use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 final readonly class PartnerSidebarCounts
 {
@@ -19,6 +20,20 @@ final readonly class PartnerSidebarCounts
     ) {}
 
     public static function forUser(User $user): self
+    {
+        return Cache::remember(
+            "partner-sidebar-counts:user:{$user->id}",
+            now()->addSeconds(60),
+            fn (): self => self::computeForUser($user),
+        );
+    }
+
+    public static function forgetForUser(int $userId): void
+    {
+        Cache::forget("partner-sidebar-counts:user:{$userId}");
+    }
+
+    private static function computeForUser(User $user): self
     {
         $activeStatusValues = collect(HackatonStatus::cases())
             ->filter(fn (HackatonStatus $status): bool => $status->isActive())

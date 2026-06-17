@@ -7,9 +7,12 @@ test('returns null for empty path', function () {
     expect(PublicStorageUrl::for(''))->toBeNull();
 });
 
-test('returns absolute urls unchanged', function () {
-    expect(PublicStorageUrl::for('https://cdn.example.com/a.png'))
-        ->toBe('https://cdn.example.com/a.png');
+test('allows external urls from app host only', function () {
+    config(['app.url' => 'https://hackatonshik.ru']);
+
+    expect(PublicStorageUrl::for('https://hackatonshik.ru/a.png'))
+        ->toBe('https://hackatonshik.ru/a.png');
+    expect(PublicStorageUrl::for('https://evil.example/a.png'))->toBeNull();
 });
 
 test('builds storage asset url for relative paths', function () {

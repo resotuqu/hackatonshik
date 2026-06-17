@@ -89,11 +89,13 @@ class HackatonCaseSubmissionController extends Controller
         }
 
         DB::transaction(function () use ($case, $request, $teamId, $userId, $answers, $uploadedFiles, $caseFields): void {
-            $submission = HackatonCaseSubmission::query()
+            $submissionQuery = HackatonCaseSubmission::query()
                 ->where('hackaton_case_id', $case->id)
                 ->where('team_id', $teamId)
                 ->where('user_id', $userId)
-                ->first();
+                ->lockForUpdate();
+
+            $submission = $submissionQuery->first();
 
             if (! $submission) {
                 $submission = HackatonCaseSubmission::query()->create([
