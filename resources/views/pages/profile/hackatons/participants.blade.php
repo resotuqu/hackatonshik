@@ -74,7 +74,7 @@
                                                                         </div>
 
                                                                         @if($doc['uploaded'])
-                                                                            <a href="/uploads/{{ $doc['file_url'] }}" download>
+                                                                            <a href="{{ \App\Support\PublicStorageUrl::for($doc['file_url']) }}" download>
                                                                                 <x-mary-button class="btn-primary btn-sm" label="Скачать" />
                                                                             </a>
                                                                         @endif

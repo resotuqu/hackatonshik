@@ -12,7 +12,7 @@ use function Pest\Laravel\actingAs;
 test('a judge can score a submission', function () {
     // Arrange
     $hackaton = Hackaton::factory()->create();
-    $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+    $case = HackatonCase::factory()->withoutRubric()->create(['hackaton_id' => $hackaton->id]);
     $team = Team::factory()->create();
     $submission = HackatonCaseSubmission::factory()->create([
         'hackaton_case_id' => $case->id,
@@ -48,7 +48,7 @@ test('a judge can score a submission', function () {
 
 test('two judges can score the same submission independently', function () {
     $hackaton = Hackaton::factory()->create();
-    $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+    $case = HackatonCase::factory()->withoutRubric()->create(['hackaton_id' => $hackaton->id]);
     $team = Team::factory()->create();
     $submission = HackatonCaseSubmission::factory()->create([
         'hackaton_case_id' => $case->id,
@@ -87,7 +87,7 @@ test('two judges can score the same submission independently', function () {
 
 test('a regular user cannot score a submission', function () {
     $hackaton = Hackaton::factory()->create();
-    $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+    $case = HackatonCase::factory()->withoutRubric()->create(['hackaton_id' => $hackaton->id]);
     $team = Team::factory()->create();
     $submission = HackatonCaseSubmission::factory()->create([
         'hackaton_case_id' => $case->id,

@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property int $hackaton_id
+ * @property array|null $rubric_json
+ * @property array|null $resources_json
+ */
 class HackatonCase extends Model
 {
     use HasFactory;

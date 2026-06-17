@@ -1,7 +1,4 @@
-<div
-    class="flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100"
-    aria-hidden="true"
->
+<div class="flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100" aria-hidden="true">
     <div class="skeleton h-44 w-full shrink-0 rounded-none rounded-t-3xl"></div>
     <div class="flex flex-1 flex-col gap-4 p-4 sm:p-5">
         <div class="skeleton h-8 w-3/4 rounded-lg"></div>

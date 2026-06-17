@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\TeamRole;
+use App\Models\Team;
 use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
@@ -8,7 +8,11 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('team.{teamId}', function ($user, $teamId) {
-    return TeamRole::where('team_id', $teamId)
-        ->where('user_id', $user->id)
-        ->exists();
+    $team = Team::query()->find($teamId);
+
+    if ($team === null) {
+        return false;
+    }
+
+    return $team->hasMember($user);
 });

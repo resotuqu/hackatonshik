@@ -16,7 +16,7 @@ final class ComputeScoreTotalsFromRubricAction
     public function handle(HackatonCase $case, JudgeDomain $judgeDomain, array $criteriaScores): array
     {
         /** @var array<int, array{id?: string, max?: int, domain?: string}> $rubric */
-        $rubric = is_array($case->rubric_json) ? $case->rubric_json : [];
+        $rubric = $case->rubric_json ?? [];
 
         $score = 0;
         $maxScore = 0;

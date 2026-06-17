@@ -15,7 +15,8 @@ class TelegramLogger
     public function __invoke(array $config): Logger
     {
         return new Logger('telegram', [
-            new class($config['level'], $config['token'], $config['chat_id']) extends AbstractProcessingHandler {
+            new class($config['level'], $config['token'], $config['chat_id']) extends AbstractProcessingHandler
+            {
                 public function __construct(
                     $level,
                     protected string $token,
@@ -26,7 +27,7 @@ class TelegramLogger
 
                 protected function write(LogRecord $record): void
                 {
-                    if (!$this->token || !$this->chatId) {
+                    if (! $this->token || ! $this->chatId) {
                         return;
                     }
 

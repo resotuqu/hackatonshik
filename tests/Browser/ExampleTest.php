@@ -14,6 +14,7 @@ class ExampleTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser): void {
             $browser->visit('/')
+                ->waitForText('Найдите команду', 30)
                 ->assertSee('Найдите команду');
         });
     }

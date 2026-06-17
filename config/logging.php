@@ -1,5 +1,7 @@
 <?php
 
+use App\Logging\TelegramLogger;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -77,7 +79,7 @@ return [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'info'),
             'handler' => StreamHandler::class,
-            'formatter' => Monolog\Formatter\JsonFormatter::class,
+            'formatter' => JsonFormatter::class,
             'handler_with' => [
                 'stream' => 'php://stderr',
             ],
@@ -95,7 +97,7 @@ return [
 
         'telegram' => [
             'driver' => 'custom',
-            'via' => App\Logging\TelegramLogger::class,
+            'via' => TelegramLogger::class,
             'level' => 'critical',
             'token' => env('TELEGRAM_BOT_TOKEN'),
             'chat_id' => env('TELEGRAM_CHAT_ID'),

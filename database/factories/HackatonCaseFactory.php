@@ -42,4 +42,11 @@ class HackatonCaseFactory extends Factory
             ],
         ];
     }
+
+    public function withoutRubric(): static
+    {
+        return $this->state(fn (): array => [
+            'rubric_json' => null,
+        ]);
+    }
 }

@@ -51,3 +51,17 @@ it('allows only captain to update a team', function () {
     expect((new TeamPolicy)->update($captain, $team))->toBeTrue();
     expect((new TeamPolicy)->update($outsider, $team))->toBeFalse();
 });
+
+it('allows team members to chat in their team', function () {
+    $captain = User::factory()->create();
+    $member = User::factory()->create();
+    $outsider = User::factory()->create();
+    $team = Team::factory()->for($captain)->create();
+    TeamRole::factory()->for($team)->create(['user_id' => $member->id]);
+
+    $policy = new TeamPolicy;
+
+    expect($policy->chat($captain, $team))->toBeTrue();
+    expect($policy->chat($member, $team))->toBeTrue();
+    expect($policy->chat($outsider, $team))->toBeFalse();
+});

@@ -178,7 +178,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isJudge(): bool
     {
-        return $this->role === UserRole::JUDGE;
+        if ($this->role === UserRole::JUDGE) {
+            return true;
+        }
+
+        if ($this->relationLoaded('judgeAssignments')) {
+            return $this->judgeAssignments->isNotEmpty();
+        }
+
+        return $this->judgeAssignments()->exists();
     }
 
     public function isParticipant(): bool

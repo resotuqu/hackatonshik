@@ -448,18 +448,19 @@
                                         <span class="min-w-0 flex-1">Организаторский кабинет</span>
                                     </a>
                                 </li>
-                            @elseif ($navUser->isJudge())
-                                <li>
-                                    <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:scale" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">Панель судьи</span>
-                                    </a>
-                                </li>
                             @elseif ($navUser->isAdmin())
                                 <li>
                                     <a href="{{ url('/admin') }}" wire:navigate class="sidebar-nav-link {{ request()->is('admin*') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Админ-панель</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @if ($navUser->isJudge())
+                                <li>
+                                    <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
+                                        <x-app-icon icon="heroicons:scale" class="h-5 w-5 shrink-0" />
+                                        <span class="min-w-0 flex-1">Панель судьи</span>
                                     </a>
                                 </li>
                             @endif

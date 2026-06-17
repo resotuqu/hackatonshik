@@ -115,7 +115,7 @@
                         <div class="aspect-video w-full shrink-0 overflow-hidden rounded-xl bg-base-200 sm:max-w-[14rem]">
                             @if(filled($featuredHackaton->image_url))
                                 <img
-                                    src="/uploads/{{ $featuredHackaton->image_url }}"
+                                    src="{{ \App\Support\PublicStorageUrl::for($featuredHackaton->image_url) }}"
                                     class="h-full w-full object-cover"
                                     alt=""
                                 />
@@ -223,7 +223,7 @@
             <x-marycard wire:key="hackaton-card-{{ $hackaton->id }}" class="card card-border @if($hackaton->pending_applications_count > 0) border-error/40 ring-1 ring-error/20 @endif">
                 <div class="aspect-video overflow-hidden rounded-xl bg-base-200">
                     @if(filled($hackaton->image_url))
-                        <img src="/uploads/{{ $hackaton->image_url }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}">
+                        <img src="{{ \App\Support\PublicStorageUrl::for($hackaton->image_url) }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}">
                     @else
                         <div class="flex h-full w-full items-center justify-center bg-linear-to-br from-secondary/15 to-primary/10">
                             <x-app-icon icon="heroicons:photo" class="h-12 w-12 text-base-content/30" />

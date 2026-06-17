@@ -87,8 +87,8 @@ test('team owner can manage vacant roles via edit page', function () {
         ->call('save')
         ->assertHasNoErrors();
 
-    expect($team->roles)->toHaveCount(1)
-        ->and($team->roles->first()->title)->toBe('Backend dev');
+    expect($team->roles()->whereNull('user_id')->get())->toHaveCount(1)
+        ->and($team->roles()->whereNull('user_id')->first()->title)->toBe('Backend dev');
 
     // Test removing role
     Livewire::test(Edit::class, ['team' => $team])
@@ -96,7 +96,7 @@ test('team owner can manage vacant roles via edit page', function () {
         ->call('save');
 
     $team->refresh();
-    expect($team->roles)->toHaveCount(0);
+    expect($team->roles()->whereNull('user_id')->count())->toBe(0);
 });
 
 test('cannot remove an occupied role', function () {

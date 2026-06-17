@@ -9,7 +9,7 @@ use Livewire\Livewire;
 
 it('requires the captain role when editing a team', function () {
     $owner = User::factory()->create();
-    $team = Team::factory()->for($owner)->create();
+    $team = Team::factory()->withoutCaptainRole()->for($owner)->create();
     $captainCategory = Role::factory()->create();
     $captainRole = TeamRole::factory()->for($team)->create([
         'user_id' => $owner->id,
@@ -34,7 +34,7 @@ it('requires the captain role when editing a team', function () {
 
 it('updates the existing captain role instead of creating a new one', function () {
     $owner = User::factory()->create();
-    $team = Team::factory()->for($owner)->create();
+    $team = Team::factory()->withoutCaptainRole()->for($owner)->create();
     $initialCategory = Role::factory()->create();
     $updatedCategory = Role::factory()->create();
     $captainRole = TeamRole::factory()->for($team)->create([
@@ -65,7 +65,7 @@ it('updates the existing captain role instead of creating a new one', function (
 
 it('keeps the captain role attached to the owner even when the client loses its db id', function () {
     $owner = User::factory()->create();
-    $team = Team::factory()->for($owner)->create();
+    $team = Team::factory()->withoutCaptainRole()->for($owner)->create();
     $captainCategory = Role::factory()->create();
     $captainRole = TeamRole::factory()->for($team)->create([
         'user_id' => $owner->id,

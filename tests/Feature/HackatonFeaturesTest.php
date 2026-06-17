@@ -332,7 +332,7 @@ test('organizer can score a case submission', function () {
     $organizer = User::factory()->partner()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $participant = User::factory()->create(['email_verified_at' => now(), 'phone_verified_at' => now()]);
     $hackaton = Hackaton::factory()->for($organizer)->create();
-    $case = HackatonCase::factory()->for($hackaton)->create();
+    $case = HackatonCase::factory()->withoutRubric()->for($hackaton)->create();
     $submission = HackatonCaseSubmission::factory()->for($case, 'case')->create([
         'user_id' => $participant->id,
         'submitted_by_user_id' => $participant->id,

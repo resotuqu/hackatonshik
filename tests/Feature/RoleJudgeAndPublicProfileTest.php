@@ -91,6 +91,35 @@ test('judge can open invitation page and accept invitation', function () {
     expect($hackaton->fresh()->judges()->where('users.id', $judge->id)->exists())->toBeTrue();
 });
 
+test('partner can accept judge invitation without losing organizer role', function () {
+    $organizer = User::factory()->partner()->create();
+    $partnerJudge = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    $invitation = JudgeInvitation::query()->create([
+        'hackaton_id' => $hackaton->id,
+        'invited_email' => mb_strtolower($partnerJudge->email),
+        'invited_by' => $organizer->id,
+        'token' => 'partner-judge-token',
+        'status' => JudgeInvitation::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($partnerJudge)
+        ->post(route('judges.invitations.accept.store', $invitation->token))
+        ->assertRedirect(route('hackatons.show', $hackaton));
+
+    $partnerJudge->refresh();
+
+    expect($partnerJudge->role)->toBe(UserRole::PARTNER)
+        ->and($partnerJudge->isJudge())->toBeTrue()
+        ->and($partnerJudge->isOrganizer())->toBeTrue()
+        ->and($hackaton->fresh()->judges()->where('users.id', $partnerJudge->id)->exists())->toBeTrue();
+
+    $this->actingAs($partnerJudge)
+        ->get(route('judge.dashboard'))
+        ->assertOk();
+});
+
 test('assigned judge can score submission', function () {
     $organizer = User::factory()->partner()->create();
     $judge = User::factory()->judge()->create();
@@ -103,7 +132,7 @@ test('assigned judge can score submission', function () {
         'assigned_at' => now(),
     ]);
 
-    $case = HackatonCase::factory()->for($hackaton)->create();
+    $case = HackatonCase::factory()->withoutRubric()->for($hackaton)->create();
     $submission = HackatonCaseSubmission::factory()->for($case, 'case')->create([
         'user_id' => $participant->id,
         'submitted_by_user_id' => $participant->id,

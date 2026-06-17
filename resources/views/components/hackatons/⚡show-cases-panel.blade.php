@@ -392,6 +392,10 @@ new #[Lazy] class extends Component
                                             </a>
                                         </div>
 
+                                        @php
+                                            $caseHasRubric = is_array($case->rubric_json) && $case->rubric_json !== [];
+                                        @endphp
+                                        @if (! $caseHasRubric)
                                         <details class="rounded-lg border border-base-200 bg-base-50/50 p-3">
                                             <summary class="cursor-pointer text-sm font-medium">Быстрое оценивание (legacy)</summary>
                                             <div class="mt-3 space-y-3">
@@ -426,6 +430,7 @@ new #[Lazy] class extends Component
                                                 @endforeach
                                             </div>
                                         </details>
+                                        @endif
                                     </div>
                                 @endif
 

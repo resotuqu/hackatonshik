@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\JudgeDomain;
+use App\Enums\UserRole;
 use App\Http\Requests\AssignHackatonJudgeRequest;
 use App\Http\Requests\StoreJudgeInvitationRequest;
 use App\Mail\JudgeInvitationMail;
@@ -88,8 +89,8 @@ class JudgeManagementController extends Controller
             abort(403);
         }
 
-        if (! $user->isJudge()) {
-            $user->update(['role' => 'judge']);
+        if ($user->isParticipant()) {
+            $user->update(['role' => UserRole::JUDGE]);
         }
 
         $invitation->update([

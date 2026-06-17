@@ -69,7 +69,7 @@ test('judge can grade a team submission', function () {
     $hackaton->judges()->attach($judge->id, ['assigned_by' => $organizer->id, 'assigned_at' => now()]);
 
     $team = Team::factory()->create(['hackaton_id' => $hackaton->id]);
-    $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
+    $case = HackatonCase::factory()->withoutRubric()->create(['hackaton_id' => $hackaton->id]);
     $submission = HackatonCaseSubmission::factory()->create([
         'team_id' => $team->id,
         'hackaton_case_id' => $case->id,

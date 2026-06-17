@@ -68,7 +68,12 @@ class BuildHackatonShowPresentationData
                 'judge_assign' => 'organizer-judge-assign-modal',
                 'certificate_upload' => 'organizer-certificate-upload-modal',
             ],
-            'issuedCertificatesByUser' => $hackaton->certificates->groupBy('user_id'),
+            'issuedCertificatesByUser' => collect(
+                $hackaton->certificates
+                    ->groupBy('user_id')
+                    ->map(static fn (Collection $group): Collection => collect($group->values()->all()))
+                    ->all()
+            ),
             'nextStepTitle' => $this->resolveNextStepTitle(
                 $availableTeams,
                 $teamsWithoutApplication,
@@ -107,7 +112,7 @@ class BuildHackatonShowPresentationData
     private function buildSeoDescription(Hackaton $hackaton): string
     {
         $plainDescription = strip_tags(SafeMarkdown::toHtml($hackaton->description ?? ''));
-        $plainDescription = preg_replace('/\s+/u', ' ', $plainDescription ?? '') ?? '';
+        $plainDescription = preg_replace('/\s+/u', ' ', $plainDescription) ?? '';
 
         return trim(mb_substr(
             $plainDescription !== '' ? $plainDescription : 'Онлайн и офлайн хакатон на платформе «Хакатонщик».',

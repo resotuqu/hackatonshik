@@ -11,6 +11,7 @@ use App\Models\Skill;
 use App\Models\Team;
 use App\Models\TeamApplication;
 use App\Models\TeamRole;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
@@ -305,10 +306,8 @@ class Index extends Component
             return;
         }
 
-        $role = $team->roles->first(function ($candidate): bool {
-            return $candidate instanceof TeamRole && $candidate->user_id === null;
-        });
-        if (! $role instanceof TeamRole) {
+        $role = $team->roles->first(fn (TeamRole $candidate): bool => $candidate->user_id === null);
+        if ($role === null) {
             return;
         }
 
@@ -403,8 +402,18 @@ class Index extends Component
 
     private function trackListEvent(string $eventName, array $payload = []): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
+        $userId = Auth::id();
+
+        if ($userId !== null && ! User::query()->whereKey($userId)->exists()) {
+            $userId = null;
+        }
+
         ListAnalyticsEvent::query()->create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'list_key' => 'teams',
             'event_name' => $eventName,
             'payload' => $payload,

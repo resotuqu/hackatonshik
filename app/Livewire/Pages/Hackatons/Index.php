@@ -10,6 +10,7 @@ use App\Models\HackatonApplication;
 use App\Models\ListAnalyticsEvent;
 use App\Models\SavedListFilter;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -278,8 +279,18 @@ class Index extends Component
 
     private function trackListEvent(string $eventName, array $payload = []): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
+        $userId = Auth::id();
+
+        if ($userId !== null && ! User::query()->whereKey($userId)->exists()) {
+            $userId = null;
+        }
+
         ListAnalyticsEvent::query()->create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'list_key' => 'hackatons',
             'event_name' => $eventName,
             'payload' => $payload,

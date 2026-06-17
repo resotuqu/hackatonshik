@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\InitialsGenerator;
 use Database\Factories\TeamFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property-read User|null $user
+ * @property-read Collection<int, TeamRole> $roles
+ */
 class Team extends Model
 {
     public const DEFAULT_TEAM_IMAGE_PATH = 'team_photos/default.png';
@@ -66,6 +73,7 @@ class Team extends Model
         return $this->belongsTo(Hackaton::class);
     }
 
+    /** @return HasMany<TeamRole, $this> */
     public function roles(): HasMany
     {
         return $this->hasMany(TeamRole::class);
@@ -88,7 +96,7 @@ class Team extends Model
      */
     public function ensureCaptainHasRole(array $captainRoleData): TeamRole
     {
-        if (! $this->exists || $this->user_id === null) {
+        if (! $this->exists) {
             throw new InvalidArgumentException('Captain role can only be ensured for a persisted team owner.');
         }
 
@@ -126,6 +134,7 @@ class Team extends Model
         return $this->hasMany(TeamRole::class)->whereNull('user_id')->count();
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -134,6 +143,21 @@ class Team extends Model
     public function participantsCount(): int
     {
         return $this->roles()->whereNotNull('user_id')->count();
+    }
+
+    public function hasMember(User $user): bool
+    {
+        if ((int) $this->user_id === (int) $user->id) {
+            return true;
+        }
+
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->contains(
+                fn (TeamRole $role): bool => (int) $role->user_id === (int) $user->id
+            );
+        }
+
+        return $this->roles()->where('user_id', $user->id)->exists();
     }
 
     /**

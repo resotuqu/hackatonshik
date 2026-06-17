@@ -120,7 +120,7 @@ new #[Lazy] class extends Component
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body">
             <h2 class="card-title text-xl">Рейтинг команд</h2>
-            @if($leaderboard->isEmpty())
+            @if($leaderboard === [])
                 <p class="text-base-content/60">Пока нет оцененных решений команд.</p>
             @else
                 <div class="overflow-x-auto">

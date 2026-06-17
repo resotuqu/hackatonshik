@@ -30,4 +30,9 @@ class TeamPolicy
     {
         return (int) $team->user_id === (int) $user->id;
     }
+
+    public function chat(User $user, Team $team): bool
+    {
+        return $team->hasMember($user);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Scoring\AggregateSubmissionScoresAction;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,7 @@ class HackatonCaseSubmission extends Model
         ];
     }
 
+    /** @return BelongsTo<HackatonCase, $this> */
     public function case(): BelongsTo
     {
         return $this->belongsTo(HackatonCase::class, 'hackaton_case_id');
@@ -60,5 +62,13 @@ class HackatonCaseSubmission extends Model
     public function score(): HasOne
     {
         return $this->hasOne(HackatonCaseScore::class)->latestOfMany('reviewed_at');
+    }
+
+    /**
+     * @return array{score: int, max_score: int}
+     */
+    public function aggregatedScoreTotals(): array
+    {
+        return app(AggregateSubmissionScoresAction::class)->forSubmission($this);
     }
 }

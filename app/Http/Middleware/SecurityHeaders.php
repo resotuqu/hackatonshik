@@ -32,14 +32,14 @@ class SecurityHeaders
                "style-src 'self' 'unsafe-inline'; ".
                "img-src 'self' data: https:; ".
                "font-src 'self' data:; ".
-               "connect-src 'self' ". (config('app.env') === 'local' ? "ws: wss:" : "wss:") ."; ".
+               "connect-src 'self' ".(config('app.env') === 'local' ? 'ws: wss:' : 'wss:').'; '.
                "base-uri 'self'; ".
                "form-action 'self'; ".
                "object-src 'none'; ".
                "frame-ancestors 'none';";
 
         if (app()->isProduction()) {
-            $csp .= " upgrade-insecure-requests;";
+            $csp .= ' upgrade-insecure-requests;';
         }
 
         $response->headers->set('Content-Security-Policy', $csp);

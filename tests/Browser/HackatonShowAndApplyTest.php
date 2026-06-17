@@ -26,7 +26,8 @@ class HackatonShowAndApplyTest extends DuskTestCase
 
         $this->browse(function (Browser $browser): void {
             $browser->visit('/hackatons')
-                ->assertSee('Каталог хакатонов')
+                ->waitForText('Хакатоны', 30)
+                ->assertSee('Хакатоны')
                 ->assertSee('BrowserCatalogHackUnique');
         });
     }

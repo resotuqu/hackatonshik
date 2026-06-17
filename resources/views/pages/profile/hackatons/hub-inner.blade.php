@@ -204,7 +204,8 @@
                                         </span>
                                     </div>
                                     <p class="text-xs text-base-content/70 mt-1">
-                                        Оценка: {{ $submission->score?->score ?? '—' }} / {{ $submission->score?->max_score ?? '—' }}
+                                        @php($scoreTotals = $submission->aggregatedScoreTotals())
+                                        Оценка: {{ $scoreTotals['max_score'] > 0 ? $scoreTotals['score'].' / '.$scoreTotals['max_score'] : '—' }}
                                     </p>
                                 </div>
                             @endforeach

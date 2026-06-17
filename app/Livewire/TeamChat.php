@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\TeamMessage;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -26,6 +27,8 @@ class TeamChat extends Component
 
     public function mount(Team $team): void
     {
+        Gate::authorize('chat', $team);
+
         $this->team = $team;
     }
 
@@ -44,6 +47,8 @@ class TeamChat extends Component
 
     public function sendMessage(): void
     {
+        Gate::authorize('chat', $this->team);
+
         $this->validate([
             'message' => 'required_without:file|string|max:2000',
             'file' => 'nullable|file|max:10240', // 10MB limit

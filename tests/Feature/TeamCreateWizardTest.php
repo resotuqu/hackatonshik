@@ -11,7 +11,8 @@ use Livewire\Livewire;
 test('team create wizard completes all steps and redirects to profile teams', function () {
     $user = User::factory()->create();
     $hackaton = Hackaton::factory()->create(['is_public' => true]);
-    $roleCategory = Role::factory()->create();
+    $captainCategory = Role::factory()->create();
+    $vacancyCategory = Role::factory()->create();
     $file = UploadedFile::fake()->image('team-cover.jpg', 800, 600);
 
     $teamTitle = 'Wizard Team '.uniqid();
@@ -30,9 +31,12 @@ test('team create wizard completes all steps and redirects to profile teams', fu
         ->set('socialLinks.0.url', 'https://t.me/test')
         ->call('nextStep')
         ->assertSet('step', 4)
+        ->set('captainRole.title', 'Team lead')
+        ->set('captainRole.description', 'I lead the team and coordinate delivery')
+        ->set('captainRole.role', (string) $captainCategory->id)
         ->set('roles.0.title', 'Dev')
         ->set('roles.0.description', 'Разработка продукта.')
-        ->set('roles.0.role', (string) $roleCategory->id)
+        ->set('roles.0.role', (string) $vacancyCategory->id)
         ->call('save')
         ->assertRedirect('/profile/teams');
 

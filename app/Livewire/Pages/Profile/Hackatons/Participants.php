@@ -101,9 +101,7 @@ class Participants extends Component
         }
 
         return $team->roles
-            ->filter(function ($role): bool {
-                return $role instanceof TeamRole && $role->user_id !== null;
-            })
+            ->filter(fn (TeamRole $role): bool => $role->user_id !== null)
             ->map(function (TeamRole $role): array {
                 $user = User::query()->find($role->user_id);
                 $roleModel = Role::query()->find($role->role_id);

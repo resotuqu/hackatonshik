@@ -31,12 +31,11 @@ class HackatonExportController extends Controller
             fputcsv($stream, ['team_id', 'team_title', 'owner', 'owner_email', 'members_count']);
 
             foreach ($teams as $team) {
-                $owner = User::query()->find($team->user_id);
                 fputcsv($stream, [
                     $team->id,
                     $team->title,
-                    $owner?->fio,
-                    $owner?->email,
+                    $team->user?->fio,
+                    $team->user?->email,
                     $team->roles->whereNotNull('user_id')->count(),
                 ]);
             }
