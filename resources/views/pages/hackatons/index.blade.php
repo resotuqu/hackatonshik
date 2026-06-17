@@ -2,35 +2,10 @@
     $hasFilters =
         filled($q)
         || filled($start_at)
-        || $status !== 'all'
         || $sort !== 'newest'
-        || $public_only
-        || $level !== 'all'
-        || $with_prizes
-        || $preset !== 'all';
+        || $level !== 'all';
 
-    $loadingTargets = 'search,clearFilters,setStatusChip,setPreset,saveCurrentFilter,applySavedFilter,quickApplyHackaton,q,start_at,status,sort,public_only,level,with_prizes,preset,nextPage,previousPage,gotoPage,setPage';
-
-    $statusChips = [
-        ['value' => 'all', 'label' => 'Любой'],
-        ['value' => \App\Enums\HackatonStatus::REGISTRATION_OPEN->value, 'label' => 'Регистрация'],
-        ['value' => \App\Enums\HackatonStatus::REGISTRATION_CLOSED->value, 'label' => 'Регистрация закрыта'],
-        ['value' => \App\Enums\HackatonStatus::WAITING_START->value, 'label' => 'Ожидание старта'],
-        ['value' => \App\Enums\HackatonStatus::CASES_ANNOUNCED->value, 'label' => 'Кейсы объявлены'],
-        ['value' => \App\Enums\HackatonStatus::IN_PROGRESS->value, 'label' => 'Идёт'],
-        ['value' => \App\Enums\HackatonStatus::JUDGING->value, 'label' => 'Судейство'],
-        ['value' => \App\Enums\HackatonStatus::FINISHED->value, 'label' => 'Завершён'],
-        ['value' => \App\Enums\HackatonStatus::PUBLISHED->value, 'label' => 'Анонс'],
-        ['value' => \App\Enums\HackatonStatus::DRAFT->value, 'label' => 'Черновик'],
-        ['value' => \App\Enums\HackatonStatus::ARCHIVED->value, 'label' => 'Архив'],
-    ];
-
-    $presetChips = [
-        ['value' => 'active_now', 'label' => 'Активные сейчас', 'icon' => 'heroicons:bolt'],
-        ['value' => 'finished', 'label' => 'Завершённые', 'icon' => 'heroicons:flag'],
-        ['value' => 'beginner', 'label' => 'Для новичков', 'icon' => 'heroicons:sparkles'],
-        ['value' => 'with_prizes', 'label' => 'С призами', 'icon' => 'heroicons:trophy'],
-    ];
+    $loadingTargets = 'search,clearFilters,saveCurrentFilter,applySavedFilter,quickApplyHackaton,q,start_at,sort,level,nextPage,previousPage,gotoPage,setPage';
 
     $totalHackatons = $this->hackatons->total();
     $hc = $totalHackatons % 100;
@@ -75,37 +50,6 @@
                     </a>
                 @endif
             </div>
-        </div>
-    </section>
-
-    {{-- Preset chips --}}
-    <section aria-label="Быстрые подборки" class="space-y-2">
-        <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-medium text-base-content/55">Подборки</span>
-            @if ($preset !== 'all')
-                <button type="button" class="btn btn-ghost btn-xs gap-1" wire:click="setPreset('all')">
-                    <x-app-icon icon="heroicons:x-mark" class="h-3.5 w-3.5" />
-                    Сбросить подборку
-                </button>
-            @endif
-        </div>
-        <div class="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
-            @foreach ($presetChips as $chip)
-                @php $isActive = $preset === $chip['value']; @endphp
-                <button
-                    type="button"
-                    wire:click="setPreset('{{ $chip['value'] }}')"
-                    aria-pressed="{{ $isActive ? 'true' : 'false' }}"
-                    @class([
-                        'btn btn-sm shrink-0 snap-start gap-1.5 rounded-lg transition-colors duration-200',
-                        'btn-primary' => $isActive,
-                        'btn-ghost border border-base-300 bg-base-100 hover:border-primary/40' => ! $isActive,
-                    ])
-                >
-                    <x-app-icon icon="{{ $chip['icon'] }}" class="h-4 w-4" />
-                    {{ $chip['label'] }}
-                </button>
-            @endforeach
         </div>
     </section>
 
@@ -165,26 +109,7 @@
                     </label>
                 </div>
 
-                {{-- Status chips --}}
-                <div class="flex flex-col gap-2">
-                    <span class="text-xs font-medium uppercase tracking-wide text-base-content/60">Статус</span>
-                    <div class="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Фильтр по статусу">
-                        @foreach ($statusChips as $chip)
-                            @php $pressed = $status === $chip['value']; @endphp
-                            <button
-                                type="button"
-                                class="btn btn-sm shrink-0 snap-start border-base-300 {{ $pressed ? 'btn-primary' : 'btn-ghost bg-base-100' }}"
-                                wire:click="setStatusChip('{{ $chip['value'] }}')"
-                                aria-pressed="{{ $pressed ? 'true' : 'false' }}"
-                            >
-                                {{ $chip['label'] }}
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-
-                {{-- Level + extra filters --}}
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <label class="form-control w-full min-w-0">
                         <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Уровень</span></span>
                         <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="level">
@@ -197,14 +122,6 @@
                     <label class="form-control w-full min-w-0">
                         <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Старт от</span></span>
                         <input type="datetime-local" class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md" wire:model.live="start_at" />
-                    </label>
-                    <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-base-300 bg-base-100 px-3 py-2">
-                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" wire:model.live="with_prizes" />
-                        <span class="label-text text-sm leading-snug">Только с призами</span>
-                    </label>
-                    <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-base-300 bg-base-100 px-3 py-2">
-                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" wire:model.live="public_only" />
-                        <span class="label-text text-sm leading-snug">Только публичные</span>
                     </label>
                 </div>
 
@@ -232,23 +149,9 @@
                         @if (filled($start_at))
                             <span class="badge badge-primary badge-outline">Старт от: {{ \Illuminate\Support\Carbon::parse($start_at)->format('d.m.Y H:i') }}</span>
                         @endif
-                        @if ($status !== 'all')
-                            @php $statusLabel = collect($statusChips)->firstWhere('value', $status)['label'] ?? $status; @endphp
-                            <span class="badge badge-primary badge-outline">Статус: {{ $statusLabel }}</span>
-                        @endif
                         @if ($level !== 'all')
                             @php $levelEnum = \App\Enums\HackatonLevel::tryFrom($level); @endphp
                             <span class="badge badge-primary badge-outline">Уровень: {{ $levelEnum?->label() ?? $level }}</span>
-                        @endif
-                        @if ($with_prizes)
-                            <span class="badge badge-primary badge-outline">С призами</span>
-                        @endif
-                        @if ($public_only)
-                            <span class="badge badge-primary badge-outline">Только публичные</span>
-                        @endif
-                        @if ($preset !== 'all')
-                            @php $presetLabel = collect($presetChips)->firstWhere('value', $preset)['label'] ?? $preset; @endphp
-                            <span class="badge badge-secondary badge-outline">Подборка: {{ $presetLabel }}</span>
                         @endif
                     </div>
                 </div>
@@ -315,10 +218,7 @@
                         :description="__('ui.hackatons.empty_description')"
                         icon="heroicons:rocket-launch"
                         :actionHref="'javascript:void(0)'"
-                        :actionLabel="__('ui.hackatons.show_active')"
-                        @click="$wire.setPreset('active_now')"
-                        :secondaryActionHref="'javascript:void(0)'"
-                        :secondaryActionLabel="__('ui.hackatons.reset_filters')"
+                        :actionLabel="__('ui.hackatons.reset_filters')"
                         @click="$wire.clearFilters()"
                     />
                 </div>
@@ -330,4 +230,3 @@
         @endif
     </div>
 </div>
-

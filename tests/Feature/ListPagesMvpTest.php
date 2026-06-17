@@ -14,7 +14,7 @@ use App\Models\TeamRole;
 use App\Models\User;
 use Livewire\Livewire;
 
-test('hackatons page supports status filter and quick apply', function () {
+test('hackatons page supports search filter and quick apply', function () {
     $user = User::factory()->create();
     $upcoming = Hackaton::factory()->create([
         'title' => 'Upcoming Hackaton',
@@ -34,7 +34,7 @@ test('hackatons page supports status filter and quick apply', function () {
 
     Livewire::actingAs($user)
         ->test(HackatonsIndex::class)
-        ->set('status', HackatonStatus::REGISTRATION_OPEN->value)
+        ->set('q', 'Upcoming')
         ->call('search')
         ->call('quickApplyHackaton', $upcoming->id)
         ->assertSee('Upcoming Hackaton')
@@ -130,58 +130,33 @@ test('list pages record analytics events', function () {
         ->toBeTrue();
 });
 
-test('hackatons page renders hero, filters and presets', function () {
+test('hackatons page renders hero and simplified filters', function () {
     Livewire::test(HackatonsIndex::class)
         ->assertSee('Каталог хакатонов')
-        ->assertSee('Активные сейчас')
-        ->assertSee('Завершённые')
-        ->assertSee('Для новичков')
-        ->assertSee('С призами')
-        ->assertSee('Найдено');
+        ->assertSee('Найдено')
+        ->assertSee('Поиск')
+        ->assertSee('Уровень')
+        ->assertDontSee('Подборки')
+        ->assertDontSee('Только с призами')
+        ->assertDontSee('Только публичные');
 });
 
-test('hackatons preset filters by status group', function () {
+test('hackatons catalog only shows public hackatons', function () {
     Hackaton::factory()->create([
-        'title' => 'ActiveHackUnique',
-        'status' => HackatonStatus::REGISTRATION_OPEN,
+        'title' => 'PublicHackVisible',
         'is_public' => true,
     ]);
     Hackaton::factory()->create([
-        'title' => 'FinishedHackUnique',
-        'status' => HackatonStatus::FINISHED,
-        'is_public' => true,
+        'title' => 'PrivateHackHidden',
+        'is_public' => false,
     ]);
 
     Livewire::test(HackatonsIndex::class)
-        ->call('setPreset', 'active_now')
-        ->assertSee('ActiveHackUnique')
-        ->assertDontSee('FinishedHackUnique');
-
-    Livewire::test(HackatonsIndex::class)
-        ->call('setPreset', 'finished')
-        ->assertSee('FinishedHackUnique')
-        ->assertDontSee('ActiveHackUnique');
+        ->assertSee('PublicHackVisible')
+        ->assertDontSee('PrivateHackHidden');
 });
 
-test('hackatons with prizes preset only shows hackatons with prize fund', function () {
-    Hackaton::factory()->create([
-        'title' => 'PrizedHackUnique',
-        'is_public' => true,
-        'prize_fund' => 100000,
-    ]);
-    Hackaton::factory()->create([
-        'title' => 'NoPrizeHackUnique',
-        'is_public' => true,
-        'prize_fund' => null,
-    ]);
-
-    Livewire::test(HackatonsIndex::class)
-        ->call('setPreset', 'with_prizes')
-        ->assertSee('PrizedHackUnique')
-        ->assertDontSee('NoPrizeHackUnique');
-});
-
-test('hackatons beginner preset filters by level', function () {
+test('hackatons level filter works', function () {
     Hackaton::factory()->create([
         'title' => 'BeginnerHackUnique',
         'is_public' => true,
@@ -194,18 +169,10 @@ test('hackatons beginner preset filters by level', function () {
     ]);
 
     Livewire::test(HackatonsIndex::class)
-        ->call('setPreset', 'beginner')
+        ->set('level', HackatonLevel::Beginner->value)
+        ->call('search')
         ->assertSee('BeginnerHackUnique')
         ->assertDontSee('AdvancedHackUnique');
-});
-
-test('hackatons status chip overrides preset', function () {
-    Livewire::test(HackatonsIndex::class)
-        ->call('setPreset', 'active_now')
-        ->assertSet('preset', 'active_now')
-        ->call('setStatusChip', HackatonStatus::FINISHED->value)
-        ->assertSet('status', HackatonStatus::FINISHED->value)
-        ->assertSet('preset', 'all');
 });
 
 test('hackaton card displays prize fund and dates for active hackaton', function () {
@@ -241,17 +208,13 @@ test('finished hackatons render finished overlay marker', function () {
         ->assertSee('Завершён');
 });
 
-test('clearFilters resets new metric filters too', function () {
+test('clearFilters resets filters', function () {
     Livewire::test(HackatonsIndex::class)
         ->set('q', 'something')
         ->set('level', HackatonLevel::Beginner->value)
-        ->set('with_prizes', true)
-        ->set('preset', 'active_now')
         ->call('clearFilters')
         ->assertSet('q', '')
-        ->assertSet('level', 'all')
-        ->assertSet('with_prizes', false)
-        ->assertSet('preset', 'all');
+        ->assertSet('level', 'all');
 });
 
 test('hackaton can be created with new metric fields', function () {
