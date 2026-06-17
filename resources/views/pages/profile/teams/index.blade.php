@@ -98,8 +98,6 @@
                             :title="$team->title"
                             :cover-url="$team->coverImagePublicUrl()"
                             :initials="$team->initialsForCover()"
-                            :show-recruiting-badge="$openSlots > 0"
-                            :hackaton-title="$hackaton?->title"
                             :show-brand-strip="true"
                         />
 

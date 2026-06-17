@@ -2,8 +2,6 @@
     'title',
     'coverUrl' => null,
     'initials' => '',
-    'showRecruitingBadge' => false,
-    'hackatonTitle' => null,
     'showBrandStrip' => false,
 ])
 
@@ -31,28 +29,10 @@
         aria-hidden="true"
     ></div>
 
-    @if ($showRecruitingBadge)
-        <div class="absolute right-3 top-3 z-20">
-            <span class="badge badge-sm border-0 bg-secondary px-2 py-1 text-xs font-medium text-secondary-content">
-                Открыт набор
-            </span>
-        </div>
-    @endif
-
-    @if (filled($hackatonTitle))
-        <div class="absolute bottom-2 left-2 z-20 max-w-[min(100%,14rem)]">
-            <span class="badge badge-sm border border-base-300 bg-base-100 text-xs font-medium text-base-content">
-                {{ $hackatonTitle }}
-            </span>
-        </div>
-    @endif
-
     <div @class([
-        'relative z-10 flex h-full flex-col items-center justify-center px-4 text-center',
+        'relative z-10 flex h-full flex-col items-center justify-center px-4 pb-3 pt-8 text-center',
         'gap-1.5' => $showBrandStrip,
         'gap-1' => ! $showBrandStrip,
-        'pb-10 pt-7' => filled($hackatonTitle),
-        'pb-3 pt-8' => ! filled($hackatonTitle),
     ])>
         @if (filled($title))
             <p class="line-clamp-2 max-w-full font-display text-lg font-semibold leading-tight text-base-100 [html[data-theme=hackatonshik-light]_&]:text-base-content sm:text-xl">

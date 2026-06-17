@@ -1,7 +1,5 @@
 @props([
     'imageUrl' => null,
-    'status' => null,
-    'level' => null,
     'isFinished' => false,
 ])
 
@@ -29,19 +27,6 @@
         class="pointer-events-none absolute inset-0 bg-linear-to-b from-base-100/10 via-transparent to-base-100/60 [html[data-theme=hackatonshik-light]_&]:from-base-content/5 [html[data-theme=hackatonshik-light]_&]:to-base-content/30"
         aria-hidden="true"
     ></div>
-
-    @if ($status)
-        <div class="absolute right-3 top-3 z-20 flex flex-col items-end gap-2">
-            <span class="badge badge-sm {{ $status->badgeClass() }} border-0 px-2.5 py-1 text-xs font-medium">
-                {{ $status->label() }}
-            </span>
-            @if ($level)
-                <span class="badge badge-sm {{ $level->badgeClass() }} border-0 px-2.5 py-1 text-xs font-medium">
-                    {{ $level->label() }}
-                </span>
-            @endif
-        </div>
-    @endif
 
     @if ($isFinished)
         <div class="absolute inset-0 z-30 flex items-center justify-center bg-base-300/55" aria-hidden="true">

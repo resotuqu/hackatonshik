@@ -21,7 +21,6 @@
     };
     
     $participants = $participantUsers ?? collect();
-    $hackatonTitle = $team->relationLoaded('hackaton') && $team->hackaton ? $team->hackaton->title : null;
 @endphp
 
 <article
@@ -33,8 +32,6 @@
         title="" {{-- Передаем пустоту, чтобы не дублировать текст поверх градиента --}}
         :cover-url="$team->coverImagePublicUrl()"
         :initials="$team->initialsForCover()"
-        :show-recruiting-badge="$hasVacancies"
-        :hackaton-title="$hackatonTitle"
     />
 
     <div class="flex min-h-0 flex-1 flex-col gap-5 p-5 sm:p-6">

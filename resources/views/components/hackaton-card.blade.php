@@ -97,7 +97,7 @@
     'border border-base-200 bg-base-200/30 opacity-90 grayscale-[20%]' => $isFinished,
 ]) aria-labelledby="{{ $titleId }}">
     {{-- Обложка хакатона остается без изменений --}}
-    <x-hackaton-cover :image-url="$imageUrl" :status="$status" :level="$hackaton->level ?? null" :is-finished="$isFinished" />
+    <x-hackaton-cover :image-url="$imageUrl" :is-finished="$isFinished" />
 
     <div class="flex min-h-0 flex-1 flex-col p-5 sm:p-6 gap-5">
         <h3 id="{{ $titleId }}" class="sr-only">{{ $hackaton->title }}</h3>
