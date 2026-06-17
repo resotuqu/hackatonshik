@@ -12,7 +12,7 @@ class TelegramLogger
     /**
      * @var list<string>
      */
-    private const SENSITIVE_CONTEXT_KEYS = [
+    public const SENSITIVE_CONTEXT_KEYS = [
         'password',
         'token',
         'secret',
@@ -69,7 +69,7 @@ class TelegramLogger
                     $redacted = [];
 
                     foreach ($context as $key => $value) {
-                        if (is_string($key) && self::isSensitiveKey($key)) {
+                        if (self::isSensitiveKey($key)) {
                             $redacted[$key] = '[REDACTED]';
 
                             continue;

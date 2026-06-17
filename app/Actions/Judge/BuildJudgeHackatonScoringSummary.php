@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Judge;
 
 use App\Models\Hackaton;
+use App\Models\HackatonCase;
 use App\Models\HackatonCaseScore;
 use App\Models\HackatonCaseSubmission;
 use App\Models\User;
@@ -16,8 +17,8 @@ final class BuildJudgeHackatonScoringSummary
      * @return array{
      *     totalSubmissions: int,
      *     ratedSubmissions: int,
-     *     unratedSubmissions: int,
-     *     cases: Collection<int, array{id: int, title: string, total: int, rated: int, unrated: int}>
+     *     unratedSubmissions: int<0, max>,
+     *     cases: Collection<int, array{id: int, title: string, total: int<0, max>, rated: int<0, max>, unrated: int<0, max>}>
      * }
      */
     public function handle(Hackaton $hackaton, User $judge): array
@@ -44,17 +45,17 @@ final class BuildJudgeHackatonScoringSummary
             ->pluck('hackaton_case_submission_id')
             ->flip();
 
-        $caseSummaries = $cases->map(function ($case) use ($submissionIdsByCase, $ratedSubmissionIds): array {
+        $caseSummaries = $cases->map(function (HackatonCase $case) use ($submissionIdsByCase, $ratedSubmissionIds): array {
             $submissions = $submissionIdsByCase->get($case->id, collect());
             $total = $submissions->count();
-            $rated = $submissions->filter(fn ($s) => $ratedSubmissionIds->has($s->id))->count();
+            $rated = $submissions->filter(fn (HackatonCaseSubmission $submission): bool => $ratedSubmissionIds->has($submission->id))->count();
 
             return [
                 'id' => $case->id,
                 'title' => $case->title,
-                'total' => $total,
-                'rated' => $rated,
-                'unrated' => max(0, $total - $rated),
+                'total' => (int) $total,
+                'rated' => (int) $rated,
+                'unrated' => (int) max(0, $total - $rated),
             ];
         });
 
@@ -64,7 +65,7 @@ final class BuildJudgeHackatonScoringSummary
         return [
             'totalSubmissions' => $totalSubmissions,
             'ratedSubmissions' => $ratedSubmissions,
-            'unratedSubmissions' => max(0, $totalSubmissions - $ratedSubmissions),
+            'unratedSubmissions' => (int) max(0, $totalSubmissions - $ratedSubmissions),
             'cases' => $caseSummaries,
         ];
     }

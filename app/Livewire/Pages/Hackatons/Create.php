@@ -26,6 +26,14 @@ class Create extends Component
     public function mount(): void
     {
         $this->authorize('create', Hackaton::class);
+
+        $slug = request()->string('template')->toString();
+        if ($slug !== '') {
+            $template = HackatonTemplate::query()->public()->where('slug', $slug)->first();
+            if ($template !== null) {
+                $this->applyTemplate($template->id);
+            }
+        }
     }
 
     public int $wizardStep = 1;
@@ -149,13 +157,19 @@ class Create extends Component
         }
 
         $this->hackatonDocuments = collect($template->default_documents ?? [])
-            ->map(fn (array $doc): array => [
-                'id' => uniqid(),
-                'name' => (string) ($doc['name'] ?? ''),
-                'description' => (string) ($doc['description'] ?? ''),
-                'file_url' => '',
-                'filling_by_team_member' => (bool) ($doc['filling_by_team_member'] ?? false),
-            ])
+            ->map(function (mixed $doc): array {
+                $name = (string) data_get($doc, 'name', '');
+                $description = (string) data_get($doc, 'description', '');
+                $isFillableByTeamMember = (bool) data_get($doc, 'filling_by_team_member', false);
+
+                return [
+                    'id' => uniqid(),
+                    'name' => $name,
+                    'description' => $description,
+                    'file_url' => '',
+                    'filling_by_team_member' => $isFillableByTeamMember,
+                ];
+            })
             ->values()
             ->all();
 

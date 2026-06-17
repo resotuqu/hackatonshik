@@ -15,3 +15,5 @@ Schedule::command('hackatons:sync-statuses')
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
 
 Schedule::command('queue:prune-failed --hours=168')->daily();
+
+Schedule::command('pulse:check')->everyMinute();

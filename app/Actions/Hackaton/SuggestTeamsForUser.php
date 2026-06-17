@@ -6,6 +6,7 @@ namespace App\Actions\Hackaton;
 
 use App\Enums\HackatonStatus;
 use App\Models\Team;
+use App\Models\TeamApplication;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -13,11 +14,15 @@ use Illuminate\Support\Collection;
 final class SuggestTeamsForUser
 {
     /**
-     * @return Collection<int, array{team: Team, match_score: int, matched_skills: list<string>}>
+     * @return Collection<int, array{team: Team, match_score: int<10, max>, matched_skills: list<string>}>
      */
     public function handle(User $user, ?int $limit = 6, ?int $hackatonId = null): Collection
     {
         if (! $user->open_to_teams) {
+            return collect();
+        }
+
+        if (! $user->is_profile_public) {
             return collect();
         }
 
@@ -57,7 +62,7 @@ final class SuggestTeamsForUser
             ->get();
 
         return $teams
-            ->map(function (Team $team) use ($userSkillIds): ?array {
+            ->map(function (Team $team) use ($user, $userSkillIds): ?array {
                 $openRoleSkills = $team->roles
                     ->whereNull('user_id')
                     ->flatMap(fn ($role) => $role->skills);
@@ -72,10 +77,21 @@ final class SuggestTeamsForUser
                     return null;
                 }
 
+                $historyAffinityScore = TeamApplication::query()
+                    ->where('user_id', $user->id)
+                    ->whereHas('teamRole.team', fn (Builder $query) => $query->where('hackaton_id', $team->hackaton_id))
+                    ->exists() ? 5 : 0;
+
+                $weightedMatchScore = ($matchScore * 10) + $historyAffinityScore;
+
                 return [
                     'team' => $team,
-                    'match_score' => $matchScore,
-                    'matched_skills' => $matchedSkills->pluck('name')->values()->all(),
+                    'match_score' => (int) $weightedMatchScore,
+                    'matched_skills' => array_values($matchedSkills
+                        ->pluck('name')
+                        ->filter(fn (mixed $name): bool => is_string($name))
+                        ->values()
+                        ->all()),
                 ];
             })
             ->filter()

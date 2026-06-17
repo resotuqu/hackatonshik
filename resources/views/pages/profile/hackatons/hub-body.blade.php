@@ -141,6 +141,108 @@
         </section>
     @endif
 
+    @if(!empty($funnel))
+        <section class="ui-surface-soft" aria-label="Воронка организатора">
+            <div class="card-body space-y-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 class="ui-heading-display text-lg font-bold">Воронка: просмотры → заявки → принятые</h2>
+                    <a href="{{ route('organizer.analytics.export') }}" class="btn btn-outline btn-sm">Экспорт CSV</a>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="ui-stat-tile p-4">
+                        <p class="text-xs text-base-content/50">Просмотры страниц</p>
+                        <p class="text-2xl font-semibold tabular-nums">{{ $funnel['summary']['views'] }}</p>
+                    </div>
+                    <div class="ui-stat-tile p-4">
+                        <p class="text-xs text-base-content/50">Заявки</p>
+                        <p class="text-2xl font-semibold tabular-nums">{{ $funnel['summary']['applications'] }}</p>
+                        <p class="text-xs text-base-content/60">
+                            Конверсия: {{ $funnel['summary']['viewToApplicationRate'] !== null ? $funnel['summary']['viewToApplicationRate'].'%' : '—' }}
+                        </p>
+                    </div>
+                    <div class="ui-stat-tile p-4">
+                        <p class="text-xs text-base-content/50">Принятые</p>
+                        <p class="text-2xl font-semibold tabular-nums">{{ $funnel['summary']['accepted'] }}</p>
+                        <p class="text-xs text-base-content/60">
+                            Retention: {{ $funnel['retentionRate'] !== null ? $funnel['retentionRate'].'%' : '—' }}
+                        </p>
+                    </div>
+                </div>
+                @if(!empty($funnel['statusSegments']))
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($funnel['statusSegments'] as $status => $total)
+                            <span class="badge badge-outline">
+                                {{ strtoupper((string) $status) }}: {{ $total }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+                @if(!empty($funnel['slices']['weekly']) || !empty($funnel['slices']['monthly']))
+                    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                        <div class="ui-stat-tile p-4">
+                            <p class="mb-2 text-xs text-base-content/50">Срез по неделям</p>
+                            <div class="space-y-1 text-xs">
+                                @foreach($funnel['slices']['weekly'] ?? [] as $slice)
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span>{{ $slice['label'] }}</span>
+                                        <span class="tabular-nums text-base-content/70">{{ $slice['views'] }}/{{ $slice['applications'] }}/{{ $slice['accepted'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="ui-stat-tile p-4">
+                            <p class="mb-2 text-xs text-base-content/50">Срез по месяцам</p>
+                            <div class="space-y-1 text-xs">
+                                @foreach($funnel['slices']['monthly'] ?? [] as $slice)
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span>{{ $slice['label'] }}</span>
+                                        <span class="tabular-nums text-base-content/70">{{ $slice['views'] }}/{{ $slice['applications'] }}/{{ $slice['accepted'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                @if(!empty($funnel['hackatons']))
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Хакатон</th>
+                                    <th class="text-right">Просмотры</th>
+                                    <th class="text-right">Заявки</th>
+                                    <th class="text-right">Принятые</th>
+                                    <th class="text-right">Pending</th>
+                                    <th class="text-right">Rejected</th>
+                                    <th class="text-right">Конверсия</th>
+                                    <th class="text-right">Completion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($funnel['hackatons'] as $row)
+                                    <tr wire:key="funnel-row-{{ $row['hackaton_id'] }}">
+                                        <td>{{ $row['title'] }}</td>
+                                        <td class="text-right tabular-nums">{{ $row['views'] }}</td>
+                                        <td class="text-right tabular-nums">{{ $row['applications'] }}</td>
+                                        <td class="text-right tabular-nums">{{ $row['accepted'] }}</td>
+                                        <td class="text-right tabular-nums">{{ $row['pending'] }}</td>
+                                        <td class="text-right tabular-nums">{{ $row['rejected'] }}</td>
+                                        <td class="text-right tabular-nums">
+                                            {{ $row['conversionRate'] !== null ? $row['conversionRate'].'%' : '—' }}
+                                        </td>
+                                        <td class="text-right tabular-nums">
+                                            {{ $row['completionRate'] !== null ? $row['completionRate'].'%' : '—' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </section>
+    @endif
+
     @if($featuredHackaton)
         <section class="ui-surface-card ui-surface-card--hackaton-active shadow-lg" aria-label="Текущий хакатон">
             <div class="card-body gap-6">

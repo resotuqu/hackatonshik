@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Horizon\Contracts\MasterSupervisorRepository;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\VKontakte\Provider as VkontakteProvider;
 use SocialiteProviders\Yandex\Provider;
@@ -177,6 +178,27 @@ class AppServiceProvider extends ServiceProvider
                 Redis::connection(config('queue.connections.redis.connection', 'default'))->ping();
             } elseif (config('queue.default') === 'database') {
                 Queue::connection('database')->size();
+            }
+
+            if (app()->isProduction() && config('broadcasting.default') === 'reverb') {
+                $reverb = config('reverb.apps.apps.0', []);
+
+                foreach (['id', 'key', 'secret'] as $key) {
+                    if (blank($reverb[$key] ?? null)) {
+                        throw new \RuntimeException("Health check failed: Reverb app {$key} is not configured.");
+                    }
+                }
+
+                if (blank(config('reverb.servers.reverb.host'))) {
+                    throw new \RuntimeException('Health check failed: REVERB_HOST is not configured.');
+                }
+            }
+
+            if (app()->isProduction() && config('queue.default') === 'redis' && app()->bound(MasterSupervisorRepository::class)) {
+                $masters = app(MasterSupervisorRepository::class)->all();
+                if ($masters === []) {
+                    throw new \RuntimeException('Health check failed: Horizon master supervisor is not running.');
+                }
             }
         });
     }

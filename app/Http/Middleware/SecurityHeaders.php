@@ -17,15 +17,13 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        // Don't add headers if it's a binary file download, etc.
-        if (! method_exists($response, 'headers')) {
-            return $response;
-        }
-
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        $response->headers->set('Cross-Origin-Resource-Policy', 'same-site');
+        $response->headers->set('Cross-Origin-Embedder-Policy', 'credentialless');
 
         $csp = "default-src 'self'; ".
                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; ". // unsafe-eval often needed for Alpine/Livewire in some edge cases, but keep it if needed. Actually Mary/Livewire 4 might need it.

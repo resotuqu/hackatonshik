@@ -60,13 +60,13 @@ return [
             'key' => 'organizer_funnel',
             'title' => 'Воронка организатора и retention-метрики',
             'priority' => 10,
-            'status' => 'planned',
+            'status' => 'done',
         ],
         [
             'key' => 'template_gallery',
             'title' => 'Публичная галерея шаблонов хакатонов',
             'priority' => 11,
-            'status' => 'planned',
+            'status' => 'done',
         ],
     ],
 ];

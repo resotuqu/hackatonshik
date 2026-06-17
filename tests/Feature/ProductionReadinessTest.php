@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\SecurityHeaders;
 use App\Models\Hackaton;
 use App\Models\HackatonDocument;
 use App\Models\Team;
 use App\Models\User;
 use App\Support\SafeMarkdown;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 uses(RefreshDatabase::class);
 
@@ -96,4 +99,27 @@ test('application creation routes are explicitly rate limited', function () {
     expect($teamApplicationRoute?->gatherMiddleware())->toContain('throttle:applications');
     expect($hackatonApplicationRoute?->gatherMiddleware())->toContain('throttle:applications');
     expect($caseCreationRoute?->gatherMiddleware())->toContain('throttle:creations');
+});
+
+test('security headers are attached to public pages', function () {
+    $middleware = new SecurityHeaders;
+    $request = Request::create('/fake', 'GET');
+    $response = $middleware->handle($request, fn (): Response => response('ok'));
+
+    expect($response->headers->get('X-Frame-Options'))->toBe('SAMEORIGIN')
+        ->and($response->headers->get('X-Content-Type-Options'))->toBe('nosniff')
+        ->and($response->headers->get('Referrer-Policy'))->toBe('strict-origin-when-cross-origin')
+        ->and($response->headers->get('Cross-Origin-Opener-Policy'))->toBe('same-origin')
+        ->and($response->headers->get('Cross-Origin-Resource-Policy'))->toBe('same-site')
+        ->and($response->headers->get('Cross-Origin-Embedder-Policy'))->toBe('credentialless');
+});
+
+test('content security policy blocks object embedding and frames', function () {
+    $middleware = new SecurityHeaders;
+    $request = Request::create('/fake', 'GET');
+    $response = $middleware->handle($request, fn (): Response => response('ok'));
+    $csp = (string) $response->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("object-src 'none'")
+        ->and($csp)->toContain("frame-ancestors 'none'");
 });

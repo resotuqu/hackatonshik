@@ -12,6 +12,7 @@
 - Real-time: `BROADCAST_CONNECTION=reverb`, все `REVERB_*` и `VITE_REVERB_*` заданы до `npm run build`.
 - `LOG_LEVEL=info`, `LOG_STACK` включает `telegram` при необходимости алертов.
 - База: **только** `php artisan migrate --force`; **не** запускать `db:seed` в production (demo-пользователи с паролем `password`).
+- Перед `config:cache`: `php artisan app:validate-production-config`.
 - После деплоя: `php artisan config:cache`, `route:cache`, `view:cache` по политике команды.
 
 ## Сервер (PHP-FPM + Nginx)
@@ -19,7 +20,7 @@
 - PHP 8.5 + расширения: redis, pdo_pgsql (или pdo_mysql), intl, mbstring, zip, gd.
 - Nginx: `root` → `public/`, `try_files $uri $uri/ /index.php?$query_string`.
 - WebSocket для Reverb: см. [`deploy/nginx/reverb-websocket.conf.example`](../deploy/nginx/reverb-websocket.conf.example) (`location /app` → `127.0.0.1:8080`).
-- Supervisor: [`deploy/supervisor/horizon.conf`](../deploy/supervisor/horizon.conf), [`deploy/supervisor/reverb.conf`](../deploy/supervisor/reverb.conf).
+- Supervisor: [`deploy/supervisor/horizon.conf`](../deploy/supervisor/horizon.conf), [`deploy/supervisor/reverb.conf`](../deploy/supervisor/reverb.conf), [`deploy/supervisor/pulse.conf`](../deploy/supervisor/pulse.conf).
 - Cron: `* * * * * cd /var/www/hackatonshik && php artisan schedule:run >> /dev/null 2>&1`.
 - `php artisan storage:link`; права `storage/` и `bootstrap/cache/` для пользователя PHP-FPM.
 - `composer install --no-dev --optimize-autoloader`.
@@ -45,14 +46,29 @@
 - `/up` возвращает 200 (Redis + queue проверяются).
 - Вход, верификация email/телефона.
 - Real-time чат команды: два браузера в одной команде видят сообщения без refresh.
-- Horizon dashboard (`/horizon`) доступен только admin.
+- Horizon dashboard (`/horizon`) и Pulse (`/pulse`) доступны только admin.
 
 ## Мониторинг
 
 - Health: маршрут `/up` доступен с балансировщика.
+- Pulse: `PULSE_ENABLED=true`, supervisor [`deploy/supervisor/pulse.conf`](../deploy/supervisor/pulse.conf), cron выполняет `pulse:check`.
 - Логи (`storage/logs`, stderr) и резервное копирование БД по регламенту команды.
 - Telegram-алерты на `critical` (если `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID` заданы).
 
+## Runbook: релиз и откат
+
+- GitHub deploy workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) (manual `workflow_dispatch`, `environment: Production`).
+- Перед деплоем: убедитесь, что `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KEY` заданы в secrets.
+- Пайплайн выполняет: `app:validate-production-config` → `migrate --force` → cache warmup → `/up` smoke.
+- При ошибке включён авто-rollback на предыдущий commit с повторной установкой prod-зависимостей и прогревом кешей.
+- После релиза: проверить `/horizon`, `/pulse`, критичные пользовательские сценарии входа и подачи заявок.
+- Инцидент-порядок: зафиксировать timestamp/commit, сохранить фрагмент логов, выполнить rollback, затем RCA в отдельном issue.
+
+## Accepted risks
+
+- CSP разрешает `unsafe-inline` и `unsafe-eval` для Livewire/Alpine (см. [`app/Http/Middleware/SecurityHeaders.php`](../app/Http/Middleware/SecurityHeaders.php)). Ужесточение — отдельный epic (nonce/CSP hash).
+
 ## Опционально (не для основного VPS-деплоя)
 
+- OpenAPI: [`docs/api/openapi.yaml`](../docs/api/openapi.yaml).
 - Docker/Octane: [`Dockerfile`](../Dockerfile), [`supervisord.conf`](../supervisord.conf) — альтернативный путь, не обязателен при PHP-FPM.

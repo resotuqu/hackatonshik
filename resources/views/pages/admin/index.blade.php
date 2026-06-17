@@ -48,6 +48,30 @@
         </div>
     </x-mary-card>
 
+    <x-mary-card title="Публикация шаблонов хакатонов" class="mt-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+        <div class="space-y-3">
+            @forelse($this->templatesForAdmin() as $template)
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-base-300 px-4 py-3" wire:key="admin-template-{{ $template->id }}">
+                    <div>
+                        <p class="font-medium">{{ $template->title }}</p>
+                        <p class="text-xs text-base-content/70">{{ $template->slug }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if($template->is_public)
+                            <span class="badge badge-success badge-outline">Публичный</span>
+                            <button type="button" class="btn btn-xs btn-ghost" wire:click="unpublishTemplate({{ $template->id }})">Скрыть</button>
+                        @else
+                            <span class="badge badge-ghost">Черновик</span>
+                            <button type="button" class="btn btn-xs btn-primary" wire:click="publishTemplate({{ $template->id }})">Опубликовать</button>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <p class="text-sm text-base-content/60">Шаблоны не найдены. Запустите сиды в local/testing.</p>
+            @endforelse
+        </div>
+    </x-mary-card>
+
     <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
         <x-slot:menu>
             <x-mary-button label="Выйти" class="btn-secondary" wire:click="logout" />

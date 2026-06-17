@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Notifications\HackatonAnnouncementPublished;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 
 class ProcessHackatonFinishedAutomations implements ShouldQueue
@@ -24,64 +25,75 @@ class ProcessHackatonFinishedAutomations implements ShouldQueue
 
     public function handle(ResolveParticipantUsersForHackatonCertificates $resolveParticipants): void
     {
-        $hackaton = Hackaton::query()->find($this->hackatonId);
+        Cache::lock('hackaton:'.$this->hackatonId.':finished-automations', 120)->get(function () use ($resolveParticipants): void {
+            $hackaton = Hackaton::query()->find($this->hackatonId);
 
-        if ($hackaton === null || $hackaton->status !== HackatonStatus::FINISHED) {
-            return;
-        }
-
-        if ($hackaton->finished_automations_ran_at !== null) {
-            return;
-        }
-
-        if ($hackaton->auto_publish_results_announcement) {
-            if (! $hackaton->is_results_public) {
-                $hackaton->forceFill(['is_results_public' => true])->save();
+            if ($hackaton === null || $hackaton->status !== HackatonStatus::FINISHED) {
+                return;
             }
 
-            $announcement = $hackaton->announcements()->create([
-                'title' => 'Итоги хакатона',
-                'body' => 'Хакатон завершён. Результаты опубликованы — проверьте итоги и сертификаты в личном кабинете.',
-                'is_draft' => false,
-                'template_key' => 'results',
-                'published_at' => now(),
-                'created_by' => $hackaton->user_id,
-            ]);
-
-            $participants = User::query()
-                ->whereIn('id', $resolveParticipants->handle($hackaton)->pluck('id'))
-                ->get();
-
-            if ($participants->isNotEmpty()) {
-                Notification::send($participants, new HackatonAnnouncementPublished($announcement));
+            if ($hackaton->finished_automations_ran_at !== null) {
+                return;
             }
-        }
 
-        if ($hackaton->auto_issue_certificates && $hackaton->certificate_template_path !== null) {
-            $participants = $resolveParticipants->handle($hackaton);
-            $title = 'Сертификат участника';
-
-            foreach ($participants as $participant) {
-                $exists = HackatonCertificate::query()
-                    ->where('hackaton_id', $hackaton->id)
-                    ->where('user_id', $participant->id)
-                    ->where('title', $title)
-                    ->exists();
-
-                if ($exists) {
-                    continue;
+            if ($hackaton->auto_publish_results_announcement) {
+                if (! $hackaton->is_results_public) {
+                    $hackaton->forceFill(['is_results_public' => true])->save();
                 }
 
-                $hackaton->certificates()->create([
-                    'user_id' => $participant->id,
-                    'uploaded_by' => $hackaton->user_id,
-                    'title' => $title,
-                    'file_path' => $hackaton->certificate_template_path,
-                    'issued_at' => now(),
+                $announcement = $hackaton->announcements()->create([
+                    'title' => 'Итоги хакатона',
+                    'body' => 'Хакатон завершён. Результаты опубликованы — проверьте итоги и сертификаты в личном кабинете.',
+                    'is_draft' => false,
+                    'template_key' => 'results',
+                    'published_at' => now(),
+                    'created_by' => $hackaton->user_id,
                 ]);
-            }
-        }
 
-        $hackaton->forceFill(['finished_automations_ran_at' => now()])->save();
+                $participants = User::query()
+                    ->whereIn('id', $resolveParticipants->handle($hackaton)->pluck('id'))
+                    ->get();
+
+                if ($participants->isNotEmpty()) {
+                    Notification::send($participants, new HackatonAnnouncementPublished($announcement));
+                }
+            }
+
+            if ($hackaton->auto_issue_certificates && $hackaton->certificate_template_path !== null) {
+                $participants = $resolveParticipants->handle($hackaton);
+                $title = 'Сертификат участника';
+
+                foreach ($participants as $participant) {
+                    $exists = HackatonCertificate::query()
+                        ->where('hackaton_id', $hackaton->id)
+                        ->where('user_id', $participant->id)
+                        ->where('title', $title)
+                        ->exists();
+
+                    if ($exists) {
+                        continue;
+                    }
+
+                    $hackaton->certificates()->create([
+                        'user_id' => $participant->id,
+                        'uploaded_by' => $hackaton->user_id,
+                        'title' => $title,
+                        'file_path' => $hackaton->certificate_template_path,
+                        'issued_at' => now(),
+                    ]);
+                }
+            }
+
+            $hackaton->forceFill(['finished_automations_ran_at' => now()])->save();
+
+            activity('hackaton_automation')
+                ->performedOn($hackaton)
+                ->withProperties([
+                    'hackaton_id' => $hackaton->id,
+                    'auto_publish_results_announcement' => $hackaton->auto_publish_results_announcement,
+                    'auto_issue_certificates' => $hackaton->auto_issue_certificates,
+                ])
+                ->log('finished_automations_processed');
+        });
     }
 }

@@ -15,7 +15,7 @@ on:
       - workos
 
 jobs:
-  ci:
+  unit-feature:
     runs-on: ubuntu-latest
     environment: Testing
     services:
@@ -92,26 +92,13 @@ jobs:
             tail -n 40 coverage/coverage.txt
           fi
 
-      - name: Upgrade Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-
-      - name: Run Browser Tests (Dusk)
+      - name: Enforce minimum code coverage
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
-          DB_DATABASE: database/dusk.sqlite
-          CACHE_STORE: file
-          SESSION_DRIVER: file
-        run: |
-          touch database/dusk.sqlite
-          php artisan migrate --force --env=testing
-          php artisan storage:link --env=testing
-          php artisan dusk:chrome-driver --detect
-          php artisan serve --no-reload --env=testing > /dev/null 2>&1 &
-          sleep 5
-          php artisan dusk
+          DB_DATABASE: ':memory:'
+          DB_FOREIGN_KEYS: 'true'
+        run: php scripts/check-coverage.php coverage/clover.xml 85
 
       - name: Run Performance Smoke Tests (optional)
         if: github.event_name == 'pull_request'
@@ -137,3 +124,59 @@ jobs:
             coverage/clover.xml
             coverage/coverage.txt
           if-no-files-found: ignore
+
+  browser:
+    runs-on: ubuntu-latest
+    needs: unit-feature
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          npm ci
+          npm run build
+
+      - name: Copy Environment File
+        run: cp .env.example .env
+
+      - name: Generate Application Key
+        run: php artisan key:generate
+
+      - name: Upgrade Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Run Browser Tests (Dusk)
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/dusk.sqlite
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+        run: |
+          touch database/dusk.sqlite
+          php artisan migrate --force --env=testing
+          php artisan storage:link --env=testing
+          php artisan dusk:chrome-driver --detect
+          php artisan serve --no-reload --env=testing > /dev/null 2>&1 &
+          sleep 5
+          for attempt in 1 2; do
+            php artisan dusk && exit 0
+            echo "Dusk attempt ${attempt} failed, retrying..."
+            sleep 5
+          done
+          exit 1

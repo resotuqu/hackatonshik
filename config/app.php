@@ -28,6 +28,14 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+    'vite_reverb' => [
+        'app_key' => env('VITE_REVERB_APP_KEY'),
+        'host' => env('VITE_REVERB_HOST'),
+        'port' => env('VITE_REVERB_PORT'),
+        'scheme' => env('VITE_REVERB_SCHEME'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

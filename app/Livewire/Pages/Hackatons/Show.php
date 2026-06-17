@@ -4,8 +4,10 @@ namespace App\Livewire\Pages\Hackatons;
 
 use App\Actions\Hackaton\BuildHackatonShowPresentationData;
 use App\Actions\Hackaton\ComposeHackatonShowPageData;
+use App\Actions\Hackaton\RecordHackatonAnalyticsEvent;
 use App\Models\Hackaton;
 use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -13,11 +15,15 @@ class Show extends Component
 {
     public Hackaton $hackaton;
 
-    public function mount(Hackaton $hackaton): void
+    public function mount(Hackaton $hackaton, RecordHackatonAnalyticsEvent $recordEvent): void
     {
         $hackaton->syncStatusByTimeline();
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
+
+        if ($hackaton->is_public) {
+            $recordEvent->handle($hackaton, 'page_view', Auth::user());
+        }
     }
 
     public function placeholder(array $params = []): ViewContract

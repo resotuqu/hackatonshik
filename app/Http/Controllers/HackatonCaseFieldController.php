@@ -7,13 +7,40 @@ use App\Http\Requests\StoreHackatonCaseFieldRequest;
 use App\Models\Hackaton;
 use App\Models\HackatonCase;
 use App\Models\HackatonCaseField;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class HackatonCaseFieldController extends Controller
 {
+    public function preview(Request $request, Hackaton $hackaton, HackatonCase $case): JsonResponse
+    {
+        abort_unless($case->hackaton_id === $hackaton->id, 404);
+        Gate::authorize('update', $case);
+
+        $validated = $request->validate([
+            'fields' => ['required', 'array', 'min:1'],
+            'fields.*.label' => ['required', 'string', 'max:255'],
+            'fields.*.type' => ['required', 'in:text,textarea,number,select,file'],
+            'fields.*.is_required' => ['nullable', 'boolean'],
+            'fields.*.conditional_on' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        return response()->json([
+            'preview' => collect($validated['fields'])->map(function (array $field): array {
+                return [
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'required' => (bool) ($field['is_required'] ?? false),
+                    'conditional_on' => $field['conditional_on'] ?? null,
+                ];
+            })->all(),
+        ]);
+    }
+
     public function store(StoreHackatonCaseFieldRequest $request, Hackaton $hackaton, HackatonCase $case): RedirectResponse
     {
         abort_unless($case->hackaton_id === $hackaton->id, 404);

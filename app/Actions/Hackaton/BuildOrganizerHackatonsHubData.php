@@ -17,6 +17,7 @@ final class BuildOrganizerHackatonsHubData
 {
     public function __construct(
         private readonly BuildOrganizerHackatonAnalytics $analytics,
+        private readonly BuildOrganizerFunnelMetrics $funnelMetrics,
     ) {}
 
     /**
@@ -26,7 +27,8 @@ final class BuildOrganizerHackatonsHubData
      *     featuredHackaton: Hackaton|null,
      *     globalPending: array{applications: int, judgeInvitations: int},
      *     judgeInvitationsFocusHackatonId: int|null,
-     *     analytics: array{applicationsByDay: list<array{date: string, count: int}>, conversionRate: float|null, acceptedApplications: int, totalApplications: int}
+     *     analytics: array{applicationsByDay: list<array{date: string, count: int}>, conversionRate: float|null, acceptedApplications: int, totalApplications: int},
+     *     funnel: array{summary: array{views: int, applications: int, accepted: int, viewToApplicationRate: float|null, applicationToAcceptedRate: float|null}, retentionRate: float|null, hackatons: list<array{hackaton_id: int, title: string, views: int, applications: int, accepted: int, conversionRate: float|null}>}
      * }|null
      */
     public function build(?User $user): ?array
@@ -102,6 +104,7 @@ final class BuildOrganizerHackatonsHubData
             'globalPending' => $globalPending,
             'judgeInvitationsFocusHackatonId' => $judgeInvitationsFocusHackatonId,
             'analytics' => $this->analytics->handle($user),
+            'funnel' => $this->funnelMetrics->handle($user),
         ];
     }
 

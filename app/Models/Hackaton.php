@@ -78,9 +78,7 @@ class Hackaton extends Model
                 Cache::forget('home-public-totals-v4');
             }
 
-            if ($hackaton->user_id !== null) {
-                PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
-            }
+            PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
         });
 
         static::deleted(function (Hackaton $hackaton): void {
@@ -93,9 +91,7 @@ class Hackaton extends Model
                 Cache::forget('home-public-totals-v4');
             }
 
-            if ($hackaton->user_id !== null) {
-                PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
-            }
+            PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
         });
     }
 

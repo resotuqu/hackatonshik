@@ -313,9 +313,10 @@ class Index extends Component
             return;
         }
 
-        abort_unless(Auth::user()?->canParticipate(), 403);
+        $user = Auth::user();
+        abort_unless($user instanceof User && $user->canParticipate(), 403);
 
-        if (Auth::user()?->isOrganizer()) {
+        if ($user->isOrganizer()) {
             $this->warning('Организатор не может подавать заявки в команды.', position: FlashToast::POSITION);
 
             return;

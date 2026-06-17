@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Profile\Hackatons;
 
 use App\Models\Hackaton;
 use App\Models\HackatonDocument;
+use App\Models\Role;
 use App\Models\Team;
 use App\Models\TeamRole;
 use App\Models\User;
@@ -128,7 +129,7 @@ class Participants extends Component
     }
 
     /**
-     * @return array<int, list<array{id: int, user_id: int, fio: string|null, nickname: string|null, email: string|null, phone: string|null, date_of_birth: string|null, role: string|null, documents: list<array{id: int, name: string, file_url: string|null, uploaded: bool, user_doc_id: int|null>}>}>>
+     * @return array<int, list<array<string, mixed>>>
      */
     #[Computed]
     public function expansionDataByTeamId(): array
@@ -182,12 +183,12 @@ class Participants extends Component
                     return [
                         'id' => $role->id,
                         'user_id' => $role->user_id,
-                        'fio' => $user?->fio,
-                        'nickname' => $user?->nickname,
-                        'email' => $user?->email,
-                        'phone' => $user?->phone,
-                        'date_of_birth' => $user?->date_of_birth,
-                        'role' => $roleModel?->name,
+                        'fio' => $user instanceof User ? $user->fio : null,
+                        'nickname' => $user instanceof User ? $user->nickname : null,
+                        'email' => $user instanceof User ? $user->email : null,
+                        'phone' => $user instanceof User ? $user->phone : null,
+                        'date_of_birth' => $user instanceof User ? $user->date_of_birth : null,
+                        'role' => $roleModel instanceof Role ? $roleModel->name : null,
                         'documents' => $documents,
                     ];
                 })

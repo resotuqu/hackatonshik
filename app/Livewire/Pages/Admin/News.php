@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Admin;
 
 use App\Livewire\Concerns\AuthorizesAdminAccess;
 use App\Models\NewsPost;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -51,7 +52,9 @@ class News extends Component
         $this->slug = $post->slug;
         $this->excerpt = (string) ($post->excerpt ?? '');
         $this->body = (string) $post->body;
-        $this->published_at = $post->published_at?->format('Y-m-d\TH:i');
+        $this->published_at = $post->published_at !== null
+            ? Carbon::parse($post->published_at)->format('Y-m-d\TH:i')
+            : null;
         $this->is_published = (bool) $post->is_published;
         $this->showForm = true;
     }

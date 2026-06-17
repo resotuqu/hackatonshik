@@ -39,11 +39,12 @@ class JudgeExportController extends Controller
             $stream = fopen('php://output', 'wb');
             fputcsv($stream, ['submission_id', 'case', 'team', 'score', 'max_score', 'is_final', 'general_comment']);
 
+            /** @var HackatonCaseScore $score */
             foreach ($scores as $score) {
                 fputcsv($stream, [
                     $score->hackaton_case_submission_id,
-                    $score->submission?->case?->title,
-                    $score->submission?->team?->title,
+                    data_get($score, 'submission.case.title'),
+                    data_get($score, 'submission.team.title'),
                     $score->score,
                     $score->max_score,
                     $score->is_final ? '1' : '0',

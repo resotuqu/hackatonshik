@@ -17,6 +17,8 @@ class HackatonTemplate extends Model
         'title',
         'slug',
         'description',
+        'locale',
+        'version',
         'level',
         'start_offset_days',
         'end_offset_days',
@@ -25,6 +27,9 @@ class HackatonTemplate extends Model
         'default_case',
         'sort_order',
         'is_active',
+        'is_public',
+        'cover_image_path',
+        'published_at',
     ];
 
     protected function casts(): array
@@ -33,11 +38,24 @@ class HackatonTemplate extends Model
             'default_documents' => 'array',
             'default_case' => 'array',
             'is_active' => 'boolean',
+            'is_public' => 'boolean',
+            'published_at' => 'datetime',
         ];
     }
 
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopePublic($query)
+    {
+        return $query
+            ->where('is_active', true)
+            ->where('is_public', true)
+            ->where(function ($query): void {
+                $query->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            });
     }
 }

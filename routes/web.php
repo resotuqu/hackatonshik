@@ -13,6 +13,7 @@ use App\Http\Controllers\HackatonWatchController;
 use App\Http\Controllers\JudgeExportController;
 use App\Http\Controllers\JudgeManagementController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrganizerAnalyticsExportController;
 use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
@@ -54,6 +55,8 @@ use App\Livewire\Pages\Teams\Create as TeamsCreate;
 use App\Livewire\Pages\Teams\Edit as TeamsEdit;
 use App\Livewire\Pages\Teams\Index as TeamsIndex;
 use App\Livewire\Pages\Teams\Show as TeamsShow;
+use App\Livewire\Pages\Templates\Index as TemplatesIndex;
+use App\Livewire\Pages\Templates\Show as TemplatesShow;
 use App\Models\Hackaton;
 use App\Models\NewsPost;
 use Illuminate\Http\Response;
@@ -126,6 +129,8 @@ Route::get('/teams/create', TeamsCreate::class)->middleware($participantMiddlewa
 Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware($participantMiddleware)->name('profile.teams');
 
 Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
+Route::get('/templates', TemplatesIndex::class)->name('templates.index');
+Route::get('/templates/{slug}', TemplatesShow::class)->name('templates.show');
 Route::get('/hackatons/create', HackatonsCreate::class)->middleware($organizerMiddleware)->name('hackatons.create');
 
 Route::get('/profile/hackatons', function () {
@@ -145,6 +150,9 @@ Route::get('/profile/hackatons', function () {
 
 Route::redirect('/profile/organizer', '/organizer')->middleware($organizerMiddleware)->name('profile.organizer');
 Route::get('/organizer', OrganizerDashboard::class)->middleware($organizerMiddleware)->name('organizer.dashboard');
+Route::get('/organizer/analytics/export', OrganizerAnalyticsExportController::class)
+    ->middleware(['throttle:exports', ...$organizerMiddleware])
+    ->name('organizer.analytics.export');
 Route::get('/organizer/applications', ProfileHackatonsApplications::class)->middleware($organizerMiddleware)->name('organizer.applications');
 Route::get('/organizer/scoring', ProfileHackatonsScoring::class)->middleware($organizerMiddleware)->name('organizer.scoring');
 Route::get('/organizer/finished', ProfileHackatonsFinished::class)->middleware($organizerMiddleware)->name('organizer.finished');
@@ -232,6 +240,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/hackatons/{hackaton}/cases/{case}/fields', [HackatonCaseFieldController::class, 'store'])
         ->middleware('throttle:creations')
         ->name('hackatons.cases.fields.store');
+    Route::post('/hackatons/{hackaton}/cases/{case}/fields/preview', [HackatonCaseFieldController::class, 'preview'])
+        ->middleware('throttle:creations')
+        ->name('hackatons.cases.fields.preview');
     Route::delete('/hackatons/{hackaton}/cases/{case}/fields/{field}', [HackatonCaseFieldController::class, 'destroy'])->name('hackatons.cases.fields.destroy');
     Route::patch('/hackatons/{hackaton}/cases/{case}/fields/reorder', [HackatonCaseFieldController::class, 'reorder'])
         ->middleware('throttle:creations')

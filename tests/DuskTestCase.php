@@ -10,11 +10,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Browser tests use `.env.dusk.local` (see APP_URL and database/dusk.sqlite).
  * Start the app before running locally: `php artisan serve --env=dusk` or `composer dusk`.
  */
+#[Group('browser')]
 abstract class DuskTestCase extends BaseTestCase
 {
     use DatabaseMigrations;

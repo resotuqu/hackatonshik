@@ -79,6 +79,11 @@
         "analyse": [
             "phpstan analyse --memory-limit=1G"
         ],
+        "precommit:quick": [
+            "@lint:check",
+            "phpstan analyse app routes --memory-limit=1G",
+            "@php artisan test --compact tests/Feature/Policies tests/Feature/FortifyAuthenticationTest.php"
+        ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
             "@lint:check",

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Hackaton\RecordHackatonAnalyticsEvent;
 use App\Enums\ApplicationStatus;
 use App\Events\HackatonApplicationChanged;
 use App\Http\Requests\BulkUpdateHackatonApplicationsRequest;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Notification;
 
 class HackatonApplicationController extends Controller
 {
-    public function store(StoreHackatonApplicationRequest $request): RedirectResponse
+    public function store(StoreHackatonApplicationRequest $request, RecordHackatonAnalyticsEvent $recordEvent): RedirectResponse
     {
         Gate::authorize('create', HackatonApplication::class);
 
@@ -44,6 +45,10 @@ class HackatonApplicationController extends Controller
             'reviewed_by' => null,
         ]);
         $application->save();
+        $recordEvent->handle($hackaton, 'application_submitted', $request->user(), [
+            'team_id' => $application->team_id,
+            'application_id' => $application->id,
+        ]);
         event(new HackatonApplicationChanged(
             teamId: (int) $application->team_id,
             hackatonId: (int) $hackaton->id,

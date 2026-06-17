@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Models\Hackaton;
+use App\Models\HackatonWatch;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<HackatonWatch>
+ */
+class HackatonWatchFactory extends Factory
+{
+    protected $model = HackatonWatch::class;
+
+    public function definition(): array
+    {
+        return [
+            'user_id' => User::factory(),
+            'hackaton_id' => Hackaton::factory(),
+        ];
+    }
+}

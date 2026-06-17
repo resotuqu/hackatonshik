@@ -13,6 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -29,7 +30,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, LogsActivity, Notifiable;
+    use HasFactory, LogsActivity, Notifiable, TwoFactorAuthenticatable;
 
     protected static function booted(): void
     {
@@ -152,6 +153,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
     ];
 
     /**
@@ -172,6 +175,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'show_skills_on_profile' => 'boolean',
             'phone_verified_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\Admin;
 use App\Enums\UserRole;
 use App\Livewire\Concerns\AuthorizesAdminAccess;
 use App\Models\Hackaton;
+use App\Models\HackatonTemplate;
 use App\Models\ListAnalyticsEvent;
 use App\Models\Team;
 use App\Models\User;
@@ -60,6 +61,40 @@ class Index extends Component
             ->get()
             ->map(fn ($row) => ['name' => (string) data_get($row, 'event_name', ''), 'total' => (int) data_get($row, 'total', 0)])
             ->all();
+    }
+
+    public function templatesForAdmin(): array
+    {
+        return HackatonTemplate::query()
+            ->orderBy('sort_order')
+            ->get(['id', 'title', 'slug', 'is_public', 'published_at'])
+            ->all();
+    }
+
+    public function publishTemplate(int $templateId): void
+    {
+        $this->authorizeAdminAccess();
+
+        $template = HackatonTemplate::query()->findOrFail($templateId);
+        $template->forceFill([
+            'is_public' => true,
+            'published_at' => now(),
+        ])->save();
+
+        $this->success('Шаблон опубликован в галерее.', position: 'toast-center toast-top');
+    }
+
+    public function unpublishTemplate(int $templateId): void
+    {
+        $this->authorizeAdminAccess();
+
+        $template = HackatonTemplate::query()->findOrFail($templateId);
+        $template->forceFill([
+            'is_public' => false,
+            'published_at' => null,
+        ])->save();
+
+        $this->success('Шаблон скрыт из публичной галереи.', position: 'toast-center toast-top');
     }
 
     public function logout(): void

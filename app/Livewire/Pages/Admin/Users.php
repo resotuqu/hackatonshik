@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\Admin;
 use App\Enums\UserRole;
 use App\Livewire\Concerns\AuthorizesAdminAccess;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -85,7 +86,10 @@ class Users extends Component
         activity('user')
             ->performedOn($user)
             ->causedBy(auth()->user())
-            ->withProperty('suspended_at', $user->suspended_at?->toIso8601String())
+            ->withProperty(
+                'suspended_at',
+                $user->suspended_at !== null ? Carbon::parse($user->suspended_at)->toIso8601String() : null
+            )
             ->log('suspension_changed');
 
         $this->success($user->isSuspended() ? 'Пользователь заблокирован.' : 'Блокировка снята.');

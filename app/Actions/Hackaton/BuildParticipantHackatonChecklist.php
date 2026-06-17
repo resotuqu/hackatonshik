@@ -9,6 +9,7 @@ use App\Models\Hackaton;
 use App\Models\HackatonCaseSubmission;
 use App\Models\User;
 use App\Models\UserHackatonDocument;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 final class BuildParticipantHackatonChecklist
@@ -29,7 +30,7 @@ final class BuildParticipantHackatonChecklist
             ->latest()
             ->first();
 
-        $applicationAccepted = $application?->status === ApplicationStatus::ACCEPTED;
+        $applicationAccepted = $application?->status === ApplicationStatus::ACCEPTED->value;
         $items[] = [
             'done' => $applicationAccepted,
             'label' => $applicationAccepted
@@ -80,7 +81,7 @@ final class BuildParticipantHackatonChecklist
         $items[] = [
             'done' => $nextCase === null || $submittedCaseIds->contains($nextCase->id),
             'label' => $nextCase
-                ? "Сдать решение по кейсу «{$nextCase->title}» до {$nextCase->deadline_at->format('d.m.Y H:i')}"
+                ? "Сдать решение по кейсу «{$nextCase->title}» до ".Carbon::parse($nextCase->deadline_at)->format('d.m.Y H:i')
                 : 'Все дедлайны кейсов прошли или кейсы не опубликованы',
             'href' => route('hackatons.show', $hackaton).'#hackaton-tab-cases',
         ];
