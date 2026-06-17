@@ -7,7 +7,7 @@
 >
     <span class="sr-only">Загрузка личного кабинета хакатона, пожалуйста подождите</span>
 
-    <nav class="text-sm breadcrumbs motion-safe:animate-card-enter" aria-hidden="true">
+    <nav class="text-sm breadcrumbs" aria-hidden="true">
         <ul class="flex flex-wrap items-center gap-1">
             <li><div class="skeleton h-4 w-14 rounded-lg"></div></li>
             <li><div class="skeleton h-4 w-3 rounded"></div></li>
@@ -19,7 +19,7 @@
         </ul>
     </nav>
 
-    <section class="card border border-base-200 bg-base-100 shadow-sm motion-safe:animate-card-enter">
+    <section class="card border border-base-200 bg-base-100 shadow-sm">
         <div class="card-body space-y-4">
             <div class="skeleton h-8 w-2/3 max-w-md rounded-xl"></div>
             <div class="skeleton h-4 w-full max-w-xl rounded-lg"></div>
@@ -41,7 +41,7 @@
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         @foreach (range(1, 4) as $_)
-            <article class="card border border-base-200 bg-base-100 shadow-sm motion-safe:animate-card-enter">
+            <article class="card border border-base-200 bg-base-100 shadow-sm">
                 <div class="card-body space-y-3">
                     <div class="skeleton h-6 w-40 rounded-lg"></div>
                     <div class="space-y-2">

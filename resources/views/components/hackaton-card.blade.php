@@ -92,7 +92,7 @@
 @endphp
 
 <article @class([
-    'ui-surface-card ui-surface-card--hover group/card flex h-full flex-col overflow-hidden transition-all duration-300 hover:shadow-xl',
+    'ui-surface-card ui-surface-card--hover group/card flex h-full flex-col overflow-hidden',
     'border border-base-300 bg-base-100' => !$isFinished,
     'border border-base-200 bg-base-200/30 opacity-90 grayscale-[20%]' => $isFinished,
 ]) aria-labelledby="{{ $titleId }}">
@@ -105,7 +105,7 @@
         {{-- Title overlay at bottom --}}
         <div class="">
             <p
-                class="line-clamp-2 font-display text-xl font-black leading-tight tracking-tight text-base-content sm:text-2xl">
+                class="line-clamp-2 font-display text-xl font-semibold leading-tight text-base-content sm:text-2xl">
                 {{ $hackaton->title }}
             </p>
         </div>
@@ -126,14 +126,9 @@
 
             @if ($daysToDeadline !== null)
                 <div @class([
-                    'flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-semibold relative overflow-hidden transition-colors',
+                    'flex items-center gap-2.5 rounded-lg border px-4 py-2.5 text-sm font-medium',
                     $deadlineClasses,
-                    'animate-pulse shadow-sm shadow-error/10' =>
-                        $deadlineUrgency === 'critical',
                 ])>
-                    @if ($deadlineUrgency === 'critical')
-                        <span class="absolute left-0 top-0 h-full w-1 bg-error"></span>
-                    @endif
                     <x-app-icon icon="{{ $deadlineUrgency === 'critical' ? 'heroicons:fire' : 'heroicons:bolt' }}"
                         class="h-4 w-4" />
                     <span>
@@ -149,16 +144,16 @@
 
         {{-- Группа 2: Статистика (объединенная в один легкий блок) --}}
         <div
-            class="flex items-center divide-x divide-base-300/50 rounded-xl border border-base-300/50 bg-base-200/30 py-3">
+            class="flex items-center divide-x divide-base-300/50 rounded-lg border border-base-300/50 bg-base-200/40 py-3">
             <div class="flex flex-1 flex-col items-center gap-0.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Команд</span>
+                <span class="text-xs text-base-content/50">Команд</span>
                 <span
-                    class="text-xl font-black tabular-nums tracking-tight text-base-content">{{ $teamsCount }}</span>
+                    class="text-lg font-semibold tabular-nums text-base-content">{{ $teamsCount }}</span>
             </div>
             <div class="flex flex-1 flex-col items-center gap-0.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Участников</span>
+                <span class="text-xs text-base-content/50">Участников</span>
                 <span
-                    class="text-xl font-black tabular-nums tracking-tight text-base-content">{{ $participantsCount }}</span>
+                    class="text-lg font-semibold tabular-nums text-base-content">{{ $participantsCount }}</span>
             </div>
         </div>
 
@@ -185,7 +180,7 @@
         {{-- Группа 4: Прогресс-бар (опущен вниз) --}}
         <div class="mt-auto flex flex-col gap-2 pt-2">
             <div
-                class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-base-content/60">
+                class="flex items-center justify-between text-xs font-medium text-base-content/60">
                 <span class="flex items-center gap-1.5">
                     @if ($stageLabel)
                         <span class="h-1.5 w-1.5 rounded-full bg-current opacity-80"></span>
@@ -204,7 +199,7 @@
         <div class="pt-2">
             @if (filled($href))
                 <a href="{{ $href }}" @if ($navigate) wire:navigate @endif
-                    class="btn btn-primary w-full rounded-xl shadow-sm sm:btn-md">
+                    class="btn btn-primary w-full sm:btn-md">
                     Подробнее
                 </a>
             @else

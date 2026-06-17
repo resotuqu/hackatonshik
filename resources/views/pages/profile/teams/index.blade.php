@@ -23,7 +23,7 @@
             <div class="bg-linear-to-br from-primary/5 to-secondary/5 px-8 py-12">
                 <div class="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
                     <div class="space-y-4">
-                        <div class="inline-flex items-center gap-2 rounded-3xl border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary">
+                        <div class="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
                             <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
                             МОИ КОМАНДЫ
                         </div>
@@ -36,7 +36,7 @@
                     </div>
 
                     <a href="/teams/create" wire:navigate
-                       class="btn btn-primary btn-lg gap-3 shadow-md shadow-primary/20 hover:shadow-lg transition-all">
+                       class="btn btn-primary btn-lg gap-3">
                         <x-app-icon icon="heroicons:plus" class="h-5 w-5" />
                         Создать команду
                     </a>

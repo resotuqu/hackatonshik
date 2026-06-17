@@ -3,12 +3,8 @@
     {{-- Hero --}}
     <section
         id="start"
-        class="relative min-h-[26rem] overflow-hidden rounded-3xl border border-primary/25 bg-base-100 shadow-xl shadow-primary/10 transition-all duration-700 ease-out sm:min-h-[30rem] lg:min-h-[70vh] lg:max-h-[min(90vh,56rem)]"
-        x-data="{ shown: false }"
-        x-init="requestAnimationFrame(() => { shown = true })"
-        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'"
+        class="relative min-h-[26rem] overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 sm:min-h-[30rem] lg:min-h-[70vh] lg:max-h-[min(90vh,56rem)]"
     >
-        <div class="pointer-events-none absolute inset-0 opacity-90" aria-hidden="true" style="background: radial-gradient(1200px 600px at 10% -10%, oklch(56% 0.21 272 / 0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, oklch(82% 0.19 118 / 0.22), transparent 50%), radial-gradient(600px 400px at 50% 100%, oklch(22% 0.06 264 / 0.35), transparent 45%);"></div>
         <div class="relative flex min-h-[inherit] flex-col gap-8 px-5 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
             <div class="flex max-w-xl flex-1 flex-col justify-center lg:max-w-[min(36rem,50%)] lg:text-left">
                 <h1 class="ui-heading-display text-5xl font-bold leading-[1.06] sm:text-6xl lg:text-7xl">
@@ -20,7 +16,7 @@
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
                     <a
                         href="/hackatons/create"
-                        class="ui-cta-secondary btn-lg order-1 text-base transition-transform hover:scale-[1.02] active:scale-[0.99] sm:text-lg sm:order-2"
+                        class="ui-cta-secondary btn-lg order-1 text-base sm:text-lg sm:order-2"
                     >
                         Создать хакатон
                     </a>
@@ -29,14 +25,13 @@
                     </a>
                 </div>
             </div>
-            <div class="relative flex max-w-[18rem] flex-1 shrink-0 items-center justify-center self-center sm:max-w-[20rem] lg:max-w-[min(24rem,40%)] lg:justify-end lg:scale-95">
+            <div class="relative flex max-w-[18rem] flex-1 shrink-0 items-center justify-center self-center sm:max-w-[20rem] lg:max-w-[min(24rem,40%)] lg:justify-end">
                 <div class="relative aspect-square w-full max-w-full">
-                    <div class="absolute inset-6 rounded-[2rem] bg-gradient-to-br from-secondary/20 via-primary/12 to-base-300/70 blur-2xl" aria-hidden="true"></div>
-                    <div class="relative flex h-full w-full items-center justify-center rounded-3xl border border-base-300/80 bg-base-200/40 p-4 shadow-inner backdrop-blur-sm sm:p-5">
+                    <div class="relative flex h-full w-full items-center justify-center rounded-[var(--radius-card)] border border-base-300 bg-base-200 p-4 sm:p-5">
                         <img
                             src="{{ url('/hackatonshik.svg') }}"
                             alt=""
-                            class="h-auto w-full max-h-[min(18rem,42vh)] object-contain drop-shadow-2xl sm:max-h-[min(20rem,48vh)] lg:max-h-[min(22rem,50vh)]"
+                            class="h-auto w-full max-h-[min(18rem,42vh)] object-contain sm:max-h-[min(20rem,48vh)] lg:max-h-[min(22rem,50vh)]"
                             width="480"
                             height="480"
                             loading="eager"
@@ -48,12 +43,7 @@
     </section>
 
     {{-- Активные хакатоны --}}
-    <section
-        class="space-y-8 transition-all duration-700 ease-out will-change-transform"
-        x-data="{ shown: false }"
-        x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' }); io.observe($el);"
-        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
-    >
+    <section class="space-y-8">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Активные хакатоны</h2>
             <a href="/hackatons" class="btn btn-ghost btn-sm gap-2 sm:btn-md">
@@ -63,13 +53,11 @@
         </div>
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             @forelse ($featuredHackatons as $hackaton)
-                <div class="motion-safe:animate-card-enter delay-{{ ($loop->index % 5) * 100 }}">
-                    <x-hackaton-card
-                        :hackaton="$hackaton"
-                        :can-quick-apply="false"
-                        href="{{ route('hackatons.show', $hackaton) }}"
-                    />
-                </div>
+                <x-hackaton-card
+                    :hackaton="$hackaton"
+                    :can-quick-apply="false"
+                    href="{{ route('hackatons.show', $hackaton) }}"
+                />
             @empty
                 <div class="sm:col-span-2">
                     <x-empty-state
@@ -87,113 +75,50 @@
     {{-- Платформа в цифрах --}}
     <section
         id="home-stats"
-        class="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm transition-all duration-700 ease-out will-change-transform sm:p-8"
-        x-data="{
-            reveal: false,
-            active: 0,
-            participants: 0,
-            teams: 0,
-            started: false,
-            start() {
-                const self = this;
-                const io = new IntersectionObserver((entries) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            self.reveal = true;
-                            self.animate();
-                            io.disconnect();
-                        }
-                    });
-                }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-                io.observe(this.$el);
-            },
-            animate() {
-                if (this.started) {
-                    return;
-                }
-                this.started = true;
-                const root = this;
-                const run = (prop, target) => {
-                    let current = 0;
-                    const step = Math.max(1, Math.ceil(target / 45));
-                    const timer = setInterval(() => {
-                        current += step;
-                        if (current >= target) {
-                            current = target;
-                            clearInterval(timer);
-                        }
-                        root[prop] = current;
-                    }, 24);
-                };
-                run('active', {{ $publicHackatonsCount }});
-                run('participants', {{ $publicParticipantsCount }});
-                run('teams', {{ $publicTeamsCount }});
-            },
-        }"
-        x-init="start()"
-        :class="reveal ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+        class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-6 sm:p-8"
     >
         <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Платформа в цифрах</h2>
         <p class="mt-2 max-w-2xl text-base-content/70">Учитываются все публичные хакатоны на платформе — текущие, предстоящие, завершённые и в архиве (кроме черновиков).</p>
         <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
-            <div
-                class="rounded-2xl border border-base-300/80 bg-base-200/50 p-6 text-center transition-all duration-500 ease-out hover:border-secondary/30 sm:p-7"
-                :class="reveal ? 'translate-y-0 opacity-100 delay-75' : 'translate-y-6 opacity-0'"
-            >
-                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/15 text-primary">
-                    <x-app-icon icon="heroicons:trophy" class="h-10 w-10" label="Хакатоны на платформе" />
+            <div class="ui-stat-tile p-6 text-center sm:p-7">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <x-app-icon icon="heroicons:trophy" class="h-7 w-7" label="Хакатоны на платформе" />
                 </div>
-                <p class="text-base font-semibold text-base-content/90">Хакатонов</p>
-                <p class="mt-3 text-5xl font-bold tabular-nums tracking-tight text-base-content sm:text-6xl" x-text="active"></p>
+                <p class="text-base font-medium text-base-content/90">Хакатонов</p>
+                <p class="mt-2 text-4xl font-semibold tabular-nums text-base-content sm:text-5xl">{{ $publicHackatonsCount }}</p>
             </div>
-            <div
-                class="rounded-2xl border border-base-300/80 bg-base-200/50 p-6 text-center transition-all duration-500 ease-out hover:border-secondary/30 sm:p-7"
-                :class="reveal ? 'translate-y-0 opacity-100 delay-150' : 'translate-y-6 opacity-0'"
-            >
-                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
-                    <x-app-icon icon="heroicons:users" class="h-10 w-10" label="Участники" />
+            <div class="ui-stat-tile p-6 text-center sm:p-7">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
+                    <x-app-icon icon="heroicons:users" class="h-7 w-7" label="Участники" />
                 </div>
-                <p class="text-base font-semibold text-base-content/90">Участников</p>
-                <p class="mt-3 text-5xl font-bold tabular-nums tracking-tight text-base-content sm:text-6xl" x-text="participants"></p>
+                <p class="text-base font-medium text-base-content/90">Участников</p>
+                <p class="mt-2 text-4xl font-semibold tabular-nums text-base-content sm:text-5xl">{{ $publicParticipantsCount }}</p>
             </div>
-            <div
-                class="rounded-2xl border border-base-300/80 bg-base-200/50 p-6 text-center transition-all duration-500 ease-out hover:border-secondary/30 sm:p-7"
-                :class="reveal ? 'translate-y-0 opacity-100 delay-200' : 'translate-y-6 opacity-0'"
-            >
-                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-accent/15 text-accent">
-                    <x-app-icon icon="heroicons:user-group" class="h-10 w-10" label="Команды" />
+            <div class="ui-stat-tile p-6 text-center sm:p-7">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-base-300 text-base-content/70">
+                    <x-app-icon icon="heroicons:user-group" class="h-7 w-7" label="Команды" />
                 </div>
-                <p class="text-base font-semibold text-base-content/90">Команд</p>
-                <p class="mt-3 text-5xl font-bold tabular-nums tracking-tight text-base-content sm:text-6xl" x-text="teams"></p>
+                <p class="text-base font-medium text-base-content/90">Команд</p>
+                <p class="mt-2 text-4xl font-semibold tabular-nums text-base-content sm:text-5xl">{{ $publicTeamsCount }}</p>
             </div>
         </div>
     </section>
 
-    <div
-        class="transition-all duration-700 ease-out will-change-transform"
-        x-data="{ shown: false }"
-        x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.06 }); io.observe($el);"
-        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
-    >
-        <livewire:home-how-it-works />
-    </div>
+    <livewire:home-how-it-works />
 
     {{-- Отзывы: snap-карусель до lg, сетка на больших экранах --}}
     <section
-        class="space-y-8 transition-all duration-700 ease-out will-change-transform"
+        class="space-y-8"
         x-data="{
-            shown: false,
             tIdx: 0,
             tPrev() { this.tIdx = (this.tIdx + 2) % 3 },
             tNext() { this.tIdx = (this.tIdx + 1) % 3 },
         }"
-        x-init="const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { shown = true; io.disconnect(); } }); }, { threshold: 0.08 }); io.observe($el);"
-        :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
     >
         <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Отзывы участников</h2>
 
         <div class="lg:hidden">
-            <div class="overflow-hidden rounded-3xl border border-base-300 bg-base-100/50 shadow-sm">
+            <div class="overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100">
                 <div
                     class="flex transition-transform duration-300 ease-out"
                     :style="'transform: translateX(-' + (tIdx * 100) + '%)'"
@@ -273,7 +198,7 @@
         </div>
 
         <div class="hidden gap-8 lg:grid lg:grid-cols-3">
-            <article class="flex flex-col rounded-3xl border border-base-300 bg-base-100 p-7 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md sm:p-8">
+            <article class="flex flex-col rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-7 transition-colors hover:border-primary/30 sm:p-8">
                 <div class="flex items-center gap-4">
                     <img
                         src="https://ui-avatars.com/api/?name=Анна+К.&background=a4f01d&color=16181d&size=160"
@@ -292,7 +217,7 @@
                     «Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»
                 </blockquote>
             </article>
-            <article class="flex flex-col rounded-3xl border border-base-300 bg-base-100 p-7 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md sm:p-8">
+            <article class="flex flex-col rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-7 transition-colors hover:border-primary/30 sm:p-8">
                 <div class="flex items-center gap-4">
                     <img
                         src="https://ui-avatars.com/api/?name=Михаил+Т.&background=5170ff&color=ffffff&size=160"
@@ -311,7 +236,7 @@
                     «Удобно следить за дедлайнами и анонсами без десятка чатов.»
                 </blockquote>
             </article>
-            <article class="flex flex-col rounded-3xl border border-base-300 bg-base-100 p-7 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md sm:p-8">
+            <article class="flex flex-col rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-7 transition-colors hover:border-primary/30 sm:p-8">
                 <div class="flex items-center gap-4">
                     <img
                         src="https://ui-avatars.com/api/?name=Елена+В.&background=374151&color=f3f4f6&size=160"
@@ -388,7 +313,7 @@
     aria-labelledby="dashboard-heading"
 >
     <header class="flex flex-col gap-1">
-        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-black sm:text-4xl">Краткая сводка</h1>
+        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
         <p class="text-base-content/60 font-medium">
             Здравствуйте, <span class="text-base-content font-bold">{{ auth()->user()->fio }}</span>. Рады вас видеть!
         </p>
@@ -412,7 +337,7 @@
         <div id="participant-hackaton-dashboard" class="scroll-mt-24 space-y-10">
         @if ($participantNextStepTitle !== '')
             <div class="rounded-xl border border-primary/20 bg-primary/10 p-4 shadow-sm">
-                <p class="text-xs uppercase tracking-wide text-primary/80">Ваш следующий шаг</p>
+                <p class="text-xs text-primary/80">Ваш следующий шаг</p>
                 <p class="mt-1 font-semibold">{{ $participantNextStepTitle }}</p>
                 <p class="mt-1 text-sm text-base-content/80">{{ $participantNextStepHint }}</p>
                 @if ($participantNextStepHref && $participantNextStepLabel)
@@ -422,61 +347,61 @@
         @endif
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+            <div class="ui-surface-card p-5 group">
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Мои команды</span>
+                        <span class="text-xs text-base-content/50">Мои команды</span>
                         <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
                             <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $teamsCount }}</p>
+                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $teamsCount }}</p>
                     </div>
                     <a href="/profile/teams" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
                 </div>
             </div>
 
-            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+            <div class="ui-surface-card p-5 group">
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Сертификаты</span>
+                        <span class="text-xs text-base-content/50">Сертификаты</span>
                         <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-content transition-colors">
                             <x-app-icon icon="heroicons:academic-cap" class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $certificatesCount }}</p>
+                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $certificatesCount }}</p>
                     </div>
                     <a href="/profile/certificates" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
                 </div>
             </div>
 
-            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+            <div class="ui-surface-card p-5 group">
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Заявки в команды</span>
+                        <span class="text-xs text-base-content/50">Заявки в команды</span>
                         <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content transition-colors">
                             <x-app-icon icon="heroicons:envelope" class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $pendingTeamApplicationsCount }}</p>
+                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $pendingTeamApplicationsCount }}</p>
                     </div>
                     <a href="/profile/teams#pending-team-role-applications" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
                 </div>
             </div>
 
-            <div class="ui-surface-card p-5 transition-all hover:shadow-xl group">
+            <div class="ui-surface-card p-5 group">
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Заявки на хакатоны</span>
+                        <span class="text-xs text-base-content/50">Заявки на хакатоны</span>
                         <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
                             <x-app-icon icon="heroicons:rocket-launch" class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
+                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
                     </div>
                     <a href="/hackatons" class="ui-cta-ghost btn-xs mt-4 self-end">Каталог</a>
                 </div>

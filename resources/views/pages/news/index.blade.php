@@ -1,5 +1,5 @@
 <div class="mx-auto mt-8 w-full max-w-7xl space-y-8 sm:mt-12">
-    <header class="rounded-3xl border border-primary/15 bg-base-100 px-6 py-5 shadow-md shadow-primary/5 sm:px-8">
+    <header class="ui-page-hero px-6 py-5 sm:px-8">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="font-display text-3xl font-bold">Новости</h1>

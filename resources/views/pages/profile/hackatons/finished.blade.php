@@ -16,7 +16,7 @@
     </header>
 
     @if($this->finishedHackatons->isEmpty())
-        <section class="ui-surface-card motion-safe:animate-card-enter">
+        <section class="ui-surface-card">
             <div class="card-body">
                 <x-empty-state
                     title="Завершённых хакатонов пока нет"
@@ -32,7 +32,7 @@
     @else
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             @foreach($this->finishedHackatons as $hackaton)
-                <article wire:key="finished-hackaton-{{ $hackaton->id }}" class="ui-surface-card ui-surface-card--hackaton-finished ui-surface-card--hover motion-safe:animate-card-enter">
+                <article wire:key="finished-hackaton-{{ $hackaton->id }}" class="ui-surface-card ui-surface-card--hackaton-finished ui-surface-card--hover">
                     <div class="card-body gap-3">
                         <div class="flex flex-wrap items-start justify-between gap-2">
                             <h2 class="card-title text-lg leading-tight">{{ $hackaton->title }}</h2>

@@ -16,7 +16,7 @@
     </header>
 
     @if($scoringRows->isEmpty())
-        <section class="ui-surface-card motion-safe:animate-card-enter">
+        <section class="ui-surface-card">
             <div class="card-body">
                 <x-empty-state
                     title="Пока нет хакатонов"

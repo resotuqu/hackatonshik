@@ -26,30 +26,17 @@
         };
     @endphp
     <section class="ui-page-hero">
-        <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
-            <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-secondary/30 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-primary/25 blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/3 h-40 w-40 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl"></div>
-        </div>
-
         <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div class="min-w-0 space-y-3">
-                <div class="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
-                    <x-app-icon icon="heroicons:user-group" class="h-3.5 w-3.5" />
-                    Каталог команд
-                </div>
+                <p class="text-sm text-base-content/60">Каталог команд</p>
                 @if ($catalog_tab === 'open')
-                    <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
-                        <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
-                            Открытые команды
-                        </span>
+                    <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
+                        Открытые команды
                     </h1>
                     <p class="max-w-2xl text-base text-base-content/70">Команды, которые сейчас ищут участников.</p>
                 @else
-                    <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
-                        <span class="bg-linear-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
-                            Все команды
-                        </span>
+                    <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
+                        Все команды
                     </h1>
                     <p class="max-w-2xl text-base text-base-content/70">Каталог публичных команд на платформе.</p>
                 @endif
@@ -59,7 +46,7 @@
             </div>
             <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
                 <div
-                    class="tabs tabs-boxed w-fit max-w-full gap-1 overflow-x-auto rounded-xl bg-base-100/80 p-1 backdrop-blur-sm"
+                    class="tabs tabs-boxed w-fit max-w-full gap-1 overflow-x-auto rounded-lg bg-base-200 p-1"
                     role="tablist"
                     aria-label="Режим каталога команд"
                 >
@@ -299,11 +286,7 @@
                         ->values()
                         ->take(4);
                 @endphp
-                <div
-                    wire:key="team-wrap-{{ $team->id }}"
-                    class="motion-safe:animate-card-enter"
-                    style="animation-delay: {{ ($loop->index % 9) * 40 }}ms;"
-                >
+                <div wire:key="team-wrap-{{ $team->id }}">
                     <x-team-card
                         :team="$team"
                         :can-quick-apply="$canQuickApply"

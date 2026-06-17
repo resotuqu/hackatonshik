@@ -59,7 +59,7 @@
         <input id="main-nav-drawer" type="checkbox" class="drawer-toggle" />
 
         <div class="drawer-content flex min-h-screen flex-col">
-            <header class="navbar min-h-12 border-b border-base-200 bg-base-100/95 px-3 shadow-sm backdrop-blur-sm sm:min-h-14 sm:px-4 lg:hidden">
+            <header class="navbar min-h-12 border-b border-base-200 bg-base-100 px-3 sm:min-h-14 sm:px-4 lg:hidden">
                 <div class="flex w-full min-w-0 flex-1 items-center gap-2">
                     <label for="main-nav-drawer" class="btn btn-ghost btn-square min-h-12 min-w-12 shrink-0 drawer-button" aria-label="Открыть меню">
                         <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
@@ -127,7 +127,7 @@
             </footer>
 
             <nav
-                class="btm-nav btm-nav-touch lg:hidden z-60 border-t border-base-200 bg-base-100/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]"
+                class="btm-nav btm-nav-touch lg:hidden z-60 border-t border-base-200 bg-base-100 pb-[env(safe-area-inset-bottom)]"
                 aria-label="Нижняя навигация"
             >
                 <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/75'])>
@@ -310,7 +310,7 @@
 
                 <ul class="menu menu-vertical app-sidebar-menu mt-5 w-full min-w-0 flex-1 gap-0.5 px-0 py-1" role="navigation" aria-label="Меню сайта">
                     @guest
-                        <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Навигация</span></li>
+                        <li class="menu-title px-1 pt-1"><span class="font-display text-xs font-medium text-base-content/55">Навигация</span></li>
                         <li>
                             <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                                 <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
@@ -330,7 +330,7 @@
                             </a>
                         </li>
                         <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                        <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Аккаунт</span></li>
+                        <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Аккаунт</span></li>
                         <li>
                             <a href="{{ route('login') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('login') ? 'active' : '' }}">
                                 <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5 shrink-0" />
@@ -350,7 +350,7 @@
                         @endphp
 
                         @if ($isPureParticipant)
-                            <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Навигация</span></li>
+                            <li class="menu-title px-1 pt-1"><span class="font-display text-xs font-medium text-base-content/55">Навигация</span></li>
                             <li>
                                 <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
@@ -370,7 +370,7 @@
                                 </a>
                             </li>
                             <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                            <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Участие</span></li>
+                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Участие</span></li>
                             <li>
                                 <a href="{{ route('profile.teams') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.teams') || request()->is('profile/teams*') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:users" class="h-5 w-5 shrink-0" />
@@ -402,7 +402,7 @@
                                 </a>
                             </li>
                         @else
-                            <li class="menu-title px-1 pt-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Навигация</span></li>
+                            <li class="menu-title px-1 pt-1"><span class="font-display text-xs font-medium text-base-content/55">Навигация</span></li>
                             <li>
                                 <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
@@ -411,7 +411,7 @@
                             </li>
                             @if ($navUser->isOrganizer() || $navUser->isJudge())
                                 <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                                <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Хакатоны</span></li>
+                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Хакатоны</span></li>
                                 @if ($navUser->isOrganizer())
                                     <li>
                                         <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer') ? 'active' : '' }}">
@@ -440,7 +440,7 @@
                                 @endif
                             @endif
                             <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                            <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Кабинет</span></li>
+                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Кабинет</span></li>
                             @if ($navUser->isOrganizer())
                                 <li>
                                     <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active' : '' }}">
@@ -466,7 +466,7 @@
                             @endif
                             @if ($navUser->isOrganizer() && isset($partnerSidebarCounts) && $partnerSidebarCounts !== null)
                                 <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                                <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Быстрые действия</span></li>
+                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Быстрые действия</span></li>
                                 <li>
                                     <a href="{{ route('profile.hackatons.applications') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.applications') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:inbox" class="h-5 w-5 shrink-0" />
@@ -501,7 +501,7 @@
 
                     <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
 
-                    <li class="menu-title px-1"><span class="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-base-content/60">Настройки</span></li>
+                    <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Настройки</span></li>
                     <li>
                         <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:border-primary/25 hover:bg-base-200/85">
                             <span class="text-[0.9375rem]">Тёмная тема</span>

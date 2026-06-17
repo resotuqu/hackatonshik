@@ -15,14 +15,12 @@
             </ul>
         </div>
 
-        <section class="ui-surface-card shadow-lg">
+        <section class="ui-surface-card">
             <div class="card-body">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="space-y-1">
-                        <h1 class="ui-heading-display text-2xl font-black sm:text-3xl lg:text-4xl">
-                            <span class="bg-linear-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                                {{ $hackaton->title }}
-                            </span>
+                        <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl lg:text-4xl">
+                            {{ $hackaton->title }}
                         </h1>
                         <p class="text-sm text-base-content/70">Личный кабинет участника: управляйте командами, следите за дедлайнами и подавайте решения.</p>
                     </div>
@@ -44,8 +42,8 @@
                                 <x-app-icon icon="heroicons:user-group" class="h-5 w-5" />
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Мои команды</p>
-                                <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $teams->count() }}</p>
+                                <p class="text-xs text-base-content/50">Мои команды</p>
+                                <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $teams->count() }}</p>
                             </div>
                         </div>
                     </div>
@@ -55,8 +53,8 @@
                                 <x-app-icon icon="heroicons:envelope" class="h-5 w-5" />
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Мои заявки</p>
-                                <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $applications->count() }}</p>
+                                <p class="text-xs text-base-content/50">Мои заявки</p>
+                                <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $applications->count() }}</p>
                             </div>
                         </div>
                     </div>
@@ -66,8 +64,8 @@
                                 <x-app-icon icon="heroicons:check-circle" class="h-5 w-5" />
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Решения</p>
-                                <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $submissions->count() }}</p>
+                                <p class="text-xs text-base-content/50">Решения</p>
+                                <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $submissions->count() }}</p>
                             </div>
                         </div>
                     </div>
@@ -76,7 +74,7 @@
         </section>
 
         @if($myCertificates->isNotEmpty())
-        <section class="ui-surface-soft shadow-md motion-safe:animate-card-enter">
+        <section class="ui-surface-soft">
             <div class="card-body">
                 <h2 class="ui-heading-display flex items-center gap-2 text-xl font-bold">
                     <x-app-icon icon="heroicons:academic-cap" class="h-6 w-6 text-primary" />
@@ -84,7 +82,7 @@
                 </h2>
                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach($myCertificates as $certificate)
-                        <div class="ui-surface-card p-4 transition-all hover:border-primary/40 hover:shadow-lg">
+                        <div class="ui-surface-card p-4 transition-colors hover:border-primary/40">
                             <div class="flex flex-col gap-3">
                                 <div class="space-y-1">
                                     <p class="font-bold leading-tight">{{ $certificate->title }}</p>

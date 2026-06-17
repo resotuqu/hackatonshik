@@ -16,10 +16,7 @@
     </div>
 
     {{-- HERO --}}
-    <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-linear-to-br from-base-100 via-base-100 to-primary/15 p-6 shadow-sm lg:p-8">
-        <div class="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-secondary/10 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
-
+    <section class="ui-page-hero">
         <div class="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
                 <div class="avatar">

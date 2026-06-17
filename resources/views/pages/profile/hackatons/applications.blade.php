@@ -16,7 +16,7 @@
     </header>
 
     @if($this->pendingApplications->isEmpty())
-        <section class="ui-surface-card motion-safe:animate-card-enter">
+        <section class="ui-surface-card">
             <div class="card-body">
                 <x-empty-state
                     title="Нет заявок на рассмотрении"
@@ -32,7 +32,7 @@
     @else
         <div class="space-y-3">
             @foreach($this->pendingApplications as $application)
-                <article wire:key="pending-app-{{ $application->id }}" class="ui-surface-card ui-surface-card--hover motion-safe:animate-card-enter">
+                <article wire:key="pending-app-{{ $application->id }}" class="ui-surface-card ui-surface-card--hover">
                     <div class="card-body gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div class="min-w-0 flex-1 space-y-2">
                             <div class="flex flex-wrap items-center gap-2">

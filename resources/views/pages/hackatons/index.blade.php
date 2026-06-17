@@ -48,22 +48,11 @@
 <div class="space-y-8">
     {{-- Hero section --}}
     <section class="ui-page-hero">
-        <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
-            <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-primary/30 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-secondary/25 blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/3 h-40 w-40 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl"></div>
-        </div>
-
         <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div class="min-w-0 space-y-3">
-                <div class="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
-                    <x-app-icon icon="heroicons:rocket-launch" class="h-3.5 w-3.5" />
-                    Каталог хакатонов
-                </div>
-                <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
-                    <span class="bg-linear-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                        Хакатоны
-                    </span>
+                <p class="text-sm text-base-content/60">Каталог хакатонов</p>
+                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Хакатоны
                 </h1>
                 <p class="max-w-2xl text-base text-base-content/70">
                     Находите подходящие соревнования, подавайте заявки командой и сражайтесь за призы.
@@ -92,7 +81,7 @@
     {{-- Preset chips --}}
     <section aria-label="Быстрые подборки" class="space-y-2">
         <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-bold uppercase tracking-widest text-base-content/55">Подборки</span>
+            <span class="text-xs font-medium text-base-content/55">Подборки</span>
             @if ($preset !== 'all')
                 <button type="button" class="btn btn-ghost btn-xs gap-1" wire:click="setPreset('all')">
                     <x-app-icon icon="heroicons:x-mark" class="h-3.5 w-3.5" />
@@ -108,8 +97,8 @@
                     wire:click="setPreset('{{ $chip['value'] }}')"
                     aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                     @class([
-                        'btn btn-sm shrink-0 snap-start gap-1.5 transition-all duration-200',
-                        'btn-primary shadow-md shadow-primary/20' => $isActive,
+                        'btn btn-sm shrink-0 snap-start gap-1.5 rounded-lg transition-colors duration-200',
+                        'btn-primary' => $isActive,
                         'btn-ghost border border-base-300 bg-base-100 hover:border-primary/40' => ! $isActive,
                     ])
                 >
@@ -313,11 +302,7 @@
                 @php
                     $canQuickApply = auth()->check() && ! auth()->user()->isOrganizer();
                 @endphp
-                <div
-                    wire:key="hackaton-card-{{ $hackaton->id }}"
-                    class="motion-safe:animate-card-enter"
-                    style="animation-delay: {{ ($loop->index % 9) * 40 }}ms;"
-                >
+                <div wire:key="hackaton-card-{{ $hackaton->id }}">
                     <x-hackaton-card
                         :hackaton="$hackaton"
                         :can-quick-apply="$canQuickApply"

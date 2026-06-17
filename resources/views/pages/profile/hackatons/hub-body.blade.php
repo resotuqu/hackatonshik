@@ -1,5 +1,5 @@
 @if($hackatons->isEmpty())
-    <section class="ui-surface-soft motion-safe:animate-card-enter">
+    <section class="ui-surface-soft">
         <div class="card-body space-y-4 py-10 sm:py-12">
             <div class="mx-auto max-w-lg text-center">
                 <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/15 ring-2 ring-secondary/25">
@@ -19,8 +19,8 @@
     </section>
 @else
     @if(($showGlobalPendingStrip ?? false) && (($globalPending['applications'] ?? 0) > 0 || ($globalPending['judgeInvitations'] ?? 0) > 0))
-        <section class="rounded-2xl border border-warning/30 bg-warning/10 p-4 sm:p-5 motion-safe:animate-card-enter" aria-label="Глобальные задачи">
-            <h2 class="ui-heading-display text-sm font-bold uppercase tracking-widest text-warning">Требуют внимания (все хакатоны)</h2>
+        <section class="rounded-2xl border border-warning/30 bg-warning/10 p-4 sm:p-5" aria-label="Глобальные задачи">
+            <h2 class="ui-heading-display text-sm font-medium text-warning">Требуют внимания (все хакатоны)</h2>
             <div class="mt-3 flex flex-wrap gap-4 text-sm">
                 @if(($globalPending['applications'] ?? 0) > 0)
                     <a href="{{ route('profile.hackatons.applications') }}" class="link link-hover font-medium" wire:navigate>
@@ -49,7 +49,7 @@
 
     <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <h1 class="ui-heading-display text-2xl font-black sm:text-3xl lg:text-4xl">Дашборд организатора</h1>
+            <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl lg:text-4xl">Дашборд организатора</h1>
             <p class="mt-1 max-w-xl text-sm text-base-content/70">
                 Ключевые метрики, текущий фокус и быстрые действия. Ниже — полный список ваших хакатонов.
             </p>
@@ -61,54 +61,54 @@
     </header>
 
     <section class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="ui-stat-tile group/stat p-4 motion-safe:animate-card-enter">
+        <div class="ui-stat-tile group/stat p-4">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary transition-colors group-hover/stat:bg-secondary group-hover/stat:text-secondary-content">
                     <x-app-icon icon="heroicons:flag" class="h-5 w-5" />
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Активные хакатоны</p>
-                    <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $summary['activeHackatons'] }}</p>
+                    <p class="text-xs text-base-content/50">Активные хакатоны</p>
+                    <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $summary['activeHackatons'] }}</p>
                 </div>
             </div>
         </div>
-        <div class="ui-stat-tile group/stat p-4 motion-safe:animate-card-enter delay-100">
+        <div class="ui-stat-tile group/stat p-4">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-error/10 text-error transition-colors group-hover/stat:bg-error group-hover/stat:text-error-content">
                     <x-app-icon icon="heroicons:inbox" class="h-5 w-5" />
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Заявки на рассмотрении</p>
-                    <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $summary['pendingApplications'] }}</p>
+                    <p class="text-xs text-base-content/50">Заявки на рассмотрении</p>
+                    <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $summary['pendingApplications'] }}</p>
                 </div>
             </div>
         </div>
-        <div class="ui-stat-tile group/stat p-4 motion-safe:animate-card-enter delay-200">
+        <div class="ui-stat-tile group/stat p-4">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover/stat:bg-primary group-hover/stat:text-primary-content">
                     <x-app-icon icon="heroicons:user-group" class="h-5 w-5" />
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Участники (роли)</p>
-                    <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $summary['participantsTotal'] }}</p>
+                    <p class="text-xs text-base-content/50">Участники (роли)</p>
+                    <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $summary['participantsTotal'] }}</p>
                 </div>
             </div>
         </div>
-        <div class="ui-stat-tile group/stat p-4 motion-safe:animate-card-enter delay-300">
+        <div class="ui-stat-tile group/stat p-4">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors group-hover/stat:bg-accent group-hover/stat:text-accent-content">
                     <x-app-icon icon="heroicons:archive-box" class="h-5 w-5" />
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Всего создано</p>
-                    <p class="ui-heading-display text-2xl font-black tabular-nums">{{ $summary['hackatonsTotal'] }}</p>
+                    <p class="text-xs text-base-content/50">Всего создано</p>
+                    <p class="ui-heading-display text-2xl font-semibold tabular-nums">{{ $summary['hackatonsTotal'] }}</p>
                 </div>
             </div>
         </div>
     </section>
 
     @if($featuredHackaton)
-        <section class="ui-surface-card ui-surface-card--hackaton-active shadow-lg motion-safe:animate-card-enter" aria-label="Текущий хакатон">
+        <section class="ui-surface-card ui-surface-card--hackaton-active shadow-lg" aria-label="Текущий хакатон">
             <div class="card-body gap-6">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:gap-4">
@@ -191,7 +191,7 @@
         </section>
     @endif
 
-    <section class="ui-surface-soft p-4 sm:p-5 motion-safe:animate-card-enter">
+    <section class="ui-surface-soft p-4 sm:p-5">
         <h2 class="ui-heading-display mb-3 text-sm font-bold uppercase tracking-widest text-base-content/55">Быстрые действия</h2>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <a href="{{ route('hackatons.create') }}" class="ui-cta-secondary btn-md h-auto min-h-[3.25rem] flex-col gap-1 py-3 sm:flex-row sm:gap-2" wire:navigate>

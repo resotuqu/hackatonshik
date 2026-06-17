@@ -8,13 +8,13 @@
                     Войдите, чтобы продолжить работу с командами, заявками и кейсами.
                 </p>
                 <div class="grid gap-2 text-sm">
-                    <div class="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
                         Отслеживайте статусы заявок в одном месте
                     </div>
-                    <div class="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
                         Отправляйте решения кейсов без лишней переписки
                     </div>
-                    <div class="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
                         Получайте анонсы и обновления по хакатонам
                     </div>
                 </div>

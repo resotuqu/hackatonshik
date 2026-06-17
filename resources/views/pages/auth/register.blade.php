@@ -9,13 +9,13 @@
                     Создайте аккаунт, чтобы участвовать в хакатонах, собирать команды и отправлять решения кейсов.
                 </p>
                 <div class="grid gap-2 text-sm">
-                    <div class="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
                         Создавайте профиль участника и вступайте в команды
                     </div>
-                    <div class="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
                         Подавайте заявки на хакатоны и отслеживайте статусы
                     </div>
-                    <div class="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
                         Получайте анонсы и сертификаты в личном кабинете
                     </div>
                 </div>

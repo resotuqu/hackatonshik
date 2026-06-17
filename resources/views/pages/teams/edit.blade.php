@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 rounded-3xl border border-base-300 bg-base-200/50 px-6 py-3">
+            <div class="flex items-center gap-4 rounded-lg border border-base-300 bg-base-200 px-6 py-3">
                 <span class="font-display text-4xl font-black tabular-nums text-secondary">{{ $teamInitials }}</span>
                 <div class="max-w-52 truncate text-lg font-semibold">{{ $team->title }}</div>
             </div>

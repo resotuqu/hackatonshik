@@ -4,21 +4,11 @@
 
 <div class="space-y-8">
     <section class="ui-page-hero">
-        <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
-            <div class="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-warning/20 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl"></div>
-        </div>
-
         <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div class="min-w-0 space-y-3">
-                <div class="inline-flex items-center gap-2 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-warning">
-                    <x-app-icon icon="heroicons:scale" class="h-3.5 w-3.5" />
-                    Панель судьи
-                </div>
-                <h1 class="ui-heading-display text-3xl font-black sm:text-4xl lg:text-5xl">
-                    <span class="bg-linear-to-r from-warning via-accent to-primary bg-clip-text text-transparent">
-                        Ваша экспертиза
-                    </span>
+                <p class="text-sm text-base-content/60">Панель судьи</p>
+                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Ваша экспертиза
                 </h1>
                 <p class="max-w-2xl text-base text-base-content/70">Оценивайте проекты участников и помогайте определять победителей.</p>
             </div>
@@ -46,9 +36,9 @@
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-base-content/60">Всего хакатонов</p>
-                            <p class="ui-heading-display text-4xl font-black tabular-nums">{{ $judgeHackatonsCount }}</p>
+                            <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $judgeHackatonsCount }}</p>
                         </div>
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                             <x-app-icon icon="heroicons:briefcase" class="h-6 w-6" />
                         </div>
                     </div>
@@ -63,14 +53,14 @@
 
             <div class="lg:col-span-2">
                 <div class="ui-surface-card h-full overflow-hidden">
-                    <div class="border-b border-base-300 bg-base-200/30 px-6 py-4">
-                        <h2 class="font-display text-lg font-bold">Ближайшие события</h2>
+                    <div class="border-b border-base-300 bg-base-200 px-6 py-4">
+                        <h2 class="font-display text-lg font-semibold">Ближайшие события</h2>
                     </div>
                     <div class="divide-y divide-base-300">
                         @foreach ($judgeHackatonsPreview as $row)
                             <div class="group flex items-center justify-between gap-4 p-4 transition-colors hover:bg-base-200/50">
                                 <div class="min-w-0 flex-1 space-y-1">
-                                    <a href="{{ route('hackatons.show', $row['id']) }}" class="ui-heading-display block truncate font-bold hover:text-primary transition-colors">
+                                    <a href="{{ route('hackatons.show', $row['id']) }}" class="ui-heading-display block truncate font-semibold hover:text-primary transition-colors">
                                         {{ $row['title'] }}
                                     </a>
                                     @if ($row['start_at'])
@@ -81,7 +71,7 @@
                                     @endif
                                 </div>
                                 <div class="flex shrink-0 gap-2">
-                                    <a href="{{ route('hackatons.show', $row['id']) }}#hackaton-cases" class="btn btn-primary btn-sm rounded-xl">
+                                    <a href="{{ route('hackatons.show', $row['id']) }}#hackaton-cases" class="btn btn-primary btn-sm">
                                         К кейсам
                                     </a>
                                 </div>
@@ -93,7 +83,7 @@
         </div>
     @endif
 
-    <div class="flex items-center justify-between rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+    <div class="flex items-center justify-between rounded-lg border border-base-300 bg-base-100 p-4">
         <p class="text-sm text-base-content/70">Нужна помощь в оценке?</p>
         <a href="/profile" class="ui-cta-outline btn-sm">
             <x-app-icon icon="heroicons:user-circle" class="h-4 w-4" />

@@ -55,8 +55,8 @@
 
         {{-- 4 & 6. Сгруппированный блок ролей со спокойным акцентом --}}
         @if ($hasVacancies || ! empty($vacantRoleNames))
-            <div class="rounded-xl border border-secondary/20 bg-secondary/5 p-4">
-                <p class="mb-3 text-xs font-bold uppercase tracking-wide text-secondary">
+            <div class="rounded-lg border border-secondary/20 bg-secondary/5 p-4">
+                <p class="mb-3 text-xs font-medium text-secondary">
                     Ищем в команду ({{ $openSlots }} {{ $slotWord }}):
                 </p>
                 <div class="flex flex-wrap gap-2">
@@ -71,15 +71,15 @@
                 </div>
             </div>
         @else
-            <div class="w-fit rounded-lg bg-base-200/50 px-3 py-1.5 border border-base-300">
-                <span class="text-xs font-semibold uppercase tracking-wider text-base-content/60">Набор закрыт</span>
+            <div class="w-fit rounded-lg bg-base-200 px-3 py-1.5 border border-base-300">
+                <span class="text-xs font-medium text-base-content/60">Набор закрыт</span>
             </div>
         @endif
 
         {{-- Навыки --}}
         @if (! empty($skillTags))
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-base-content/50">Навыки</p>
+                <p class="mb-2 text-xs font-medium text-base-content/50">Навыки</p>
                 <div class="flex flex-wrap gap-2">
                     @foreach ($skillTags as $tag)
                         <span class="badge badge-outline border-base-300 bg-base-200/30 px-3 py-3 text-xs font-medium text-base-content/80">
@@ -95,7 +95,7 @@
             
             @if ($participants->isNotEmpty())
                 <div class="flex flex-col gap-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-base-content/50">Участники</span>
+                    <span class="text-xs font-medium text-base-content/50">Участники</span>
                     <div class="flex -space-x-3">
                         @foreach ($participants->take(5) as $member)
                             @php
@@ -128,14 +128,14 @@
                     <a
                         href="{{ $href }}"
                         @if ($navigate) wire:navigate @endif
-                        class="btn btn-neutral w-full sm:w-auto px-6 rounded-xl shadow-sm"
+                        class="btn btn-neutral w-full sm:w-auto px-6"
                     >
                         Подробнее
                     </a>
                 @else
                     <button
                         type="button"
-                        class="btn btn-neutral w-full sm:w-auto px-6 rounded-xl shadow-sm"
+                        class="btn btn-neutral w-full sm:w-auto px-6"
                         wire:click="openTeam({{ $team->id }})"
                     >
                         Подробнее

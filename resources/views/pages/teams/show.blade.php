@@ -10,9 +10,9 @@
                 $occupiedRoles->contains(fn ($r) => (int) $r->user_id === (int) auth()->id()));
         $canHeroApply =
             auth()->check() && !auth()->user()->isOrganizer() && !$isTeamMember && $openRoles->isNotEmpty();
-        $sectionCard = 'card rounded-3xl border border-base-300 bg-base-100 shadow-sm';
-        $heroApplyBtn = 'btn btn-primary gap-2 shadow-lg shadow-primary/20';
-        $modalTriggerClass = 'btn btn-primary btn-lg inline-flex cursor-pointer items-center justify-center gap-2 shadow-lg shadow-primary/25';
+        $sectionCard = 'card rounded-[var(--radius-card)] border border-base-300 bg-base-100';
+        $heroApplyBtn = 'btn btn-primary gap-2';
+        $modalTriggerClass = 'btn btn-primary btn-lg inline-flex cursor-pointer items-center justify-center gap-2';
     @endphp
 
     @section('meta_description', $seoDescription)
@@ -53,12 +53,9 @@
 
         <section id="team-panel-overview" role="tabpanel" data-tab-panel="team" data-tab-value="overview">
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div class="relative overflow-hidden rounded-3xl border border-base-300 bg-linear-to-br from-base-100 via-base-100 to-primary/15 shadow-lg lg:col-span-2">
-                    <div class="team-hero-orb pointer-events-none absolute -top-24 -right-20 h-64 w-64 rounded-full bg-secondary/15 blur-3xl motion-reduce:opacity-40"></div>
-                    <div class="team-hero-orb pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-primary/12 blur-3xl motion-reduce:opacity-40"></div>
-
-                    <div class="relative border-b border-base-300/50 px-5 pb-5 pt-6 sm:px-7 sm:pt-8">
-                        <h1 class="font-display text-pretty bg-linear-to-r from-base-content via-base-content to-base-content/65 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+                <div class="relative overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 lg:col-span-2">
+                    <div class="relative border-b border-base-300 px-5 pb-5 pt-6 sm:px-7 sm:pt-8">
+                        <h1 class="font-display text-pretty text-4xl font-bold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
                             {{ $team->title }}
                         </h1>
                     </div>
@@ -175,8 +172,8 @@
                         </h2>
                         @forelse ($openRoles as $role)
                             <div
-                                class="animate-card-enter space-y-4 rounded-2xl border border-base-300/60 border-l-4 border-l-primary bg-base-100/75 p-5 shadow-lg shadow-primary/5 backdrop-blur-sm transition duration-300 ease-out first:mt-0 hover:-translate-y-0.5 hover:border-base-300/80 hover:shadow-xl hover:shadow-primary/10 sm:p-6"
-                                style="animation-delay: {{ min($loop->index * 40, 200) }}ms">
+                                class="space-y-4 rounded-lg border border-base-300 border-l-4 border-l-primary bg-base-100 p-5 sm:p-6"
+                            >
                                 <div class="flex flex-wrap items-start justify-between gap-4">
                                     <div class="min-w-0 space-y-2">
                                         <p class="font-display text-lg font-bold leading-tight tracking-tight sm:text-xl">{{ $role->title }}</p>
@@ -296,7 +293,7 @@
                                             : null;
                                 @endphp
                                 <div
-                                    class="animate-card-enter group relative flex flex-col gap-3 rounded-2xl border border-base-300/55 bg-base-100/70 p-5 shadow-md ring-1 ring-transparent transition duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:ring-primary/15">
+                                    class="group relative flex flex-col gap-3 rounded-lg border border-base-300 bg-base-100 p-5 transition-colors hover:border-primary/30">
                                     <div class="flex items-start gap-3">
                                         <div class="avatar placeholder">
                                             <div

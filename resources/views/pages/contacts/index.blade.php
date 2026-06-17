@@ -3,7 +3,7 @@
     <x-marytoast />
 
     <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <article class="rounded-3xl border border-primary/15 bg-base-100 p-6 shadow-md shadow-primary/5 sm:p-8">
+        <article class="ui-page-hero">
             <h1 class="font-display text-3xl font-bold">Контакты</h1>
             <p class="mt-1 text-base-content/75">Свяжитесь с нами удобным способом</p>
             <div class="mt-6 space-y-3 text-base">
@@ -36,7 +36,7 @@
     </section>
 
     @if (filled(env('YANDEX_MAPS_EMBED_URL')) || filled(env('GOOGLE_MAPS_EMBED_URL')))
-        <section class="rounded-3xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
+        <section class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-4 sm:p-6">
             <h2 class="font-display text-2xl font-bold">Мы на карте</h2>
             <div class="mt-4 overflow-hidden rounded-2xl border border-base-300">
                 <iframe

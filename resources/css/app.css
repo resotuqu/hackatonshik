@@ -55,12 +55,12 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Space Grotesk', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-    --radius-card: 1.5rem;
-    --radius-panel: 1rem;
-    --radius-control: 0.75rem;
-    --shadow-card: 0 10px 30px -14px oklch(8% 0.02 264 / 0.45);
-    --shadow-card-hover: 0 18px 40px -20px oklch(8% 0.03 264 / 0.55);
-    --shadow-surface-soft: 0 1px 3px -1px oklch(8% 0.02 264 / 0.35);
+    --radius-card: 1rem;
+    --radius-panel: 0.75rem;
+    --radius-control: 0.5rem;
+    --shadow-card: 0 1px 2px oklch(8% 0.01 40 / 0.12);
+    --shadow-card-hover: 0 2px 6px oklch(8% 0.015 40 / 0.16);
+    --shadow-surface-soft: 0 1px 2px oklch(8% 0.01 40 / 0.08);
     --tracking-tight-display: -0.02em;
     --spacing-section: clamp(2.5rem, 2rem + 1.5vw, 4rem);
     --spacing-stack-sm: 0.5rem;
@@ -95,18 +95,18 @@
     default: true;
     prefersdark: false;
     color-scheme: dark;
-    --color-base-100: oklch(22% 0.018 264);
-    --color-base-200: oklch(26% 0.022 264);
-    --color-base-300: oklch(31% 0.026 264);
-    --color-base-content: oklch(96% 0.012 264);
+    --color-base-100: oklch(22% 0.012 40);
+    --color-base-200: oklch(26% 0.014 40);
+    --color-base-300: oklch(31% 0.016 40);
+    --color-base-content: oklch(96% 0.008 40);
     --color-primary: oklch(56% 0.21 272);
     --color-primary-content: oklch(98% 0.01 272);
     --color-secondary: oklch(82% 0.19 118);
     --color-secondary-content: oklch(22% 0.06 132);
     --color-accent: oklch(62% 0.14 200);
     --color-accent-content: oklch(98% 0.01 200);
-    --color-neutral: oklch(30% 0.04 264);
-    --color-neutral-content: oklch(92% 0.02 264);
+    --color-neutral: oklch(30% 0.02 40);
+    --color-neutral-content: oklch(92% 0.01 40);
     --color-info: oklch(62% 0.16 250);
     --color-info-content: oklch(98% 0.01 250);
     --color-success: oklch(72% 0.17 155);
@@ -130,18 +130,18 @@
     default: false;
     prefersdark: false;
     color-scheme: light;
-    --color-base-100: oklch(98% 0.008 264);
-    --color-base-200: oklch(94% 0.014 264);
-    --color-base-300: oklch(88% 0.022 264);
-    --color-base-content: oklch(24% 0.04 264);
+    --color-base-100: oklch(98% 0.006 40);
+    --color-base-200: oklch(94% 0.01 40);
+    --color-base-300: oklch(88% 0.014 40);
+    --color-base-content: oklch(24% 0.02 40);
     --color-primary: oklch(52% 0.22 272);
     --color-primary-content: oklch(98% 0.01 272);
     --color-secondary: oklch(78% 0.19 118);
     --color-secondary-content: oklch(22% 0.06 132);
     --color-accent: oklch(55% 0.14 200);
     --color-accent-content: oklch(98% 0.01 200);
-    --color-neutral: oklch(40% 0.04 264);
-    --color-neutral-content: oklch(98% 0.01 264);
+    --color-neutral: oklch(40% 0.02 40);
+    --color-neutral-content: oklch(98% 0.01 40);
     --color-info: oklch(58% 0.16 250);
     --color-info-content: oklch(98% 0.01 250);
     --color-success: oklch(52% 0.15 155);
@@ -200,17 +200,17 @@
 
 [data-tab-list='team'] .tab,
 [data-tab-list='hackaton'] .tab {
-    @apply inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl border border-transparent px-4 py-2 text-sm font-medium transition duration-200;
+    @apply inline-flex min-h-12 shrink-0 items-center gap-2 rounded-lg border border-transparent border-l-2 border-l-transparent px-4 py-2 text-sm font-medium transition duration-200;
 }
 
 [data-tab-list='team'] .tab.tab-active,
 [data-tab-list='hackaton'] .tab.tab-active {
-    @apply border-base-300/70 bg-base-100 text-base-content shadow-md ring-1 ring-primary/25;
+    @apply border-base-300/60 border-l-primary bg-base-100 text-base-content;
 }
 
 [data-tab-list='team'] .tab:not(.tab-active),
 [data-tab-list='hackaton'] .tab:not(.tab-active) {
-    @apply text-base-content/70 hover:border-base-300/50 hover:bg-base-100/40 hover:text-base-content;
+    @apply text-base-content/70 hover:border-base-300/50 hover:bg-base-200/50 hover:text-base-content;
 }
 
 /**
@@ -219,36 +219,43 @@
 .ui-surface-card {
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
-    background-image: linear-gradient(135deg, oklch(100% 0 0 / 0.02) 0%, transparent 50%);
     @apply overflow-hidden border border-base-300 bg-base-100;
 }
 
 .ui-surface-card--hover {
-    @apply transition-all duration-300 ease-out motion-reduce:transition-none;
+    @apply transition-colors duration-200 ease-out motion-reduce:transition-none;
 }
 
 .ui-surface-card--hover:hover {
     box-shadow: var(--shadow-card-hover);
-    @apply -translate-y-1 border-primary/30;
+    @apply border-primary/40;
 }
 
 .ui-surface-card--hackaton-active {
-    @apply border-base-300 hover:shadow-2xl hover:shadow-primary/15;
+    @apply border-base-300 hover:border-primary/35;
 }
 
 .ui-surface-card--hackaton-finished {
-    @apply border-base-300/70 opacity-90 hover:border-base-content/30 hover:opacity-100 hover:shadow-2xl hover:shadow-base-content/5;
+    @apply border-base-300/70 opacity-90 hover:border-base-content/30 hover:opacity-100;
 }
 
 .ui-surface-card--team {
-    @apply border-base-300 hover:shadow-2xl hover:shadow-accent/15;
+    @apply border-base-300 hover:border-primary/30;
 }
 
 .ui-surface-soft {
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-surface-soft);
-    background-image: radial-gradient(at top left, oklch(100% 0 0 / 0.03), transparent 70%);
-    @apply relative overflow-hidden border border-base-300 bg-base-200/50 backdrop-blur-md;
+    @apply relative overflow-hidden border border-base-300 bg-base-200;
+}
+
+.ui-cover-placeholder {
+    @apply bg-base-300;
+    background-image:
+        radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--color-primary) 10%, transparent) 1px, transparent 0),
+        radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--color-secondary) 8%, transparent) 1px, transparent 0);
+    background-size: 20px 20px, 20px 20px;
+    background-position: 0 0, 10px 10px;
 }
 
 .ui-surface-soft-muted {
@@ -263,14 +270,7 @@
 
 .ui-page-hero {
     border-radius: var(--radius-card);
-    @apply relative overflow-hidden border border-base-300 bg-base-100 p-6 shadow-xl sm:p-8 lg:p-10;
-}
-
-.ui-page-hero::before {
-    content: '';
-    @apply absolute inset-0 opacity-40;
-    background: radial-gradient(circle at 0% 0%, oklch(56% 0.21 272 / 0.15), transparent 40%),
-                radial-gradient(circle at 100% 100%, oklch(82% 0.19 118 / 0.1), transparent 40%);
+    @apply relative overflow-hidden border border-base-300 border-b-base-300 bg-base-200 p-6 sm:p-8 lg:p-10;
 }
 
 .ui-section-y {
@@ -292,7 +292,7 @@
 }
 
 .ui-cta-primary {
-    @apply btn btn-primary gap-2 shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.98];
+    @apply btn btn-primary gap-2 transition-colors duration-200;
 }
 
 .ui-cta-primary:focus-visible {
@@ -300,7 +300,7 @@
 }
 
 .ui-cta-secondary {
-    @apply btn btn-secondary gap-2 shadow-lg shadow-secondary/25 ring-2 ring-secondary/30 ring-offset-2 ring-offset-base-100 transition-all duration-200 active:scale-[0.98];
+    @apply btn btn-secondary gap-2 transition-colors duration-200;
 }
 
 .ui-cta-secondary:focus-visible {
@@ -308,7 +308,7 @@
 }
 
 .ui-cta-outline {
-    @apply btn btn-outline border-base-300 transition-all duration-200 active:scale-[0.98];
+    @apply btn btn-outline border-base-300 transition-colors duration-200;
 }
 
 .ui-cta-outline:focus-visible {
@@ -316,7 +316,7 @@
 }
 
 .ui-cta-outline-primary {
-    @apply btn btn-outline border-primary/50 text-primary transition-all duration-200 active:scale-[0.98];
+    @apply btn btn-outline border-primary/50 text-primary transition-colors duration-200;
 }
 
 .ui-cta-outline-primary:focus-visible {
@@ -332,7 +332,7 @@
 }
 
 .ui-cta-danger {
-    @apply btn btn-ghost text-error hover:bg-error/10 transition-all duration-200 active:scale-[0.98];
+    @apply btn btn-ghost text-error hover:bg-error/10 transition-colors duration-200;
 }
 
 .ui-cta-danger:focus-visible {
@@ -349,7 +349,7 @@
 .delay-500 { animation-delay: 500ms !important; }
 
 .hover-lift {
-    @apply transition-transform duration-300 ease-out hover:-translate-y-1 active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:translate-y-0;
+    @apply transition-colors duration-200 ease-out motion-reduce:transition-none;
 }
 
 /**
@@ -361,11 +361,16 @@
 }
 
 .btm-nav.btm-nav-touch a.active {
-    @apply scale-110 font-bold;
+    @apply relative font-semibold text-primary;
+}
+
+.btm-nav.btm-nav-touch a.active::after {
+    content: '';
+    @apply absolute bottom-1 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary;
 }
 
 .btm-nav.btm-nav-touch .btm-nav-label {
-    @apply text-[10px] uppercase tracking-wider font-semibold leading-tight;
+    @apply text-[10px] font-medium leading-tight;
 }
 
 /* Alpine.js cloak guard — hides elements until Alpine has initialised */
@@ -495,7 +500,7 @@
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link {
-    @apply flex min-h-12 items-center gap-3 rounded-xl border-l-4 border-transparent px-3 py-2.5 text-[0.9375rem] font-medium leading-snug text-base-content no-underline transition-colors duration-200;
+    @apply flex min-h-12 items-center gap-3 rounded-lg border-l-4 border-transparent px-3 py-2.5 text-[0.9375rem] font-medium leading-snug text-base-content no-underline transition-colors duration-200;
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link:hover {
@@ -507,7 +512,7 @@
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta {
-    @apply min-h-[3rem] border-secondary/40 bg-secondary/10 font-semibold text-base-content shadow-sm ring-1 ring-secondary/20;
+    @apply min-h-[3rem] border-secondary/40 bg-secondary/10 font-semibold text-base-content;
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta:hover {
@@ -515,7 +520,7 @@
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta.active {
-    @apply border-secondary bg-secondary/25 font-bold text-base-content ring-2 ring-secondary/35;
+    @apply border-secondary bg-secondary/25 font-bold text-base-content;
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link:focus-visible {
