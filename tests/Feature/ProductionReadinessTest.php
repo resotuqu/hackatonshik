@@ -43,8 +43,9 @@ test('public catalog profiles omit internal user id', function () {
 
     $response->assertOk();
     $first = $response->json('data.0');
-    expect($first)->toHaveKeys(['nickname', 'display_name', 'role', 'description']);
+    expect($first)->toHaveKeys(['nickname', 'display_name', 'description']);
     expect($first)->not->toHaveKey('id');
+    expect($first)->not->toHaveKey('role');
 });
 
 test('safe markdown strips raw html', function () {

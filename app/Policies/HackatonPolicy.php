@@ -9,6 +9,11 @@ use App\Models\User;
 
 class HackatonPolicy
 {
+    public function create(User $user): bool
+    {
+        return $user->isOrganizer();
+    }
+
     public function view(?User $user, Hackaton $hackaton): bool
     {
         if ($hackaton->is_public) {

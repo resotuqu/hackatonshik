@@ -52,7 +52,7 @@ class SocialAuthController extends Controller
                 'fio' => $name,
                 'nickname' => "{$driver}_".Str::lower(Str::random(10)),
                 'date_of_birth' => now()->subYears(18)->toDateString(),
-                'phone' => '+70000000000',
+                'phone' => $this->uniquePlaceholderPhone(),
                 'password' => Hash::make(Str::random(40)),
                 'phone_verified_at' => null,
                 'email_verified_at' => now(),
@@ -69,5 +69,14 @@ class SocialAuthController extends Controller
         abort_unless(isset(self::PROVIDERS[$provider]), 404);
 
         return self::PROVIDERS[$provider];
+    }
+
+    private function uniquePlaceholderPhone(): string
+    {
+        do {
+            $phone = '+79'.str_pad((string) random_int(0, 999_999_999), 9, '0', STR_PAD_LEFT);
+        } while (User::query()->where('phone', $phone)->exists());
+
+        return $phone;
     }
 }

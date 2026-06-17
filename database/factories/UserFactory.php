@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -33,12 +35,28 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'phone' => fake()->phoneNumber(),
             'phone_verified_at' => now(),
-            'role' => 'user',
+            'role' => UserRole::USER->value,
             'is_profile_public' => true,
             'show_email_on_profile' => false,
             'show_phone_on_profile' => false,
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function make($attributes = [], ?Model $parent = null): Model
+    {
+        return User::unguarded(fn (): Model => parent::make($attributes, $parent));
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function create($attributes = [], ?Model $parent = null): Model
+    {
+        return User::unguarded(fn (): Model => parent::create($attributes, $parent));
     }
 
     /**
@@ -64,21 +82,21 @@ class UserFactory extends Factory
     public function partner(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'partner',
+            'role' => UserRole::PARTNER->value,
         ]);
     }
 
     public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'admin',
+            'role' => UserRole::ADMIN->value,
         ]);
     }
 
     public function judge(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'judge',
+            'role' => UserRole::JUDGE->value,
         ]);
     }
 }

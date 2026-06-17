@@ -50,6 +50,32 @@ test('only team owner can apply for that team', function () {
         ->assertSessionHasErrors(['team_id']);
 });
 
+test('partner cannot apply to hackaton via http store', function () {
+    $partner = User::factory()->partner()->create();
+    $team = Team::factory()->create(['user_id' => $partner->id]);
+    $hackaton = Hackaton::factory()->create();
+
+    $this->actingAs($partner)
+        ->post(route('hackaton.applications.store'), [
+            'hackaton_id' => $hackaton->id,
+            'team_id' => $team->id,
+        ])
+        ->assertForbidden();
+});
+
+test('judge cannot apply to hackaton via http store', function () {
+    $judge = User::factory()->judge()->create();
+    $team = Team::factory()->create(['user_id' => $judge->id]);
+    $hackaton = Hackaton::factory()->create();
+
+    $this->actingAs($judge)
+        ->post(route('hackaton.applications.store'), [
+            'hackaton_id' => $hackaton->id,
+            'team_id' => $team->id,
+        ])
+        ->assertForbidden();
+});
+
 test('team owner can withdraw pending application', function () {
     $user = User::factory()->create();
     $team = Team::factory()->create(['user_id' => $user->id]);

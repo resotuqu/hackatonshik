@@ -106,3 +106,12 @@ it('viewOrganizationDashboard allows organizer and assigned judge', function () 
     expect($policy->viewOrganizationDashboard($judge, $hackaton))->toBeTrue();
     expect($policy->viewOrganizationDashboard($outsider, $hackaton))->toBeFalse();
 });
+
+it('allows organizers to create hackatons', function () {
+    $organizer = User::factory()->partner()->create();
+    $participant = User::factory()->create();
+
+    $policy = new HackatonPolicy;
+    expect($policy->create($organizer))->toBeTrue();
+    expect($policy->create($participant))->toBeFalse();
+});

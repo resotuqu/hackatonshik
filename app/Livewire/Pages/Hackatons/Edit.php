@@ -4,7 +4,7 @@ namespace App\Livewire\Pages\Hackatons;
 
 use App\Enums\HackatonLevel;
 use App\Models\Hackaton;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -15,7 +15,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Изменение хакатона'])]
 class Edit extends Component
 {
-    use Toast, WithFileUploads;
+    use AuthorizesRequests, Toast, WithFileUploads;
 
     public Hackaton $hackaton;
 
@@ -104,11 +104,9 @@ class Edit extends Component
         'uploadImage' => false,
     ];
 
-    public function mount(Hackaton $hackaton)
+    public function mount(Hackaton $hackaton): void
     {
-        if (Auth::id() !== $hackaton->user_id) {
-            return $this->redirect(route('organizer.dashboard'));
-        }
+        $this->authorize('update', $hackaton);
 
         $this->hackaton = $hackaton->load('images');
         $this->title = $hackaton->title;
@@ -162,6 +160,8 @@ class Edit extends Component
 
     public function save(): void
     {
+        $this->authorize('update', $this->hackaton);
+
         try {
             $this->validate();
         } catch (ValidationException $e) {

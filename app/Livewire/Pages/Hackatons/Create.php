@@ -8,6 +8,7 @@ use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -19,11 +20,11 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Создание хакатона'])]
 class Create extends Component
 {
-    use Toast, WithFileUploads;
+    use AuthorizesRequests, Toast, WithFileUploads;
 
     public function mount(): void
     {
-        abort_unless(Auth::user()?->isOrganizer(), 403);
+        $this->authorize('create', Hackaton::class);
     }
 
     public int $wizardStep = 1;
@@ -225,6 +226,8 @@ class Create extends Component
 
     public function save(): mixed
     {
+        $this->authorize('create', Hackaton::class);
+
         try {
             $this->validate();
             $this->validate([

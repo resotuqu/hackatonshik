@@ -15,6 +15,14 @@ test('admin avatar presets page is forbidden for non-admin', function () {
     $this->actingAs($user)->get('/admin/avatar-presets')->assertForbidden();
 });
 
+test('non admin cannot mount avatar presets livewire component', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(AvatarPresets::class)
+        ->assertForbidden();
+});
+
 test('admin can create avatar preset pack', function () {
     $admin = User::factory()->admin()->create();
 

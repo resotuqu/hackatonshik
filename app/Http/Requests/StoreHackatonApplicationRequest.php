@@ -9,13 +9,12 @@ use App\Models\HackatonApplication;
 use App\Models\Team;
 use App\Models\TeamRole;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class StoreHackatonApplicationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::check();
+        return $this->user()?->can('create', HackatonApplication::class) ?? false;
     }
 
     public function rules(): array

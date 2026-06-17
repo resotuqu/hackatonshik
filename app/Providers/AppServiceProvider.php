@@ -120,8 +120,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(HackatonCertificate::class, HackatonCertificatePolicy::class);
         Gate::define('access-admin', fn ($user): bool => $user->isAdmin());
         Gate::define('viewPulse', fn ($user): bool => $user->isAdmin());
-        Gate::define('viewHorizon', fn ($user): bool => $user->isAdmin());
-        Gate::define('viewTelescope', fn ($user): bool => $user->isAdmin() || app()->isLocal());
     }
 
     /**

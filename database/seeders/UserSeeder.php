@@ -42,45 +42,45 @@ class UserSeeder extends Seeder
         }
 
         foreach ($definitions as $def) {
-            User::query()->updateOrCreate(
-                ['email' => $def['email']],
-                [
-                    'fio' => $def['fio'],
-                    'date_of_birth' => '1990-05-15',
-                    'email_verified_at' => now(),
-                    'nickname' => $def['nickname'],
-                    'password' => $hashed,
-                    'phone' => $def['phone'],
-                    'phone_verified_at' => now(),
-                    'role' => $def['role'],
-                    'description' => $faker->realText(120),
-                    'is_profile_public' => true,
-                    'show_email_on_profile' => false,
-                    'show_phone_on_profile' => false,
-                ],
-            );
+            $user = User::query()->firstOrNew(['email' => $def['email']]);
+            $user->fill([
+                'fio' => $def['fio'],
+                'date_of_birth' => '1990-05-15',
+                'email_verified_at' => now(),
+                'nickname' => $def['nickname'],
+                'password' => $hashed,
+                'phone' => $def['phone'],
+                'description' => $faker->realText(120),
+                'is_profile_public' => true,
+                'show_email_on_profile' => false,
+                'show_phone_on_profile' => false,
+            ]);
+            $user->forceFill([
+                'phone_verified_at' => now(),
+                'role' => $def['role'],
+            ])->save();
         }
 
         $participantCount = max(80, $organizerCount * 40);
         for ($i = 0; $i < $participantCount; $i++) {
             $n = $i + 1;
-            User::query()->updateOrCreate(
-                ['email' => "participant{$n}@demo.hackaton.local"],
-                [
-                    'fio' => $faker->name(),
-                    'date_of_birth' => $faker->date('Y-m-d', '-18 years'),
-                    'email_verified_at' => now(),
-                    'nickname' => sprintf('participant_%03d', $n),
-                    'password' => $hashed,
-                    'phone' => sprintf('+7%d', 9_002_001_000 + $i),
-                    'phone_verified_at' => now(),
-                    'role' => UserRole::USER->value,
-                    'description' => $faker->optional(0.7)->realText(100),
-                    'is_profile_public' => true,
-                    'show_email_on_profile' => false,
-                    'show_phone_on_profile' => false,
-                ],
-            );
+            $user = User::query()->firstOrNew(['email' => "participant{$n}@demo.hackaton.local"]);
+            $user->fill([
+                'fio' => $faker->name(),
+                'date_of_birth' => $faker->date('Y-m-d', '-18 years'),
+                'email_verified_at' => now(),
+                'nickname' => sprintf('participant_%03d', $n),
+                'password' => $hashed,
+                'phone' => sprintf('+7%d', 9_002_001_000 + $i),
+                'description' => $faker->optional(0.7)->realText(100),
+                'is_profile_public' => true,
+                'show_email_on_profile' => false,
+                'show_phone_on_profile' => false,
+            ]);
+            $user->forceFill([
+                'phone_verified_at' => now(),
+                'role' => UserRole::USER->value,
+            ])->save();
         }
 
         $this->command?->newLine();

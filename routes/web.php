@@ -161,12 +161,12 @@ Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware
 
 Route::get('/teams/{team}', TeamsShow::class)->name('teams.show');
 Route::get('/teams/{team}/edit', TeamsEdit::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware($participantMiddleware)
     ->name('teams.edit');
 
 Route::get('/hackatons/{hackaton}', HackatonsShow::class)->name('hackatons.show');
 Route::get('/hackatons/{hackaton}/edit', HackatonsEdit::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware($organizerMiddleware)
     ->name('hackatons.edit');
 
 Route::get('/auth/yandex/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'yandex');

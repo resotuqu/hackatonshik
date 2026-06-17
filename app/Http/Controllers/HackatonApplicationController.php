@@ -24,6 +24,8 @@ class HackatonApplicationController extends Controller
 {
     public function store(StoreHackatonApplicationRequest $request): RedirectResponse
     {
+        Gate::authorize('create', HackatonApplication::class);
+
         $validated = $request->validated();
         $hackaton = Hackaton::query()->findOrFail($validated['hackaton_id']);
 

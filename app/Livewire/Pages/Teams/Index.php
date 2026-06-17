@@ -295,6 +295,8 @@ class Index extends Component
             return;
         }
 
+        abort_unless(Auth::user()?->canParticipate(), 403);
+
         if (Auth::user()?->isOrganizer()) {
             session()->flash('warning', 'Организатор не может подавать заявки в команды.');
 

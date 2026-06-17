@@ -94,7 +94,7 @@ class JudgeManagementController extends Controller
         }
 
         if ($user->isParticipant()) {
-            $user->update(['role' => UserRole::JUDGE]);
+            $user->forceFill(['role' => UserRole::JUDGE])->save();
         }
 
         $invitation->update([

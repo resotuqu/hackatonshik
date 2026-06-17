@@ -9,6 +9,7 @@ use App\Models\Skill;
 use App\Models\Team;
 use App\Models\TeamRole;
 use App\Models\TeamSocialLink;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -21,7 +22,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Изменение команды'])]
 class Edit extends Component
 {
-    use HasSocialLinks, Toast, WithFileUploads;
+    use AuthorizesRequests, HasSocialLinks, Toast, WithFileUploads;
 
     public Team $team;
 
@@ -129,11 +130,7 @@ class Edit extends Component
 
     public function save()
     {
-        if (Auth::id() !== $this->team->user_id) {
-            $this->redirect('/profile/teams');
-
-            return;
-        }
+        $this->authorize('update', $this->team);
 
         $this->validate();
 

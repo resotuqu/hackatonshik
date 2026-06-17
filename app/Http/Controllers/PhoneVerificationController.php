@@ -79,7 +79,7 @@ class PhoneVerificationController extends Controller
             ]);
         }
 
-        $user->update(['phone_verified_at' => now()]);
+        $user->forceFill(['phone_verified_at' => now()])->save();
         Cache::forget($cacheKey);
         RateLimiter::clear($attemptsKey);
 

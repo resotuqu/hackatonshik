@@ -9,6 +9,7 @@ use App\Models\Skill;
 use App\Models\Team;
 use App\Models\TeamRole;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -19,7 +20,7 @@ use Livewire\WithFileUploads;
 #[Layout('layouts::app', ['title' => 'Создание команды'])]
 class Create extends Component
 {
-    use HasSocialLinks, WithFileUploads;
+    use AuthorizesRequests, HasSocialLinks, WithFileUploads;
 
     public int $step = 1;
 
@@ -179,6 +180,8 @@ class Create extends Component
 
     public function save(): void
     {
+        $this->authorize('create', Team::class);
+
         if ($this->step < self::TOTAL_STEPS) {
             $this->nextStep();
 
@@ -300,7 +303,7 @@ class Create extends Component
 
     public function mount(): void
     {
-        abort_unless(Auth::user()?->canParticipate(), 403);
+        $this->authorize('create', Team::class);
 
         $this->captainRole = $this->emptyRoleData();
         $this->addRole();

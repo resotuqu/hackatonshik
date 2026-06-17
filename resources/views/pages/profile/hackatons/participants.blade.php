@@ -30,7 +30,7 @@
             @else
                 <x-marytable wire:model="expandedTeams" :headers="$teamHeaders" :rows="$this->teamRows" striped expandable>
                     @scope('expansion', $team)
-                        @php $participants = $this->getTeamParticipants($team['id']); @endphp
+                        @php $participants = $this->expansionDataByTeamId[$team['id']] ?? []; @endphp
 
                         @if(empty($participants))
                             <p class="opacity-70 p-4">Нет участников в команде.</p>
@@ -56,13 +56,11 @@
                                                     </div>
 
                                                     {{-- Документы --}}
-                                                    @php $documents = $this->getParticipantDocuments($participant['user_id']); @endphp
-
-                                                    @if(!empty($documents))
+                                                    @if(!empty($participant['documents']))
                                                         <div>
                                                             <p class="font-semibold mb-2">Документы</p>
                                                             <div class="space-y-2">
-                                                                @foreach($documents as $doc)
+                                                                @foreach($participant['documents'] as $doc)
                                                                     <div class="flex items-center justify-between gap-2 p-2 rounded-lg {{ $doc['uploaded'] ? 'bg-success/10' : 'bg-error/10' }}">
                                                                         <div class="flex items-center gap-2">
                                                                             @if($doc['uploaded'])

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Pages\Admin;
 
+use App\Enums\UserRole;
+use App\Livewire\Concerns\AuthorizesAdminAccess;
 use App\Models\Hackaton;
 use App\Models\ListAnalyticsEvent;
 use App\Models\Team;
@@ -15,7 +17,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Админ-панель'])]
 class Index extends Component
 {
-    use Toast;
+    use AuthorizesAdminAccess, Toast;
 
     public function mount(): void
     {
@@ -70,6 +72,8 @@ class Index extends Component
 
     public function savePartner(): void
     {
+        $this->authorizeAdminAccess();
+
         $this->validate([
             'fio' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date'],
@@ -91,16 +95,17 @@ class Index extends Component
             'password.confirmed' => 'Подтверждение пароля не совпадает.',
         ]);
 
-        User::query()->create([
+        $user = User::query()->create([
             'fio' => $this->fio,
             'date_of_birth' => $this->date_of_birth,
             'email' => $this->email,
             'nickname' => $this->nickname,
             'phone' => $this->phone,
             'password' => $this->password,
-            'role' => 'partner',
             'description' => $this->description,
         ]);
+
+        $user->forceFill(['role' => UserRole::PARTNER])->save();
 
         $this->reset(['fio', 'date_of_birth', 'email', 'nickname', 'phone', 'password', 'password_confirmation', 'description']);
 

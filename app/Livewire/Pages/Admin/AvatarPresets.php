@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\Admin;
 
+use App\Livewire\Concerns\AuthorizesAdminAccess;
 use App\Models\AvatarPreset;
 use App\Models\AvatarPresetPack;
 use App\Support\PresetAvatar;
@@ -17,7 +18,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts::app', ['title' => 'Аватарки (паки)'])]
 class AvatarPresets extends Component
 {
-    use Toast, WithFileUploads;
+    use AuthorizesAdminAccess, Toast, WithFileUploads;
 
     public string $new_pack_name = '';
 
@@ -65,6 +66,8 @@ class AvatarPresets extends Component
 
     public function createPack(): void
     {
+        $this->authorizeAdminAccess();
+
         $this->validate([
             'new_pack_name' => ['required', 'string', 'max:255'],
             'new_pack_slug' => ['required', 'string', 'max:64', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:avatar_preset_packs,slug'],
@@ -93,6 +96,8 @@ class AvatarPresets extends Component
 
     public function updatePack(int $id): void
     {
+        $this->authorizeAdminAccess();
+
         $this->validate([
             "packForm.$id.name" => ['required', 'string', 'max:255'],
             "packForm.$id.sort_order" => ['required', 'integer', 'min:0', 'max:999999'],
@@ -114,6 +119,8 @@ class AvatarPresets extends Component
 
     public function deletePack(int $id): void
     {
+        $this->authorizeAdminAccess();
+
         $pack = AvatarPresetPack::query()->with('presets')->findOrFail($id);
 
         foreach (AvatarPreset::query()->where('avatar_preset_pack_id', $pack->id)->get() as $preset) {
@@ -132,6 +139,8 @@ class AvatarPresets extends Component
 
     public function uploadToPack(): void
     {
+        $this->authorizeAdminAccess();
+
         $this->validate([
             'upload_pack_id' => ['required', 'exists:avatar_preset_packs,id'],
             'upload_files' => ['required', 'array', 'min:1'],
@@ -173,6 +182,8 @@ class AvatarPresets extends Component
 
     public function deletePreset(int $id): void
     {
+        $this->authorizeAdminAccess();
+
         $preset = AvatarPreset::query()->with('pack')->findOrFail($id);
         $pack = AvatarPresetPack::query()->find($preset->avatar_preset_pack_id);
         if (! $pack instanceof AvatarPresetPack) {
