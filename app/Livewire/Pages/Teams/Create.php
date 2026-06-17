@@ -300,6 +300,8 @@ class Create extends Component
 
     public function mount(): void
     {
+        abort_unless(Auth::user()?->canParticipate(), 403);
+
         $this->captainRole = $this->emptyRoleData();
         $this->addRole();
         $this->addSocialLink();

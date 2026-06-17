@@ -140,7 +140,12 @@
                         $btmStaff = $btmUser->isOrganizer() || $btmUser->isJudge() || $btmUser->isAdmin();
                     @endphp
                     @if ($btmStaff)
-                        @if ($btmUser->isOrganizer())
+                        @if ($btmUser->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:shield-check" class="h-6 w-6" />
+                                <span class="btm-nav-label">Админ</span>
+                            </a>
+                        @elseif ($btmUser->isOrganizer())
                             <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:squares-2x2" class="h-6 w-6" />
                                 <span class="btm-nav-label">Орг.</span>
@@ -149,11 +154,6 @@
                             <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:scale" class="h-6 w-6" />
                                 <span class="btm-nav-label">Судья</span>
-                            </a>
-                        @else
-                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
-                                <x-app-icon icon="heroicons:shield-check" class="h-6 w-6" />
-                                <span class="btm-nav-label">Админ</span>
                             </a>
                         @endif
                     @else
@@ -179,7 +179,12 @@
                     </a>
                 @else
                     @if ($btmStaff)
-                        @if ($btmUser->isOrganizer())
+                        @if ($btmUser->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
+                                <x-app-icon icon="heroicons:chart-bar-square" class="h-6 w-6" />
+                                <span class="btm-nav-label">Админ</span>
+                            </a>
+                        @elseif ($btmUser->isOrganizer())
                             <a href="{{ route('organizer.applications') }}" wire:navigate @class([request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                                 <span class="btm-nav-label">Заявки</span>
@@ -188,11 +193,6 @@
                             <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:clipboard-document-list" class="h-6 w-6" />
                                 <span class="btm-nav-label">Хакатоны</span>
-                            </a>
-                        @else
-                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
-                                <x-app-icon icon="heroicons:chart-bar-square" class="h-6 w-6" />
-                                <span class="btm-nav-label">Админ</span>
                             </a>
                         @endif
                     @else
@@ -346,7 +346,7 @@
                     @else
                         @php
                             $navUser = Auth::user();
-                            $isPureParticipant = ! $navUser->isOrganizer() && ! $navUser->isJudge() && ! $navUser->isAdmin();
+                            $isPureParticipant = $navUser->canParticipate();
                         @endphp
 
                         @if ($isPureParticipant)

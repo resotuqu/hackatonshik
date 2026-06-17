@@ -12,12 +12,12 @@ use App\Models\TeamRole;
 use App\Models\User;
 use App\Policies\HackatonCaseSubmissionPolicy;
 
-it('always allows organizer to create a case submission', function () {
+it('denies organizer from creating a case submission', function () {
     $organizer = User::factory()->partner()->create();
     $hackaton = Hackaton::factory()->for($organizer)->create();
     $case = HackatonCase::factory()->create(['hackaton_id' => $hackaton->id]);
 
-    expect((new HackatonCaseSubmissionPolicy)->create($organizer, $case))->toBeTrue();
+    expect((new HackatonCaseSubmissionPolicy)->create($organizer, $case))->toBeFalse();
 });
 
 it('allows team member to create a case submission only when application is accepted', function () {

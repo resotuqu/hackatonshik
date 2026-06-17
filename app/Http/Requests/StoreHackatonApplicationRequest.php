@@ -39,6 +39,12 @@ class StoreHackatonApplicationRequest extends FormRequest
                     return;
                 }
 
+                if (! $user->canParticipate()) {
+                    $validator->errors()->add('team_id', 'Только участники могут подавать заявки на хакатоны.');
+
+                    return;
+                }
+
                 $team = Team::query()->find($teamId);
 
                 if (! $team) {

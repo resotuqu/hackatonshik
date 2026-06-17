@@ -15,6 +15,7 @@ class Hub extends Component
 
     public function mount(Hackaton $hackaton): void
     {
+        abort_unless(auth()->user()?->canParticipate(), 403);
         $this->authorize('view', $hackaton);
         $this->hackaton = $hackaton;
     }

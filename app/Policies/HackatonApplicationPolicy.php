@@ -13,7 +13,7 @@ class HackatonApplicationPolicy
 {
     public function create(User $user): bool
     {
-        return true;
+        return $user->canParticipate();
     }
 
     public function update(User $user, HackatonApplication $application): bool

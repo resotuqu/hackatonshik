@@ -14,13 +14,13 @@ class HackatonCaseSubmissionPolicy
 {
     public function create(User $user, HackatonCase $hackatonCase): bool
     {
-        $hackaton = Hackaton::query()->find($hackatonCase->hackaton_id);
-        if (! $hackaton instanceof Hackaton) {
+        if (! $user->canParticipate()) {
             return false;
         }
 
-        if ($hackaton->user_id === $user->id) {
-            return true;
+        $hackaton = Hackaton::query()->find($hackatonCase->hackaton_id);
+        if (! $hackaton instanceof Hackaton) {
+            return false;
         }
 
         $hackatonId = $hackatonCase->hackaton_id;

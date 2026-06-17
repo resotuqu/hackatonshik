@@ -13,7 +13,7 @@ class TeamApplicationPolicy
 {
     public function create(User $user): bool
     {
-        return ! $user->isOrganizer();
+        return $user->canParticipate();
     }
 
     public function update(User $user, TeamApplication $application): bool

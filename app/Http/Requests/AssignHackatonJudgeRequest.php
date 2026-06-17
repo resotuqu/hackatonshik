@@ -42,6 +42,10 @@ class AssignHackatonJudgeRequest extends FormRequest
                 if (! $candidate || ! $candidate->isJudge()) {
                     $validator->errors()->add('user_id', 'Назначать можно только зарегистрированных судей.');
                 }
+
+                if ($candidate?->isOrganizer()) {
+                    $validator->errors()->add('user_id', 'Организатор не может быть назначен внешним судьёй.');
+                }
             },
         ];
     }

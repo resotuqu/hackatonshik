@@ -277,7 +277,7 @@
                         ->all();
                     $canQuickApply =
                         auth()->check()
-                        && ! auth()->user()->isOrganizer()
+                        && auth()->user()->canParticipate()
                         && (int) $team->user_id !== auth()->id();
                     $participantUsers = $team->roles
                         ->filter(fn ($r) => $r->user_id && $r->relationLoaded('user') && $r->user)

@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureContactChannelsVerified;
 use App\Http\Middleware\EnsureJudge;
 use App\Http\Middleware\EnsureOrganizer;
+use App\Http\Middleware\EnsureParticipant;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'signed' => ValidateSignature::class.':relative',
             'organizer' => EnsureOrganizer::class,
             'judge' => EnsureJudge::class,
+            'participant' => EnsureParticipant::class,
         ]);
 
         $appEnv = (string) env('APP_ENV', 'production');

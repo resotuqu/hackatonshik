@@ -9,6 +9,11 @@ use App\Models\User;
 
 class TeamPolicy
 {
+    public function create(User $user): bool
+    {
+        return $user->canParticipate();
+    }
+
     public function view(?User $user, Team $team): bool
     {
         if ($team->is_public) {

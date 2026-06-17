@@ -89,6 +89,10 @@ class JudgeManagementController extends Controller
             abort(403);
         }
 
+        if ($user->isOrganizer() || $user->isAdmin()) {
+            abort(403, 'Организаторы и администраторы не могут принимать приглашения судьи.');
+        }
+
         if ($user->isParticipant()) {
             $user->update(['role' => UserRole::JUDGE]);
         }

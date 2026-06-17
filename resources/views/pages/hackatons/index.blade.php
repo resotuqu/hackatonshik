@@ -42,7 +42,7 @@
         default => 'хакатонов',
     };
 
-    $canCreate = auth()->check() && (auth()->user()->isOrganizer() || auth()->user()->isAdmin());
+    $canCreate = auth()->check() && auth()->user()->isOrganizer();
 @endphp
 
 <div class="space-y-8">
@@ -300,7 +300,7 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @forelse ($this->hackatons as $hackaton)
                 @php
-                    $canQuickApply = auth()->check() && ! auth()->user()->isOrganizer();
+                    $canQuickApply = auth()->check() && auth()->user()->canParticipate();
                 @endphp
                 <div wire:key="hackaton-card-{{ $hackaton->id }}">
                     <x-hackaton-card

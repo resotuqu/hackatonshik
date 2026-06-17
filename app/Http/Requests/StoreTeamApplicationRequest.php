@@ -37,8 +37,8 @@ class StoreTeamApplicationRequest extends FormRequest
                     return;
                 }
 
-                if ($user->isOrganizer()) {
-                    $validator->errors()->add('team_role_id', 'Организатор не может подавать заявки в команды.');
+                if (! $user->canParticipate()) {
+                    $validator->errors()->add('team_role_id', 'Только участники могут подавать заявки в команды.');
 
                     return;
                 }

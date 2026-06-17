@@ -9,7 +9,7 @@
             ($team->user_id === auth()->id() ||
                 $occupiedRoles->contains(fn ($r) => (int) $r->user_id === (int) auth()->id()));
         $canHeroApply =
-            auth()->check() && !auth()->user()->isOrganizer() && !$isTeamMember && $openRoles->isNotEmpty();
+            auth()->check() && auth()->user()->canParticipate() && !$isTeamMember && $openRoles->isNotEmpty();
         $sectionCard = 'card rounded-[var(--radius-card)] border border-base-300 bg-base-100';
         $heroApplyBtn = 'btn btn-primary gap-2';
         $modalTriggerClass = 'btn btn-primary btn-lg inline-flex cursor-pointer items-center justify-center gap-2';

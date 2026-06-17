@@ -109,15 +109,16 @@ Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:ac
 Route::get('/admin/avatar-presets', AdminAvatarPresets::class)->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
+$organizerMiddleware = ['auth', 'verified', 'organizer'];
+$participantMiddleware = ['auth', 'verified', 'participant'];
+$authMiddleware = ['auth', 'verified'];
+
 Route::get('/teams', TeamsIndex::class)->name('teams.index');
-Route::get('/teams/create', TeamsCreate::class)->middleware(['auth', 'verified'])->name('teams.create');
-Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware(['auth', 'verified'])->name('profile.teams');
+Route::get('/teams/create', TeamsCreate::class)->middleware($participantMiddleware)->name('teams.create');
+Route::get('/profile/teams', ProfileTeamsIndex::class)->middleware($participantMiddleware)->name('profile.teams');
 
 Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
-Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified', 'organizer'])->name('hackatons.create');
-
-$organizerMiddleware = ['auth', 'verified', 'organizer'];
-$authMiddleware = ['auth', 'verified'];
+Route::get('/hackatons/create', HackatonsCreate::class)->middleware($organizerMiddleware)->name('hackatons.create');
 
 Route::get('/profile/hackatons', function () {
     $user = Auth::user();
@@ -148,15 +149,15 @@ Route::get('/profile/hackatons/{hackaton}/participants', function (Hackaton $hac
     return redirect()->route('organizer.participants', $hackaton);
 })->middleware($organizerMiddleware)->name('profile.hackatons.participants');
 
-Route::get('/participant/hackatons', ParticipantHackatonsIndex::class)->middleware($authMiddleware)->name('participant.hackatons');
+Route::get('/participant/hackatons', ParticipantHackatonsIndex::class)->middleware($participantMiddleware)->name('participant.hackatons');
 Route::get('/participant/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
-    ->middleware($authMiddleware)
+    ->middleware($participantMiddleware)
     ->name('participant.hackatons.hub');
 Route::get('/profile/hackatons/{hackaton}/hub', function (Hackaton $hackaton) {
     return redirect()->route('participant.hackatons.hub', $hackaton);
-})->middleware($authMiddleware)->name('profile.hackatons.hub');
+})->middleware($participantMiddleware)->name('profile.hackatons.hub');
 
-Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware($authMiddleware)->name('profile.certificates');
+Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware($participantMiddleware)->name('profile.certificates');
 
 Route::get('/teams/{team}', TeamsShow::class)->name('teams.show');
 Route::get('/teams/{team}/edit', TeamsEdit::class)
