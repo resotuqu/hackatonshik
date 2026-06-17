@@ -151,7 +151,7 @@
                                 <span class="btm-nav-label">Судья</span>
                             </a>
                         @else
-                            <a href="{{ url('/admin') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:shield-check" class="h-6 w-6" />
                                 <span class="btm-nav-label">Админ</span>
                             </a>
@@ -180,9 +180,9 @@
                 @else
                     @if ($btmStaff)
                         @if ($btmUser->isOrganizer())
-                            <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('organizer.applications') }}" wire:navigate @class([request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                                <span class="btm-nav-label">Мои</span>
+                                <span class="btm-nav-label">Заявки</span>
                             </a>
                         @elseif ($btmUser->isJudge())
                             <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
@@ -190,9 +190,9 @@
                                 <span class="btm-nav-label">Хакатоны</span>
                             </a>
                         @else
-                            <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
                                 <x-app-icon icon="heroicons:chart-bar-square" class="h-6 w-6" />
-                                <span class="btm-nav-label">Сводка</span>
+                                <span class="btm-nav-label">Админ</span>
                             </a>
                         @endif
                     @else
@@ -384,9 +384,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('home') }}#participant-hackaton-dashboard" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                                <a href="{{ route('participant.hackatons') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('participant.hackatons', 'participant.hackatons.hub') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:rectangle-stack" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">Мои хакатоны и заявки</span>
+                                    <span class="min-w-0 flex-1">Мои заявки и хакатоны</span>
                                 </a>
                             </li>
                             <li>
@@ -414,27 +414,16 @@
                                 <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Хакатоны</span></li>
                                 @if ($navUser->isOrganizer())
                                     <li>
-                                        <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer') ? 'active' : '' }}">
-                                            <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0" />
-                                            <span class="min-w-0 flex-1">Мои хакатоны</span>
-                                            @if (isset($partnerSidebarCounts) && $partnerSidebarCounts !== null && $partnerSidebarCounts->totalHackatonsCount > 0)
-                                                <span class="badge badge-sm badge-ghost shrink-0 tabular-nums" title="Активные / всего">
-                                                    {{ $partnerSidebarCounts->activeHackatonsCount }}/{{ $partnerSidebarCounts->totalHackatonsCount }}
-                                                </span>
-                                            @endif
-                                        </a>
-                                    </li>
-                                    <li>
                                         <a href="{{ route('hackatons.create') }}" wire:navigate class="sidebar-nav-link sidebar-nav-link--partner-cta {{ request()->routeIs('hackatons.create') ? 'active' : '' }}">
                                             <x-app-icon icon="heroicons:plus" class="h-5 w-5 shrink-0" />
                                             <span class="min-w-0 flex-1">Создать новый хакатон</span>
                                         </a>
                                     </li>
-                                @else
+                                @elseif ($navUser->isJudge())
                                     <li>
                                         <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
                                             <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0" />
-                                            <span class="min-w-0 flex-1">Мои хакатоны</span>
+                                            <span class="min-w-0 flex-1">Назначенные хакатоны</span>
                                         </a>
                                     </li>
                                 @endif
@@ -443,14 +432,19 @@
                             <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Кабинет</span></li>
                             @if ($navUser->isOrganizer())
                                 <li>
-                                    <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active' : '' }}">
+                                    <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer', 'organizer.applications', 'organizer.scoring', 'organizer.finished', 'organizer.participants') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:squares-2x2" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Организаторский кабинет</span>
+                                        @if (isset($partnerSidebarCounts) && $partnerSidebarCounts !== null && $partnerSidebarCounts->totalHackatonsCount > 0)
+                                            <span class="badge badge-sm badge-ghost shrink-0 tabular-nums" title="Активные / всего">
+                                                {{ $partnerSidebarCounts->activeHackatonsCount }}/{{ $partnerSidebarCounts->totalHackatonsCount }}
+                                            </span>
+                                        @endif
                                     </a>
                                 </li>
                             @elseif ($navUser->isAdmin())
                                 <li>
-                                    <a href="{{ url('/admin') }}" wire:navigate class="sidebar-nav-link {{ request()->is('admin*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('admin*') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Админ-панель</span>
                                     </a>
@@ -468,7 +462,7 @@
                                 <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
                                 <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Быстрые действия</span></li>
                                 <li>
-                                    <a href="{{ route('profile.hackatons.applications') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.applications') ? 'active' : '' }}">
+                                    <a href="{{ route('organizer.applications') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:inbox" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Заявки на рассмотрении</span>
                                         @if ($partnerSidebarCounts->pendingApplicationsCount > 0)
@@ -477,13 +471,13 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('profile.hackatons.scoring') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.scoring') ? 'active' : '' }}">
+                                    <a href="{{ route('organizer.scoring') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.scoring', 'profile.hackatons.scoring') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:clipboard-document-check" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">Оценка работ</span>
+                                        <span class="min-w-0 flex-1">Сводка по оценкам</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('profile.hackatons.finished') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.hackatons.finished') ? 'active' : '' }}">
+                                    <a href="{{ route('organizer.finished') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.finished', 'profile.hackatons.finished') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:archive-box" class="h-5 w-5 shrink-0" />
                                         <span class="min-w-0 flex-1">Завершённые хакатоны</span>
                                     </a>

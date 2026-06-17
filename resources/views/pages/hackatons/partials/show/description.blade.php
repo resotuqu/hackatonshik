@@ -53,7 +53,7 @@
                 @auth
                     @if ($hackaton->user_id !== auth()->id())
                         <div class="divider my-1"></div>
-                        <a href="{{ route('profile.hackatons.hub', $hackaton) }}" class="btn btn-sm btn-outline w-full">
+                        <a href="{{ route('participant.hackatons.hub', $hackaton) }}" class="btn btn-sm btn-outline w-full">
                             Открыть мой кабинет участника
                         </a>
                         @if ($myApplicationsByTeam->isNotEmpty())

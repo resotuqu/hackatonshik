@@ -43,7 +43,7 @@
             <a class="btn btn-sm btn-primary" href="/admin/avatar-presets">Аватарки (паки)</a>
             <a class="btn btn-sm btn-outline" href="/hackatons">Хакатоны</a>
             <a class="btn btn-sm btn-outline" href="/teams">Команды</a>
-            <a class="btn btn-sm btn-outline" href="/profile">Пользователи</a>
+            <a class="btn btn-sm btn-outline" href="{{ route('profile') }}">Мой профиль</a>
         </div>
     </x-mary-card>
 

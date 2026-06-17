@@ -29,7 +29,7 @@ class Participants extends Component
     public function mount(Hackaton $hackaton): void
     {
         if (! Auth::check() || Auth::id() !== $hackaton->user_id) {
-            $this->redirect('/profile/hackatons');
+            $this->redirect(route('organizer.dashboard'));
 
             return;
         }

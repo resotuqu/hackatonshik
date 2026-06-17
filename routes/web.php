@@ -33,6 +33,7 @@ use App\Livewire\Pages\Judge\HackatonShow as JudgeHackatonShow;
 use App\Livewire\Pages\Judge\SubmissionList as JudgeSubmissionList;
 use App\Livewire\Pages\News\Index as NewsIndex;
 use App\Livewire\Pages\News\Show as NewsShow;
+use App\Livewire\Pages\Participant\Hackatons\Index as ParticipantHackatonsIndex;
 use App\Livewire\Pages\PrivacyPolicy\Index as PrivacyPolicyIndex;
 use App\Livewire\Pages\Profile\Certificates\Index as ProfileCertificatesIndex;
 use App\Livewire\Pages\Profile\Hackatons\Applications as ProfileHackatonsApplications;
@@ -47,9 +48,11 @@ use App\Livewire\Pages\Teams\Create as TeamsCreate;
 use App\Livewire\Pages\Teams\Edit as TeamsEdit;
 use App\Livewire\Pages\Teams\Index as TeamsIndex;
 use App\Livewire\Pages\Teams\Show as TeamsShow;
+use App\Models\Hackaton;
 use App\Models\NewsPost;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeIndex::class)->name('home');
@@ -102,7 +105,7 @@ Route::get('/cookie-policy', CookiePolicyIndex::class);
 Route::get('/login', AuthLogin::class)->name('login');
 Route::get('/register', AuthRegister::class)->name('register');
 Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified'])->name('profile');
-Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:access-admin']);
+Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.dashboard');
 Route::get('/admin/avatar-presets', AdminAvatarPresets::class)->middleware(['auth', 'verified', 'can:access-admin']);
 Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
@@ -114,18 +117,46 @@ Route::get('/hackatons', HackatonsIndex::class)->name('hackatons.index');
 Route::get('/hackatons/create', HackatonsCreate::class)->middleware(['auth', 'verified', 'organizer'])->name('hackatons.create');
 
 $organizerMiddleware = ['auth', 'verified', 'organizer'];
+$authMiddleware = ['auth', 'verified'];
 
-Route::redirect('/profile/hackatons', '/organizer')->middleware($organizerMiddleware)->name('profile.hackatons');
+Route::get('/profile/hackatons', function () {
+    $user = Auth::user();
+    abort_unless($user !== null, 403);
+
+    if ($user->isOrganizer()) {
+        return redirect()->route('organizer.dashboard');
+    }
+
+    if ($user->isJudge()) {
+        return redirect()->route('judge.dashboard');
+    }
+
+    return redirect()->route('participant.hackatons');
+})->middleware($authMiddleware)->name('profile.hackatons');
+
 Route::redirect('/profile/organizer', '/organizer')->middleware($organizerMiddleware)->name('profile.organizer');
 Route::get('/organizer', OrganizerDashboard::class)->middleware($organizerMiddleware)->name('organizer.dashboard');
-Route::get('/profile/hackatons/applications', ProfileHackatonsApplications::class)->middleware($organizerMiddleware)->name('profile.hackatons.applications');
-Route::get('/profile/hackatons/scoring', ProfileHackatonsScoring::class)->middleware($organizerMiddleware)->name('profile.hackatons.scoring');
-Route::get('/profile/hackatons/finished', ProfileHackatonsFinished::class)->middleware($organizerMiddleware)->name('profile.hackatons.finished');
-Route::get('/profile/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware($organizerMiddleware)->name('profile.hackatons.participants');
-Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware(['auth', 'verified'])->name('profile.certificates');
-Route::get('/profile/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
-    ->middleware(['auth', 'verified'])
-    ->name('profile.hackatons.hub');
+Route::get('/organizer/applications', ProfileHackatonsApplications::class)->middleware($organizerMiddleware)->name('organizer.applications');
+Route::get('/organizer/scoring', ProfileHackatonsScoring::class)->middleware($organizerMiddleware)->name('organizer.scoring');
+Route::get('/organizer/finished', ProfileHackatonsFinished::class)->middleware($organizerMiddleware)->name('organizer.finished');
+Route::get('/organizer/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware($organizerMiddleware)->name('organizer.participants');
+
+Route::redirect('/profile/hackatons/applications', '/organizer/applications')->middleware($organizerMiddleware)->name('profile.hackatons.applications');
+Route::redirect('/profile/hackatons/scoring', '/organizer/scoring')->middleware($organizerMiddleware)->name('profile.hackatons.scoring');
+Route::redirect('/profile/hackatons/finished', '/organizer/finished')->middleware($organizerMiddleware)->name('profile.hackatons.finished');
+Route::get('/profile/hackatons/{hackaton}/participants', function (Hackaton $hackaton) {
+    return redirect()->route('organizer.participants', $hackaton);
+})->middleware($organizerMiddleware)->name('profile.hackatons.participants');
+
+Route::get('/participant/hackatons', ParticipantHackatonsIndex::class)->middleware($authMiddleware)->name('participant.hackatons');
+Route::get('/participant/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
+    ->middleware($authMiddleware)
+    ->name('participant.hackatons.hub');
+Route::get('/profile/hackatons/{hackaton}/hub', function (Hackaton $hackaton) {
+    return redirect()->route('participant.hackatons.hub', $hackaton);
+})->middleware($authMiddleware)->name('profile.hackatons.hub');
+
+Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware($authMiddleware)->name('profile.certificates');
 
 Route::get('/teams/{team}', TeamsShow::class)->name('teams.show');
 Route::get('/teams/{team}/edit', TeamsEdit::class)
@@ -142,12 +173,14 @@ Route::get('/auth/yandex/callback', [SocialAuthController::class, 'callback'])->
 Route::get('/auth/vk/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'vk');
 Route::get('/auth/vk/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'vk');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'judge'])->group(function () {
     Route::get('/judge', JudgeDashboard::class)->name('judge.dashboard');
     Route::get('/judge/hackatons/{hackaton}', JudgeHackatonShow::class)->name('judge.hackatons.show');
     Route::get('/judge/hackatons/{hackaton}/cases/{case}', JudgeSubmissionList::class)->name('judge.cases.submissions');
     Route::get('/judge/submissions/{submission}', JudgeEvaluateSubmission::class)->name('judge.submissions.evaluate');
+});
 
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
     Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');

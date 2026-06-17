@@ -15,10 +15,10 @@
                 </p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
                     <a
-                        href="/hackatons/create"
+                        href="/contacts"
                         class="ui-cta-secondary btn-lg order-1 text-base sm:text-lg sm:order-2"
                     >
-                        Создать хакатон
+                        Стать организатором
                     </a>
                     <a href="/teams" class="ui-cta-outline-primary btn-lg order-2 sm:order-1">
                         Найти команду
@@ -440,17 +440,22 @@
         @endif
 
         <div class="flex flex-wrap gap-3">
-            <a href="/hackatons" class="btn btn-primary">Хакатоны</a>
-            <a href="/teams/create" class="btn btn-outline">Создать команду</a>
-            <a href="/profile/teams" class="btn btn-outline">Мои команды</a>
+            <a href="{{ route('participant.hackatons') }}" class="btn btn-primary">Мои заявки и хакатоны</a>
+            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Каталог</a>
+            <a href="{{ route('teams.create') }}" class="btn btn-outline">Создать команду</a>
+            <a href="{{ route('profile.teams') }}" class="btn btn-outline">Мои команды</a>
         </div>
         </div>
-    @elseif (auth()->user()->isOrganizer())
+    @endif
+
+    @if (auth()->user()->isOrganizer())
+        <section class="space-y-6" data-test="home-organizer-dashboard">
+            <h2 class="ui-heading-display text-xl font-semibold">Организатор</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <x-marycard title="Мои хакатоны" class="card card-border bg-base-100 shadow-sm">
                 <p class="text-3xl font-semibold tabular-nums">{{ $hackatonsCount }}</p>
                 <x-slot:menu>
-                    <a href="/profile/hackatons" class="btn btn-ghost btn-sm">Открыть</a>
+                    <a href="{{ route('organizer.dashboard') }}" class="btn btn-ghost btn-sm">Открыть</a>
                 </x-slot:menu>
             </x-marycard>
             <x-marycard title="Заявки команд на рассмотрении" class="card card-border bg-base-100 shadow-sm">
@@ -467,22 +472,27 @@
             @if ($pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId)
                 <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#hackaton-tab-participants" class="btn btn-primary">Рассмотреть заявки</a>
             @endif
-            <a href="/profile/hackatons" class="btn {{ $pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId ? 'btn-outline' : 'btn-primary' }}">Мои хакатоны</a>
-            <a href="/hackatons/create" class="btn btn-outline">Создать хакатон</a>
-            <a href="/hackatons" class="btn btn-outline">Каталог хакатонов</a>
+            <a href="{{ route('organizer.dashboard') }}" class="btn {{ $pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId ? 'btn-outline' : 'btn-primary' }}">Мои хакатоны</a>
+            <a href="{{ route('hackatons.create') }}" class="btn btn-outline">Создать хакатон</a>
+            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Каталог хакатонов</a>
         </div>
-    @elseif (auth()->user()->isJudge())
+        </section>
+    @endif
+
+    @if (auth()->user()->isJudge())
+        <section class="space-y-6" data-test="home-judge-dashboard">
+            <h2 class="ui-heading-display text-xl font-semibold">Судья</h2>
         @if ($judgeHackatonsCount === 0)
             <div class="rounded-xl border border-base-200 bg-base-100 p-6 text-center shadow-sm" data-test="judge-dashboard-empty">
                 <p class="text-base-content/80">У вас пока нет назначенных хакатонов. Когда организатор добавит вас в судьи, события появятся здесь.</p>
-                <a href="/hackatons" class="btn btn-primary mt-4">Каталог хакатонов</a>
+                <a href="{{ route('hackatons.index') }}" class="btn btn-primary mt-4">Каталог хакатонов</a>
             </div>
         @else
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-marycard title="Назначенные хакатоны" class="card card-border bg-base-100 shadow-sm">
                     <p class="text-3xl font-semibold tabular-nums">{{ $judgeHackatonsCount }}</p>
                     <x-slot:menu>
-                        <a href="/hackatons" class="btn btn-ghost btn-sm">Каталог</a>
+                        <a href="{{ route('judge.dashboard') }}" class="btn btn-ghost btn-sm">Панель судьи</a>
                     </x-slot:menu>
                 </x-marycard>
             </div>
@@ -497,7 +507,7 @@
                                         <span class="text-sm text-base-content/70">{{ $row['start_at'] }}</span>
                                     @endif
                                 </div>
-                                <a href="{{ route('hackatons.show', $row['id']) }}#hackaton-cases" class="btn btn-ghost btn-xs shrink-0">К кейсам</a>
+                                <a href="{{ route('judge.hackatons.show', $row['id']) }}" class="btn btn-ghost btn-xs shrink-0">К оценке</a>
                             </li>
                         @endforeach
                     </ul>
@@ -505,10 +515,15 @@
             @endif
         @endif
         <div class="flex flex-wrap gap-3">
-            <a href="/hackatons" class="btn btn-primary">Все хакатоны</a>
-            <a href="/profile" class="btn btn-outline">Профиль</a>
+            <a href="{{ route('judge.dashboard') }}" class="btn btn-primary">Панель судьи</a>
+            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Каталог</a>
         </div>
-    @elseif (auth()->user()->isAdmin())
+        </section>
+    @endif
+
+    @if (auth()->user()->isAdmin())
+        <section class="space-y-6" data-test="home-admin-dashboard">
+            <h2 class="ui-heading-display text-xl font-semibold">Администратор</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <x-marycard title="Пользователей" class="card card-border bg-base-100 shadow-sm">
                 <p class="text-3xl font-semibold tabular-nums">{{ $usersCount }}</p>
@@ -525,11 +540,13 @@
             </x-marycard>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="/admin" class="btn btn-primary">Админ-панель</a>
-            <a href="/hackatons" class="btn btn-outline">Хакатоны</a>
-            <a href="/profile" class="btn btn-outline">Профиль</a>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Админ-панель</a>
+            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Хакатоны</a>
         </div>
-    @else
+        </section>
+    @endif
+
+    @if (! auth()->user()->isParticipant() && ! auth()->user()->isOrganizer() && ! auth()->user()->isJudge() && ! auth()->user()->isAdmin())
         <p class="text-base-content/80">Выберите раздел в меню слева или перейдите к хакатонам.</p>
         <div class="flex flex-wrap gap-3">
             <a href="/hackatons" class="btn btn-primary">Хакатоны</a>

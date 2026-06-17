@@ -13,14 +13,26 @@ it('allows partner to access organizer profile hackaton pages', function (): voi
 
     $this->actingAs($partner)
         ->get(route('profile.hackatons.applications'))
+        ->assertRedirect(route('organizer.applications'));
+
+    $this->actingAs($partner)
+        ->get(route('organizer.applications'))
         ->assertOk();
 
     $this->actingAs($partner)
         ->get(route('profile.hackatons.scoring'))
+        ->assertRedirect(route('organizer.scoring'));
+
+    $this->actingAs($partner)
+        ->get(route('organizer.scoring'))
         ->assertOk();
 
     $this->actingAs($partner)
         ->get(route('profile.hackatons.finished'))
+        ->assertRedirect(route('organizer.finished'));
+
+    $this->actingAs($partner)
+        ->get(route('organizer.finished'))
         ->assertOk();
 });
 

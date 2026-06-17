@@ -8,12 +8,7 @@
         </ul>
     </nav>
 
-    <div class="tabs tabs-boxed w-full overflow-x-auto">
-        <a class="tab tab-active">Личные данные</a>
-        <a class="tab" href="/profile/teams">Мои команды</a>
-        <a class="tab" href="/profile/hackatons">Мои хакатоны</a>
-        <a class="tab" href="/profile/certificates">Сертификаты</a>
-    </div>
+    <x-profile-nav-tabs active="personal" />
 
     {{-- HERO --}}
     <section class="ui-page-hero">

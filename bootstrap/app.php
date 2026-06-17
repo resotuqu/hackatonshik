@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureContactChannelsVerified;
+use App\Http\Middleware\EnsureJudge;
 use App\Http\Middleware\EnsureOrganizer;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'signed' => ValidateSignature::class.':relative',
             'organizer' => EnsureOrganizer::class,
+            'judge' => EnsureJudge::class,
         ]);
 
         $appEnv = (string) env('APP_ENV', 'production');

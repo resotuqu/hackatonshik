@@ -3,7 +3,7 @@
         <ul>
             <li><a href="/">Главная</a></li>
             <li><a href="{{ route('profile') }}">Профиль</a></li>
-            <li><a href="{{ route('profile.hackatons') }}">Мои хакатоны</a></li>
+            <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
             <li class="opacity-70">Завершённые</li>
         </ul>
     </div>
@@ -22,7 +22,7 @@
                     title="Завершённых хакатонов пока нет"
                     description="После окончания события статус обновится автоматически по расписанию — затем хакатон появится в этом списке."
                     icon="heroicons:archive-box"
-                    action-href="{{ route('profile.hackatons') }}"
+                    action-href="{{ route('organizer.dashboard') }}"
                     action-label="К дашборду"
                     secondary-action-href="{{ route('hackatons.create') }}"
                     secondary-action-label="Создать хакатон"

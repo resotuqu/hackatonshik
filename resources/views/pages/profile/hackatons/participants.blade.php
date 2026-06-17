@@ -4,7 +4,7 @@
             <ul>
                 <li><a href="/">Главная</a></li>
                 <li><a href="/profile">Профиль</a></li>
-                <li><a href="/profile/hackatons">Мои хакатоны</a></li>
+                <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
                 <li class="opacity-70">Участники</li>
             </ul>
         </div>
@@ -14,7 +14,7 @@
                 <h3 class="text-2xl font-bold">Участники хакатона</h3>
                 <p class="opacity-80">{{ $hackaton->title }}</p>
             </div>
-            <a href="/profile/hackatons">
+            <a href="{{ route('organizer.dashboard') }}">
                 <x-mary-button label="Назад" class="btn-secondary" />
             </a>
         </div>

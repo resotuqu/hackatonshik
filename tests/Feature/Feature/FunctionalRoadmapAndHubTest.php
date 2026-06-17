@@ -47,10 +47,14 @@ test('participant can open personal hackaton hub', function () {
 
     $response = $this
         ->actingAs($participant)
-        ->get(route('profile.hackatons.hub', $hackaton));
+        ->get(route('participant.hackatons.hub', $hackaton));
 
     $response->assertSuccessful();
     $response->assertSee('Личный кабинет участника', false);
+
+    $this->actingAs($participant)
+        ->get(route('profile.hackatons.hub', $hackaton))
+        ->assertRedirect(route('participant.hackatons.hub', $hackaton));
 });
 
 test('outsider cannot open personal hackaton hub', function () {
@@ -63,7 +67,7 @@ test('outsider cannot open personal hackaton hub', function () {
 
     $response = $this
         ->actingAs($outsider)
-        ->get(route('profile.hackatons.hub', $hackaton));
+        ->get(route('participant.hackatons.hub', $hackaton));
 
     $response->assertForbidden();
 });

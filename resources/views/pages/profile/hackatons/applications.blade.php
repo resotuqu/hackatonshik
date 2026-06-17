@@ -3,7 +3,7 @@
         <ul>
             <li><a href="/">Главная</a></li>
             <li><a href="{{ route('profile') }}">Профиль</a></li>
-            <li><a href="{{ route('profile.hackatons') }}">Мои хакатоны</a></li>
+            <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
             <li class="opacity-70">Заявки</li>
         </ul>
     </div>
@@ -22,7 +22,7 @@
                     title="Нет заявок на рассмотрении"
                     description="Новые заявки появятся здесь, когда команды подадут участие в ваших хакатонах."
                     icon="heroicons:inbox"
-                    action-href="{{ route('profile.hackatons') }}"
+                    action-href="{{ route('organizer.dashboard') }}"
                     action-label="К дашборду"
                     secondary-action-href="{{ route('hackatons.index') }}"
                     secondary-action-label="Каталог хакатонов"

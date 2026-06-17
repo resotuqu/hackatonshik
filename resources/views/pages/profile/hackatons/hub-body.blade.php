@@ -23,7 +23,7 @@
             <h2 class="ui-heading-display text-sm font-medium text-warning">Требуют внимания (все хакатоны)</h2>
             <div class="mt-3 flex flex-wrap gap-4 text-sm">
                 @if(($globalPending['applications'] ?? 0) > 0)
-                    <a href="{{ route('profile.hackatons.applications') }}" class="link link-hover font-medium" wire:navigate>
+                    <a href="{{ route('organizer.applications') }}" class="link link-hover font-medium" wire:navigate>
                         Заявки команд: {{ $globalPending['applications'] }}
                     </a>
                 @endif
@@ -177,7 +177,7 @@
                             <x-app-icon icon="heroicons:inbox" class="h-4 w-4 text-error" />
                             Заявки
                         </a>
-                        <a href="{{ route('profile.hackatons.scoring') }}" class="ui-cta-outline btn-sm w-full gap-2 sm:flex-1 lg:flex-none" wire:navigate>
+                        <a href="{{ route('organizer.scoring') }}" class="ui-cta-outline btn-sm w-full gap-2 sm:flex-1 lg:flex-none" wire:navigate>
                             <x-app-icon icon="heroicons:clipboard-document-check" class="h-4 w-4" />
                             Оценка
                         </a>
@@ -198,15 +198,15 @@
                 <x-app-icon icon="heroicons:plus-circle" class="h-6 w-6" />
                 <span>Создать хакатон</span>
             </a>
-            <a href="{{ route('profile.hackatons.applications') }}" class="ui-cta-outline btn-md h-auto min-h-[3.25rem] flex-col gap-1 border-error/25 py-3 sm:flex-row sm:gap-2" wire:navigate>
+            <a href="{{ route('organizer.applications') }}" class="ui-cta-outline btn-md h-auto min-h-[3.25rem] flex-col gap-1 border-error/25 py-3 sm:flex-row sm:gap-2" wire:navigate>
                 <x-app-icon icon="heroicons:inbox" class="h-6 w-6 text-error" />
                 <span>Заявки</span>
             </a>
-            <a href="{{ route('profile.hackatons.scoring') }}" class="ui-cta-outline btn-md h-auto min-h-[3.25rem] flex-col gap-1 py-3 sm:flex-row sm:gap-2" wire:navigate>
+            <a href="{{ route('organizer.scoring') }}" class="ui-cta-outline btn-md h-auto min-h-[3.25rem] flex-col gap-1 py-3 sm:flex-row sm:gap-2" wire:navigate>
                 <x-app-icon icon="heroicons:clipboard-document-check" class="h-6 w-6" />
                 <span>Оценка работ</span>
             </a>
-            <a href="{{ route('profile.hackatons.finished') }}" class="ui-cta-outline btn-md h-auto min-h-[3.25rem] flex-col gap-1 py-3 sm:flex-row sm:gap-2" wire:navigate>
+            <a href="{{ route('organizer.finished') }}" class="ui-cta-outline btn-md h-auto min-h-[3.25rem] flex-col gap-1 py-3 sm:flex-row sm:gap-2" wire:navigate>
                 <x-app-icon icon="heroicons:archive-box" class="h-6 w-6" />
                 <span>Завершённые</span>
             </a>

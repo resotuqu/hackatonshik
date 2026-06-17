@@ -49,6 +49,6 @@ trait ManagesOwnedHackatons
 
     public function participantsHackaton(int $id): mixed
     {
-        return redirect()->route('profile.hackatons.participants', ['hackaton' => $id]);
+        return redirect()->route('organizer.participants', ['hackaton' => $id]);
     }
 }

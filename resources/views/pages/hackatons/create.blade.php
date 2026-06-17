@@ -14,7 +14,7 @@
     <div class="text-sm breadcrumbs">
         <ul>
             <li><a href="/">Главная</a></li>
-            <li><a href="{{ route('profile.hackatons') }}">Мои хакатоны</a></li>
+            <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
             <li class="opacity-70">Создание хакатона</li>
         </ul>
     </div>
@@ -200,7 +200,7 @@
             @endif
 
             <x-slot:actions>
-                <a href="{{ route('profile.hackatons') }}">
+                <a href="{{ route('organizer.dashboard') }}">
                     <x-marybutton type="button" label="Отмена" class="btn-ghost" />
                 </a>
                 @if($wizardStep > 1)

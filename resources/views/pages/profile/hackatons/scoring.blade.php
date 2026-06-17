@@ -3,7 +3,7 @@
         <ul>
             <li><a href="/">Главная</a></li>
             <li><a href="{{ route('profile') }}">Профиль</a></li>
-            <li><a href="{{ route('profile.hackatons') }}">Мои хакатоны</a></li>
+            <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
             <li class="opacity-70">Оценка работ</li>
         </ul>
     </div>
@@ -24,7 +24,7 @@
                     icon="heroicons:clipboard-document-check"
                     action-href="{{ route('hackatons.create') }}"
                     action-label="Создать хакатон"
-                    secondary-action-href="{{ route('profile.hackatons') }}"
+                    secondary-action-href="{{ route('organizer.dashboard') }}"
                     secondary-action-label="Дашборд"
                 />
             </div>

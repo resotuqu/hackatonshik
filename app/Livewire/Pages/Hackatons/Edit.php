@@ -107,7 +107,7 @@ class Edit extends Component
     public function mount(Hackaton $hackaton)
     {
         if (Auth::id() !== $hackaton->user_id) {
-            return $this->redirect('/profile/hackatons');
+            return $this->redirect(route('organizer.dashboard'));
         }
 
         $this->hackaton = $hackaton->load('images');
@@ -257,7 +257,7 @@ class Edit extends Component
 
         $this->success('Хакатон обновлён !', position: 'toast-center toast-top');
 
-        $this->redirect('/profile/hackatons');
+        $this->redirect(route('organizer.dashboard'));
     }
 
     /**

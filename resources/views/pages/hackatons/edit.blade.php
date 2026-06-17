@@ -31,7 +31,7 @@
     <div class="text-sm breadcrumbs">
         <ul>
             <li><a href="/">Главная</a></li>
-            <li><a href="/profile/hackatons">Мои хакатоны</a></li>
+            <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
             <li class="opacity-70">Редактирование хакатона</li>
         </ul>
     </div>
@@ -210,7 +210,7 @@
             </div>
 
             <x-slot:actions>
-                <a href="/profile/hackatons">
+                <a href="{{ route('organizer.dashboard') }}">
                     <x-marybutton type="button" label="Отмена" class="btn-ghost" />
                 </a>
                 <x-marybutton label="Сохранить изменения" type="submit" class="btn-primary" spinner="save"

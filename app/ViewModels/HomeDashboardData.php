@@ -112,26 +112,18 @@ final class HomeDashboardData
             $self->certificatesCount = (int) $userWithCounts->certificates_count;
             $self->pendingTeamApplicationsCount = (int) $userWithCounts->team_applications_count;
             $self->fillParticipant($user);
-
-            return $self;
         }
 
         if ($user->isOrganizer()) {
             $self->fillOrganizer($user);
-
-            return $self;
         }
 
         if ($user->isJudge()) {
             $self->fillJudge($user);
-
-            return $self;
         }
 
         if ($user->isAdmin()) {
             $self->fillAdmin();
-
-            return $self;
         }
 
         return $self;
