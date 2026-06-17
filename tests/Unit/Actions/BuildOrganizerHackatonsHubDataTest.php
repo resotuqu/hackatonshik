@@ -10,7 +10,7 @@ use App\Models\JudgeInvitation;
 use App\Models\User;
 
 test('build returns null for guest', function () {
-    expect((new BuildOrganizerHackatonsHubData)->build(null))->toBeNull();
+    expect(app(BuildOrganizerHackatonsHubData::class)->build(null))->toBeNull();
 });
 
 test('build deduplicates pending application counts in summary and global pending', function () {
@@ -21,7 +21,7 @@ test('build deduplicates pending application counts in summary and global pendin
         'status' => ApplicationStatus::PENDING,
     ]);
 
-    $data = (new BuildOrganizerHackatonsHubData)->build($organizer);
+    $data = app(BuildOrganizerHackatonsHubData::class)->build($organizer);
 
     expect($data)->not->toBeNull()
         ->and($data['summary']['pendingApplications'])->toBe(1)
@@ -44,7 +44,7 @@ test('build picks hackaton with most pending judge invitations for focus link', 
         'invited_by' => $organizer->id,
     ]);
 
-    $data = (new BuildOrganizerHackatonsHubData)->build($organizer);
+    $data = app(BuildOrganizerHackatonsHubData::class)->build($organizer);
 
     expect($data['globalPending']['judgeInvitations'])->toBe(3)
         ->and($data['judgeInvitationsFocusHackatonId'])->toBe($hackatonB->id);
@@ -59,7 +59,7 @@ test('build featured hackaton prefers one with pending applications', function (
         'status' => ApplicationStatus::PENDING,
     ]);
 
-    $data = (new BuildOrganizerHackatonsHubData)->build($organizer);
+    $data = app(BuildOrganizerHackatonsHubData::class)->build($organizer);
 
     expect($data['featuredHackaton']?->id)->toBe($busy->id)
         ->and($data['featuredHackaton']?->id)->not->toBe($quiet->id);

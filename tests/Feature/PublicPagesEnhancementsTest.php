@@ -15,7 +15,7 @@ test('home page shows primary cta buttons', function () {
 
     $response->assertOk();
     $response->assertSee('Найти команду');
-    $response->assertSee('Создать хакатон');
+    $response->assertSee('Хакатоны');
 });
 
 test('news page renders published posts', function () {

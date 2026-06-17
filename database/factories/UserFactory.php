@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
@@ -45,18 +46,20 @@ class UserFactory extends Factory
 
     /**
      * @param  array<string, mixed>  $attributes
+     * @return ($count is null ? Model : Collection<int, Model>)
      */
-    public function make($attributes = [], ?Model $parent = null): Model
+    public function make($attributes = [], ?Model $parent = null)
     {
-        return User::unguarded(fn (): Model => parent::make($attributes, $parent));
+        return User::unguarded(fn () => parent::make($attributes, $parent));
     }
 
     /**
      * @param  array<string, mixed>  $attributes
+     * @return ($count is null ? Model : Collection<int, Model>)
      */
-    public function create($attributes = [], ?Model $parent = null): Model
+    public function create($attributes = [], ?Model $parent = null)
     {
-        return User::unguarded(fn (): Model => parent::create($attributes, $parent));
+        return User::unguarded(fn () => parent::create($attributes, $parent));
     }
 
     /**

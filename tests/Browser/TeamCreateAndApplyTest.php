@@ -26,6 +26,7 @@ class TeamCreateAndApplyTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($user): void {
             $browser->loginAs($user)
                 ->visit('/teams/create')
+                ->waitForText('Создание команды', 30)
                 ->assertSee('Создание команды');
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Hackaton\BumpHackatonCatalogCacheVersion;
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Jobs\ProcessHackatonFinishedAutomations;
@@ -44,16 +45,15 @@ class Hackaton extends Model
     protected static function booted(): void
     {
         static::created(function (): void {
-            self::bumpCatalogCacheVersion();
+            app(BumpHackatonCatalogCacheVersion::class)->handle();
         });
+
         static::updated(function (Hackaton $hackaton): void {
             if ($hackaton->wasChanged(['title', 'is_public', 'start_at', 'end_at', 'image_url'])) {
-                self::bumpCatalogCacheVersion();
+                app(BumpHackatonCatalogCacheVersion::class)->handle();
             }
         });
-        static::deleted(function (): void {
-            self::bumpCatalogCacheVersion();
-        });
+
         static::saved(function (Hackaton $hackaton): void {
             if (
                 ! $hackaton->wasRecentlyCreated
@@ -73,7 +73,10 @@ class Hackaton extends Model
                 PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
             }
         });
+
         static::deleted(function (Hackaton $hackaton): void {
+            app(BumpHackatonCatalogCacheVersion::class)->handle();
+
             if (Cache::supportsTags()) {
                 Cache::tags(['catalog', 'home'])->flush();
             } else {
@@ -244,16 +247,6 @@ class Hackaton extends Model
         }
 
         return true;
-    }
-
-    private static function bumpCatalogCacheVersion(): void
-    {
-        $store = Cache::supportsTags()
-            ? Cache::tags(['catalog', 'catalog:hackatons'])
-            : Cache::store();
-
-        $key = 'api:v1:catalog:hackatons:version';
-        $store->put($key, ((int) $store->get($key, 0)) + 1);
     }
 
     protected function casts(): array

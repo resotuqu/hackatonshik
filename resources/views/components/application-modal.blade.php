@@ -13,7 +13,7 @@
 @endphp
 
 <div class="inline-block">
-    <label for="{{ $modalId }}" class="{{ $triggerClass }}">
+    <label for="{{ $modalId }}" class="{{ $triggerClass }}" dusk="application-modal-trigger-{{ $type }}-{{ $id }}">
         @isset($trigger)
             {{ $trigger }}
         @else

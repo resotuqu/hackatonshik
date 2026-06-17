@@ -27,13 +27,15 @@ class TeamFlowTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($user, $hackaton, $team): void {
             $browser->loginAs($user)
                 ->visit(route('hackatons.show', $hackaton))
-                ->waitForText('Подать заявку', 30)
-                ->click('label.btn-primary.btn-sm')
+                ->waitForText('Dusk Hackathon', 30)
+                ->waitFor('@application-modal-trigger-hackaton-'.$hackaton->id, 30)
+                ->click('@application-modal-trigger-hackaton-'.$hackaton->id)
                 ->waitFor('select[name="team_id"]', 15)
                 ->select('team_id', (string) $team->id)
                 ->press('Отправить заявку')
-                ->waitForText('Заявка команды на хакатон подана', 30)
-                ->assertSee('Заявка команды на хакатон подана');
+                ->waitForText('Ваши заявки', 30)
+                ->assertSee('Dusk Team')
+                ->assertSee('На рассмотрении');
         });
     }
 }

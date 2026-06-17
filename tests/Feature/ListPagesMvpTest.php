@@ -121,6 +121,8 @@ test('authenticated user can save list filters', function () {
 test('list pages record analytics events', function () {
     $user = User::factory()->create();
 
+    app()->detectEnvironment(fn (): string => 'local');
+
     Livewire::actingAs($user)->test(HackatonsIndex::class);
     Livewire::actingAs($user)->test(TeamsIndex::class)->call('search');
 

@@ -34,9 +34,9 @@ return [
         ],
         [
             'key' => 'sms_verification',
-            'title' => 'SMS верификация телефона',
+            'title' => 'Верификация телефона (Flash Call через Plusofon; SMS — опционально)',
             'priority' => 6,
-            'status' => 'planned',
+            'status' => 'done',
         ],
     ],
 ];

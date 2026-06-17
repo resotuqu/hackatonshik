@@ -43,6 +43,7 @@ class HackatonShowAndApplyTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($hackaton): void {
             $browser->visit('/hackatons/'.$hackaton->id)
+                ->waitForText('BrowserShowHackUnique', 30)
                 ->assertSee('BrowserShowHackUnique');
         });
     }

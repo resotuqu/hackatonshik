@@ -22,7 +22,7 @@ test('participant can open personal hub when they own a team', function () {
     ]);
 
     actingAs($captain)
-        ->get(route('profile.hackatons.hub', $hackaton))
+        ->get(route('participant.hackatons.hub', $hackaton))
         ->assertOk()
         ->assertSee('Личный кабинет участника', false);
 });
@@ -36,7 +36,7 @@ test('team member can open personal hub for hackaton via team role', function ()
     TeamRole::factory()->for($team)->create(['user_id' => $member->id]);
 
     actingAs($member)
-        ->get(route('profile.hackatons.hub', $hackaton))
+        ->get(route('participant.hackatons.hub', $hackaton))
         ->assertOk();
 });
 
@@ -45,7 +45,7 @@ test('organizer without participating team gets 403 from hub', function () {
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     actingAs($organizer)
-        ->get(route('profile.hackatons.hub', $hackaton))
+        ->get(route('participant.hackatons.hub', $hackaton))
         ->assertForbidden();
 });
 
@@ -59,7 +59,7 @@ test('judge without participating team gets 403 from hub', function () {
     ]);
 
     actingAs($judge)
-        ->get(route('profile.hackatons.hub', $hackaton))
+        ->get(route('participant.hackatons.hub', $hackaton))
         ->assertForbidden();
 });
 
@@ -69,6 +69,6 @@ test('outsider without team membership cannot open hub', function () {
     $hackaton = Hackaton::factory()->for($organizer)->create();
 
     actingAs($outsider)
-        ->get(route('profile.hackatons.hub', $hackaton))
+        ->get(route('participant.hackatons.hub', $hackaton))
         ->assertForbidden();
 });

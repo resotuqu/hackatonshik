@@ -7,9 +7,14 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
 
+/**
+ * Browser tests use `.env.dusk.local` (see APP_URL and database/dusk.sqlite).
+ * Start the app before running locally: `php artisan serve --env=dusk` or `composer dusk`.
+ */
 abstract class DuskTestCase extends BaseTestCase
 {
     use DatabaseMigrations;
@@ -22,6 +27,10 @@ abstract class DuskTestCase extends BaseTestCase
             'telescope.enabled' => false,
             'pulse.enabled' => false,
         ]);
+
+        if (! is_link(public_path('storage'))) {
+            Artisan::call('storage:link');
+        }
     }
 
     /**

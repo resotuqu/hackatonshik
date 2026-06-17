@@ -34,7 +34,8 @@ class HackathonDiscoveryTest extends DuskTestCase
                 ->assertSee($hackaton->title)
                 ->pause(500)
                 ->press('Подробнее') // Click the card button
-                ->waitForRoute('hackatons.show', ['hackaton' => $hackaton->id])
+                ->waitForRoute('hackatons.show', ['hackaton' => $hackaton->id], 30)
+                ->waitForText($hackaton->title, 30)
                 ->assertSee($hackaton->title)
                 ->assertSee($hackaton->description);
         });

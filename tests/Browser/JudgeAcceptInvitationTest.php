@@ -34,6 +34,7 @@ class JudgeAcceptInvitationTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($invitation, $invitee): void {
             $browser->loginAs($invitee)
                 ->visit('/judge-invitations/'.$invitation->token)
+                ->waitForText('JudgeInviteBrowserUnique', 30)
                 ->assertSee('JudgeInviteBrowserUnique');
         });
     }

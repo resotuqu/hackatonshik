@@ -185,15 +185,20 @@ class AppServiceProvider extends ServiceProvider
     {
         $cache = Cache::supportsTags() ? Cache::tags(['catalog']) : Cache::store();
         $bumpCatalogVersion = static function (): void {
-            $cacheStore = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:hackatons']) : Cache::store();
-            $cacheStore->add('api:v1:catalog:hackatons:version', 1);
-            $cacheStore->increment('api:v1:catalog:hackatons:version');
-            $cacheStore = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:teams']) : Cache::store();
-            $cacheStore->add('api:v1:catalog:teams:version', 1);
-            $cacheStore->increment('api:v1:catalog:teams:version');
-            $cacheStore = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:profiles']) : Cache::store();
-            $cacheStore->add('api:v1:catalog:profiles:version', 1);
-            $cacheStore->increment('api:v1:catalog:profiles:version');
+            $bumpKey = static function (string $key): void {
+                if (app()->isProduction() && Cache::supportsTags()) {
+                    $store = Cache::tags(['catalog']);
+                    $store->put($key, ((int) $store->get($key, 0)) + 1);
+
+                    return;
+                }
+
+                Cache::put($key, ((int) Cache::get($key, 0)) + 1);
+            };
+
+            $bumpKey('api:v1:catalog:hackatons:version');
+            $bumpKey('api:v1:catalog:teams:version');
+            $bumpKey('api:v1:catalog:profiles:version');
         };
 
         Team::saved(static function () use ($bumpCatalogVersion): void {
