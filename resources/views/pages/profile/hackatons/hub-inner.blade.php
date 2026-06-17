@@ -73,6 +73,51 @@
             </div>
         </section>
 
+        @if(!empty($checklist))
+            <section class="ui-surface-soft">
+                <div class="card-body space-y-4">
+                    <h2 class="ui-heading-display text-xl font-bold">Что сделать сейчас</h2>
+                    <ul class="space-y-2">
+                        @foreach($checklist['items'] as $item)
+                            <li class="flex items-start gap-3 rounded-xl border border-base-200 p-3 {{ $item['done'] ? 'bg-success/5' : 'bg-warning/5' }}">
+                                @if($item['done'])
+                                    <x-app-icon icon="heroicons:check-circle" class="h-5 w-5 text-success shrink-0 mt-0.5" />
+                                @else
+                                    <x-app-icon icon="heroicons:exclamation-circle" class="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                                @endif
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium">{{ $item['label'] }}</p>
+                                    @if(!$item['done'] && $item['href'])
+                                        <a href="{{ $item['href'] }}" class="link link-primary text-xs">Перейти</a>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div class="rounded-xl border border-base-200 p-3">
+                            <p class="text-xs text-base-content/50">Документы</p>
+                            <progress
+                                class="progress progress-primary w-full mt-2"
+                                value="{{ $checklist['documentsProgress']['uploaded'] }}"
+                                max="{{ max($checklist['documentsProgress']['required'], 1) }}"
+                            ></progress>
+                            <p class="mt-1 tabular-nums">{{ $checklist['documentsProgress']['uploaded'] }}/{{ $checklist['documentsProgress']['required'] }}</p>
+                        </div>
+                        <div class="rounded-xl border border-base-200 p-3">
+                            <p class="text-xs text-base-content/50">Сдачи кейсов (команда)</p>
+                            <progress
+                                class="progress progress-secondary w-full mt-2"
+                                value="{{ $checklist['teamSubmissionsProgress']['submitted'] }}"
+                                max="{{ max($checklist['teamSubmissionsProgress']['totalCases'], 1) }}"
+                            ></progress>
+                            <p class="mt-1 tabular-nums">{{ $checklist['teamSubmissionsProgress']['submitted'] }}/{{ $checklist['teamSubmissionsProgress']['totalCases'] }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         @if($myCertificates->isNotEmpty())
         <section class="ui-surface-soft">
             <div class="card-body">

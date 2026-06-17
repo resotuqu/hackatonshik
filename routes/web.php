@@ -9,6 +9,7 @@ use App\Http\Controllers\HackatonCaseScoreController;
 use App\Http\Controllers\HackatonCaseSubmissionController;
 use App\Http\Controllers\HackatonCertificateController;
 use App\Http\Controllers\HackatonExportController;
+use App\Http\Controllers\JudgeExportController;
 use App\Http\Controllers\JudgeManagementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PhoneVerificationController;
@@ -18,6 +19,8 @@ use App\Livewire\Organizer\Dashboard as OrganizerDashboard;
 use App\Livewire\Pages\About\Index as AboutIndex;
 use App\Livewire\Pages\Admin\AvatarPresets as AdminAvatarPresets;
 use App\Livewire\Pages\Admin\Index as AdminIndex;
+use App\Livewire\Pages\Admin\News as AdminNews;
+use App\Livewire\Pages\Admin\Users as AdminUsers;
 use App\Livewire\Pages\Auth\Login as AuthLogin;
 use App\Livewire\Pages\Auth\Register as AuthRegister;
 use App\Livewire\Pages\Contacts\Index as ContactsIndex;
@@ -107,6 +110,8 @@ Route::get('/register', AuthRegister::class)->name('register');
 Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified'])->name('profile');
 Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.dashboard');
 Route::get('/admin/avatar-presets', AdminAvatarPresets::class)->middleware(['auth', 'verified', 'can:access-admin']);
+Route::get('/admin/news', AdminNews::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.news');
+Route::get('/admin/users', AdminUsers::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.users');
 Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
 $organizerMiddleware = ['auth', 'verified', 'organizer'];
@@ -177,6 +182,7 @@ Route::get('/auth/vk/callback', [SocialAuthController::class, 'callback'])->defa
 Route::middleware(['auth', 'verified', 'judge'])->group(function () {
     Route::get('/judge', JudgeDashboard::class)->name('judge.dashboard');
     Route::get('/judge/hackatons/{hackaton}', JudgeHackatonShow::class)->name('judge.hackatons.show');
+    Route::get('/judge/hackatons/{hackaton}/scores/export', [JudgeExportController::class, 'scores'])->name('judge.hackatons.scores.export');
     Route::get('/judge/hackatons/{hackaton}/cases/{case}', JudgeSubmissionList::class)->name('judge.cases.submissions');
     Route::get('/judge/submissions/{submission}', JudgeEvaluateSubmission::class)->name('judge.submissions.evaluate');
 });

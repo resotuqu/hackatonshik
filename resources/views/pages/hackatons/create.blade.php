@@ -46,6 +46,24 @@
             @if ($wizardStep === 1)
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
                     <h2 class="text-lg font-semibold">Шаг 1 — Основная информация</h2>
+
+                    @if($templates->isNotEmpty())
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium">Создать из шаблона</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($templates as $template)
+                                    <button
+                                        type="button"
+                                        wire:click="applyTemplate({{ $template->id }})"
+                                        class="btn btn-sm {{ $selectedTemplateId === $template->id ? 'btn-primary' : 'btn-outline' }}"
+                                    >
+                                        {{ $template->title }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     <x-mary-input label="Название хакатона" wire:model="title" placeholder="Например, HackFest 2026"/>
                     <x-marymarkdown wire:model="description" :config="$this->config" label="Описание хакатона" />
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -15,13 +15,18 @@ use Illuminate\Support\Collection;
 
 final class BuildOrganizerHackatonsHubData
 {
+    public function __construct(
+        private readonly BuildOrganizerHackatonAnalytics $analytics,
+    ) {}
+
     /**
      * @return array{
      *     hackatons: Collection<int, Hackaton>,
      *     summary: array{activeHackatons: int, pendingApplications: int, participantsTotal: int, hackatonsTotal: int},
      *     featuredHackaton: Hackaton|null,
      *     globalPending: array{applications: int, judgeInvitations: int},
-     *     judgeInvitationsFocusHackatonId: int|null
+     *     judgeInvitationsFocusHackatonId: int|null,
+     *     analytics: array{applicationsByDay: list<array{date: string, count: int}>, conversionRate: float|null, acceptedApplications: int, totalApplications: int}
      * }|null
      */
     public function build(?User $user): ?array
@@ -96,6 +101,7 @@ final class BuildOrganizerHackatonsHubData
             'featuredHackaton' => $featuredHackaton,
             'globalPending' => $globalPending,
             'judgeInvitationsFocusHackatonId' => $judgeInvitationsFocusHackatonId,
+            'analytics' => $this->analytics->handle($user),
         ];
     }
 

@@ -27,9 +27,15 @@ return [
             'status' => 'done',
         ],
         [
-            'key' => 'oauth_vk_sms',
-            'title' => 'VK OAuth и SMS верификация телефона',
+            'key' => 'oauth_vk',
+            'title' => 'VK OAuth',
             'priority' => 5,
+            'status' => 'done',
+        ],
+        [
+            'key' => 'sms_verification',
+            'title' => 'SMS верификация телефона',
+            'priority' => 6,
             'status' => 'planned',
         ],
     ],

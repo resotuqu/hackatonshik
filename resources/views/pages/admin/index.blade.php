@@ -41,6 +41,8 @@
         </div>
         <div class="mt-4 flex flex-wrap gap-2">
             <a class="btn btn-sm btn-primary" href="/admin/avatar-presets">Аватарки (паки)</a>
+            <a class="btn btn-sm btn-primary" href="{{ route('admin.news') }}">Новости</a>
+            <a class="btn btn-sm btn-primary" href="{{ route('admin.users') }}">Пользователи</a>
             <a class="btn btn-sm btn-outline" href="/hackatons">Хакатоны</a>
             <a class="btn btn-sm btn-outline" href="/teams">Команды</a>
             <a class="btn btn-sm btn-outline" href="{{ route('profile') }}">Мой профиль</a>

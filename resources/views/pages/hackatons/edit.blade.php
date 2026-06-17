@@ -209,6 +209,22 @@
                 </div>
             </div>
 
+            <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
+                <h2 class="text-lg font-semibold">Автоматизации после завершения</h2>
+                <label class="label cursor-pointer justify-start gap-3">
+                    <input type="checkbox" class="checkbox checkbox-primary" wire:model="auto_publish_results_announcement" />
+                    <span class="label-text">Автоматически опубликовать анонс с итогами</span>
+                </label>
+                <label class="label cursor-pointer justify-start gap-3">
+                    <input type="checkbox" class="checkbox checkbox-primary" wire:model="auto_issue_certificates" />
+                    <span class="label-text">Автоматически выдать сертификаты участникам</span>
+                </label>
+                <x-maryfile wire:model="certificateTemplate" label="Шаблон сертификата (PDF)" hint="Нужен для автовыдачи сертификатов" />
+                @if(filled($hackaton->certificate_template_path))
+                    <p class="text-sm text-base-content/70">Текущий шаблон загружен.</p>
+                @endif
+            </div>
+
             <x-slot:actions>
                 <a href="{{ route('organizer.dashboard') }}">
                     <x-marybutton type="button" label="Отмена" class="btn-ghost" />

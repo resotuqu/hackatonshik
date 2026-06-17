@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class BuildParticipantHackatonHubPageData
 {
+    public function __construct(
+        private readonly BuildParticipantHackatonChecklist $checklist,
+    ) {}
+
     /**
      * @return array<string, mixed>|null
      */
@@ -75,6 +79,7 @@ final class BuildParticipantHackatonHubPageData
             'requiredDocuments' => $requiredDocuments,
             'upcomingCases' => $upcomingCases,
             'myCertificates' => $myCertificates,
+            'checklist' => $this->checklist->handle($hackaton, $user, $teams),
         ];
     }
 }

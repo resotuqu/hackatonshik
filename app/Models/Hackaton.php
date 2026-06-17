@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
+use App\Jobs\ProcessHackatonFinishedAutomations;
 use App\ViewModels\PartnerSidebarCounts;
 use Database\Factories\HackatonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -215,7 +216,13 @@ class Hackaton extends Model
             return false;
         }
 
+        $previousStatus = $this->status;
+
         $this->update(['status' => $nextStatus]);
+
+        if ($nextStatus === HackatonStatus::FINISHED && $previousStatus !== HackatonStatus::FINISHED) {
+            ProcessHackatonFinishedAutomations::dispatch($this->id);
+        }
 
         return true;
     }
@@ -230,6 +237,9 @@ class Hackaton extends Model
             'end_at' => 'datetime',
             'registration_deadline_at' => 'datetime',
             'prize_fund' => 'decimal:2',
+            'auto_issue_certificates' => 'boolean',
+            'auto_publish_results_announcement' => 'boolean',
+            'finished_automations_ran_at' => 'datetime',
         ];
     }
 
@@ -246,5 +256,9 @@ class Hackaton extends Model
         'prize_places_count',
         'level',
         'registration_deadline_at',
+        'auto_issue_certificates',
+        'auto_publish_results_announcement',
+        'certificate_template_path',
+        'finished_automations_ran_at',
     ];
 }

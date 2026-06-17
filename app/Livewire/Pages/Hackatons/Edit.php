@@ -83,6 +83,12 @@ class Edit extends Component
     ])]
     public $registration_deadline_at = null;
 
+    public bool $auto_issue_certificates = false;
+
+    public bool $auto_publish_results_announcement = false;
+
+    public $certificateTemplate;
+
     #[Validate([
         'hackatonDocuments.*.name' => ['required'],
         'hackatonDocuments.*.description' => ['required'],
@@ -118,6 +124,8 @@ class Edit extends Component
         $this->prize_places_count = $hackaton->prize_places_count;
         $this->level = is_string($hackaton->level) ? $hackaton->level : null;
         $this->registration_deadline_at = $hackaton->registration_deadline_at;
+        $this->auto_issue_certificates = (bool) $hackaton->auto_issue_certificates;
+        $this->auto_publish_results_announcement = (bool) $hackaton->auto_publish_results_announcement;
 
         foreach ($hackaton->documents as $document) {
             $this->hackatonDocuments[] = [
@@ -164,6 +172,9 @@ class Edit extends Component
 
         try {
             $this->validate();
+            $this->validate([
+                'certificateTemplate' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            ]);
         } catch (ValidationException $e) {
             $this->error('Ошибка заполнения полей !', position: 'toast-center toast-top');
             throw $e;
@@ -191,7 +202,13 @@ class Edit extends Component
             'prize_places_count' => $this->prize_places_count !== '' ? $this->prize_places_count : null,
             'level' => $this->level !== '' ? $this->level : null,
             'registration_deadline_at' => $this->registration_deadline_at !== '' ? $this->registration_deadline_at : null,
+            'auto_issue_certificates' => $this->auto_issue_certificates,
+            'auto_publish_results_announcement' => $this->auto_publish_results_announcement,
         ];
+
+        if ($this->certificateTemplate) {
+            $data['certificate_template_path'] = $this->certificateTemplate->store('hackaton_certificates', 'local');
+        }
 
         if ($this->photo) {
             $data['image_url'] = $this->photo->storePublicly(path: 'hackaton_photos', options: 'public');

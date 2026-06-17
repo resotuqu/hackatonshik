@@ -82,32 +82,64 @@ new class extends Component
         $this->isFinal = true;
 
         $this->dispatch('toast', message: 'Оценка финализирована');
+
+        $this->goToNextUnrated();
     }
 
     public function goNext(): void
     {
-        $next = HackatonCaseSubmission::query()
-            ->where('hackaton_case_id', $this->submission->hackaton_case_id)
-            ->where('id', '>', $this->submission->id)
-            ->orderBy('id')
-            ->value('id');
+        $next = $this->findAdjacentSubmissionId('next');
 
         if ($next) {
             $this->redirectRoute('judge.submissions.evaluate', ['submission' => $next]);
         }
     }
 
+    public function goToNextUnrated(): void
+    {
+        $userId = (int) auth()->id();
+
+        $next = HackatonCaseSubmission::query()
+            ->where('hackaton_case_id', $this->submission->hackaton_case_id)
+            ->whereDoesntHave('scores', fn (Builder $query) => $query->where('reviewed_by', $userId)->where('is_final', true))
+            ->where('id', '!=', $this->submission->id)
+            ->orderBy('id')
+            ->value('id');
+
+        if ($next) {
+            $this->redirectRoute('judge.submissions.evaluate', ['submission' => $next]);
+
+            return;
+        }
+
+        $this->dispatch('toast', message: 'Все сдачи по этому кейсу оценены');
+    }
+
     public function goPrev(): void
     {
-        $prev = HackatonCaseSubmission::query()
-            ->where('hackaton_case_id', $this->submission->hackaton_case_id)
-            ->where('id', '<', $this->submission->id)
-            ->orderByDesc('id')
-            ->value('id');
+        $prev = $this->findAdjacentSubmissionId('prev');
 
         if ($prev) {
             $this->redirectRoute('judge.submissions.evaluate', ['submission' => $prev]);
         }
+    }
+
+    private function findAdjacentSubmissionId(string $direction): ?int
+    {
+        $query = HackatonCaseSubmission::query()
+            ->where('hackaton_case_id', $this->submission->hackaton_case_id);
+
+        if ($direction === 'next') {
+            return $query
+                ->where('id', '>', $this->submission->id)
+                ->orderBy('id')
+                ->value('id');
+        }
+
+        return $query
+            ->where('id', '<', $this->submission->id)
+            ->orderByDesc('id')
+            ->value('id');
     }
 
     public function judgeDomain(): JudgeDomain
@@ -156,6 +188,7 @@ new class extends Component
             @endif
             <button class="btn btn-sm btn-outline" wire:click="goPrev">← Пред.</button>
             <button class="btn btn-sm btn-outline" wire:click="goNext">След. →</button>
+            <button class="btn btn-sm btn-primary" wire:click="goToNextUnrated">След. неоценённая</button>
         </div>
     </div>
 

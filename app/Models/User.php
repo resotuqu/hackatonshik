@@ -153,6 +153,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'show_email_on_profile' => 'boolean',
             'show_phone_on_profile' => 'boolean',
             'phone_verified_at' => 'datetime',
+            'suspended_at' => 'datetime',
         ];
     }
 
@@ -195,6 +196,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canParticipate(): bool
     {
-        return $this->isParticipant();
+        return $this->isParticipant() && ! $this->isSuspended();
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
     }
 }

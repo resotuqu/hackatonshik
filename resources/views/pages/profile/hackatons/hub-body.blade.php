@@ -107,6 +107,40 @@
         </div>
     </section>
 
+    @if(!empty($analytics))
+        @php
+            $maxDailyApplications = max(array_column($analytics['applicationsByDay'] ?? [], 'count') ?: [1]);
+        @endphp
+        <section class="ui-surface-soft" aria-label="Аналитика заявок">
+            <div class="card-body space-y-4">
+                <h2 class="ui-heading-display text-lg font-bold">Аналитика заявок (14 дней)</h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="ui-stat-tile p-4">
+                        <p class="text-xs text-base-content/50">Конверсия в принятые</p>
+                        <p class="text-2xl font-semibold tabular-nums">
+                            {{ $analytics['conversionRate'] !== null ? $analytics['conversionRate'].'%' : '—' }}
+                        </p>
+                        <p class="text-xs text-base-content/60">
+                            {{ $analytics['acceptedApplications'] }} / {{ $analytics['totalApplications'] }} заявок
+                        </p>
+                    </div>
+                    <div class="ui-stat-tile p-4">
+                        <p class="text-xs text-base-content/50 mb-2">Заявки по дням</p>
+                        <div class="flex items-end gap-1 h-16">
+                            @foreach($analytics['applicationsByDay'] ?? [] as $day)
+                                <div
+                                    class="flex-1 bg-primary/70 rounded-t"
+                                    style="height: {{ $maxDailyApplications > 0 ? max(4, ($day['count'] / $maxDailyApplications) * 100) : 4 }}%"
+                                    title="{{ $day['date'] }}: {{ $day['count'] }}"
+                                ></div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     @if($featuredHackaton)
         <section class="ui-surface-card ui-surface-card--hackaton-active shadow-lg" aria-label="Текущий хакатон">
             <div class="card-body gap-6">

@@ -111,37 +111,46 @@ new class extends Component
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        @foreach($submissions as $submission)
-            @php
-                $myScore = $submission->scores->first();
-                $badge = $myScore?->is_final ? ['badge-success','Final'] : ($myScore ? ['badge-warning','Draft'] : ['badge-ghost','—']);
-                $title = $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение');
-            @endphp
-            <a href="{{ route('judge.submissions.evaluate', $submission) }}"
-               class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="card-body gap-3">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <div class="font-semibold truncate">{{ $title }}</div>
-                            <div class="text-xs text-base-content/60">{{ $submission->submitted_at?->format('d.m.Y H:i') }}</div>
-                        </div>
-                        <span class="badge {{ $badge[0] }}">{{ $badge[1] }}</span>
-                    </div>
-
-                    <div class="flex items-center justify-between text-sm">
-                        <div class="text-base-content/70">
+    <div class="overflow-x-auto">
+        <table class="table table-zebra">
+            <thead>
+                <tr>
+                    <th>Команда</th>
+                    <th>Отправлено</th>
+                    <th>Статус</th>
+                    <th>Оценка</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($submissions as $submission)
+                    @php
+                        $myScore = $submission->scores->first();
+                        $badge = $myScore?->is_final ? ['badge-success','Final'] : ($myScore ? ['badge-warning','Draft'] : ['badge-ghost','Не оценено']);
+                        $title = $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение');
+                    @endphp
+                    <tr>
+                        <td class="font-medium">{{ $title }}</td>
+                        <td class="text-sm text-base-content/70">{{ $submission->submitted_at?->format('d.m.Y H:i') }}</td>
+                        <td><span class="badge {{ $badge[0] }}">{{ $badge[1] }}</span></td>
+                        <td>
                             @if($myScore)
                                 {{ $myScore->score }} / {{ $myScore->max_score }}
                             @else
-                                Нет оценки
+                                —
                             @endif
-                        </div>
-                        <span class="btn btn-sm btn-primary">Открыть</span>
-                    </div>
-                </div>
-            </a>
-        @endforeach
+                        </td>
+                        <td class="text-right">
+                            <a href="{{ route('judge.submissions.evaluate', $submission) }}" class="btn btn-sm btn-primary">Открыть</a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center opacity-70 py-8">Сдач не найдено по выбранным фильтрам.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 

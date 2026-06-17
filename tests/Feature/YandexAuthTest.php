@@ -51,6 +51,25 @@ test('yandex callback redirects to login when provider has no email', function (
     $this->assertDatabaseCount('users', 0);
 });
 
+test('oauth callback redirects to login when provider throws', function (string $path, string $driver) {
+    $providerDriver = mock();
+    $providerDriver->shouldReceive('user')->once()->andThrow(new RuntimeException('OAuth provider error'));
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with($driver)
+        ->andReturn($providerDriver);
+
+    $response = $this->get($path);
+
+    $response->assertRedirect(route('login'));
+    $response->assertSessionHas('error', 'Не удалось выполнить вход через OAuth.');
+    $this->assertGuest();
+})->with([
+    'yandex' => ['/auth/yandex/callback', 'yandex'],
+    'vk' => ['/auth/vk/callback', 'vkontakte'],
+]);
+
 test('vk callback creates local user and logs in', function () {
     $socialiteUser = mock(SocialiteUserContract::class);
     $socialiteUser->shouldReceive('getEmail')->andReturn('vk-user@example.com');

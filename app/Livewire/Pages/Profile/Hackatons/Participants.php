@@ -6,20 +6,27 @@ use App\Models\Hackaton;
 use App\Models\HackatonDocument;
 use App\Models\Team;
 use App\Models\TeamRole;
+use App\Models\User;
 use App\Models\UserHackatonDocument;
+use App\Notifications\DocumentUploadReminder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Mary\Traits\Toast;
 
 class Participants extends Component
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, Toast;
 
     public Hackaton $hackaton;
 
     public array $expandedTeams = [];
+
+    public string $documentsFilter = 'all';
 
     public array $teamHeaders = [
         ['key' => 'id', 'label' => 'ID', 'hidden' => true],
@@ -53,6 +60,71 @@ class Participants extends Component
         }
 
         return Storage::disk('public')->download($document->file_url);
+    }
+
+    public function sendDocumentReminders(): void
+    {
+        $this->authorize('update', $this->hackaton);
+
+        $userIds = $this->incompleteDocumentUserIds();
+
+        if ($userIds->isEmpty()) {
+            $this->warning('Все участники уже загрузили обязательные документы.', position: 'toast-center toast-top');
+
+            return;
+        }
+
+        $users = User::query()->whereIn('id', $userIds)->get();
+        Notification::send($users, new DocumentUploadReminder($this->hackaton));
+
+        $this->success("Напоминания отправлены: {$users->count()} участникам.", position: 'toast-center toast-top');
+    }
+
+    /**
+     * @return Collection<int, int>
+     */
+    private function incompleteDocumentUserIds(): Collection
+    {
+        $requiredDocumentIds = $this->hackaton->documents()
+            ->where('filling_by_team_member', true)
+            ->pluck('id');
+
+        if ($requiredDocumentIds->isEmpty()) {
+            return collect();
+        }
+
+        $teams = $this->hackaton->teams()->with('roles')->get();
+        $participantIds = $teams
+            ->flatMap(fn (Team $team) => $team->roles->pluck('user_id'))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($participantIds->isEmpty()) {
+            return collect();
+        }
+
+        $uploadedCounts = UserHackatonDocument::query()
+            ->whereIn('user_id', $participantIds)
+            ->whereIn('hackaton_document_id', $requiredDocumentIds)
+            ->selectRaw('user_id, COUNT(*) as uploaded_count')
+            ->groupBy('user_id')
+            ->pluck('uploaded_count', 'user_id');
+
+        $requiredCount = $requiredDocumentIds->count();
+
+        return $participantIds->filter(
+            fn (int $userId): bool => (int) ($uploadedCounts[$userId] ?? 0) < $requiredCount
+        )->values();
+    }
+
+    private function teamPassesDocumentsFilter(int $teamId, int $totalUploaded, int $totalRequired): bool
+    {
+        return match ($this->documentsFilter) {
+            'complete' => $totalRequired > 0 && $totalUploaded >= $totalRequired,
+            'incomplete' => $totalRequired > 0 && $totalUploaded < $totalRequired,
+            default => true,
+        };
     }
 
     /**
@@ -171,8 +243,17 @@ class Participants extends Component
                     'files_progress' => $totalRequired > 0
                         ? $totalUploaded.'/'.$totalRequired
                         : '—',
+                    'total_uploaded' => $totalUploaded,
+                    'total_required' => $totalRequired,
                 ];
             })
+            ->filter(fn (array $row): bool => $this->teamPassesDocumentsFilter(
+                $row['id'],
+                $row['total_uploaded'],
+                $row['total_required'],
+            ))
+            ->map(fn (array $row): array => collect($row)->except(['total_uploaded', 'total_required'])->all())
+            ->values()
             ->all();
     }
 

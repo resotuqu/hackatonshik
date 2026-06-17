@@ -14,9 +14,22 @@
                 <h3 class="text-2xl font-bold">Участники хакатона</h3>
                 <p class="opacity-80">{{ $hackaton->title }}</p>
             </div>
-            <a href="{{ route('organizer.dashboard') }}">
-                <x-mary-button label="Назад" class="btn-secondary" />
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <select class="select select-bordered select-sm" wire:model.live="documentsFilter">
+                    <option value="all">Все команды</option>
+                    <option value="incomplete">Неполный комплект документов</option>
+                    <option value="complete">Документы загружены</option>
+                </select>
+                <x-mary-button
+                    label="Напомнить о документах"
+                    class="btn-warning btn-sm"
+                    wire:click="sendDocumentReminders"
+                    wire:confirm="Отправить напоминание участникам с незагруженными документами?"
+                />
+                <a href="{{ route('organizer.dashboard') }}">
+                    <x-mary-button label="Назад" class="btn-secondary btn-sm" />
+                </a>
+            </div>
         </div>
 
         <div class="overflow-x-auto">

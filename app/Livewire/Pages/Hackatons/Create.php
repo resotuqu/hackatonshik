@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\Hackatons;
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
+use App\Models\HackatonTemplate;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,8 @@ class Create extends Component
     }
 
     public int $wizardStep = 1;
+
+    public ?int $selectedTemplateId = null;
 
     public const WIZARD_LAST_STEP = 5;
 
@@ -128,6 +131,35 @@ class Create extends Component
     {
         unset($this->hackatonDocuments[$index]);
         $this->hackatonDocuments = array_values($this->hackatonDocuments);
+    }
+
+    public function applyTemplate(int $templateId): void
+    {
+        $template = HackatonTemplate::query()->active()->findOrFail($templateId);
+
+        $this->selectedTemplateId = $template->id;
+        $this->title = $template->title;
+        $this->description = (string) ($template->description ?? '');
+        $this->level = $template->level;
+        $this->start_at = now()->addDays($template->start_offset_days)->format('Y-m-d H:i');
+        $this->end_at = now()->addDays($template->end_offset_days)->format('Y-m-d H:i');
+
+        if ($template->registration_deadline_offset_days !== null) {
+            $this->registration_deadline_at = now()->addDays($template->registration_deadline_offset_days)->format('Y-m-d H:i');
+        }
+
+        $this->hackatonDocuments = collect($template->default_documents ?? [])
+            ->map(fn (array $doc): array => [
+                'id' => uniqid(),
+                'name' => (string) ($doc['name'] ?? ''),
+                'description' => (string) ($doc['description'] ?? ''),
+                'file_url' => '',
+                'filling_by_team_member' => (bool) ($doc['filling_by_team_member'] ?? false),
+            ])
+            ->values()
+            ->all();
+
+        $this->success('Шаблон применён. Заполните оставшиеся поля и загрузите файлы документов.', position: 'toast-center toast-top');
     }
 
     public function wizardSubmit(): mixed
@@ -296,6 +328,8 @@ class Create extends Component
 
     public function render(): View
     {
-        return view('pages.hackatons.create');
+        return view('pages.hackatons.create', [
+            'templates' => HackatonTemplate::query()->active()->orderBy('sort_order')->get(),
+        ]);
     }
 }
