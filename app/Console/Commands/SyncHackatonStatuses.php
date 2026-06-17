@@ -9,7 +9,9 @@ use App\Models\HackatonCase;
 use App\Models\Team;
 use App\Models\User;
 use App\Notifications\CaseDeadlineReminder;
+use App\Notifications\HackatonWatchStartReminder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
@@ -30,6 +32,7 @@ class SyncHackatonStatuses extends Command
     {
         $updated = 0;
         $deadlineRemindersSent = 0;
+        $watchStartRemindersSent = 0;
 
         Hackaton::query()
             ->select(['id', 'is_public', 'start_at', 'end_at', 'status', 'registration_deadline_at'])
@@ -71,7 +74,9 @@ class SyncHackatonStatuses extends Command
                 }
             });
 
-        $this->info("Синхронизация завершена. Обновлено статусов: {$updated}. Напоминаний отправлено: {$deadlineRemindersSent}.");
+        $watchStartRemindersSent += $this->sendHackatonWatchStartReminders();
+
+        $this->info("Синхронизация завершена. Обновлено статусов: {$updated}. Напоминаний о дедлайнах: {$deadlineRemindersSent}. Напоминаний о старте: {$watchStartRemindersSent}.");
 
         return self::SUCCESS;
     }
@@ -111,5 +116,40 @@ class SyncHackatonStatuses extends Command
         }
 
         return $byHackaton;
+    }
+
+    private function sendHackatonWatchStartReminders(): int
+    {
+        $sent = 0;
+        $reminderDays = [7, 1];
+
+        foreach ($reminderDays as $days) {
+            $windowStart = now()->addDays($days)->startOfDay();
+            $windowEnd = now()->addDays($days)->endOfDay();
+
+            Hackaton::query()
+                ->where('is_public', true)
+                ->whereBetween('start_at', [$windowStart, $windowEnd])
+                ->select(['id', 'title', 'start_at'])
+                ->chunkById(50, function ($hackatons) use ($days, &$sent): void {
+                    foreach ($hackatons as $hackaton) {
+                        $watchers = User::query()
+                            ->whereHas('watchedHackatons', fn ($query) => $query->where('hackatons.id', $hackaton->id))
+                            ->get();
+
+                        foreach ($watchers as $watcher) {
+                            $cacheKey = "hackaton-watch-start:{$hackaton->id}:{$watcher->id}:{$days}";
+                            if (! Cache::add($cacheKey, true, Carbon::parse((string) $hackaton->start_at)->addDay())) {
+                                continue;
+                            }
+
+                            $sent++;
+                            Notification::send($watcher, new HackatonWatchStartReminder($hackaton, $days));
+                        }
+                    }
+                });
+        }
+
+        return $sent;
     }
 }

@@ -215,6 +215,10 @@
                     <span class="label-text">Автоматически опубликовать анонс с итогами</span>
                 </label>
                 <label class="label cursor-pointer justify-start gap-3">
+                    <input type="checkbox" class="checkbox checkbox-primary" wire:model="is_results_public" />
+                    <span class="label-text">Публичная страница итогов (рейтинг команд)</span>
+                </label>
+                <label class="label cursor-pointer justify-start gap-3">
                     <input type="checkbox" class="checkbox checkbox-primary" wire:model="auto_issue_certificates" />
                     <span class="label-text">Автоматически выдать сертификаты участникам</span>
                 </label>

@@ -111,6 +111,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(TeamMessage::class);
     }
 
+    /** @return BelongsToMany<Skill, $this> */
+    public function skills(): BelongsToMany
+    {
+        return $this->belongsToMany(Skill::class);
+    }
+
+    /** @return BelongsToMany<Hackaton, $this> */
+    public function watchedHackatons(): BelongsToMany
+    {
+        return $this->belongsToMany(Hackaton::class, 'hackaton_watches')->withTimestamps();
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -127,6 +139,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_profile_public',
         'show_email_on_profile',
         'show_phone_on_profile',
+        'open_to_teams',
+        'show_skills_on_profile',
         'avatar_path',
     ];
 
@@ -154,6 +168,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_profile_public' => 'boolean',
             'show_email_on_profile' => 'boolean',
             'show_phone_on_profile' => 'boolean',
+            'open_to_teams' => 'boolean',
+            'show_skills_on_profile' => 'boolean',
             'phone_verified_at' => 'datetime',
             'suspended_at' => 'datetime',
         ];

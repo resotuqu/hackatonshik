@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Profile;
 
 use App\Enums\ApplicationStatus;
 use App\Enums\UserRole;
+use App\Models\Skill;
 use App\Models\TeamApplication;
 use App\Services\ContactChangeService;
 use App\Support\PresetAvatar;
@@ -45,6 +46,13 @@ class Index extends Component
     public bool $show_email_on_profile = false;
 
     public bool $show_phone_on_profile = false;
+
+    public bool $open_to_teams = false;
+
+    public bool $show_skills_on_profile = false;
+
+    /** @var list<int> */
+    public array $skill_ids = [];
 
     public $avatar = null;
 
@@ -110,6 +118,9 @@ class Index extends Component
         $this->is_profile_public = (bool) $user->is_profile_public;
         $this->show_email_on_profile = (bool) $user->show_email_on_profile;
         $this->show_phone_on_profile = (bool) $user->show_phone_on_profile;
+        $this->open_to_teams = (bool) $user->open_to_teams;
+        $this->show_skills_on_profile = (bool) $user->show_skills_on_profile;
+        $this->skill_ids = $user->skills()->pluck('skills.id')->map(fn ($id) => (int) $id)->all();
         $this->avatar_path = $user->avatar_path;
         if ($user->avatar_path && PresetAvatar::isAllowedPath($user->avatar_path)) {
             $this->selected_preset_path = $user->avatar_path;
@@ -257,6 +268,31 @@ class Index extends Component
         ]);
     }
 
+    public function persistTeamMatchingPreferences(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+
+        $this->validate([
+            'skill_ids' => ['array'],
+            'skill_ids.*' => ['integer', 'exists:skills,id'],
+        ]);
+
+        $user->update([
+            'open_to_teams' => $this->open_to_teams,
+            'show_skills_on_profile' => $this->show_skills_on_profile,
+        ]);
+        $user->skills()->sync($this->skill_ids);
+    }
+
+    #[Computed]
+    public function skillsData()
+    {
+        return Skill::query()->orderBy('name')->get(['id', 'name']);
+    }
+
     public function updatedIsProfilePublic(): void
     {
         $this->persistPrivacyToggles();
@@ -270,6 +306,22 @@ class Index extends Component
     public function updatedShowPhoneOnProfile(): void
     {
         $this->persistPrivacyToggles();
+    }
+
+    public function updatedOpenToTeams(): void
+    {
+        $this->persistTeamMatchingPreferences();
+    }
+
+    public function updatedShowSkillsOnProfile(): void
+    {
+        $this->persistTeamMatchingPreferences();
+    }
+
+    public function updatedSkillIds(): void
+    {
+        $this->persistTeamMatchingPreferences();
+        $this->skipRender();
     }
 
     public function openPasswordChangeModal(): void

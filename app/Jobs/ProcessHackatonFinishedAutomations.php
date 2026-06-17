@@ -35,6 +35,10 @@ class ProcessHackatonFinishedAutomations implements ShouldQueue
         }
 
         if ($hackaton->auto_publish_results_announcement) {
+            if (! $hackaton->is_results_public) {
+                $hackaton->forceFill(['is_results_public' => true])->save();
+            }
+
             $announcement = $hackaton->announcements()->create([
                 'title' => 'Итоги хакатона',
                 'body' => 'Хакатон завершён. Результаты опубликованы — проверьте итоги и сертификаты в личном кабинете.',

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\Home;
 
+use App\Actions\Hackaton\SuggestTeamsForUser;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\Team;
@@ -72,6 +73,9 @@ class Index extends Component
     public int $unreadNotificationsCount = 0;
 
     public bool $showPhoneVerificationBanner = false;
+
+    /** @var list<array{team: Team, match_score: int, matched_skills: list<string>}> */
+    public array $recommendedTeams = [];
 
     public function mount(): void
     {
@@ -157,6 +161,12 @@ class Index extends Component
 
         foreach (HomeDashboardData::fromUser($user)->toLivewireArray() as $key => $value) {
             $this->{$key} = $value;
+        }
+
+        if ($user->isParticipant()) {
+            $this->recommendedTeams = app(SuggestTeamsForUser::class)
+                ->handle($user, 3)
+                ->all();
         }
     }
 

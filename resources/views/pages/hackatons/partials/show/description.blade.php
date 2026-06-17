@@ -20,6 +20,7 @@
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body space-y-4">
                 <h2 class="card-title text-lg">Информация о хакатоне</h2>
+                <x-hackaton-watch-button :hackaton="$hackaton" :is-watched="$isWatched ?? false" />
                 <div class="rounded-xl border border-primary/20 bg-primary/10 p-4">
                     <p class="text-xs uppercase tracking-wide text-primary/80">Ваш следующий шаг</p>
                     <p class="mt-1 font-semibold">{{ $nextStepTitle }}</p>

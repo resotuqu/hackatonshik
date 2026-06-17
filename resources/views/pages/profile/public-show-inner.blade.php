@@ -7,7 +7,11 @@
             : 'https://ui-avatars.com/api/?name='.urlencode($profileUser->fio).'&background=random';
         $teamsCount = $profileUser->teams->count();
         $hackatonsCount = $profileUser->hackatons->count();
-        $skills = $profileUser->teamRoles->flatMap(fn ($role) => $role->skills->pluck('name'))->unique()->values();
+        $skills = $profileUser->teamRoles->flatMap(fn ($role) => $role->skills->pluck('name'));
+        if ($profileUser->show_skills_on_profile) {
+            $skills = $skills->merge($profileUser->skills->pluck('name'));
+        }
+        $skills = $skills->unique()->values();
         $publicProfileUrl = route('profile.public.show', ['user' => $profileUser->nickname]);
 
         $bioSource = filled($profileUser->description)

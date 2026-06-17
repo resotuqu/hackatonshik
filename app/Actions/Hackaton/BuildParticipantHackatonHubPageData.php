@@ -14,6 +14,7 @@ final class BuildParticipantHackatonHubPageData
 {
     public function __construct(
         private readonly BuildParticipantHackatonChecklist $checklist,
+        private readonly SuggestTeamsForUser $suggestTeamsForUser,
     ) {}
 
     /**
@@ -78,6 +79,7 @@ final class BuildParticipantHackatonHubPageData
             'submissions' => $submissions,
             'requiredDocuments' => $requiredDocuments,
             'upcomingCases' => $upcomingCases,
+            'recommendedTeams' => $this->suggestTeamsForUser->handle($user, 3, $hackaton->id)->all(),
             'myCertificates' => $myCertificates,
             'checklist' => $this->checklist->handle($hackaton, $user, $teams),
         ];

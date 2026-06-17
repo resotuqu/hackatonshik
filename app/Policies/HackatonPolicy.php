@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\User;
 
@@ -66,5 +67,22 @@ class HackatonPolicy
     public function viewActivityHistory(User $user, Hackaton $hackaton): bool
     {
         return $this->update($user, $hackaton);
+    }
+
+    public function viewPublicResults(?User $user, Hackaton $hackaton): bool
+    {
+        if (! $hackaton->is_results_public) {
+            return false;
+        }
+
+        if (in_array($hackaton->status, [
+            HackatonStatus::JUDGING,
+            HackatonStatus::FINISHED,
+            HackatonStatus::ARCHIVED,
+        ], true)) {
+            return true;
+        }
+
+        return $user !== null && $this->viewOrganizationDashboard($user, $hackaton);
     }
 }

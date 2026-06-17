@@ -237,6 +237,31 @@
                     </div>
                 </section>
 
+                {{-- Team matching --}}
+                <section class="card border border-base-300 bg-base-100">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base">
+                            <x-app-icon icon="heroicons:user-plus" class="h-5 w-5 text-primary" />
+                            Поиск команды
+                        </h2>
+                        <p class="text-sm text-base-content/70">
+                            Укажите навыки — мы порекомендуем команды с открытыми ролями, где нужны такие же компетенции.
+                        </p>
+                        <x-marytoggle label="Ищу команду" wire:model.live="open_to_teams" />
+                        <x-marytoggle label="Показывать навыки в публичном профиле" wire:model.live="show_skills_on_profile" />
+                        <div class="form-control w-full">
+                            <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Мои навыки</span></span>
+                            <x-marychoices-offline
+                                wire:model.live="skill_ids"
+                                :options="$this->skillsData"
+                                placeholder="Выберите навыки…"
+                                clearable
+                                searchable
+                            />
+                        </div>
+                    </div>
+                </section>
+
                 {{-- Privacy --}}
                 <section class="card border border-base-300 bg-base-100">
                     <div class="card-body gap-4">
@@ -361,6 +386,10 @@
                     <a href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener" class="btn btn-block btn-sm btn-outline">
                         <x-app-icon icon="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
                         Открыть публичную страницу
+                    </a>
+                    <a href="{{ route('profile.watches') }}" class="btn btn-block btn-sm btn-outline" wire:navigate>
+                        <x-app-icon icon="heroicons:bookmark" class="h-4 w-4" />
+                        Мои закладки
                     </a>
                 </div>
             </section>

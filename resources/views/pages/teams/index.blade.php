@@ -14,6 +14,8 @@
 @endphp
 
 <div class="space-y-8">
+    <x-recommended-teams :recommendations="$this->recommendedTeams->all()" />
+
     @php
         $totalTeams = $this->teams->total();
         $tc = $totalTeams % 100;

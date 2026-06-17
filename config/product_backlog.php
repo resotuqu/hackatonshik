@@ -38,5 +38,35 @@ return [
             'priority' => 6,
             'status' => 'done',
         ],
+        [
+            'key' => 'hackaton_watchlist',
+            'title' => 'Закладки на хакатоны и напоминания о статусе и старте',
+            'priority' => 7,
+            'status' => 'done',
+        ],
+        [
+            'key' => 'public_results',
+            'title' => 'Публичная страница итогов хакатона',
+            'priority' => 8,
+            'status' => 'done',
+        ],
+        [
+            'key' => 'team_matching',
+            'title' => 'Умный подбор команд по навыкам профиля',
+            'priority' => 9,
+            'status' => 'done',
+        ],
+        [
+            'key' => 'organizer_funnel',
+            'title' => 'Воронка организатора и retention-метрики',
+            'priority' => 10,
+            'status' => 'planned',
+        ],
+        [
+            'key' => 'template_gallery',
+            'title' => 'Публичная галерея шаблонов хакатонов',
+            'priority' => 11,
+            'status' => 'planned',
+        ],
     ],
 ];

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Actions\Hackaton\BumpHackatonCatalogCacheVersion;
+use App\Actions\Hackaton\NotifyHackatonWatchersOfStatusChange;
 use App\Enums\HackatonLevel;
 use App\Enums\HackatonStatus;
 use App\Jobs\ProcessHackatonFinishedAutomations;
@@ -49,6 +50,14 @@ class Hackaton extends Model
         });
 
         static::updated(function (Hackaton $hackaton): void {
+            if ($hackaton->wasChanged('status')) {
+                app(NotifyHackatonWatchersOfStatusChange::class)->handle(
+                    $hackaton,
+                    $hackaton->getOriginal('status'),
+                    $hackaton->status,
+                );
+            }
+
             if ($hackaton->wasChanged(['title', 'is_public', 'start_at', 'end_at', 'image_url'])) {
                 app(BumpHackatonCatalogCacheVersion::class)->handle();
             }
@@ -108,6 +117,12 @@ class Hackaton extends Model
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
+    }
+
+    /** @return BelongsToMany<User, $this> */
+    public function watchers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'hackaton_watches')->withTimestamps();
     }
 
     public function teamsCount(): int
@@ -261,6 +276,7 @@ class Hackaton extends Model
             'prize_fund' => 'decimal:2',
             'auto_issue_certificates' => 'boolean',
             'auto_publish_results_announcement' => 'boolean',
+            'is_results_public' => 'boolean',
             'finished_automations_ran_at' => 'datetime',
         ];
     }
@@ -280,6 +296,7 @@ class Hackaton extends Model
         'registration_deadline_at',
         'auto_issue_certificates',
         'auto_publish_results_announcement',
+        'is_results_public',
         'certificate_template_path',
         'finished_automations_ran_at',
     ];

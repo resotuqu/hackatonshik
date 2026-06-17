@@ -335,6 +335,7 @@
 
     @if (auth()->user()->isParticipant())
         <div id="participant-hackaton-dashboard" class="scroll-mt-24 space-y-10">
+        <x-recommended-teams :recommendations="$recommendedTeams" />
         @if ($participantNextStepTitle !== '')
             <div class="rounded-xl border border-primary/20 bg-primary/10 p-4 shadow-sm">
                 <p class="text-xs text-primary/80">Ваш следующий шаг</p>

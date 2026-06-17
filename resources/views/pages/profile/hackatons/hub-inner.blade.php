@@ -15,6 +15,8 @@
             </ul>
         </div>
 
+        <x-recommended-teams :recommendations="$recommendedTeams ?? []" />
+
         <section class="ui-surface-card">
             <div class="card-body">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

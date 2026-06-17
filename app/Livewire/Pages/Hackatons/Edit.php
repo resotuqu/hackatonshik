@@ -87,6 +87,8 @@ class Edit extends Component
 
     public bool $auto_publish_results_announcement = false;
 
+    public bool $is_results_public = false;
+
     public $certificateTemplate;
 
     #[Validate([
@@ -126,6 +128,7 @@ class Edit extends Component
         $this->registration_deadline_at = $hackaton->registration_deadline_at;
         $this->auto_issue_certificates = (bool) $hackaton->auto_issue_certificates;
         $this->auto_publish_results_announcement = (bool) $hackaton->auto_publish_results_announcement;
+        $this->is_results_public = (bool) $hackaton->is_results_public;
 
         foreach ($hackaton->documents as $document) {
             $this->hackatonDocuments[] = [
@@ -204,6 +207,7 @@ class Edit extends Component
             'registration_deadline_at' => $this->registration_deadline_at !== '' ? $this->registration_deadline_at : null,
             'auto_issue_certificates' => $this->auto_issue_certificates,
             'auto_publish_results_announcement' => $this->auto_publish_results_announcement,
+            'is_results_public' => $this->is_results_public,
         ];
 
         if ($this->certificateTemplate) {

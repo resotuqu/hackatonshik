@@ -17,6 +17,12 @@ class Skill extends Model
         return $this->belongsToMany(TeamRole::class, 'team_role_skills');
     }
 
+    /** @return BelongsToMany<User, $this> */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     protected function casts(): array
     {
         return [

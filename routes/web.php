@@ -9,6 +9,7 @@ use App\Http\Controllers\HackatonCaseScoreController;
 use App\Http\Controllers\HackatonCaseSubmissionController;
 use App\Http\Controllers\HackatonCertificateController;
 use App\Http\Controllers\HackatonExportController;
+use App\Http\Controllers\HackatonWatchController;
 use App\Http\Controllers\JudgeExportController;
 use App\Http\Controllers\JudgeManagementController;
 use App\Http\Controllers\NotificationController;
@@ -28,6 +29,7 @@ use App\Livewire\Pages\CookiePolicy\Index as CookiePolicyIndex;
 use App\Livewire\Pages\Hackatons\Create as HackatonsCreate;
 use App\Livewire\Pages\Hackatons\Edit as HackatonsEdit;
 use App\Livewire\Pages\Hackatons\Index as HackatonsIndex;
+use App\Livewire\Pages\Hackatons\Results as HackatonsResults;
 use App\Livewire\Pages\Hackatons\Show as HackatonsShow;
 use App\Livewire\Pages\Home\Index as HomeIndex;
 use App\Livewire\Pages\Judge\Dashboard as JudgeDashboard;
@@ -47,6 +49,7 @@ use App\Livewire\Pages\Profile\Hackatons\Scoring as ProfileHackatonsScoring;
 use App\Livewire\Pages\Profile\Index as ProfileIndex;
 use App\Livewire\Pages\Profile\PublicProfileShow;
 use App\Livewire\Pages\Profile\Teams\Index as ProfileTeamsIndex;
+use App\Livewire\Pages\Profile\Watches\Index as ProfileWatchesIndex;
 use App\Livewire\Pages\Teams\Create as TeamsCreate;
 use App\Livewire\Pages\Teams\Edit as TeamsEdit;
 use App\Livewire\Pages\Teams\Index as TeamsIndex;
@@ -164,12 +167,15 @@ Route::get('/profile/hackatons/{hackaton}/hub', function (Hackaton $hackaton) {
 
 Route::get('/profile/certificates', ProfileCertificatesIndex::class)->middleware($participantMiddleware)->name('profile.certificates');
 
+Route::get('/profile/watches', ProfileWatchesIndex::class)->middleware(['auth', 'verified'])->name('profile.watches');
+
 Route::get('/teams/{team}', TeamsShow::class)->name('teams.show');
 Route::get('/teams/{team}/edit', TeamsEdit::class)
     ->middleware($participantMiddleware)
     ->name('teams.edit');
 
 Route::get('/hackatons/{hackaton}', HackatonsShow::class)->name('hackatons.show');
+Route::get('/hackatons/{hackaton}/results', HackatonsResults::class)->name('hackatons.results');
 Route::get('/hackatons/{hackaton}/edit', HackatonsEdit::class)
     ->middleware($organizerMiddleware)
     ->name('hackatons.edit');
@@ -203,6 +209,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('team.applications.store');
     Route::patch('/team-applications/{application}', [TeamApplicationController::class, 'update'])->name('team.applications.update');
     Route::delete('/team-applications/{application}', [TeamApplicationController::class, 'destroy'])->name('team.applications.destroy');
+
+    Route::post('/hackaton-watches/{hackaton}', [HackatonWatchController::class, 'store'])->name('hackaton.watches.store');
+    Route::delete('/hackaton-watches/{hackaton}', [HackatonWatchController::class, 'destroy'])->name('hackaton.watches.destroy');
 
     Route::post('/hackaton-applications', [HackatonApplicationController::class, 'store'])
         ->middleware('throttle:applications')

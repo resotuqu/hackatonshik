@@ -91,6 +91,7 @@ class ComposeHackatonShowPageData
         return [
             'isOrganizer' => $isOrganizer,
             'isAssignedJudge' => $isAssignedJudge,
+            'isWatched' => $user !== null && $user->watchedHackatons()->where('hackatons.id', $hackaton->id)->exists(),
             'availableTeams' => $availableTeams,
             'submitterTeams' => $submitterTeams,
             'participantUsers' => $participantUsers,

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\Teams;
 
+use App\Actions\Hackaton\SuggestTeamsForUser;
 use App\Enums\ApplicationStatus;
 use App\Models\Hackaton;
 use App\Models\ListAnalyticsEvent;
@@ -71,6 +72,20 @@ class Index extends Component
     public function normalizedRoleIds(): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $this->role_ids))));
+    }
+
+    #[Computed]
+    public function recommendedTeams()
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User || ! $user->isParticipant()) {
+            return collect();
+        }
+
+        $hackatonId = $this->hackaton_id !== '0' ? (int) $this->hackaton_id : null;
+
+        return app(SuggestTeamsForUser::class)->handle($user, 3, $hackatonId);
     }
 
     #[Computed]

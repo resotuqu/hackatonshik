@@ -33,6 +33,7 @@ class PublicProfileShow extends Component
                         'hackatons' => fn ($query) => $query->latest()->limit(6),
                         'certificates.hackaton',
                         'teamRoles.skills',
+                        'skills',
                     ])
                     ->firstOrFail();
             }
