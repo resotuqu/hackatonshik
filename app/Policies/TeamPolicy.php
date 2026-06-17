@@ -40,4 +40,9 @@ class TeamPolicy
     {
         return $team->hasMember($user);
     }
+
+    public function viewActivityHistory(User $user, Team $team): bool
+    {
+        return (int) $team->user_id === (int) $user->id;
+    }
 }

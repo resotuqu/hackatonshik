@@ -31,12 +31,16 @@
                         <span class="font-medium">{{ $hackaton->user->nickname ?? $hackaton->user->name ?? $hackaton->user->email }}</span>
                     </div>
                     <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
+                        <span class="text-base-content/70">Обновлено</span>
+                        <x-datetime :value="$hackaton->updated_at" mode="relative" class="font-medium" />
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
                         <span class="text-base-content/70">Старт</span>
-                        <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y H:i') }}</span>
+                        <x-datetime :value="$hackaton->start_at" class="font-medium" />
                     </div>
                     <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
                         <span class="text-base-content/70">Финиш</span>
-                        <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y H:i') }}</span>
+                        <x-datetime :value="$hackaton->end_at" class="font-medium" />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -66,9 +70,7 @@
                                             <span class="font-medium">{{ $myApplication->team->title }}</span>
                                         </p>
                                         <div class="mt-1 flex items-center justify-between gap-2">
-                                            <span class="badge badge-{{ $myApplication->status->isAccepted() ? 'success' : ($myApplication->status->isRejected() ? 'error' : 'warning') }}">
-                                                {{ $myApplication->status->label() }}
-                                            </span>
+                                            <x-application-status-badge :status="$myApplication->status" />
                                             @if ($myApplication->status->isPending())
                                                 <form method="POST" action="{{ route('hackaton.applications.destroy', $myApplication) }}"
                                                     onsubmit="return confirm('Отменить поданную заявку команды?');">

@@ -76,26 +76,6 @@
 
             <main id="main-content" class="flex-1 pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:pb-0" tabindex="-1">
                 <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
-                    @if (session('success') || session('error') || session('warning'))
-                        <div class="toast toast-top toast-end z-70">
-                            @if (session('success'))
-                                <div class="alert alert-success shadow-lg">
-                                    <span>{{ session('success') }}</span>
-                                </div>
-                            @endif
-                            @if (session('error'))
-                                <div class="alert alert-error shadow-lg">
-                                    <span>{{ session('error') }}</span>
-                                </div>
-                            @endif
-                            @if (session('warning'))
-                                <div class="alert alert-warning shadow-lg">
-                                    <span>{{ session('warning') }}</span>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-
                     @hasSection('slot')
                         @yield('slot')
                     @elseif (isset($slot))
@@ -274,6 +254,9 @@
                                                             @if(filled($notificationMessage))
                                                                 <p class="text-xs text-base-content/70">{{ $notificationMessage }}</p>
                                                             @endif
+                                                            <p class="mt-1 text-[0.65rem] text-base-content/50">
+                                                                <x-datetime :value="$notification->created_at" mode="relative" />
+                                                            </p>
                                                         </a>
                                                         @if($notification->read_at === null)
                                                             <form method="POST" action="{{ route('notifications.read', $notification) }}" class="mt-1">
@@ -513,6 +496,9 @@
             </aside>
         </div>
     </div>
+
+    <x-marytoast position="toast-top toast-end" />
+    <x-flash-toast-bridge />
 
     @livewireScripts
     <script>

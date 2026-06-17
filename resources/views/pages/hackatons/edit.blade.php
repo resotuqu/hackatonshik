@@ -1,6 +1,5 @@
 
 <div class="mx-auto w-full max-w-6xl space-y-4">
-    <x-marytoast />
     @php
         $hasFilledDocument = collect($hackatonDocuments)->contains(function ($document) {
             $hasDocumentType = array_key_exists('filling_by_team_member', $document)
@@ -234,4 +233,10 @@
             </x-slot:actions>
         </x-maryform>
     </x-marycard>
+
+    @can('viewActivityHistory', $hackaton)
+        <x-marycard class="card card-border bg-base-100">
+            <x-activity-timeline :subject="$hackaton" :limit="20" />
+        </x-marycard>
+    @endcan
 </div>

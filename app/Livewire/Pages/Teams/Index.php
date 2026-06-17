@@ -12,6 +12,7 @@ use App\Models\Team;
 use App\Models\TeamApplication;
 use App\Models\TeamRole;
 use App\Models\User;
+use App\Support\FlashToast;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
@@ -19,6 +20,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Mary\Traits\Toast;
 
 #[Layout('layouts::app', [
     'title' => 'Команды участников — Хакатонщик',
@@ -27,6 +29,7 @@ use Livewire\WithPagination;
 ])]
 class Index extends Component
 {
+    use Toast;
     use WithPagination;
 
     #[Url(as: 'tab')]
@@ -298,7 +301,7 @@ class Index extends Component
         abort_unless(Auth::user()?->canParticipate(), 403);
 
         if (Auth::user()?->isOrganizer()) {
-            session()->flash('warning', 'Организатор не может подавать заявки в команды.');
+            $this->warning('Организатор не может подавать заявки в команды.', position: FlashToast::POSITION);
 
             return;
         }
@@ -326,7 +329,7 @@ class Index extends Component
         $application->save();
 
         $this->trackListEvent('quick_apply_click', ['team_id' => $teamId, 'team_role_id' => $role->id]);
-        session()->flash('success', 'Быстрый отклик отправлен.');
+        $this->success('Быстрый отклик отправлен.', position: FlashToast::POSITION);
     }
 
     public function openTeam(int $teamId)

@@ -87,6 +87,12 @@
             </div>
         @endif
 
+        @if ($team->updated_at)
+            <p class="text-xs text-base-content/45">
+                обновлено <x-datetime :value="$team->updated_at" mode="relative" />
+            </p>
+        @endif
+
         {{-- Футер карточки: Участники и кнопка --}}
         <div class="mt-auto flex flex-col gap-4 pt-2 sm:flex-row sm:items-end sm:justify-between">
             

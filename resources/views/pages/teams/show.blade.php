@@ -157,6 +157,19 @@
                                 </ul>
                             </div>
                         @endif
+
+                        <div class="divider my-0 text-xs text-base-content/40"></div>
+
+                        <x-entity-meta
+                            :updated-at="$team->updated_at"
+                            :created-at="$team->created_at"
+                            :actor="$team->user"
+                            actor-label="Капитан"
+                        />
+
+                        @can('viewActivityHistory', $team)
+                            <x-activity-timeline :subject="$team" class="pt-2" />
+                        @endcan
                     </div>
                 </div>
             </div>
@@ -196,9 +209,7 @@
                                                 </span>
                                             @elseif ($myApplication)
                                                 <div class="flex flex-col items-end gap-2">
-                                                    <span class="badge badge-{{ $myApplication->status->isAccepted() ? 'success' : ($myApplication->status->isRejected() ? 'error' : 'warning') }}">
-                                                        Заявка: {{ $myApplication->status->label() }}
-                                                    </span>
+                                                    <x-application-status-badge :status="$myApplication->status" />
                                                     @if ($myApplication->status->isPending())
                                                         <form method="POST" action="{{ route('team.applications.destroy', $myApplication) }}"
                                                             onsubmit="return confirm('Отменить поданную заявку?');">
@@ -410,10 +421,7 @@
                                                 <td class="max-w-xs truncate">{{ $app->message }}</td>
                                                 <td class="whitespace-nowrap text-sm">{{ $app->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                                 <td>
-                                                    <span
-                                                        class="badge badge-{{ $app->status->isAccepted() ? 'success' : ($app->status->isRejected() ? 'error' : 'warning') }}">
-                                                        {{ $app->status->label() }}
-                                                    </span>
+                                                    <x-application-status-badge :status="$app->status" />
                                                 </td>
                                                 <td>{{ $app->reviewer?->nickname ?? $app->reviewer?->name ?? '—' }}</td>
                                                 <td class="whitespace-nowrap text-sm">{{ $app->reviewed_at?->format('d.m.Y H:i') ?? '—' }}</td>
@@ -453,10 +461,7 @@
                                     <div class="rounded-2xl border border-base-300/70 bg-base-200/25 p-4 shadow-sm">
                                         <div class="flex flex-wrap items-start justify-between gap-2">
                                             <p class="font-semibold leading-snug">{{ $app->user->fio ?? $app->user->nickname ?? $app->user->email }}</p>
-                                            <span
-                                                class="badge badge-{{ $app->status->isAccepted() ? 'success' : ($app->status->isRejected() ? 'error' : 'warning') }} shrink-0">
-                                                {{ $app->status->label() }}
-                                            </span>
+                                            <x-application-status-badge :status="$app->status" class="shrink-0" />
                                         </div>
                                         <p class="mt-2 text-sm text-base-content/70">
                                             <span class="font-medium text-base-content/80">Роль:</span> {{ $app->teamRole->title }}

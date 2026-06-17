@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property int $id
@@ -37,8 +39,21 @@ class Hackaton extends Model
     /** @use HasFactory<HackatonFactory> */
     use HasFactory;
 
+    use LogsActivity;
+
     protected static function booted(): void
     {
+        static::created(function (): void {
+            self::bumpCatalogCacheVersion();
+        });
+        static::updated(function (Hackaton $hackaton): void {
+            if ($hackaton->wasChanged(['title', 'is_public', 'start_at', 'end_at', 'image_url'])) {
+                self::bumpCatalogCacheVersion();
+            }
+        });
+        static::deleted(function (): void {
+            self::bumpCatalogCacheVersion();
+        });
         static::saved(function (Hackaton $hackaton): void {
             if (
                 ! $hackaton->wasRecentlyCreated
@@ -54,7 +69,9 @@ class Hackaton extends Model
                 Cache::forget('home-public-totals-v4');
             }
 
-            PartnerSidebarCounts::forgetForUser($hackaton->user_id);
+            if ($hackaton->user_id !== null) {
+                PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
+            }
         });
         static::deleted(function (Hackaton $hackaton): void {
             if (Cache::supportsTags()) {
@@ -64,7 +81,9 @@ class Hackaton extends Model
                 Cache::forget('home-public-totals-v4');
             }
 
-            PartnerSidebarCounts::forgetForUser($hackaton->user_id);
+            if ($hackaton->user_id !== null) {
+                PartnerSidebarCounts::forgetForUser((int) $hackaton->user_id);
+            }
         });
     }
 
@@ -227,6 +246,16 @@ class Hackaton extends Model
         return true;
     }
 
+    private static function bumpCatalogCacheVersion(): void
+    {
+        $store = Cache::supportsTags()
+            ? Cache::tags(['catalog', 'catalog:hackatons'])
+            : Cache::store();
+
+        $key = 'api:v1:catalog:hackatons:version';
+        $store->put($key, ((int) $store->get($key, 0)) + 1);
+    }
+
     protected function casts(): array
     {
         return [
@@ -261,4 +290,22 @@ class Hackaton extends Model
         'certificate_template_path',
         'finished_automations_ran_at',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('hackaton')
+            ->logOnly([
+                'title',
+                'description',
+                'status',
+                'is_public',
+                'start_at',
+                'end_at',
+                'registration_deadline_at',
+                'prize_fund',
+            ])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 }

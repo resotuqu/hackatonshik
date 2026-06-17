@@ -1,5 +1,4 @@
 <div>
-    <x-marytoast />
 
     <div class="text-sm breadcrumbs mb-4">
         <ul>
@@ -69,6 +68,11 @@
                                     class="btn-xs {{ $user->isSuspended() ? 'btn-success' : 'btn-warning' }}"
                                     label="{{ $user->isSuspended() ? 'Разблокировать' : 'Заблокировать' }}"
                                 />
+                                <x-mary-button
+                                    wire:click="showActivity({{ $user->id }})"
+                                    class="btn-xs btn-ghost"
+                                    label="История"
+                                />
                             </td>
                         </tr>
                     @endforeach
@@ -77,4 +81,16 @@
         </div>
         <div class="mt-4">{{ $users->links() }}</div>
     </x-mary-card>
+
+    @if ($activityUser)
+        <x-mary-card class="card card-border bg-base-100 mt-4">
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h2 class="text-lg font-semibold">История: {{ $activityUser->fio }}</h2>
+                <x-mary-button wire:click="hideActivity" class="btn-ghost btn-sm" label="Скрыть" />
+            </div>
+            @can('viewActivityHistory', $activityUser)
+                <x-activity-timeline :subject="$activityUser" :limit="50" />
+            @endcan
+        </x-mary-card>
+    @endif
 </div>

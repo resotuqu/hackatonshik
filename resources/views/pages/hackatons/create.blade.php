@@ -1,6 +1,5 @@
 
 <div class="mx-auto w-full max-w-6xl space-y-4">
-    <x-marytoast/>
     @php
         $wizardLabels = [
             1 => 'Основная информация и даты',

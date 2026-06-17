@@ -9,9 +9,11 @@ use App\Models\HackatonJudge;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Livewire\Component;
+use Mary\Traits\Toast;
 
 new class extends Component
 {
+    use Toast;
     public HackatonCaseSubmission $submission;
 
     /**
@@ -65,7 +67,7 @@ new class extends Component
 
         $this->isSaving = false;
 
-        $this->dispatch('toast', message: 'Черновик сохранён');
+        $this->success('Черновик сохранён', position: \App\Support\FlashToast::POSITION);
     }
 
     public function finalize(EvaluateSubmissionAction $evaluate): void
@@ -81,7 +83,7 @@ new class extends Component
         $this->isSaving = false;
         $this->isFinal = true;
 
-        $this->dispatch('toast', message: 'Оценка финализирована');
+        $this->success('Оценка финализирована', position: \App\Support\FlashToast::POSITION);
 
         $this->goToNextUnrated();
     }
@@ -112,7 +114,7 @@ new class extends Component
             return;
         }
 
-        $this->dispatch('toast', message: 'Все сдачи по этому кейсу оценены');
+        $this->success('Все сдачи по этому кейсу оценены', position: \App\Support\FlashToast::POSITION);
     }
 
     public function goPrev(): void
@@ -333,16 +335,6 @@ new class extends Component
                             Финализировать
                         </button>
                     </div>
-                </div>
-            </div>
-
-            <div
-                class="toast toast-end toast-top"
-                x-data="{ open: false, message: '' }"
-                x-on:toast.window="open = true; message = $event.detail.message; setTimeout(() => open = false, 1500)"
-            >
-                <div class="alert alert-success" x-show="open">
-                    <span x-text="message"></span>
                 </div>
             </div>
         </div>

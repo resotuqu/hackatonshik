@@ -90,9 +90,7 @@ new #[Lazy] class extends Component
                                         <td class="max-w-xs truncate">{{ $app->message }}</td>
                                         <td>{{ $app->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $app->status->isAccepted() ? 'success' : ($app->status->isRejected() ? 'error' : 'warning') }}">
-                                                {{ $app->status->label() }}
-                                            </span>
+                                            <x-application-status-badge :status="$app->status" />
                                         </td>
                                         <td>{{ $app->reviewer?->nickname ?? $app->reviewer?->name ?? '—' }}</td>
                                         <td>{{ $app->reviewed_at?->format('d.m.Y H:i') ?? '—' }}</td>

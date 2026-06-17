@@ -70,9 +70,12 @@
                                 @if ($appTeam?->hackaton)
                                     <p class="text-sm text-base-content/60">{{ $appTeam->hackaton->title }}</p>
                                 @endif
+                                <p class="text-xs text-base-content/50">
+                                    Подана <x-datetime :value="$application->created_at" mode="relative" />
+                                </p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="badge badge-warning badge-sm">{{ $application->status->label() }}</span>
+                                <x-application-status-badge :status="$application->status" size="sm" />
                             </div>
                         </div>
                     @endforeach

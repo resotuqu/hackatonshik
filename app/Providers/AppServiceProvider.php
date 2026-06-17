@@ -23,6 +23,7 @@ use App\Policies\HackatonCertificatePolicy;
 use App\Policies\HackatonPolicy;
 use App\Policies\TeamApplicationPolicy;
 use App\Policies\TeamPolicy;
+use App\Policies\UserPolicy;
 use App\ViewModels\PartnerSidebarCounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -118,6 +119,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(HackatonCaseSubmission::class, HackatonCaseSubmissionPolicy::class);
         Gate::policy(HackatonAnnouncement::class, HackatonAnnouncementPolicy::class);
         Gate::policy(HackatonCertificate::class, HackatonCertificatePolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
         Gate::define('access-admin', fn ($user): bool => $user->isAdmin());
         Gate::define('viewPulse', fn ($user): bool => $user->isAdmin());
     }
@@ -194,21 +196,6 @@ class AppServiceProvider extends ServiceProvider
             $cacheStore->increment('api:v1:catalog:profiles:version');
         };
 
-        $refreshCatalogVersion = static function (Hackaton $hackaton) use ($bumpCatalogVersion): void {
-            if (
-                ! $hackaton->wasRecentlyCreated
-                && ! $hackaton->wasChanged(['title', 'is_public', 'start_at', 'end_at', 'image_url'])
-            ) {
-                return;
-            }
-
-            $bumpCatalogVersion();
-        };
-
-        Hackaton::saved($refreshCatalogVersion);
-        Hackaton::deleted(static function () use ($bumpCatalogVersion): void {
-            $bumpCatalogVersion();
-        });
         Team::saved(static function () use ($bumpCatalogVersion): void {
             $bumpCatalogVersion();
         });

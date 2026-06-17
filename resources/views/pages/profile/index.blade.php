@@ -1,5 +1,4 @@
 <div class="mx-auto w-full max-w-6xl space-y-6">
-    <x-marytoast />
 
     <nav class="text-sm breadcrumbs">
         <ul>

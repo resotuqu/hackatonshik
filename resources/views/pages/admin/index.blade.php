@@ -1,5 +1,4 @@
 <div>
-    <x-marytoast />
     @php
         $roadmapItems = collect(config('product_backlog.hackatonshik', []))->sortBy('priority')->values();
         $dashboardStats = $this->dashboardStats();

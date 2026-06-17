@@ -1,5 +1,4 @@
 <div>
-    <x-marytoast />
 
     <div class="text-sm breadcrumbs mb-4">
         <ul>

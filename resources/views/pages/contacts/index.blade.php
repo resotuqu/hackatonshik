@@ -1,6 +1,5 @@
 
 <div class="mx-auto mt-8 w-full max-w-6xl space-y-8 sm:mt-12 sm:space-y-12">
-    <x-marytoast />
 
     <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <article class="ui-page-hero">

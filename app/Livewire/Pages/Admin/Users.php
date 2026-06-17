@@ -25,6 +25,8 @@ class Users extends Component
 
     public ?int $editingUserId = null;
 
+    public ?int $activityUserId = null;
+
     public string $editRole = '';
 
     public function mount(): void
@@ -80,7 +82,25 @@ class Users extends Component
             'suspended_at' => $user->isSuspended() ? null : now(),
         ])->save();
 
+        activity('user')
+            ->performedOn($user)
+            ->causedBy(auth()->user())
+            ->withProperty('suspended_at', $user->suspended_at?->toIso8601String())
+            ->log('suspension_changed');
+
         $this->success($user->isSuspended() ? 'Пользователь заблокирован.' : 'Блокировка снята.');
+    }
+
+    public function showActivity(int $userId): void
+    {
+        $this->authorizeAdminAccess();
+
+        $this->activityUserId = $userId;
+    }
+
+    public function hideActivity(): void
+    {
+        $this->activityUserId = null;
     }
 
     public function render()
@@ -102,6 +122,9 @@ class Users extends Component
         return view('pages.admin.users', [
             'users' => $users,
             'roles' => UserRole::cases(),
+            'activityUser' => $this->activityUserId
+                ? User::query()->find($this->activityUserId)
+                : null,
         ]);
     }
 }

@@ -162,9 +162,7 @@
                                 <div class="rounded-lg border border-base-300 p-3">
                                     <div class="flex items-center justify-between gap-2">
                                         <p class="font-medium">{{ $application->team?->title }}</p>
-                                        <span class="badge badge-{{ $application->status->isAccepted() ? 'success' : ($application->status->isRejected() ? 'error' : 'warning') }}">
-                                            {{ $application->status->label() }}
-                                        </span>
+                                        <x-application-status-badge :status="$application->status" />
                                     </div>
                                     <p class="text-xs text-base-content/70 mt-1">
                                         Обновлено: {{ optional($application->updated_at)->format('d.m.Y H:i') }}

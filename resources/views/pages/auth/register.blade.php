@@ -1,6 +1,5 @@
 
 <div class="mx-auto w-full max-w-5xl">
-    <x-marytoast />
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <section class="card h-fit self-start border border-base-200 bg-base-100 shadow-sm lg:col-span-2">
             <div class="card-body justify-start space-y-4">

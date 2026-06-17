@@ -26,5 +26,11 @@ trait HasApplicationReview
             'reviewed_at' => now(),
             'reviewed_by' => $reviewer->id,
         ]);
+
+        activity('application')
+            ->performedOn($this)
+            ->causedBy($reviewer)
+            ->withProperty('status', $status->value)
+            ->log('status_changed');
     }
 }

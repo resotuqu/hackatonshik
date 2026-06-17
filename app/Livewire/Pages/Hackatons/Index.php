@@ -9,6 +9,7 @@ use App\Models\ListAnalyticsEvent;
 use App\Models\SavedListFilter;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\FlashToast;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -17,6 +18,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Mary\Traits\Toast;
 
 #[Layout('layouts::app', [
     'title' => 'Каталог хакатонов — Хакатонщик',
@@ -25,6 +27,7 @@ use Livewire\WithPagination;
 ])]
 class Index extends Component
 {
+    use Toast;
     use WithPagination;
 
     #[Url(as: 'q')]
@@ -47,7 +50,7 @@ class Index extends Component
         $buildQuery = fn () => Hackaton::query()
             ->select([
                 'id', 'title', 'image_url', 'start_at', 'end_at', 'is_public', 'status',
-                'prize_fund', 'prize_places_count', 'level', 'registration_deadline_at',
+                'prize_fund', 'prize_places_count', 'level', 'registration_deadline_at', 'updated_at',
             ])
             ->where('is_public', true)
             ->withCount('teams')
@@ -131,7 +134,7 @@ class Index extends Component
         );
 
         if (! $teamId) {
-            session()->flash('warning', 'Нет доступной команды для быстрой заявки.');
+            $this->warning('Нет доступной команды для быстрой заявки.', position: FlashToast::POSITION);
 
             return;
         }
@@ -150,7 +153,7 @@ class Index extends Component
         $application->save();
 
         $this->trackListEvent('quick_apply_click', ['hackaton_id' => $hackatonId, 'team_id' => (int) $teamId]);
-        session()->flash('success', 'Быстрая заявка отправлена.');
+        $this->success('Быстрая заявка отправлена.', position: FlashToast::POSITION);
     }
 
     public function openHackaton(int $hackatonId)

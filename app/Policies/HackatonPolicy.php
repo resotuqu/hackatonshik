@@ -62,4 +62,9 @@ class HackatonPolicy
     {
         return $this->update($user, $hackaton) || $hackaton->isJudge($user);
     }
+
+    public function viewActivityHistory(User $user, Hackaton $hackaton): bool
+    {
+        return $this->update($user, $hackaton);
+    }
 }

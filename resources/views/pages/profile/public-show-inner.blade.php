@@ -40,11 +40,22 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <span class="badge badge-primary badge-outline">{{ $publicRoleLabel }}</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="badge badge-primary badge-outline">{{ $publicRoleLabel }}</span>
+                            @if ($profileUser->hasVerifiedContactChannels())
+                                <span class="badge badge-success badge-outline gap-1">
+                                    <x-app-icon icon="heroicons:shield-check" class="h-3.5 w-3.5" />
+                                    Профиль подтверждён
+                                </span>
+                            @endif
+                        </div>
                         <h1 class="ui-heading-display text-3xl font-semibold lg:text-4xl">
                             {{ $profileUser->fio }}
                         </h1>
                         <p class="text-base text-base-content/70">{{ '@'.$profileUser->nickname }}</p>
+                        <p class="text-sm text-base-content/60">
+                            На платформе с <x-datetime :value="$profileUser->created_at" mode="date" class="font-medium text-base-content/75" />
+                        </p>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/75">
                             <span class="inline-flex items-center gap-1.5">
                                 <span class="font-semibold text-secondary">{{ $hackatonsCount }}</span>

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property int $id
@@ -25,6 +27,8 @@ class Team extends Model
 
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
+
+    use LogsActivity;
 
     protected static function booted(): void
     {
@@ -259,5 +263,14 @@ class Team extends Model
     public function hackatonCase(): BelongsTo
     {
         return $this->belongsTo(HackatonCase::class, 'hackaton_case_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('team')
+            ->logOnly(['title', 'description', 'is_public', 'image_url', 'hackaton_id'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

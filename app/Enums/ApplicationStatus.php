@@ -33,4 +33,13 @@ enum ApplicationStatus: string
     {
         return $this === self::REJECTED;
     }
+
+    public function badgeClass(): string
+    {
+        return match ($this) {
+            self::PENDING => 'badge-warning',
+            self::ACCEPTED => 'badge-success',
+            self::REJECTED => 'badge-error',
+        };
+    }
 }
