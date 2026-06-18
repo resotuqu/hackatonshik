@@ -100,15 +100,7 @@
     <x-hackaton-cover :image-url="$imageUrl" :is-finished="$isFinished" />
 
     <div class="flex min-h-0 flex-1 flex-col p-5 sm:p-6 gap-5">
-        <h3 id="{{ $titleId }}" class="sr-only">{{ $hackaton->title }}</h3>
-
-        {{-- Title overlay at bottom --}}
-        <div class="">
-            <p
-                class="line-clamp-2 font-display text-xl font-semibold leading-tight text-base-content sm:text-2xl">
-                {{ $hackaton->title }}
-            </p>
-        </div>
+        <h3 id="{{ $titleId }}" class="line-clamp-2 font-display text-xl font-semibold leading-tight text-base-content sm:text-2xl">{{ $hackaton->title }}</h3>
 
         {{-- Группа 1: Даты и дедлайны --}}
         <div class="flex flex-col gap-3">

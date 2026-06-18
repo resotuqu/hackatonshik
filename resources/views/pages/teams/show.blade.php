@@ -22,13 +22,13 @@
     @endif
 
     <div class="team-page mx-auto w-full max-w-7xl space-y-6" data-testid="team-page-root">
-        <nav class="flex flex-wrap items-center gap-1 text-sm" aria-label="Навигация по хлебным крошкам">
-            <a href="/" class="link link-hover text-base-content/80">Главная</a>
-            <x-app-icon icon="heroicons:chevron-right-20-solid" class="h-4 w-4 shrink-0 text-base-content/40" />
-            <a href="/teams" class="link link-hover text-base-content/80">Команды</a>
-            <x-app-icon icon="heroicons:chevron-right-20-solid" class="h-4 w-4 shrink-0 text-base-content/40" />
-            <span class="max-w-[min(100%,12rem)] truncate text-base-content/50 sm:max-w-md" title="{{ $team->title }}">{{ $team->title }}</span>
-        </nav>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="/">Главная</a></li>
+                <li><a href="/teams">Команды</a></li>
+                <li class="opacity-70">{{ $team->title }}</li>
+            </ul>
+        </div>
 
         <div class="tabs tabs-boxed w-full overflow-x-auto rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner" role="tablist" aria-label="Разделы команды" data-tab-list="team">
             <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="team-panel-overview" data-tab-trigger="team" data-tab-value="overview">
