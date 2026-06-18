@@ -72,6 +72,46 @@
         </div>
     </x-mary-card>
 
+    <x-mary-card title="Экспериментальные функции" class="mt-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+        @php
+            $platformSettings = \App\Models\PlatformSetting::allSettings();
+        @endphp
+
+        @if($platformSettings->isEmpty())
+            <p class="text-sm text-base-content/60">Нет настроенных функций.</p>
+        @else
+            <div class="space-y-3">
+                @foreach($platformSettings as $setting)
+                    @php $isOn = (bool) $setting->value; @endphp
+                    <div class="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-base-300 px-4 py-3" wire:key="pf-{{ $setting->key }}">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <p class="font-medium">{{ $setting->label }}</p>
+                                @if($isOn)
+                                    <span class="badge badge-success badge-xs badge-outline">вкл</span>
+                                @else
+                                    <span class="badge badge-ghost badge-xs">выкл</span>
+                                @endif
+                            </div>
+                            @if($setting->description)
+                                <p class="mt-0.5 text-xs text-base-content/60">{{ $setting->description }}</p>
+                            @endif
+                            <p class="mt-1 font-mono text-[10px] text-base-content/30">{{ $setting->key }}</p>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-sm shrink-0 {{ $isOn ? 'btn-error btn-outline' : 'btn-success' }}"
+                            wire:click="togglePlatformFeature('{{ $setting->key }}')"
+                            wire:confirm="{{ $isOn ? 'Отключить функцию? Новые загрузки больших файлов будут заблокированы, но ранее загруженные файлы останутся.' : 'Включить функцию?' }}"
+                        >
+                            {{ $isOn ? 'Отключить' : 'Включить' }}
+                        </button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </x-mary-card>
+
     <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
         <x-slot:menu>
             <x-mary-button label="Выйти" class="btn-secondary" wire:click="logout" />

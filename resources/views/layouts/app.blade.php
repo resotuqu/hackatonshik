@@ -212,64 +212,9 @@
                         />
                     </div>
                     @auth
-                        @php
-                            $unreadNotificationsCount = Auth::user()->unreadNotifications()->count();
-                            $recentNotifications = Auth::user()->notifications()->latest()->limit(5)->get();
-                        @endphp
                         <div class="flex w-full items-center gap-2">
-                            <div class="dropdown dropdown-end dropdown-bottom ml-auto">
-                                <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
-                                    <div class="indicator">
-                                        <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
-                                        @if($unreadNotificationsCount > 0)
-                                            <span class="badge badge-xs badge-error indicator-item">{{ min($unreadNotificationsCount, 9) }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div tabindex="-1" class="card card-compact dropdown-content z-50 mt-3 w-[min(20rem,calc(100vw-2rem))] max-w-[min(20rem,calc(100vw-2rem))] border border-base-200 bg-base-100 shadow-xl">
-                                    <div class="card-body gap-2">
-                                        <div class="flex items-center justify-between">
-                                            <p class="font-medium">Уведомления</p>
-                                            @if($unreadNotificationsCount > 0)
-                                                <form method="POST" action="{{ route('notifications.read-all') }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-ghost btn-xs">Прочитать все</button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                        @if($recentNotifications->isEmpty())
-                                            <p class="text-sm text-base-content/70">Пока нет уведомлений.</p>
-                                        @else
-                                            <div class="space-y-2">
-                                                @foreach($recentNotifications as $notification)
-                                                    @php
-                                                        $notificationData = $notification->data ?? [];
-                                                        $notificationUrl = $notificationData['url'] ?? route('home');
-                                                        $notificationTitle = $notificationData['title'] ?? 'Новое уведомление';
-                                                        $notificationMessage = $notificationData['message'] ?? null;
-                                                    @endphp
-                                                    <div class="rounded-lg border border-base-200 p-2 {{ $notification->read_at ? 'opacity-80' : 'bg-base-200/40' }}">
-                                                        <a href="{{ $notificationUrl }}" class="block">
-                                                            <p class="text-sm font-medium">{{ $notificationTitle }}</p>
-                                                            @if(filled($notificationMessage))
-                                                                <p class="text-xs text-base-content/70">{{ $notificationMessage }}</p>
-                                                            @endif
-                                                            <p class="mt-1 text-[0.65rem] text-base-content/50">
-                                                                <x-datetime :value="$notification->created_at" mode="relative" />
-                                                            </p>
-                                                        </a>
-                                                        @if($notification->read_at === null)
-                                                            <form method="POST" action="{{ route('notifications.read', $notification) }}" class="mt-1">
-                                                                @csrf
-                                                                <button type="submit" class="btn btn-ghost btn-xs px-1">Отметить прочитанным</button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
+                            <div class="ml-auto">
+                                <livewire:notification-bell />
                             </div>
                             <div class="dropdown dropdown-start order-first">
                                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">

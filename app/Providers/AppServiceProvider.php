@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\HackatonApplicationChanged;
 use App\Events\TeamApplicationChanged;
+use App\Listeners\BroadcastNewNotification;
 use App\Listeners\InvalidateHomeCaches;
 use App\Mail\VerifyEmailAddressMail;
 use App\Models\Hackaton;
@@ -30,6 +31,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -90,6 +92,8 @@ class AppServiceProvider extends ServiceProvider
             $url,
         ))->locale('ru'));
 
+        Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:51200']);
+
         $this->configureDefaults();
         $this->configureRateLimiting();
         $this->configureCatalogCacheInvalidation();
@@ -100,6 +104,7 @@ class AppServiceProvider extends ServiceProvider
         });
         Event::listen(HackatonApplicationChanged::class, InvalidateHomeCaches::class);
         Event::listen(TeamApplicationChanged::class, InvalidateHomeCaches::class);
+        Event::listen(NotificationSent::class, BroadcastNewNotification::class);
 
         View::composer('layouts.app', function ($view): void {
             $user = Auth::user();

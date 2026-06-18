@@ -7,6 +7,7 @@ use App\Livewire\Concerns\AuthorizesAdminAccess;
 use App\Models\Hackaton;
 use App\Models\HackatonTemplate;
 use App\Models\ListAnalyticsEvent;
+use App\Models\PlatformSetting;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -95,6 +96,15 @@ class Index extends Component
         ])->save();
 
         $this->success('Шаблон скрыт из публичной галереи.', position: 'toast-center toast-top');
+    }
+
+    public function togglePlatformFeature(string $key): void
+    {
+        $this->authorizeAdminAccess();
+
+        $enabled = PlatformSetting::toggle($key);
+        $label = $enabled ? 'включена' : 'отключена';
+        $this->success("Функция {$label}.", position: 'toast-center toast-top');
     }
 
     public function logout(): void
