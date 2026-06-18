@@ -3,9 +3,17 @@
         filled($q)
         || filled($start_at)
         || $sort !== 'newest'
-        || $level !== 'all';
+        || $level !== 'all'
+        || $statusGroup !== 'all';
 
-    $loadingTargets = 'search,clearFilters,saveCurrentFilter,applySavedFilter,quickApplyHackaton,q,start_at,sort,level,nextPage,previousPage,gotoPage,setPage';
+    $loadingTargets = 'search,clearFilters,saveCurrentFilter,applySavedFilter,quickApplyHackaton,q,start_at,sort,level,statusGroup,nextPage,previousPage,gotoPage,setPage';
+
+    $statusGroupOptions = [
+        'all'      => 'Все',
+        'upcoming' => 'Предстоящие',
+        'active'   => 'Идут сейчас',
+        'finished' => 'Завершены',
+    ];
 
     $totalHackatons = $this->hackatons->total();
     $hc = $totalHackatons % 100;
@@ -109,6 +117,21 @@
                     </label>
                 </div>
 
+                <div>
+                    <span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Статус</span>
+                    <div class="mt-1 flex flex-wrap gap-1.5">
+                        @foreach ($statusGroupOptions as $value => $label)
+                            <button
+                                type="button"
+                                wire:click="$set('statusGroup', '{{ $value }}')"
+                                class="btn btn-sm {{ $statusGroup === $value ? 'btn-primary' : 'btn-ghost border border-base-300' }}"
+                            >
+                                {{ $label }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <label class="form-control w-full min-w-0">
                         <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Уровень</span></span>
@@ -152,6 +175,9 @@
                         @if ($level !== 'all')
                             @php $levelEnum = \App\Enums\HackatonLevel::tryFrom($level); @endphp
                             <span class="badge badge-primary badge-outline">Уровень: {{ $levelEnum?->label() ?? $level }}</span>
+                        @endif
+                        @if ($statusGroup !== 'all')
+                            <span class="badge badge-primary badge-outline">Статус: {{ $statusGroupOptions[$statusGroup] ?? $statusGroup }}</span>
                         @endif
                     </div>
                 </div>

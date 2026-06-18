@@ -210,13 +210,40 @@ test('finished hackatons render finished overlay marker', function () {
         ->assertSee('Завершён');
 });
 
+test('hackatons status group filter hides non-matching statuses', function () {
+    Hackaton::factory()->create([
+        'title' => 'ActiveStatusHack',
+        'is_public' => true,
+        'status' => HackatonStatus::IN_PROGRESS,
+    ]);
+    Hackaton::factory()->create([
+        'title' => 'FinishedStatusHack',
+        'is_public' => true,
+        'status' => HackatonStatus::FINISHED,
+    ]);
+
+    Livewire::test(HackatonsIndex::class)
+        ->set('statusGroup', 'active')
+        ->call('search')
+        ->assertSee('ActiveStatusHack')
+        ->assertDontSee('FinishedStatusHack');
+
+    Livewire::test(HackatonsIndex::class)
+        ->set('statusGroup', 'finished')
+        ->call('search')
+        ->assertSee('FinishedStatusHack')
+        ->assertDontSee('ActiveStatusHack');
+});
+
 test('clearFilters resets filters', function () {
     Livewire::test(HackatonsIndex::class)
         ->set('q', 'something')
         ->set('level', HackatonLevel::Beginner->value)
+        ->set('statusGroup', 'active')
         ->call('clearFilters')
         ->assertSet('q', '')
-        ->assertSet('level', 'all');
+        ->assertSet('level', 'all')
+        ->assertSet('statusGroup', 'all');
 });
 
 test('hackaton can be created with new metric fields', function () {

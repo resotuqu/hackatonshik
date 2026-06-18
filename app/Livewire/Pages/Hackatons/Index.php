@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Hackatons;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\ListAnalyticsEvent;
@@ -42,6 +43,9 @@ class Index extends Component
     #[Url(as: 'level')]
     public string $level = 'all';
 
+    #[Url(as: 'status')]
+    public string $statusGroup = 'all';
+
     public string $saved_filter_name = '';
 
     #[Computed]
@@ -63,6 +67,29 @@ class Index extends Component
                 $query->where('start_at', '>=', $this->start_at);
             })
             ->when($this->level !== 'all', fn (Builder $query): Builder => $query->where('level', $this->level))
+            ->when($this->statusGroup !== 'all', function (Builder $query): void {
+                $statuses = match ($this->statusGroup) {
+                    'upcoming' => [
+                        HackatonStatus::PUBLISHED->value,
+                        HackatonStatus::REGISTRATION_OPEN->value,
+                        HackatonStatus::REGISTRATION_CLOSED->value,
+                        HackatonStatus::WAITING_START->value,
+                        HackatonStatus::CASES_ANNOUNCED->value,
+                    ],
+                    'active' => [
+                        HackatonStatus::IN_PROGRESS->value,
+                        HackatonStatus::JUDGING->value,
+                    ],
+                    'finished' => [
+                        HackatonStatus::FINISHED->value,
+                        HackatonStatus::ARCHIVED->value,
+                    ],
+                    default => [],
+                };
+                if ($statuses !== []) {
+                    $query->whereIn('status', $statuses);
+                }
+            })
             ->when($this->sort === 'start_soonest', fn (Builder $query) => $query->orderBy('start_at')->orderByDesc('id'))
             ->when($this->sort === 'newest', fn (Builder $query) => $query->orderByDesc('id'))
             ->when($this->sort === 'biggest_prize', fn (Builder $query) => $query->orderByDesc('prize_fund')->orderByDesc('id'))
@@ -73,11 +100,12 @@ class Index extends Component
         }
 
         $cacheKey = sprintf(
-            'livewire:hackatons:index:v2:p%s:q%s:l%s:so%s',
+            'livewire:hackatons:index:v3:p%s:q%s:l%s:so%s:sg%s',
             $this->getPage(),
             hash('sha256', json_encode($this->currentFilters(), JSON_THROW_ON_ERROR)),
             $this->level,
-            $this->sort
+            $this->sort,
+            $this->statusGroup
         );
         $cache = Cache::supportsTags() ? Cache::tags(['catalog', 'catalog:hackatons']) : Cache::store();
 
@@ -112,9 +140,10 @@ class Index extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['q', 'start_at', 'sort', 'level']);
+        $this->reset(['q', 'start_at', 'sort', 'level', 'statusGroup']);
         $this->level = 'all';
         $this->sort = 'newest';
+        $this->statusGroup = 'all';
         $this->resetPage();
     }
 
@@ -199,6 +228,7 @@ class Index extends Component
         $this->start_at = (string) ($payload['start_at'] ?? '');
         $this->sort = (string) ($payload['sort'] ?? 'newest');
         $this->level = (string) ($payload['level'] ?? 'all');
+        $this->statusGroup = (string) ($payload['statusGroup'] ?? 'all');
         $this->search();
     }
 
@@ -209,6 +239,7 @@ class Index extends Component
             'start_at' => $this->start_at,
             'sort' => $this->sort,
             'level' => $this->level,
+            'statusGroup' => $this->statusGroup,
         ];
     }
 
