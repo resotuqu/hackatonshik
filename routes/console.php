@@ -12,6 +12,11 @@ Schedule::command('hackatons:sync-statuses')
     ->everyTenMinutes()
     ->withoutOverlapping();
 
+Schedule::command('hackatons:send-deadline-reminders --days=3')
+    ->dailyAt('08:00')
+    ->withoutOverlapping()
+    ->runInBackground();
+
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
 
 Schedule::command('queue:prune-failed --hours=168')->daily();

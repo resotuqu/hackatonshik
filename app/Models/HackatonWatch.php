@@ -17,7 +17,15 @@ class HackatonWatch extends Model
     protected $fillable = [
         'user_id',
         'hackaton_id',
+        'reminder_sent_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'reminder_sent_at' => 'datetime',
+        ];
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
