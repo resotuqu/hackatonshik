@@ -144,12 +144,12 @@ class HackatonExportController extends Controller
                 fputcsv($stream, [
                     $application->id,
                     $application->team_id,
-                    $application->team?->title,
-                    $application->status->value,
+                    data_get($application, 'team.title'),
+                    $application->getRawOriginal('status'),
                     $application->message,
                     $application->created_at?->toIso8601String(),
-                    $application->reviewed_at?->toIso8601String(),
-                    $application->reviewer?->fio ?? $application->reviewer?->email,
+                    $application->getRawOriginal('reviewed_at'),
+                    data_get($application, 'reviewer.fio') ?? data_get($application, 'reviewer.email'),
                 ]);
             }
 
@@ -191,7 +191,7 @@ class HackatonExportController extends Controller
                     data_get($score, 'submission.team.title'),
                     $score->score,
                     $score->max_score,
-                    $score->reviewer?->fio ?? $score->reviewer?->email,
+                    data_get($score, 'reviewer.fio') ?? data_get($score, 'reviewer.email'),
                     $score->general_comment,
                 ]);
             }

@@ -28,9 +28,10 @@ class TeamChatMention extends Notification implements ShouldQueue
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
-        $author = $this->message->user?->fio ?? $this->message->user?->nickname ?? 'Участник';
+        $user = $this->message->user;
+        $author = $user->fio ?? $user->nickname ?? 'Участник';
         $preview = mb_strimwidth((string) $this->message->content, 0, 80, '…');
-        $teamTitle = $this->message->team?->title ?? 'команды';
+        $teamTitle = $this->message->team->title ?? 'команды';
 
         return [
             'type' => 'team_chat_mention',

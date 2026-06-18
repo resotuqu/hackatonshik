@@ -34,16 +34,19 @@ class HackatonApplication extends Model
         ];
     }
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Hackaton, $this> */
     public function hackaton(): BelongsTo
     {
         return $this->belongsTo(Hackaton::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');

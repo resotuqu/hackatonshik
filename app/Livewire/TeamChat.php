@@ -200,7 +200,7 @@ class TeamChat extends Component
         preg_match_all('/@([\w\-\.]+)/u', $content, $matches);
 
         return array_values(array_unique(
-            array_map('mb_strtolower', $matches[1] ?? [])
+            array_map('mb_strtolower', $matches[1])
         ));
     }
 
