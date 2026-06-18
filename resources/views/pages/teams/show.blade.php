@@ -518,54 +518,6 @@
 
     <script>
         (function () {
-            const setupTabGroup = (groupName, fallbackTab) => {
-                const triggers = Array.from(document.querySelectorAll(`[data-tab-trigger="${groupName}"]`));
-                const panels = Array.from(document.querySelectorAll(`[data-tab-panel="${groupName}"]`));
-
-                if (triggers.length === 0 || panels.length === 0) {
-                    return;
-                }
-
-                const availableTabs = new Set(triggers.map((trigger) => trigger.dataset.tabValue));
-                const hash = window.location.hash;
-                const hashPrefix = `#${groupName}-tab-`;
-                const requestedTab = hash.startsWith(hashPrefix) ? hash.slice(hashPrefix.length) : null;
-                let activeTab = requestedTab && availableTabs.has(requestedTab) ? requestedTab : fallbackTab;
-
-                if (!availableTabs.has(activeTab)) {
-                    activeTab = triggers[0].dataset.tabValue;
-                }
-
-                const setActiveTab = (tabValue, replace = false) => {
-                    if (!availableTabs.has(tabValue)) {
-                        return;
-                    }
-
-                    triggers.forEach((trigger) => {
-                        const isActive = trigger.dataset.tabValue === tabValue;
-                        trigger.classList.toggle('tab-active', isActive);
-                        trigger.setAttribute('aria-selected', isActive ? 'true' : 'false');
-                    });
-
-                    panels.forEach((panel) => {
-                        panel.classList.toggle('hidden', panel.dataset.tabValue !== tabValue);
-                    });
-
-                    const nextHash = `${hashPrefix}${tabValue}`;
-                    if (replace) {
-                        history.replaceState(null, '', nextHash);
-                    } else {
-                        history.pushState(null, '', nextHash);
-                    }
-                };
-
-                triggers.forEach((trigger) => {
-                    trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
-                });
-
-                setActiveTab(activeTab, true);
-            };
-
-            setupTabGroup('team', 'overview');
+            window.setupTabGroup('team', 'overview');
         })();
     </script>

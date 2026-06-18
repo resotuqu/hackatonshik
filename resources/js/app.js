@@ -273,4 +273,8 @@ window.createAvatarCropperModal = function createAvatarCropperModal(config) {
  * allow your team to quickly build robust real-time web applications.
  */
 
+import { setupTabGroup } from './tabs';
+
+window.setupTabGroup = setupTabGroup;
+
 import './echo';

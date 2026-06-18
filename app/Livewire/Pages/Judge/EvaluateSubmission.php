@@ -14,7 +14,7 @@ class EvaluateSubmission extends Component
     {
         abort_unless(auth()->check(), 403);
 
-        $this->submission = $submission;
+        $this->submission = $submission->loadMissing(['case.hackaton']);
         $this->authorize('view', $submission);
     }
 
@@ -22,6 +22,7 @@ class EvaluateSubmission extends Component
     {
         return view('pages.judge.evaluate-submission', [
             'submission' => $this->submission,
+            'hackaton' => $this->submission->case?->hackaton,
         ])
             ->title('Оценка решения')
             ->layout('layouts::app');

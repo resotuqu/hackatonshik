@@ -180,8 +180,7 @@
         {{-- Группа 4: Прогресс-бар (опущен вниз) --}}
         @if ($hackaton->updated_at)
             <p class="text-xs text-base-content/45">
-                {{ $teamsCount }} {{ $teamsCount === 1 ? 'команда' : ($teamsCount >= 2 && $teamsCount <= 4 ? 'команды' : 'команд') }}
-                · обновлено <x-datetime :value="$hackaton->updated_at" mode="relative" />
+                Обновлено <x-datetime :value="$hackaton->updated_at" mode="relative" />
             </p>
         @endif
         <div class="mt-auto flex flex-col gap-2 pt-2">
