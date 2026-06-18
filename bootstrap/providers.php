@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\HorizonServiceProvider;
 use App\Providers\TelescopeServiceProvider;
+use Laravel\Telescope\TelescopeApplicationServiceProvider;
 use SocialiteProviders\Manager\ServiceProvider;
 
 $providers = [
@@ -13,7 +14,7 @@ $providers = [
     ServiceProvider::class,
 ];
 
-if (class_exists(TelescopeServiceProvider::class)) {
+if (class_exists(TelescopeApplicationServiceProvider::class)) {
     $providers[] = TelescopeServiceProvider::class;
 }
 
