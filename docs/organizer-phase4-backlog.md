@@ -6,7 +6,7 @@ These items are intentionally out of scope for the current implementation track;
 
 | Epic | What exists today | Still open |
 |------|-------------------|------------|
-| **A** | `BuildOrganizerHackatonAnalytics` — 14-day application chart, conversion rate on organizer hub | Funnel, retention, export, cached aggregates |
+| **A** | `BuildOrganizerHackatonAnalytics` — 14-day chart, conversion rate, **5-min cache** | Funnel retention slices, export уже в hub |
 | **B** | `ProcessHackatonFinishedAutomations` — auto certificates + results announcement on `FINISHED` | Per-organizer rules, material archive, template-driven config |
 | **D** | `HackatonTemplate` model + presets in create wizard | Public gallery, versioning, localization |
 

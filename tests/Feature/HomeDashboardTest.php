@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\ApplicationStatus;
+use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\Team;
@@ -21,6 +22,29 @@ test('guest sees marketing landing on home', function () {
     $response->assertSee('Отзывы участников', false);
     $response->assertSee('Первые хакатоны уже скоро!', false);
     $response->assertSee('Следите за обновлениями — скоро здесь появятся интересные события.', false);
+});
+
+test('guest sees featured hackatons when public events exist', function () {
+    $hackaton = Hackaton::factory()->create([
+        'is_public' => true,
+        'status' => HackatonStatus::REGISTRATION_OPEN,
+        'title' => 'FeaturedDashboardHackUnique',
+    ]);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee($hackaton->title, false)
+        ->assertDontSee('Первые хакатоны уже скоро!', false);
+});
+
+test('participant next step links to team create when user has no teams', function () {
+    $user = User::factory()->create(['role' => 'user']);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertSee('Создайте команду', false)
+        ->assertSee('/teams/create', false);
 });
 
 test('authenticated participant sees dashboard summary on home', function () {

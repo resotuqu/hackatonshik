@@ -131,4 +131,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | RSS feed branding
+    |--------------------------------------------------------------------------
+    */
+
+    'rss_channel_title' => env('RSS_CHANNEL_TITLE', 'Новости Хакатонщика'),
+
+    'rss_channel_description' => env('RSS_CHANNEL_DESCRIPTION', 'Новости платформы Хакатонщик'),
+
 ];

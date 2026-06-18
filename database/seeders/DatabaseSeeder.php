@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             RoleSeeder::class,
             SkillSeeder::class,
+            HackatonTemplateSeeder::class,
             HackatonSeeder::class,
             HackatonDocumentSeeder::class,
             HackatonCaseSeeder::class,
@@ -45,6 +46,7 @@ class DatabaseSeeder extends Seeder
             SavedListFilterSeeder::class,
             ListAnalyticsEventSeeder::class,
             AvatarPresetPackSeeder::class,
+            DemoShowcaseSeeder::class,
         ]);
     }
 }

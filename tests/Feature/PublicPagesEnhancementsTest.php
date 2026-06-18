@@ -45,6 +45,8 @@ test('news rss endpoint returns xml feed', function () {
     $response->assertOk();
     $response->assertHeader('content-type', 'application/rss+xml; charset=UTF-8');
     $response->assertSee('<rss version="2.0">', false);
+    $response->assertSee(config('app.rss_channel_title'), false);
+    $response->assertDontSee('Herd News', false);
 });
 
 test('team page renders tab navigation and panels', function () {

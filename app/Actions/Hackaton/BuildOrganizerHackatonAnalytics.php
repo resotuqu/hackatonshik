@@ -9,6 +9,7 @@ use App\Models\HackatonApplication;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 final class BuildOrganizerHackatonAnalytics
 {
@@ -21,6 +22,22 @@ final class BuildOrganizerHackatonAnalytics
      * }
      */
     public function handle(User $user): array
+    {
+        $userId = (int) $user->id;
+        $cacheKey = "organizer-analytics:{$userId}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), fn (): array => $this->build($user));
+    }
+
+    /**
+     * @return array{
+     *     applicationsByDay: list<array{date: string, count: int}>,
+     *     conversionRate: float|null,
+     *     acceptedApplications: int,
+     *     totalApplications: int
+     * }
+     */
+    private function build(User $user): array
     {
         $userId = (int) $user->id;
         $since = now()->subDays(13)->startOfDay();

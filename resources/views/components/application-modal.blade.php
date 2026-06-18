@@ -13,7 +13,7 @@
 @endphp
 
 <div class="inline-block">
-    <label for="{{ $modalId }}" class="{{ $triggerClass }}" dusk="application-modal-trigger-{{ $type }}-{{ $id }}">
+    <label for="{{ $modalId }}" class="{{ $triggerClass }}" dusk="application-modal-trigger-{{ $type }}-{{ $id }}" aria-haspopup="dialog" aria-controls="{{ $modalId }}-dialog">
         @isset($trigger)
             {{ $trigger }}
         @else
@@ -22,9 +22,9 @@
     </label>
     <input type="checkbox" id="{{ $modalId }}" class="modal-toggle" />
 
-    <div class="modal modal-bottom sm:modal-middle" role="dialog">
+    <div class="modal modal-bottom sm:modal-middle" role="dialog" id="{{ $modalId }}-dialog" aria-labelledby="{{ $modalId }}-title">
         <div class="modal-box max-w-xl">
-            <h3 class="font-bold text-lg">{{ $title }}</h3>
+            <h3 class="font-bold text-lg" id="{{ $modalId }}-title">{{ $title }}</h3>
 
             <form 
                 method="POST" 

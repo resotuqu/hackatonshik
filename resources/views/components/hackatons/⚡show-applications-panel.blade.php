@@ -57,7 +57,7 @@ new #[Lazy] class extends Component
                 @if($applications->isEmpty())
                     <p class="text-base-content/60">Пока нет заявок. Когда команды подадут заявки, они появятся в этом списке.</p>
                 @else
-                    <div class="mb-3 flex items-center gap-2">
+                    <div class="mb-3 flex flex-wrap items-center gap-2" role="group" aria-label="Групповая модерация заявок">
                         <select form="bulk-status-update" name="status" class="select select-bordered select-sm">
                             <option value="accepted">Принять</option>
                             <option value="rejected">Отклонить</option>

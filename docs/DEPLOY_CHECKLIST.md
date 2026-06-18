@@ -48,6 +48,31 @@
 - Real-time чат команды: два браузера в одной команде видят сообщения без refresh.
 - Horizon dashboard (`/horizon`) и Pulse (`/pulse`) доступны только admin.
 
+## Demo smoke (local / staging с demo-seed)
+
+Ручная проверка перед защитой или демо на стенде с `php artisan migrate:fresh --seed`:
+
+| Роль | Действие | URL / учётная запись |
+|------|----------|----------------------|
+| **Guest** | Каталог, RSS, публичный профиль | `/hackatons`, `/news/rss`, `/u/admin_demo` |
+| **Участник** | Команда → hub → submission | `organizer1@…` не нужен; любой `user` из сидов, `/teams/create`, `/participant/hackatons/{id}/hub` |
+| **Организатор** | Создание из шаблона, заявки, scoring | `organizer1@demo.hackaton.local` / `password`, `/hackatons/create` |
+| **Судья** | Приглашение → scoring | `judge1@demo.hackaton.local` / `password` |
+| **Admin** | Пользователи, новости | `admin@demo.hackaton.local` / `password`, `/admin` |
+
+**Эталонный demo-хакатон:** после сида «SmartOmega GameJab 2026» закреплён в статусе `finished` (`DemoShowcaseSeeder`) — полный цикл: команды, кейсы, submissions, judging, сертификаты.
+
+Автотесты smoke-сценариев: `composer dusk` (9 browser-тестов, включая hub и create wizard).
+
+## Staging перед production
+
+1. Скопировать production `.env` на staging; `APP_DEBUG=false`, отдельная БД.
+2. `composer install --no-dev`, `npm run build`, `php artisan migrate --force`.
+3. `php artisan app:validate-production-config` (при `APP_ENV=production`).
+4. Поднять Horizon, Reverb, Pulse через supervisor (см. `deploy/supervisor/`).
+5. Пройти smoke-тест выше + OAuth на staging-домене.
+6. Manual `workflow_dispatch` deploy workflow на staging, затем production.
+
 ## Мониторинг
 
 - Health: маршрут `/up` доступен с балансировщика.

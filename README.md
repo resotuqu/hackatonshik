@@ -86,6 +86,31 @@ composer lint:check && composer analyse && php artisan test --compact
 composer precommit:quick
 ```
 
+Browser-тесты (Laravel Dusk) запускаются отдельно — нужен поднятый сервер на `APP_URL` из `.env.dusk.local`:
+
+```bash
+php artisan serve --no-reload --env=dusk --port=8000
+composer dusk
+```
+
+Unit и Feature-тесты не включают Browser suite (см. `phpunit.xml`); в CI они идут отдельными job'ами.
+
+## Demo-данные (local/testing)
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Сидеры доступны только в `local` и `testing` (в production `db:seed` пропускается).
+
+| Роль | Email | Пароль |
+|------|-------|--------|
+| Admin | `admin@demo.hackaton.local` | `password` |
+| Организатор | `organizer1@demo.hackaton.local` | `password` |
+| Судья | `judge1@demo.hackaton.local` | `password` |
+
+После сида доступны шаблоны хакатонов (GameJam, AI Hack и др.) в мастере создания и публичные хакатоны из `placeholders/` в разных статусах. **SmartOmega GameJab 2026** закрепляется в статусе `finished` через `DemoShowcaseSeeder` — рекомендуется для live-demo (команды, кейсы, submissions, judging, сертификаты).
+
 ## CI
 
 GitHub Actions: [.github/workflows/tests.yml](.github/workflows/tests.yml) — матрица PHP 8.4/8.5, `composer install`, `npm run build`, `./vendor/bin/pest` (suites `Unit` и `Feature` с покрытием), затем Laravel Dusk (`php artisan dusk`) против поднятого `php artisan serve`. Перед merge CI отклоняет коммит с файлом `public/test.html` в дереве.

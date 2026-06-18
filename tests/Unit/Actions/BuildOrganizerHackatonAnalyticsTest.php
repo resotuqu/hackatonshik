@@ -8,6 +8,7 @@ use App\Models\Hackaton;
 use App\Models\HackatonApplication;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 test('analytics returns conversion rate and daily application counts', function () {
     Carbon::setTestNow('2026-06-15 12:00:00');
@@ -35,4 +36,28 @@ test('analytics returns conversion rate and daily application counts', function 
         ->and(collect($analytics['applicationsByDay'])->sum('count'))->toBe(2);
 
     Carbon::setTestNow();
+});
+
+test('analytics results are cached for five minutes', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    HackatonApplication::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'status' => ApplicationStatus::PENDING,
+    ]);
+
+    $action = app(BuildOrganizerHackatonAnalytics::class);
+    $first = $action->handle($organizer);
+
+    HackatonApplication::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'status' => ApplicationStatus::ACCEPTED,
+    ]);
+
+    $second = $action->handle($organizer);
+
+    expect($first['totalApplications'])->toBe(1)
+        ->and($second['totalApplications'])->toBe(1)
+        ->and(Cache::has('organizer-analytics:'.$organizer->id))->toBeTrue();
 });

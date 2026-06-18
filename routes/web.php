@@ -92,13 +92,17 @@ Route::get('/news/rss', function (): Response {
 XML;
     })->implode("\n");
 
+    $channelTitle = e((string) config('app.rss_channel_title'));
+    $channelDescription = e((string) config('app.rss_channel_description'));
+    $channelLink = route('home');
+
     $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
-  <title>Herd News</title>
-  <link>{route('home')}</link>
-  <description>Новости платформы Herd</description>
+  <title>{$channelTitle}</title>
+  <link>{$channelLink}</link>
+  <description>{$channelDescription}</description>
   {$items}
 </channel>
 </rss>
