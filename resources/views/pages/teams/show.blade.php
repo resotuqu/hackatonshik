@@ -211,15 +211,27 @@
                                                 <div class="flex flex-col items-end gap-2">
                                                     <x-application-status-badge :status="$myApplication->status" />
                                                     @if ($myApplication->status->isPending())
-                                                        <form method="POST" action="{{ route('team.applications.destroy', $myApplication) }}"
-                                                            onsubmit="return confirm('Отменить поданную заявку?');">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button class="btn btn-xs btn-ghost gap-1" type="submit">
-                                                                <x-app-icon icon="heroicons:x-mark" class="h-3.5 w-3.5" />
-                                                                Отменить заявку
-                                                            </button>
-                                                        </form>
+                                                        <label for="confirm-cancel-app-{{ $myApplication->id }}" class="btn btn-xs btn-ghost gap-1 cursor-pointer">
+                                                            <x-app-icon icon="heroicons:x-mark" class="h-3.5 w-3.5" />
+                                                            Отменить заявку
+                                                        </label>
+
+                                                        <input type="checkbox" id="confirm-cancel-app-{{ $myApplication->id }}" class="modal-toggle" />
+                                                        <div class="modal modal-bottom sm:modal-middle" role="dialog" aria-labelledby="confirm-cancel-app-title-{{ $myApplication->id }}">
+                                                            <div class="modal-box max-w-sm">
+                                                                <h3 class="text-lg font-bold" id="confirm-cancel-app-title-{{ $myApplication->id }}">Отменить заявку?</h3>
+                                                                <p class="py-4 text-sm text-base-content/70">Заявка будет удалена. Вы сможете подать её повторно.</p>
+                                                                <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
+                                                                    <label for="confirm-cancel-app-{{ $myApplication->id }}" class="btn btn-ghost w-full sm:w-auto">Нет, оставить</label>
+                                                                    <form method="POST" action="{{ route('team.applications.destroy', $myApplication) }}">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-error w-full sm:w-auto">Отменить заявку</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                            <label class="modal-backdrop" for="confirm-cancel-app-{{ $myApplication->id }}">close</label>
+                                                        </div>
                                                     @endif
                                                 </div>
                                             @else
@@ -302,14 +314,19 @@
                                         $u->is_profile_public && filled($u->nickname)
                                             ? route('profile.public.show', ['user' => $u->nickname])
                                             : null;
+                                    $memberAvatarUrl = filled($u->avatar_path) ? asset('storage/' . $u->avatar_path) : null;
                                 @endphp
                                 <div
                                     class="group relative flex flex-col gap-3 rounded-lg border border-base-300 bg-base-100 p-5 transition-colors hover:border-primary/30">
                                     <div class="flex items-start gap-3">
-                                        <div class="avatar placeholder">
+                                        <div @class(['avatar', 'placeholder' => !$memberAvatarUrl])>
                                             <div
                                                 class="w-14 rounded-full bg-neutral text-neutral-content ring-2 ring-base-300/80 ring-offset-2 ring-offset-base-100 transition duration-300 group-hover:ring-primary/40">
-                                                <span class="text-lg font-semibold">{{ $initials ?: '?' }}</span>
+                                                @if ($memberAvatarUrl)
+                                                    <img src="{{ $memberAvatarUrl }}" alt="{{ $displayName }}" class="h-full w-full object-cover" />
+                                                @else
+                                                    <span class="text-lg font-semibold">{{ $initials ?: '?' }}</span>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="min-w-0 flex-1">
@@ -327,16 +344,31 @@
                                         </div>
                                     </div>
                                     @if (auth()->check() && $team->user_id === auth()->id())
-                                        <form method="POST" action="{{ route('teams.participants.destroy', ['team' => $team, 'teamRole' => $role]) }}"
-                                            class="mt-auto border-t border-base-300/50 pt-4"
-                                            onsubmit="return confirm('Удалить участника из команды?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-error btn-xs btn-block gap-1" type="submit">
+                                        <div class="mt-auto border-t border-base-300/50 pt-4">
+                                            <label for="confirm-remove-member-{{ $role->id }}" class="btn btn-error btn-xs btn-block gap-1 cursor-pointer">
                                                 <x-app-icon icon="heroicons:user-minus" class="h-4 w-4" />
                                                 Удалить из команды
-                                            </button>
-                                        </form>
+                                            </label>
+                                        </div>
+
+                                        <input type="checkbox" id="confirm-remove-member-{{ $role->id }}" class="modal-toggle" />
+                                        <div class="modal modal-bottom sm:modal-middle" role="dialog" aria-labelledby="confirm-remove-member-title-{{ $role->id }}">
+                                            <div class="modal-box max-w-sm">
+                                                <h3 class="text-lg font-bold" id="confirm-remove-member-title-{{ $role->id }}">Удалить участника?</h3>
+                                                <p class="py-4 text-sm text-base-content/70">
+                                                    <span class="font-semibold text-base-content">{{ $displayName }}</span> будет удалён из команды, роль освободится.
+                                                </p>
+                                                <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
+                                                    <label for="confirm-remove-member-{{ $role->id }}" class="btn btn-ghost w-full sm:w-auto">Отмена</label>
+                                                    <form method="POST" action="{{ route('teams.participants.destroy', ['team' => $team, 'teamRole' => $role]) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-error w-full sm:w-auto">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <label class="modal-backdrop" for="confirm-remove-member-{{ $role->id }}">close</label>
+                                        </div>
                                     @endif
                                 </div>
                             @endforeach
@@ -354,6 +386,30 @@
                             <x-app-icon icon="heroicons:inbox" class="h-6 w-6 text-primary" />
                             Заявки на вступление
                         </h2>
+
+                        @foreach ($team->applications as $app)
+                            @if ($app->status->isPending())
+                                <input type="checkbox" id="confirm-reject-app-{{ $app->id }}" class="modal-toggle" />
+                                <div class="modal modal-bottom sm:modal-middle" role="dialog" aria-labelledby="confirm-reject-app-title-{{ $app->id }}">
+                                    <div class="modal-box max-w-sm">
+                                        <h3 class="text-lg font-bold" id="confirm-reject-app-title-{{ $app->id }}">Отклонить заявку?</h3>
+                                        <p class="py-4 text-sm text-base-content/70">
+                                            <span class="font-semibold text-base-content">{{ $app->user->fio ?? $app->user->nickname ?? 'Участник' }}</span> останется без роли.
+                                        </p>
+                                        <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
+                                            <label for="confirm-reject-app-{{ $app->id }}" class="btn btn-ghost w-full sm:w-auto">Отмена</label>
+                                            <form method="POST" action="{{ route('team.applications.update', $app) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="rejected">
+                                                <button type="submit" class="btn btn-error w-full sm:w-auto">Отклонить</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <label class="modal-backdrop" for="confirm-reject-app-{{ $app->id }}">close</label>
+                                </div>
+                            @endif
+                        @endforeach
 
                         @if ($team->applications->isEmpty())
                             <x-team-empty-state
@@ -437,17 +493,10 @@
                                                             </button>
                                                         </form>
 
-                                                        <form method="POST" action="{{ route('team.applications.update', $app) }}"
-                                                            class="ml-2 inline-flex"
-                                                            onsubmit="return confirm('Отклонить заявку? Пользователь останется без роли.');">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <input type="hidden" name="status" value="rejected">
-                                                            <button class="btn btn-error btn-xs gap-0.5" type="submit">
-                                                                <x-app-icon icon="heroicons:x-mark" class="h-3.5 w-3.5" />
-                                                                Отклонить
-                                                            </button>
-                                                        </form>
+                                                        <label for="confirm-reject-app-{{ $app->id }}" class="btn btn-error btn-xs gap-0.5 ml-2 cursor-pointer">
+                                                            <x-app-icon icon="heroicons:x-mark" class="h-3.5 w-3.5" />
+                                                            Отклонить
+                                                        </label>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -494,16 +543,12 @@
                                                         Принять
                                                     </button>
                                                 </form>
-                                                <form method="POST" action="{{ route('team.applications.update', $app) }}" class="flex-1 min-w-[8rem]"
-                                                    onsubmit="return confirm('Отклонить заявку? Пользователь останется без роли.');">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="status" value="rejected">
-                                                    <button class="btn btn-error btn-sm btn-block gap-1" type="submit">
+                                                <div class="flex-1 min-w-[8rem]">
+                                                    <label for="confirm-reject-app-{{ $app->id }}" class="btn btn-error btn-sm btn-block gap-1 cursor-pointer">
                                                         <x-app-icon icon="heroicons:x-mark" class="h-4 w-4" />
                                                         Отклонить
-                                                    </button>
-                                                </form>
+                                                    </label>
+                                                </div>
                                             </div>
                                         @endif
                                     </div>

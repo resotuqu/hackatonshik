@@ -8,7 +8,12 @@
     <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
             <div class="flex flex-col gap-4">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-base-200 text-sm font-semibold text-base-content/70">1</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <x-app-icon icon="heroicons:identification" class="h-6 w-6" />
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-base-content/40">Шаг 1</span>
+                </div>
                 <div>
                     <p class="font-display text-lg font-semibold leading-snug">Соберите профиль</p>
                     <p class="mt-2 text-sm leading-relaxed text-base-content/80">
@@ -19,7 +24,12 @@
         </div>
         <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
             <div class="flex flex-col gap-4">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-base-200 text-sm font-semibold text-base-content/70">2</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+                        <x-app-icon icon="heroicons:magnifying-glass" class="h-6 w-6" />
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-base-content/40">Шаг 2</span>
+                </div>
                 <div>
                     <p class="font-display text-lg font-semibold leading-snug">Найдите команду</p>
                     <p class="mt-2 text-sm leading-relaxed text-base-content/80">
@@ -30,7 +40,12 @@
         </div>
         <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
             <div class="flex flex-col gap-4">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-base-200 text-sm font-semibold text-base-content/70">3</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent">
+                        <x-app-icon icon="heroicons:bolt" class="h-6 w-6" />
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-base-content/40">Шаг 3</span>
+                </div>
                 <div>
                     <p class="font-display text-lg font-semibold leading-snug">Участвуйте в хакатоне</p>
                     <p class="mt-2 text-sm leading-relaxed text-base-content/80">
@@ -41,7 +56,12 @@
         </div>
         <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
             <div class="flex flex-col gap-4">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-base-200 text-sm font-semibold text-base-content/70">4</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/10 text-warning">
+                        <x-app-icon icon="heroicons:trophy" class="h-6 w-6" />
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-base-content/40">Шаг 4</span>
+                </div>
                 <div>
                     <p class="font-display text-lg font-semibold leading-snug">Получайте результаты</p>
                     <p class="mt-2 text-sm leading-relaxed text-base-content/80">
