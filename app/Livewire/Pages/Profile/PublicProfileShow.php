@@ -2,8 +2,11 @@
 
 namespace App\Livewire\Pages\Profile;
 
+use App\Enums\ApplicationStatus;
+use App\Models\Hackaton;
 use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -33,11 +36,34 @@ class PublicProfileShow extends Component
                         'hackatons' => fn ($query) => $query->latest()->limit(6),
                         'certificates.hackaton',
                         'teamRoles.skills',
+                        'teamRoles.team.applications' => fn ($q) => $q->where('status', ApplicationStatus::ACCEPTED->value)
+                            ->with('hackaton'),
                         'skills',
                     ])
                     ->firstOrFail();
             }
         );
+    }
+
+    /**
+     * Get hackatons the user participated in (accepted team applications).
+     *
+     * @return Collection<int, Hackaton>
+     */
+    public function getParticipatedHackatons(): Collection
+    {
+        $teamIds = $this->profileUser->teamRoles->pluck('team_id')->unique();
+
+        return Hackaton::query()
+            ->whereIn('id', function ($q) use ($teamIds): void {
+                $q->select('hackaton_id')
+                    ->from('hackaton_applications')
+                    ->where('status', ApplicationStatus::ACCEPTED->value)
+                    ->whereIn('team_id', $teamIds);
+            })
+            ->latest('start_at')
+            ->limit(8)
+            ->get();
     }
 
     public function placeholder(array $params = []): ViewContract
@@ -50,7 +76,9 @@ class PublicProfileShow extends Component
     {
         $title = $this->profileUser->fio ?? $this->profileUser->nickname;
 
-        return view('pages.profile.public-show-inner', ['profileUser' => $this->profileUser])
-            ->title($title);
+        return view('pages.profile.public-show-inner', [
+            'profileUser' => $this->profileUser,
+            'participatedHackatons' => $this->getParticipatedHackatons(),
+        ])->title($title);
     }
 }

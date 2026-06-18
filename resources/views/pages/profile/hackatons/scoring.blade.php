@@ -65,6 +65,12 @@
                                         <x-app-icon icon="heroicons:puzzle-piece" class="h-3.5 w-3.5" />
                                         Кейсы
                                     </a>
+                                    @if($row['final_scores_count'] > 0)
+                                        <a href="{{ route('hackatons.export.results', $h) }}" class="btn btn-ghost btn-xs gap-1" title="Экспорт финальных оценок CSV">
+                                            <x-app-icon icon="heroicons:arrow-down-tray" class="h-3.5 w-3.5" />
+                                            CSV
+                                        </a>
+                                    @endif
                                     @if(auth()->user()?->isJudge())
                                         <a href="{{ route('judge.dashboard') }}" class="btn btn-secondary btn-xs gap-1" wire:navigate>
                                             <x-app-icon icon="heroicons:scale" class="h-3.5 w-3.5" />

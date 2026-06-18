@@ -26,6 +26,39 @@
                     wire:click="sendDocumentReminders"
                     wire:confirm="Отправить напоминание участникам с незагруженными документами?"
                 />
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-outline btn-sm gap-1">
+                        <x-app-icon icon="heroicons:arrow-down-tray" class="h-4 w-4" />
+                        Экспорт
+                        <x-app-icon icon="heroicons:chevron-down" class="h-3 w-3" />
+                    </div>
+                    <ul tabindex="-1" class="dropdown-content menu menu-sm z-50 mt-1 w-52 rounded-box border border-base-200 bg-base-100 p-1.5 shadow-lg">
+                        <li>
+                            <a href="{{ route('hackatons.export.applications', $hackaton) }}">
+                                <x-app-icon icon="heroicons:inbox" class="h-4 w-4" />
+                                Заявки (CSV)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('hackatons.export.teams', $hackaton) }}">
+                                <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
+                                Команды (CSV)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('hackatons.export.participants', $hackaton) }}">
+                                <x-app-icon icon="heroicons:users" class="h-4 w-4" />
+                                Участники (CSV)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('hackatons.export.documents-zip', $hackaton) }}">
+                                <x-app-icon icon="heroicons:archive-box-arrow-down" class="h-4 w-4" />
+                                Документы (ZIP)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 <a href="{{ route('organizer.dashboard') }}">
                     <x-mary-button label="Назад" class="btn-secondary btn-sm" />
                 </a>

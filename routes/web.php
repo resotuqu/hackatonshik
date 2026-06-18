@@ -277,6 +277,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/hackatons/{hackaton}/export/documents-zip', [HackatonExportController::class, 'documentsZip'])
         ->middleware('throttle:exports')
         ->name('hackatons.export.documents-zip');
+    Route::get('/hackatons/{hackaton}/export/applications', [HackatonExportController::class, 'applications'])
+        ->middleware('throttle:exports')
+        ->name('hackatons.export.applications');
+    Route::get('/hackatons/{hackaton}/export/results', [HackatonExportController::class, 'results'])
+        ->middleware('throttle:exports')
+        ->name('hackatons.export.results');
 
     Route::post('/hackatons/{hackaton}/judges/invite', [JudgeManagementController::class, 'invite'])
         ->middleware('throttle:judge-management')

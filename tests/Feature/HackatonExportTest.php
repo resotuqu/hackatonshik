@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\ApplicationStatus;
 use App\Models\Hackaton;
+use App\Models\HackatonApplication;
 use App\Models\HackatonDocument;
 use App\Models\Team;
 use App\Models\User;
@@ -57,6 +59,40 @@ test('organizer can export documents as zip', function () {
 
     $response->assertOk()
         ->assertHeader('Content-Disposition', 'attachment; filename=hackaton_'.$hackaton->id.'_documents.zip');
+});
+
+test('organizer can export applications as csv', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    $team = Team::factory()->create(['user_id' => $organizer->id]);
+    HackatonApplication::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'team_id' => $team->id,
+        'status' => ApplicationStatus::ACCEPTED,
+    ]);
+
+    $response = $this->actingAs($organizer)
+        ->get(route('hackatons.export.applications', $hackaton));
+
+    $response->assertOk()
+        ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('application_id,team_id,team_title,status');
+});
+
+test('organizer can export results as csv', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+
+    $response = $this->actingAs($organizer)
+        ->get(route('hackatons.export.results', $hackaton));
+
+    $response->assertOk()
+        ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('submission_id,case,team,score,max_score');
 });
 
 test('non-organizer cannot export data', function () {

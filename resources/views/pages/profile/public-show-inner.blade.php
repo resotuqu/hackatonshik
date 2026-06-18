@@ -7,11 +7,27 @@
             : 'https://ui-avatars.com/api/?name='.urlencode($profileUser->fio).'&background=random';
         $teamsCount = $profileUser->teams->count();
         $hackatonsCount = $profileUser->hackatons->count();
-        $skills = $profileUser->teamRoles->flatMap(fn ($role) => $role->skills->pluck('name'));
-        if ($profileUser->show_skills_on_profile) {
-            $skills = $skills->merge($profileUser->skills->pluck('name'));
-        }
-        $skills = $skills->unique()->values();
+
+        // Skills grouped by team role
+        $roleSkillGroups = $profileUser->teamRoles
+            ->filter(fn ($role) => $role->skills->isNotEmpty())
+            ->map(fn ($role) => [
+                'title' => $role->title,
+                'skills' => $role->skills->pluck('name'),
+            ]);
+
+        // Personal skills (only if user enabled it)
+        $personalSkills = $profileUser->show_skills_on_profile
+            ? $profileUser->skills->pluck('name')
+            : collect();
+
+        // All skills (flat, for SEO / summary stat)
+        $allSkills = $profileUser->teamRoles
+            ->flatMap(fn ($role) => $role->skills->pluck('name'))
+            ->merge($personalSkills)
+            ->unique()
+            ->values();
+
         $publicProfileUrl = route('profile.public.show', ['user' => $profileUser->nickname]);
 
         $bioSource = filled($profileUser->description)
@@ -52,6 +68,12 @@
                                     Профиль подтверждён
                                 </span>
                             @endif
+                            @if ($profileUser->open_to_teams)
+                                <span class="badge badge-accent badge-outline gap-1">
+                                    <x-app-icon icon="heroicons:user-plus" class="h-3.5 w-3.5" />
+                                    Открыт к командам
+                                </span>
+                            @endif
                         </div>
                         <h1 class="ui-heading-display text-3xl font-semibold lg:text-4xl">
                             {{ $profileUser->fio }}
@@ -70,6 +92,13 @@
                                 <span class="font-semibold text-secondary">{{ $teamsCount }}</span>
                                 команд
                             </span>
+                            @if ($allSkills->isNotEmpty())
+                                <span class="text-base-content/30">·</span>
+                                <span class="inline-flex items-center gap-1.5">
+                                    <span class="font-semibold text-secondary">{{ $allSkills->count() }}</span>
+                                    навыков
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -134,13 +163,14 @@
             </section>
         @endif
 
+        {{-- SKILLS --}}
         <section class="card border border-base-300 bg-base-100">
             <div class="card-body gap-4">
                 <h2 class="card-title text-base">
                     <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-primary" />
                     Навыки и роли
                 </h2>
-                @if ($skills->isEmpty())
+                @if ($roleSkillGroups->isEmpty() && $personalSkills->isEmpty())
                     <x-empty-state
                         embedded
                         title="Навыки не указаны"
@@ -148,15 +178,37 @@
                         icon="heroicons:sparkles"
                     />
                 @else
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($skills as $skill)
-                            <span class="badge badge-ghost">{{ $skill }}</span>
+                    <div class="space-y-4">
+                        @foreach ($roleSkillGroups as $group)
+                            <div>
+                                <p class="mb-2 text-xs font-medium uppercase tracking-wide text-base-content/50">
+                                    {{ $group['title'] }}
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($group['skills'] as $skill)
+                                        <span class="badge badge-primary badge-outline">{{ $skill }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endforeach
+                        @if ($personalSkills->isNotEmpty())
+                            <div>
+                                <p class="mb-2 text-xs font-medium uppercase tracking-wide text-base-content/50">
+                                    Личные навыки
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($personalSkills as $skill)
+                                        <span class="badge badge-ghost">{{ $skill }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endif
             </div>
         </section>
 
+        {{-- STATS --}}
         <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <article class="card border border-base-300 bg-base-100">
                 <div class="card-body gap-2">
@@ -173,7 +225,7 @@
                         <x-app-icon icon="heroicons:flag" class="h-4 w-4 text-secondary" />
                         Хакатоны
                     </p>
-                    <p class="text-3xl font-semibold text-secondary">{{ $hackatonsCount }}</p>
+                    <p class="text-3xl font-semibold text-secondary">{{ $hackatonsCount + $participatedHackatons->count() }}</p>
                 </div>
             </article>
             <article class="card border border-base-300 bg-base-100">
@@ -187,6 +239,7 @@
             </article>
         </section>
 
+        {{-- TEAMS --}}
         <section class="card border border-base-300 bg-base-100">
             <div class="card-body gap-4">
                 <h2 class="card-title text-base">
@@ -210,36 +263,88 @@
             </div>
         </section>
 
-        <section class="card border border-base-300 bg-base-100">
-            <div class="card-body gap-4">
-                <h2 class="card-title text-base">
-                    <x-app-icon icon="heroicons:flag" class="h-5 w-5 text-primary" />
-                    Последние хакатоны
-                </h2>
-                @if ($profileUser->hackatons->isEmpty())
+        {{-- HACKATON HISTORY --}}
+        @if ($profileUser->hackatons->isNotEmpty() || $participatedHackatons->isNotEmpty())
+            <section class="card border border-base-300 bg-base-100">
+                <div class="card-body gap-4">
+                    <h2 class="card-title text-base">
+                        <x-app-icon icon="heroicons:flag" class="h-5 w-5 text-primary" />
+                        История хакатонов
+                    </h2>
+
+                    @php
+                        $showSectionLabels = $profileUser->hackatons->isNotEmpty() && $participatedHackatons->isNotEmpty();
+                    @endphp
+
+                    @if ($profileUser->hackatons->isNotEmpty())
+                        <div>
+                            @if ($showSectionLabels)
+                                <p class="mb-3 text-xs font-medium uppercase tracking-wide text-base-content/50">Организатор</p>
+                            @endif
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                @foreach ($profileUser->hackatons as $hackaton)
+                                    <a href="{{ route('hackatons.show', $hackaton) }}" class="rounded-xl border border-base-300 p-3 transition hover:border-primary">
+                                        <div class="mb-1 flex items-start justify-between gap-2">
+                                            <p class="font-medium leading-snug">{{ $hackaton->title }}</p>
+                                            <span class="badge badge-xs {{ $hackaton->status->badgeClass() }} shrink-0">
+                                                {{ $hackaton->status->label() }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-base-content/60">
+                                            {{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y') }}
+                                            –
+                                            {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y') }}
+                                        </p>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($participatedHackatons->isNotEmpty())
+                        <div>
+                            @if ($showSectionLabels)
+                                <p class="mb-3 text-xs font-medium uppercase tracking-wide text-base-content/50">Участник</p>
+                            @endif
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                @foreach ($participatedHackatons as $hackaton)
+                                    <a href="{{ route('hackatons.show', $hackaton) }}" class="rounded-xl border border-base-300 p-3 transition hover:border-primary">
+                                        <div class="mb-1 flex items-start justify-between gap-2">
+                                            <p class="font-medium leading-snug">{{ $hackaton->title }}</p>
+                                            <span class="badge badge-xs {{ $hackaton->status->badgeClass() }} shrink-0">
+                                                {{ $hackaton->status->label() }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-base-content/60">
+                                            {{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y') }}
+                                            –
+                                            {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y') }}
+                                        </p>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </section>
+        @else
+            <section class="card border border-base-300 bg-base-100">
+                <div class="card-body gap-4">
+                    <h2 class="card-title text-base">
+                        <x-app-icon icon="heroicons:flag" class="h-5 w-5 text-primary" />
+                        История хакатонов
+                    </h2>
                     <x-empty-state
                         embedded
                         title="Хакатонов нет"
-                        description="Пользователь ещё не создавал хакатоны на платформе."
+                        description="Пользователь ещё не участвовал в хакатонах на платформе."
                         icon="heroicons:flag"
                     />
-                @else
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        @foreach ($profileUser->hackatons as $hackaton)
-                            <a href="{{ route('hackatons.show', $hackaton) }}" class="rounded-xl border border-base-300 p-3 transition hover:border-primary">
-                                <p class="font-medium">{{ $hackaton->title }}</p>
-                                <p class="text-xs text-base-content/70">
-                                    {{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y') }}
-                                    -
-                                    {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y') }}
-                                </p>
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </section>
+                </div>
+            </section>
+        @endif
 
+        {{-- CERTIFICATES --}}
         <section class="card border border-base-300 bg-base-100">
             <div class="card-body gap-4">
                 <h2 class="card-title text-base">

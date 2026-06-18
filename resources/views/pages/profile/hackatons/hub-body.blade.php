@@ -321,6 +321,45 @@
                             <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
                             Участники
                         </button>
+                        <div class="dropdown dropdown-end sm:flex-1 lg:flex-none">
+                            <div tabindex="0" role="button" class="ui-cta-outline btn-sm w-full gap-2">
+                                <x-app-icon icon="heroicons:arrow-down-tray" class="h-4 w-4" />
+                                Экспорт
+                                <x-app-icon icon="heroicons:chevron-down" class="h-3 w-3 ml-auto" />
+                            </div>
+                            <ul tabindex="-1" class="dropdown-content menu menu-sm z-50 mt-1 w-52 rounded-box border border-base-200 bg-base-100 p-1.5 shadow-lg">
+                                <li>
+                                    <a href="{{ route('hackatons.export.applications', $featuredHackaton) }}">
+                                        <x-app-icon icon="heroicons:inbox" class="h-4 w-4" />
+                                        Заявки (CSV)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('hackatons.export.teams', $featuredHackaton) }}">
+                                        <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
+                                        Команды (CSV)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('hackatons.export.participants', $featuredHackaton) }}">
+                                        <x-app-icon icon="heroicons:users" class="h-4 w-4" />
+                                        Участники (CSV)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('hackatons.export.results', $featuredHackaton) }}">
+                                        <x-app-icon icon="heroicons:clipboard-document-check" class="h-4 w-4" />
+                                        Результаты (CSV)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('hackatons.export.documents-zip', $featuredHackaton) }}">
+                                        <x-app-icon icon="heroicons:archive-box-arrow-down" class="h-4 w-4" />
+                                        Документы (ZIP)
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

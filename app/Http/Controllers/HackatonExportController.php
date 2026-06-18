@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Hackaton;
+use App\Models\HackatonApplication;
+use App\Models\HackatonCaseScore;
+use App\Models\HackatonCaseSubmission;
 use App\Models\HackatonDocument;
 use App\Models\User;
 use App\Models\UserHackatonDocument;
@@ -114,6 +117,87 @@ class HackatonExportController extends Controller
         $zip->close();
 
         return response()->download($tempFile, "hackaton_{$hackaton->id}_documents.zip")->deleteFileAfterSend(true);
+    }
+
+    public function applications(Hackaton $hackaton): StreamedResponse
+    {
+        $this->authorizeOrganizer($hackaton);
+
+        @set_time_limit(120);
+
+        $applications = HackatonApplication::query()
+            ->where('hackaton_id', $hackaton->id)
+            ->with([
+                'team:id,title',
+                'reviewer:id,fio,email',
+            ])
+            ->orderBy('created_at')
+            ->get();
+
+        $filename = "hackaton_{$hackaton->id}_applications.csv";
+
+        return response()->streamDownload(function () use ($applications): void {
+            $stream = fopen('php://output', 'wb');
+            fputcsv($stream, ['application_id', 'team_id', 'team_title', 'status', 'message', 'submitted_at', 'reviewed_at', 'reviewed_by']);
+
+            foreach ($applications as $application) {
+                fputcsv($stream, [
+                    $application->id,
+                    $application->team_id,
+                    $application->team?->title,
+                    $application->status->value,
+                    $application->message,
+                    $application->created_at?->toIso8601String(),
+                    $application->reviewed_at?->toIso8601String(),
+                    $application->reviewer?->fio ?? $application->reviewer?->email,
+                ]);
+            }
+
+            fclose($stream);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
+    public function results(Hackaton $hackaton): StreamedResponse
+    {
+        $this->authorizeOrganizer($hackaton);
+
+        @set_time_limit(120);
+
+        $submissionIds = HackatonCaseSubmission::query()
+            ->whereHas('case', fn ($q) => $q->where('hackaton_id', $hackaton->id))
+            ->pluck('id');
+
+        $scores = HackatonCaseScore::query()
+            ->whereIn('hackaton_case_submission_id', $submissionIds)
+            ->where('is_final', true)
+            ->with([
+                'submission.case:id,title',
+                'submission.team:id,title',
+                'reviewer:id,fio,email',
+            ])
+            ->orderBy('hackaton_case_submission_id')
+            ->get();
+
+        $filename = "hackaton_{$hackaton->id}_results.csv";
+
+        return response()->streamDownload(function () use ($scores): void {
+            $stream = fopen('php://output', 'wb');
+            fputcsv($stream, ['submission_id', 'case', 'team', 'score', 'max_score', 'judge', 'comment']);
+
+            foreach ($scores as $score) {
+                fputcsv($stream, [
+                    $score->hackaton_case_submission_id,
+                    data_get($score, 'submission.case.title'),
+                    data_get($score, 'submission.team.title'),
+                    $score->score,
+                    $score->max_score,
+                    $score->reviewer?->fio ?? $score->reviewer?->email,
+                    $score->general_comment,
+                ]);
+            }
+
+            fclose($stream);
+        }, $filename, ['Content-Type' => 'text/csv']);
     }
 
     private function resolveParticipants(Hackaton $hackaton): Collection
