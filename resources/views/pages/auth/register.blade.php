@@ -1,23 +1,45 @@
 
 <div class="mx-auto w-full max-w-5xl">
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        {{-- Left info panel — changes based on selected account type --}}
         <section class="card h-fit self-start border border-base-200 bg-base-100 shadow-sm lg:col-span-2">
             <div class="card-body justify-start space-y-4">
-                <h2 class="text-2xl font-semibold leading-tight">Добро пожаловать в Хакатонщик</h2>
-                <p class="text-sm text-base-content/70">
-                    Создайте аккаунт, чтобы участвовать в хакатонах, собирать команды и отправлять решения кейсов.
-                </p>
-                <div class="grid gap-2 text-sm">
-                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                        Создавайте профиль участника и вступайте в команды
+                @if($accountType === 'partner')
+                    <div class="inline-flex items-center gap-2">
+                        <span class="badge badge-secondary badge-sm">Организатор</span>
                     </div>
-                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                        Подавайте заявки на хакатоны и отслеживайте статусы
+                    <h2 class="text-2xl font-semibold leading-tight">Проводите хакатоны на Хакатонщике</h2>
+                    <p class="text-sm text-base-content/70">
+                        Создайте аккаунт организатора, чтобы публиковать хакатоны, принимать заявки команд и управлять соревнованиями.
+                    </p>
+                    <div class="grid gap-2 text-sm">
+                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+                            Создавайте и публикуйте хакатоны с призовым фондом
+                        </div>
+                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+                            Принимайте и отклоняйте заявки команд
+                        </div>
+                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+                            Добавляйте кейсы, судей и выдавайте сертификаты
+                        </div>
                     </div>
-                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                        Получайте анонсы и сертификаты в личном кабинете
+                @else
+                    <h2 class="text-2xl font-semibold leading-tight">Добро пожаловать в Хакатонщик</h2>
+                    <p class="text-sm text-base-content/70">
+                        Создайте аккаунт, чтобы участвовать в хакатонах, собирать команды и отправлять решения кейсов.
+                    </p>
+                    <div class="grid gap-2 text-sm">
+                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+                            Создавайте профиль участника и вступайте в команды
+                        </div>
+                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+                            Подавайте заявки на хакатоны и отслеживайте статусы
+                        </div>
+                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+                            Получайте анонсы и сертификаты в личном кабинете
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </section>
 
@@ -45,6 +67,36 @@
             </div>
 
             @if ($step === 1)
+                {{-- Account type picker --}}
+                <div class="mb-4">
+                    <p class="mb-2 text-sm font-medium text-base-content/80">Тип аккаунта</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" wire:model.live="accountType" value="user" class="peer sr-only" />
+                            <div class="flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 text-center transition
+                                peer-checked:border-primary peer-checked:bg-primary/5
+                                border-base-300 bg-base-200/40 hover:border-base-400">
+                                <x-app-icon icon="heroicons:user" class="h-6 w-6 text-base-content/60 peer-checked:text-primary" />
+                                <span class="text-sm font-semibold">Участник</span>
+                                <span class="text-[11px] text-base-content/60">Участвую в хакатонах</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" wire:model.live="accountType" value="partner" class="peer sr-only" />
+                            <div class="flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 text-center transition
+                                peer-checked:border-secondary peer-checked:bg-secondary/5
+                                border-base-300 bg-base-200/40 hover:border-base-400">
+                                <x-app-icon icon="heroicons:building-office-2" class="h-6 w-6 text-base-content/60" />
+                                <span class="text-sm font-semibold">Организатор</span>
+                                <span class="text-[11px] text-base-content/60">Провожу хакатоны</span>
+                            </div>
+                        </label>
+                    </div>
+                    @error('accountType')
+                        <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <p class="text-xs text-base-content/60 mb-2 rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">
                     Если вы закроете страницу до завершения регистрации, данные не сохранятся — позже нужно будет заполнить форму заново.
                 </p>

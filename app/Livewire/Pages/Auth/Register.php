@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Auth;
 
 use App\Actions\Fortify\PasswordValidationRules;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,8 @@ class Register extends Component
     public int $step = 1;
 
     public const int TOTAL_STEPS = 4;
+
+    public string $accountType = 'user';
 
     public $fio = '';
 
@@ -41,6 +44,7 @@ class Register extends Component
     {
         return match ($step) {
             1 => [
+                'accountType' => ['required', 'in:user,partner'],
                 'fio' => ['required', 'string', 'max:255'],
                 'date_of_birth' => ['required', 'date', 'before:now'],
             ],
@@ -116,6 +120,10 @@ class Register extends Component
             'date_of_birth' => $this->date_of_birth,
             'password' => $this->password,
         ]);
+
+        if ($this->accountType === 'partner') {
+            $user->forceFill(['role' => UserRole::PARTNER])->save();
+        }
 
         $user->sendEmailVerificationNotification();
 
