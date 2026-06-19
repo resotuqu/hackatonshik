@@ -4,7 +4,7 @@
 
 @section('slot')
     <div class="mx-auto w-full max-w-xl space-y-4">
-        <x-mary-card title="Забыли пароль?" class="card card-border bg-base-100">
+        <x-mary-card title="Забыли пароль?" class="card border border-base-300 bg-base-100">
             <p class="text-sm text-base-content/70">
                 Укажите email аккаунта — мы отправим ссылку для сброса пароля.
             </p>

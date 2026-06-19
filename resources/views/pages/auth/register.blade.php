@@ -1,54 +1,64 @@
 
 <div class="mx-auto w-full max-w-5xl">
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        {{-- Left info panel — changes based on selected account type --}}
-        <section class="card h-fit self-start border border-base-200 bg-base-100 shadow-sm lg:col-span-2">
-            <div class="card-body justify-start space-y-4">
-                @if($accountType === 'partner')
-                    <div class="inline-flex items-center gap-2">
-                        <span class="badge badge-secondary badge-sm">Организатор</span>
-                    </div>
-                    <h2 class="text-2xl font-semibold leading-tight">Проводите хакатоны на Хакатонщике</h2>
-                    <p class="text-sm text-base-content/70">
+        {{-- Dark brand panel — switches content based on account type --}}
+        <section class="flex flex-col justify-between gap-8 rounded-2xl bg-base-content px-6 py-8 text-base-100 lg:col-span-2">
+            <div class="space-y-3">
+                <p class="text-xs font-semibold uppercase tracking-widest text-base-100/50">Хакатонщик</p>
+                @if ($accountType === 'partner')
+                    <h2 class="text-2xl font-semibold leading-tight">Проводите хакатоны</h2>
+                    <p class="text-sm text-base-100/70">
                         Создайте аккаунт организатора, чтобы публиковать хакатоны, принимать заявки команд и управлять соревнованиями.
                     </p>
-                    <div class="grid gap-2 text-sm">
-                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                            Создавайте и публикуйте хакатоны с призовым фондом
-                        </div>
-                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                            Принимайте и отклоняйте заявки команд
-                        </div>
-                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                            Добавляйте кейсы, судей и выдавайте сертификаты
-                        </div>
-                    </div>
                 @else
-                    <div class="inline-flex items-center gap-2">
-                        <span class="badge badge-primary badge-sm">Участник</span>
-                    </div>
-                    <h2 class="text-2xl font-semibold leading-tight">Добро пожаловать в Хакатонщик</h2>
-                    <p class="text-sm text-base-content/70">
+                    <h2 class="text-2xl font-semibold leading-tight">Добро пожаловать</h2>
+                    <p class="text-sm text-base-100/70">
                         Создайте аккаунт, чтобы участвовать в хакатонах, собирать команды и отправлять решения кейсов.
                     </p>
-                    <div class="grid gap-2 text-sm">
-                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                            Создавайте профиль участника и вступайте в команды
-                        </div>
-                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                            Подавайте заявки на хакатоны и отслеживайте статусы
-                        </div>
-                        <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                            Получайте анонсы и сертификаты в личном кабинете
-                        </div>
+                @endif
+            </div>
+            <div class="grid gap-2 text-sm">
+                @if ($accountType === 'partner')
+                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                        Создавайте и публикуйте хакатоны с призовым фондом
+                    </div>
+                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                        Принимайте и отклоняйте заявки команд
+                    </div>
+                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                        Добавляйте кейсы, судей и выдавайте сертификаты
+                    </div>
+                @else
+                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                        Создавайте профиль участника и вступайте в команды
+                    </div>
+                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                        Подавайте заявки на хакатоны и отслеживайте статусы
+                    </div>
+                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                        Получайте анонсы и сертификаты в личном кабинете
                     </div>
                 @endif
             </div>
+            <dl class="grid grid-cols-3 border-t border-base-100/15 pt-6 text-center">
+                <div>
+                    <dt class="text-xs text-base-100/50">Хакатонов</dt>
+                    <dd class="mt-1 text-xl font-semibold tabular-nums">500+</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-base-100/50">Участников</dt>
+                    <dd class="mt-1 text-xl font-semibold tabular-nums">2 000+</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-base-100/50">Команд</dt>
+                    <dd class="mt-1 text-xl font-semibold tabular-nums">120+</dd>
+                </div>
+            </dl>
         </section>
 
         <x-maryform
             wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}"
-            class="card border border-base-200 bg-base-100 p-4 shadow-sm sm:p-6 lg:col-span-3"
+            class="card border border-base-300 bg-base-100 p-4 sm:p-6 lg:col-span-3"
         >
             @php
                 $progressPercent = (int) round(($step / 4) * 100);

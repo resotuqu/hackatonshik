@@ -1,26 +1,41 @@
 <div class="mx-auto w-full max-w-5xl">
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <section class="card h-fit self-start border border-base-200 bg-base-100 shadow-sm lg:col-span-2">
-            <div class="card-body justify-start space-y-4">
-                <h2 class="text-2xl font-semibold leading-tight">С возвращением в Хакатонщик</h2>
-                <p class="text-sm text-base-content/70">
+        <section class="flex flex-col justify-between gap-8 rounded-2xl bg-base-content px-6 py-8 text-base-100 lg:col-span-2">
+            <div class="space-y-3">
+                <p class="text-xs font-semibold uppercase tracking-widest text-base-100/50">Хакатонщик</p>
+                <h2 class="text-2xl font-semibold leading-tight">С возвращением</h2>
+                <p class="text-sm text-base-100/70">
                     Войдите, чтобы продолжить работу с командами, заявками и кейсами.
                 </p>
-                <div class="grid gap-2 text-sm">
-                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                        Отслеживайте статусы заявок в одном месте
-                    </div>
-                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                        Отправляйте решения кейсов без лишней переписки
-                    </div>
-                    <div class="rounded-lg border border-base-300 bg-base-200 p-3">
-                        Получайте анонсы и обновления по хакатонам
-                    </div>
+            </div>
+            <div class="grid gap-2 text-sm">
+                <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                    Отслеживайте статусы заявок в одном месте
+                </div>
+                <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                    Отправляйте решения кейсов без лишней переписки
+                </div>
+                <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
+                    Получайте анонсы и обновления по хакатонам
                 </div>
             </div>
+            <dl class="grid grid-cols-3 border-t border-base-100/15 pt-6 text-center">
+                <div>
+                    <dt class="text-xs text-base-100/50">Хакатонов</dt>
+                    <dd class="mt-1 text-xl font-semibold tabular-nums">500+</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-base-100/50">Участников</dt>
+                    <dd class="mt-1 text-xl font-semibold tabular-nums">2 000+</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-base-100/50">Команд</dt>
+                    <dd class="mt-1 text-xl font-semibold tabular-nums">120+</dd>
+                </div>
+            </dl>
         </section>
 
-        <x-maryform wire:submit="save" class="card border border-base-200 bg-base-100 p-4 shadow-sm sm:p-6 lg:col-span-3">
+        <x-maryform wire:submit="save" class="card border border-base-300 bg-base-100 p-4 sm:p-6 lg:col-span-3">
             <x-mary-header title="Авторизация" separator />
             <div class="space-y-3">
                 <x-mary-input
