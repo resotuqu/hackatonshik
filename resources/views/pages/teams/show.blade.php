@@ -306,7 +306,7 @@
                             @foreach ($occupiedRoles as $role)
                                 @php
                                     $u = $role->user;
-                                    $displayName = $u->fio ?? $u->nickname ?? $u->email;
+                                    $displayName = filled($u->fio) ? $u->publicName() : ($u->nickname ?? $u->email);
                                     $initials = filled($u->fio)
                                         ? $u->initials()
                                         : mb_strtoupper(mb_substr((string) ($u->nickname ?? $u->email), 0, 2));

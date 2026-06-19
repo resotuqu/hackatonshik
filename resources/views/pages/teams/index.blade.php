@@ -28,54 +28,41 @@
         };
     @endphp
     <section class="ui-page-hero">
-        <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div class="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0 space-y-3">
                 <p class="text-sm text-base-content/60">Каталог команд</p>
-                @if ($catalog_tab === 'open')
-                    <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
-                        Открытые команды
-                    </h1>
-                    <p class="max-w-2xl text-base text-base-content/70">Команды, которые сейчас ищут участников.</p>
-                @else
-                    <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
-                        Все команды
-                    </h1>
-                    <p class="max-w-2xl text-base text-base-content/70">Каталог публичных команд на платформе.</p>
-                @endif
-                <p class="text-sm font-medium tabular-nums text-base-content/60">
-                    Найдено {{ $totalTeams }} {{ $teamsWord }}
-                </p>
-            </div>
-            <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
-                <div
-                    class="tabs tabs-boxed w-fit max-w-full gap-1 overflow-x-auto rounded-lg bg-base-200 p-1"
-                    role="tablist"
-                    aria-label="Режим каталога команд"
-                >
-                    <button
-                        type="button"
-                        role="tab"
-                        class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'open' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
-                        aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
-                        wire:click="setCatalogTab('open')"
-                    >
-                        Открытые
-                    </button>
-                    <button
-                        type="button"
-                        role="tab"
-                        class="tab tab-sm sm:tab-md whitespace-nowrap {{ $catalog_tab === 'all' ? 'tab-active bg-primary! text-primary-content!' : '' }}"
-                        aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
-                        wire:click="setCatalogTab('all')"
-                    >
-                        Все команды
-                    </button>
+                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">Команды</h1>
+                <p class="max-w-2xl text-base text-base-content/70">Команды участников хакатонов — открытые и закрытые.</p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <p class="text-sm font-medium tabular-nums text-base-content/60">
+                        Найдено {{ $totalTeams }} {{ $teamsWord }}
+                    </p>
+                    <div class="flex rounded-full bg-base-200 p-1 gap-1" role="tablist" aria-label="Режим каталога команд">
+                        <button
+                            type="button"
+                            role="tab"
+                            class="rounded-full px-4 py-1 text-sm font-medium transition-all duration-200 whitespace-nowrap {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                            aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
+                            wire:click="setCatalogTab('open')"
+                        >
+                            Открытые
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            class="rounded-full px-4 py-1 text-sm font-medium transition-all duration-200 whitespace-nowrap {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                            aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
+                            wire:click="setCatalogTab('all')"
+                        >
+                            Все
+                        </button>
+                    </div>
                 </div>
-                <a href="/teams/create" wire:navigate class="ui-cta-primary">
-                    <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
-                    Создать команду
-                </a>
             </div>
+            <a href="/teams/create" wire:navigate class="ui-cta-primary shrink-0 self-start">
+                <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
+                Создать команду
+            </a>
         </div>
     </section>
 
@@ -115,7 +102,7 @@
                         @php $pressed = in_array($chipRole->id, $roleIdInts, true); @endphp
                         <button
                             type="button"
-                            class="btn btn-sm shrink-0 snap-start border-base-300 {{ $pressed ? 'btn-primary' : 'btn-ghost bg-base-100' }}"
+                            class="btn btn-sm shrink-0 snap-start {{ $pressed ? 'btn-primary' : 'btn-ghost border border-base-300 bg-base-100 hover:border-primary/40' }}"
                             wire:click="toggleRoleId({{ $chipRole->id }})"
                             aria-pressed="{{ $pressed ? 'true' : 'false' }}"
                         >
@@ -173,7 +160,7 @@
                     </label>
                     <label class="form-control w-full">
                         <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Начало хакатона от</span></span>
-                        <input type="datetime-local" class="input input-bordered input-sm w-full sm:input-md" wire:model.live="start_from" />
+                        <input type="date" class="input input-bordered input-sm w-full sm:input-md" wire:model.live="start_from" />
                     </label>
                 </div>
             </details>

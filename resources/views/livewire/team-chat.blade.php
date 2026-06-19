@@ -49,14 +49,14 @@
                             <span class="text-[9px] font-bold text-base-content/50">{{ $msg->user->initials() }}</span>
                         @endif
                     </div>
-                    <span class="text-[11px] text-base-content/50 font-medium">{{ $msg->user->fio }}</span>
+                    <span class="text-[11px] text-base-content/50 font-medium">{{ $msg->user->publicName() }}</span>
                     <span class="text-[10px] text-base-content/30">{{ $msg->created_at->format('H:i') }}</span>
                 </div>
 
                 {{-- Reply context --}}
                 @if($msg->parent)
                     <div class="@if($isMine) mr-8 @else ml-8 @endif px-2 py-1 rounded border-l-2 border-primary/40 bg-base-200/60 text-[11px] text-base-content/60 max-w-[260px] truncate">
-                        <span class="font-semibold text-primary/70">{{ $msg->parent->user?->fio }}</span>:
+                        <span class="font-semibold text-primary/70">{{ $msg->parent->user?->publicName() }}</span>:
                         {{ Str::limit($msg->parent->content, 60) }}
                     </div>
                 @endif
@@ -135,7 +135,7 @@
                         @foreach($reactionGroups as $emoji => $group)
                             @php
                                 $meReacted = $group->contains('user_id', auth()->id());
-                                $names = $group->map(fn($r) => $r->user?->fio)->filter()->join(', ');
+                                $names = $group->map(fn($r) => $r->user?->publicName())->filter()->join(', ');
                             @endphp
                             <button
                                 type="button"
@@ -167,7 +167,7 @@
                 $replyPreview = $replyMsg
                     ? Str::limit($replyMsg->content, 80)
                     : '#'.$replyToId;
-                $replyAuthor = $replyMsg?->user?->fio ?? '';
+                $replyAuthor = $replyMsg?->user?->publicName() ?? '';
             @endphp
             <div class="flex items-center justify-between gap-2 border-b border-base-300/60 bg-primary/5 px-4 py-2 text-xs text-base-content/70">
                 <div class="flex items-center gap-2 min-w-0">

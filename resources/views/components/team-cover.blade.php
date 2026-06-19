@@ -19,6 +19,7 @@
             alt=""
             class="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover/cover:scale-[1.02]"
             loading="lazy"
+            onerror="this.style.display='none'"
         />
     @else
         <div class="ui-cover-placeholder absolute inset-0" aria-hidden="true"></div>

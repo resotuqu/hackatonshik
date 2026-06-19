@@ -43,6 +43,10 @@
                 <x-mary-button class="btn-primary w-full" label="Войти в аккаунт" type="submit" wire:loading.attr="disabled" wire:target="save" spinner="save" />
             </x-slot:actions>
 
+            <p class="text-center text-sm text-base-content/60">
+                Нет аккаунта? <a href="{{ route('register') }}" wire:navigate class="link link-primary font-medium">Зарегистрироваться</a>
+            </p>
+
             <a href="/auth/yandex/redirect" class="block w-full rounded-xl bg-[#FC3F1D] px-4 py-3 text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#FC3F1D]/40">
                 <span class="inline-flex w-full items-center justify-center gap-3 text-sm font-semibold">
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#FC3F1D]">Я</span>

@@ -4,7 +4,7 @@
             : ($profileUser->role === 'partner' ? 'Партнёр' : ($profileUser->role === 'judge' ? 'Судья' : 'Администратор'));
         $avatarUrl = $profileUser->avatar_path
             ? asset('storage/'.$profileUser->avatar_path)
-            : 'https://ui-avatars.com/api/?name='.urlencode($profileUser->fio).'&background=random';
+            : 'https://ui-avatars.com/api/?name='.urlencode($profileUser->publicName()).'&background=random';
         $teamsCount = $profileUser->teams->count();
         $hackatonsCount = $profileUser->hackatons->count();
 
@@ -32,12 +32,12 @@
 
         $bioSource = filled($profileUser->description)
             ? strip_tags(\App\Support\SafeMarkdown::toHtml($profileUser->description))
-            : sprintf('%s — %s на платформе «Хакатонщик».', $profileUser->fio ?? $profileUser->nickname, $publicRoleLabel);
+            : sprintf('%s — %s на платформе «Хакатонщик».', $profileUser->publicName(), $publicRoleLabel);
         $bioSource = preg_replace('/\s+/u', ' ', $bioSource ?? '') ?? '';
         $seoDescription = trim(mb_substr($bioSource, 0, 180, 'UTF-8'));
     @endphp
 
-    @section('title', $profileUser->fio ?? $profileUser->nickname)
+    @section('title', $profileUser->publicName())
     @section('meta_description', $seoDescription)
     @section('canonical_url', $publicProfileUrl)
     @section('og_image', $avatarUrl)
@@ -56,7 +56,7 @@
                 <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
                     <div class="avatar">
                         <div class="w-32 rounded-full ring-2 ring-secondary/40 ring-offset-2 ring-offset-base-100 sm:w-36">
-                            <img src="{{ $avatarUrl }}" alt="Аватар {{ $profileUser->fio }}" />
+                            <img src="{{ $avatarUrl }}" alt="Аватар {{ $profileUser->publicName() }}" />
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -76,7 +76,7 @@
                             @endif
                         </div>
                         <h1 class="ui-heading-display text-3xl font-semibold lg:text-4xl">
-                            {{ $profileUser->fio }}
+                            {{ $profileUser->publicName() }}
                         </h1>
                         <p class="text-base text-base-content/70">{{ '@'.$profileUser->nickname }}</p>
                         <p class="text-sm text-base-content/60">
@@ -107,7 +107,7 @@
                     <button
                         class="btn btn-sm btn-outline btn-secondary gap-2"
                         type="button"
-                        onclick="if (navigator.share) { navigator.share({ title: @json($profileUser->fio), url: @json($publicProfileUrl) }); } else { navigator.clipboard.writeText(@json($publicProfileUrl)); const t = this.querySelector('[data-share-label]'); if (t) t.textContent = 'Ссылка скопирована'; }"
+                        onclick="if (navigator.share) { navigator.share({ title: @json($profileUser->publicName()), url: @json($publicProfileUrl) }); } else { navigator.clipboard.writeText(@json($publicProfileUrl)); const t = this.querySelector('[data-share-label]'); if (t) t.textContent = 'Ссылка скопирована'; }"
                     >
                         <x-app-icon icon="heroicons:share" class="h-4 w-4 shrink-0" />
                         <span data-share-label>Поделиться</span>

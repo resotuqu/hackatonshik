@@ -24,6 +24,9 @@
                         </div>
                     </div>
                 @else
+                    <div class="inline-flex items-center gap-2">
+                        <span class="badge badge-primary badge-sm">Участник</span>
+                    </div>
                     <h2 class="text-2xl font-semibold leading-tight">Добро пожаловать в Хакатонщик</h2>
                     <p class="text-sm text-base-content/70">
                         Создайте аккаунт, чтобы участвовать в хакатонах, собирать команды и отправлять решения кейсов.
@@ -131,15 +134,17 @@
                 <x-mary-input label="Контактный номер телефона" wire:model="phone" prefix="+" />
             @endif
 
-            <x-slot:actions class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
-                @if ($step > 1)
-                    <x-marybutton class="btn-outline w-full sm:w-auto" label="Назад" type="button" wire:click="previousStep" />
-                @endif
-                @if ($step < 4)
-                    <x-marybutton class="btn-primary w-full sm:min-w-40" label="Далее" type="submit" />
-                @else
-                    <x-marybutton class="btn-primary w-full sm:min-w-40" label="Зарегистрироваться" type="submit" />
-                @endif
+            <x-slot:actions class="w-full">
+                <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+                    @if ($step > 1)
+                        <x-marybutton class="btn-outline w-full sm:w-auto" label="Назад" type="button" wire:click="previousStep" />
+                    @endif
+                    @if ($step < 4)
+                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="Далее" type="submit" />
+                    @else
+                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="Зарегистрироваться" type="submit" />
+                    @endif
+                </div>
             </x-slot:actions>
             <div class="mt-2 grid gap-2">
                 <a href="/auth/yandex/redirect" class="block w-full rounded-xl bg-[#FC3F1D] px-4 py-3 text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#FC3F1D]/40">

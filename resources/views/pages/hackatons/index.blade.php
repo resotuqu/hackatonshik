@@ -40,23 +40,22 @@
                 <p class="max-w-2xl text-base text-base-content/70">
                     Находите подходящие соревнования, подавайте заявки командой и сражайтесь за призы.
                 </p>
-                <p class="text-sm font-medium tabular-nums text-base-content/60">
-                    Найдено {{ $totalHackatons }} {{ $hackatonsWord }}
-                </p>
-            </div>
-
-            <div class="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
-                @if ($canCreate)
-                    <a href="/hackatons/create" wire:navigate class="ui-cta-primary btn-md">
-                        <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
-                        Создать хакатон
-                    </a>
-                @elseif (! auth()->check())
-                    <a href="{{ route('login') }}" class="ui-cta-outline btn-md gap-2">
-                        <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />
-                        Войти, чтобы участвовать
-                    </a>
-                @endif
+                <div class="flex flex-wrap items-center gap-3">
+                    <p class="text-sm font-medium tabular-nums text-base-content/60">
+                        Найдено {{ $totalHackatons }} {{ $hackatonsWord }}
+                    </p>
+                    @if ($canCreate)
+                        <a href="/hackatons/create" wire:navigate class="ui-cta-primary btn-sm">
+                            <x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />
+                            Создать хакатон
+                        </a>
+                    @elseif (! auth()->check())
+                        <a href="{{ route('login') }}" class="ui-cta-outline btn-sm gap-1.5">
+                            <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
+                            Войти, чтобы участвовать
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     </section>
@@ -144,7 +143,7 @@
                     </label>
                     <label class="form-control w-full min-w-0">
                         <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Старт от</span></span>
-                        <input type="datetime-local" class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md" wire:model.live="start_at" />
+                        <input type="date" class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md" wire:model.live="start_at" />
                     </label>
                 </div>
 

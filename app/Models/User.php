@@ -187,6 +187,36 @@ class User extends Authenticatable implements MustVerifyEmail
         return InitialsGenerator::generate($this->fio);
     }
 
+    /**
+     * Get the user's anonymized display name: "Имя О.Ф."
+     * Used for public-facing displays to protect privacy.
+     */
+    public function publicName(): string
+    {
+        if (! filled($this->fio)) {
+            return $this->nickname ?? 'Участник';
+        }
+
+        $parts = preg_split('/\s+/u', trim($this->fio), 3);
+        $lastName = $parts[0] ?? '';
+        $firstName = $parts[1] ?? '';
+        $patronymic = $parts[2] ?? '';
+
+        if (! filled($firstName)) {
+            return $lastName;
+        }
+
+        $initials = '';
+        if (filled($patronymic)) {
+            $initials .= mb_strtoupper(mb_substr($patronymic, 0, 1, 'UTF-8'), 'UTF-8').'.';
+        }
+        if (filled($lastName)) {
+            $initials .= mb_strtoupper(mb_substr($lastName, 0, 1, 'UTF-8'), 'UTF-8').'.';
+        }
+
+        return $firstName.($initials ? ' '.$initials : '');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;

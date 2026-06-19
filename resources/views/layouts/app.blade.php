@@ -1,6 +1,12 @@
 @php use Illuminate\Support\Facades\Auth; @endphp
 <!DOCTYPE html>
-<html lang="ru" class="group">
+@php
+    $validThemes = ['hackatonshik', 'hackatonshik-light'];
+    $serverTheme = isset($_COOKIE['theme']) && in_array($_COOKIE['theme'], $validThemes)
+        ? $_COOKIE['theme']
+        : 'hackatonshik';
+@endphp
+<html lang="ru" class="group" data-theme="{{ $serverTheme }}">
 <head>
     @php
         $pageTitle = isset($title) ? trim($title) : trim($__env->yieldContent('title', config('app.name')));
@@ -238,7 +244,6 @@
 
                 <ul class="menu menu-vertical app-sidebar-menu mt-5 w-full min-w-0 flex-1 gap-0.5 px-0 py-1" role="navigation" aria-label="Меню сайта">
                     @guest
-                        <li class="menu-title px-1 pt-1"><span class="font-display text-xs font-medium text-base-content/55">Навигация</span></li>
                         <li>
                             <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                                 <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
@@ -258,7 +263,6 @@
                             </a>
                         </li>
                         <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                        <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Аккаунт</span></li>
                         <li>
                             <a href="{{ route('login') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('login') ? 'active' : '' }}">
                                 <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5 shrink-0" />
@@ -278,7 +282,6 @@
                         @endphp
 
                         @if ($isPureParticipant)
-                            <li class="menu-title px-1 pt-1"><span class="font-display text-xs font-medium text-base-content/55">Навигация</span></li>
                             <li>
                                 <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
@@ -330,7 +333,6 @@
                                 </a>
                             </li>
                         @else
-                            <li class="menu-title px-1 pt-1"><span class="font-display text-xs font-medium text-base-content/55">Навигация</span></li>
                             <li>
                                 <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />

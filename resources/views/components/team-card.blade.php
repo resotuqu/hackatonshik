@@ -12,80 +12,85 @@
     $titleId = 'team-card-title-' . $team->id;
     $openSlots = (int) ($team->empty_roles_count ?? 0);
     $hasVacancies = $openSlots > 0;
-    
-    // Склонение слова "роль"
+
     $slotWord = match (true) {
         $openSlots % 10 === 1 && $openSlots % 100 !== 11 => 'место',
         in_array($openSlots % 10, [2, 3, 4], true) && ! in_array($openSlots % 100, [12, 13, 14], true) => 'места',
         default => 'мест',
     };
-    
+
     $participants = $participantUsers ?? collect();
+
+    // Роли: показываем макс 2, остаток — счётчик
+    $visibleRoles = array_slice($vacantRoleNames, 0, 2);
+    $extraRoles = max(0, count($vacantRoleNames) - 2);
 @endphp
 
 <article
     class="ui-surface-card ui-surface-card--hover ui-surface-card--team group/card flex h-full flex-col overflow-hidden"
     aria-labelledby="{{ $titleId }}"
 >
-    {{-- 1. Убрали дублирование заголовка. Оставляем инициалы и градиент/обложку --}}
     <x-team-cover
-        title="" {{-- Передаем пустоту, чтобы не дублировать текст поверх градиента --}}
+        title=""
         :cover-url="$team->coverImagePublicUrl()"
         :initials="$team->initialsForCover()"
     />
 
-    <div class="flex min-h-0 flex-1 flex-col gap-5 p-5 sm:p-6">
-        
-        {{-- 3. Заголовок и проект --}}
-        <div class="space-y-1">
-            <h3 id="{{ $titleId }}" class="ui-heading-display text-xl font-bold leading-snug text-base-content sm:text-2xl">
-                {{ $team->title }}
-            </h3>
-            {{-- Задел на будущее, если решите разделить Название команды и Название проекта в БД --}}
-            {{-- <p class="text-sm font-medium text-base-content/60">Проект: <span class="text-base-content/80">{{ $team->project_name }}</span></p> --}}
-        </div>
+    <div class="flex min-h-0 flex-1 flex-col gap-4 p-5 sm:p-6">
 
-        {{-- 5. Ограничение высоты описания (Трункация) --}}
-        <p class="line-clamp-2 text-sm leading-relaxed text-base-content/70">
+        {{-- Заголовок: строго 1 строка --}}
+        <h3 id="{{ $titleId }}" class="truncate text-xl font-bold leading-snug text-base-content sm:text-2xl" title="{{ $team->title }}">
+            {{ $team->title }}
+        </h3>
+
+        {{-- Описание: ровно 3 строки с резервированием места --}}
+        <p class="line-clamp-3 text-sm leading-relaxed text-base-content/70" style="min-height: calc(1.625rem * 3)">
             {{ \App\Support\SafeMarkdown::toPlainExcerpt($team->description ?? '') ?: 'Описание проекта пока не добавлено. Лидер команды скоро это исправит...' }}
         </p>
 
-        {{-- 4 & 6. Сгруппированный блок ролей со спокойным акцентом --}}
-        @if ($hasVacancies || ! empty($vacantRoleNames))
-            <div class="rounded-lg border border-secondary/20 bg-secondary/5 p-4">
-                <p class="mb-3 text-xs font-medium text-secondary">
+        {{-- Ищем в команду: макс 2 роли + "+N", резервируем место --}}
+        <div class="rounded-lg border border-secondary/20 bg-secondary/5 p-4" style="min-height: 5.5rem">
+            <p class="mb-2 text-xs font-medium text-secondary">
+                @if ($hasVacancies || ! empty($vacantRoleNames))
                     Ищем в команду ({{ $openSlots }} {{ $slotWord }}):
-                </p>
-                <div class="flex flex-wrap gap-2">
-                    @forelse ($vacantRoleNames as $name)
-                        {{-- Полупрозрачные бейджи вместо "кричащих" сплошных --}}
-                        <span class="badge badge-secondary badge-outline border-secondary/30 bg-secondary/10 px-3 py-3 font-semibold">
-                            {{ $name }}
-                        </span>
-                    @empty
+                @else
+                    <span class="text-base-content/50">Набор закрыт</span>
+                @endif
+            </p>
+            <div class="flex flex-wrap gap-2">
+                @forelse ($visibleRoles as $name)
+                    <span class="badge badge-secondary badge-outline border-secondary/30 bg-secondary/10 px-3 py-3 font-semibold">
+                        {{ $name }}
+                    </span>
+                @empty
+                    @if (! $hasVacancies)
+                        {{-- пустое место для выравнивания --}}
+                    @else
                         <span class="text-sm font-medium text-base-content/60">Любые роли</span>
-                    @endforelse
-                </div>
+                    @endif
+                @endforelse
+                @if ($extraRoles > 0)
+                    <span class="badge badge-outline border-base-300 bg-base-200/50 px-3 py-3 text-xs font-semibold text-base-content/60">
+                        +{{ $extraRoles }}
+                    </span>
+                @endif
             </div>
-        @else
-            <div class="w-fit rounded-lg bg-base-200 px-3 py-1.5 border border-base-300">
-                <span class="text-xs font-medium text-base-content/60">Набор закрыт</span>
-            </div>
-        @endif
+        </div>
 
-        {{-- Навыки --}}
-        @if (! empty($skillTags))
-            <div>
+        {{-- Навыки: макс 2 строки бейджей с резервированием места --}}
+        {{-- Высота 2 строк: badge ~1.75rem + gap 0.5rem --}}
+        <div style="min-height: 4.5rem">
+            @if (! empty($skillTags))
                 <p class="mb-2 text-xs font-medium text-base-content/50">Навыки</p>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 overflow-hidden" style="max-height: calc(1.75rem * 2 + 0.5rem)">
                     @foreach ($skillTags as $tag)
                         <span class="badge badge-outline border-base-300 bg-base-200/30 px-3 py-3 text-xs font-medium text-base-content/80">
                             {{ $tag }}
                         </span>
                     @endforeach
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
 
         @if ($team->updated_at)
             <p class="text-xs text-base-content/45">
@@ -93,9 +98,9 @@
             </p>
         @endif
 
-        {{-- Футер карточки: Участники и кнопка --}}
+        {{-- Футер: участники и кнопка --}}
         <div class="mt-auto flex flex-col gap-4 pt-2 sm:flex-row sm:items-end sm:justify-between">
-            
+
             @if ($participants->isNotEmpty())
                 <div class="flex flex-col gap-2">
                     <span class="text-xs font-medium text-base-content/50">Участники</span>
@@ -104,13 +109,13 @@
                             @php
                                 $avatarUrl = filled($member->avatar_path)
                                     ? asset('storage/' . $member->avatar_path)
-                                    : 'https://ui-avatars.com/api/?name=' . urlencode($member->fio ?: $member->nickname ?: 'U') . '&background=random&color=fff&size=64';
+                                    : 'https://ui-avatars.com/api/?name=' . urlencode($member->publicName()) . '&background=random&color=fff&size=64';
                             @endphp
                             <div class="relative group/avatar transition-transform hover:z-10 hover:scale-110">
                                 <img
                                     src="{{ $avatarUrl }}"
-                                    alt="{{ $member->fio }}"
-                                    title="{{ $member->fio }}"
+                                    alt="{{ $member->publicName() }}"
+                                    title="{{ $member->publicName() }}"
                                     class="h-10 w-10 rounded-full border-2 border-base-100 object-cover ring-1 ring-base-300 shadow-sm"
                                     loading="lazy"
                                 />

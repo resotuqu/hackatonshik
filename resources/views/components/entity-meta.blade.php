@@ -38,7 +38,7 @@
                     {{ $actorLabel }}:
                 @endif
                 <a href="{{ route('profile.public.show', ['user' => $actor->nickname]) }}" class="link link-hover font-medium text-base-content/80">
-                    {{ $actor->fio ?? $actor->nickname }}
+                    {{ $actor->publicName() }}
                 </a>
             </span>
         </p>

@@ -1,29 +1,30 @@
 <div class="mx-auto mt-8 w-full max-w-6xl space-y-8 sm:mt-12 sm:space-y-12">
     <section class="ui-page-hero">
-        <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-3">
-                <h1 class="font-display text-3xl font-bold sm:text-4xl">О Хакатонщике</h1>
-                <p class="max-w-2xl text-base-content/75">
-                    Мы делаем хакатоны доступнее: помогаем участникам находить команды и роли,
-                    а организаторам — собирать сильные составы без хаоса в чатах и таблицах.
-                </p>
-            </div>
-            <img src="/logo.svg" class="mx-auto h-auto w-48 sm:mx-0 sm:w-64" alt="Логотип Хакатонщика">
+        <div class="space-y-3">
+            <h1 class="font-display text-3xl font-bold sm:text-4xl">О Хакатонщике</h1>
+            <p class="max-w-2xl text-base-content/75">
+                Мы делаем хакатоны доступнее: помогаем участникам находить команды и роли,
+                а организаторам — собирать сильные составы без хаоса в чатах и таблицах.
+            </p>
         </div>
     </section>
 
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <x-marycard title="Проведено хакатонов" class="card card-border border-base-300 bg-base-100">
-            <p class="text-3xl font-semibold">{{ $impact['hackatons'] ?? 0 }}</p>
+        <x-marycard class="card card-border border-base-300 bg-base-100">
+            <p class="text-3xl font-semibold tabular-nums">{{ $impact['hackatons'] ?? 0 }}</p>
+            <p class="mt-1 text-sm text-base-content/60">хакатонов проведено</p>
         </x-marycard>
-        <x-marycard title="Участников" class="card card-border border-base-300 bg-base-100">
-            <p class="text-3xl font-semibold">{{ $impact['participants'] ?? 0 }}</p>
+        <x-marycard class="card card-border border-base-300 bg-base-100">
+            <p class="text-3xl font-semibold tabular-nums">{{ $impact['participants'] ?? 0 }}</p>
+            <p class="mt-1 text-sm text-base-content/60">участников</p>
         </x-marycard>
-        <x-marycard title="Команд" class="card card-border border-base-300 bg-base-100">
-            <p class="text-3xl font-semibold">{{ $impact['teams'] ?? 0 }}</p>
+        <x-marycard class="card card-border border-base-300 bg-base-100">
+            <p class="text-3xl font-semibold tabular-nums">{{ $impact['teams'] ?? 0 }}</p>
+            <p class="mt-1 text-sm text-base-content/60">команд</p>
         </x-marycard>
-        <x-marycard title="Пользователей" class="card card-border border-base-300 bg-base-100">
-            <p class="text-3xl font-semibold">{{ $impact['users'] ?? 0 }}</p>
+        <x-marycard class="card card-border border-base-300 bg-base-100">
+            <p class="text-3xl font-semibold tabular-nums">{{ $impact['users'] ?? 0 }}</p>
+            <p class="mt-1 text-sm text-base-content/60">пользователей</p>
         </x-marycard>
     </section>
 
