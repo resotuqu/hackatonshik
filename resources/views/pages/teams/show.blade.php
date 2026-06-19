@@ -64,9 +64,8 @@
                         @if ($teamImage)
                             <img src="{{ $teamImage }}" class="h-full w-full object-cover shadow-inner" alt="{{ $team->title }}">
                         @else
-                            <div
-                                class="flex h-full min-h-44 flex-col items-center justify-center gap-3 bg-base-200 px-4 text-center text-base-content/55 bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--color-base-300)_55%,transparent)_1px,transparent_0)] [background-size:28px_28px]">
-                                <x-app-icon icon="heroicons:photo" class="h-16 w-16 text-primary/50" />
+                            <div class="ui-cover-placeholder flex h-full min-h-44 flex-col items-center justify-center gap-3 px-4 text-center text-base-content/55">
+                                <x-app-icon icon="heroicons:photo" class="h-16 w-16 text-base-content/30" />
                                 <span class="text-sm font-medium">Превью не загружено</span>
                             </div>
                         @endif

@@ -1,7 +1,7 @@
 <div class="mx-auto mt-8 w-full max-w-6xl space-y-8 sm:mt-12 sm:space-y-12">
-    <section class="ui-page-hero">
-        <div class="space-y-3">
-            <h1 class="font-display text-3xl font-bold sm:text-4xl">О Хакатонщике</h1>
+    <section class="ui-page-header">
+        <div class="space-y-2 pb-5">
+            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">О Хакатонщике</h1>
             <p class="max-w-2xl text-base-content/75">
                 Мы делаем хакатоны доступнее: помогаем участникам находить команды и роли,
                 а организаторам — собирать сильные составы без хаоса в чатах и таблицах.
@@ -91,7 +91,7 @@
         </x-marycard>
     </section>
 
-    <section class="ui-page-hero">
+    <section class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-6 sm:p-8">
         <h2 class="font-display text-2xl font-bold">Присоединяйтесь</h2>
         <p class="mt-2 text-base-content/75">
             Если вы участник, соберите профиль и найдите команду. Если вы организатор,

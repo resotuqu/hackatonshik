@@ -1,7 +1,7 @@
 <section id="hackaton-panel-description" role="tabpanel" @class(['hidden' => ($hackatonTabFallback ?? 'description') !== 'description']) data-tab-panel="hackaton" data-tab-value="description">
     <div id="hackaton-tab-description" class="scroll-mt-24" tabindex="-1"></div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 card bg-base-100 border border-base-200 shadow-sm">
+        <div class="lg:col-span-2 card bg-base-100 border border-base-300">
             <div class="p-4 pb-0">
                 <x-image-carousel
                     carousel-id="hackaton-hero-carousel"
@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card bg-base-100 border border-base-300">
             <div class="card-body space-y-4">
                 <h2 class="card-title text-lg">Информация о хакатоне</h2>
                 <x-hackaton-watch-button :hackaton="$hackaton" :is-watched="$isWatched ?? false" />

@@ -1,5 +1,5 @@
 <section id="hackaton-panel-documents" role="tabpanel" @class(['hidden' => ($hackatonTabFallback ?? 'description') !== 'documents']) data-tab-panel="hackaton" data-tab-value="documents">
-    <div class="card bg-base-100 border border-base-200 shadow-sm">
+    <div class="card border border-base-300 bg-base-100">
         <div class="card-body">
             <h2 class="card-title text-xl">Документы хакатона</h2>
             @if ($hackaton->documents->isEmpty())

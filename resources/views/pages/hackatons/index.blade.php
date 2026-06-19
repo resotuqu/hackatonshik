@@ -28,21 +28,36 @@
     $canCreate = auth()->check() && auth()->user()->isOrganizer();
 @endphp
 
-<div class="space-y-8">
-    {{-- Hero section --}}
-    <section class="ui-page-hero">
-        <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div class="min-w-0 space-y-3">
+<div class="space-y-6">
+    {{-- Page header --}}
+    <section class="ui-page-header">
+        <div class="flex flex-col gap-4 pb-4 md:flex-row md:items-end md:justify-between">
+            <div class="min-w-0 space-y-2">
                 <p class="text-sm text-base-content/60">Каталог хакатонов</p>
-                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
+                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">
                     Хакатоны
                 </h1>
                 <p class="max-w-2xl text-base text-base-content/70">
                     Находите подходящие соревнования, подавайте заявки командой и сражайтесь за призы.
                 </p>
+            </div>
+            <div class="flex flex-col items-start gap-3 md:items-end">
+                <div class="flex flex-wrap gap-1" role="tablist" aria-label="Фильтр по статусу">
+                    @foreach ($statusGroupOptions as $value => $label)
+                        <button
+                            type="button"
+                            wire:click="$set('statusGroup', '{{ $value }}')"
+                            role="tab"
+                            aria-selected="{{ $statusGroup === $value ? 'true' : 'false' }}"
+                            class="btn btn-sm {{ $statusGroup === $value ? 'btn-primary' : 'btn-ghost border border-base-300' }}"
+                        >
+                            {{ $label }}
+                        </button>
+                    @endforeach
+                </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <p class="text-sm font-medium tabular-nums text-base-content/60">
-                        Найдено {{ $totalHackatons }} {{ $hackatonsWord }}
+                        {{ $totalHackatons }} {{ $hackatonsWord }}
                     </p>
                     @if ($canCreate)
                         <a href="/hackatons/create" wire:navigate class="ui-cta-primary btn-sm">
@@ -52,7 +67,7 @@
                     @elseif (! auth()->check())
                         <a href="{{ route('login') }}" class="ui-cta-outline btn-sm gap-1.5">
                             <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
-                            Войти, чтобы участвовать
+                            Войти
                         </a>
                     @endif
                 </div>
@@ -60,131 +75,82 @@
         </div>
     </section>
 
-    {{-- Filters panel (collapsible on mobile) --}}
-    <section class="space-y-4" aria-label="Фильтры">
-        <div
-            x-data="{ open: window.matchMedia('(min-width: 1024px)').matches }"
-            x-init="window.addEventListener('resize', () => { if (window.matchMedia('(min-width: 1024px)').matches) open = true; })"
-            class="rounded-2xl border border-base-300 bg-base-200/30"
-        >
-            <button
-                type="button"
-                @click="open = !open"
-                :aria-expanded="open ? 'true' : 'false'"
-                aria-controls="hackatons-filters-panel"
-                class="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold sm:px-5 lg:cursor-default lg:pointer-events-none"
-            >
-                <span class="inline-flex items-center gap-2">
-                    <x-app-icon icon="heroicons:adjustments-horizontal" class="h-4 w-4 text-primary" />
-                    Фильтры
-                    @if ($hasFilters)
-                        <span class="badge badge-primary badge-xs">активны</span>
-                    @endif
-                </span>
-                <span class="inline-flex items-center gap-2 text-xs font-medium text-base-content/60 lg:hidden">
-                    <span x-show="!open">Развернуть</span>
-                    <span x-show="open" x-cloak>Свернуть</span>
-                    <x-app-icon icon="heroicons:chevron-down" class="h-4 w-4 transition-transform" x-bind:class="open && 'rotate-180'" />
-                </span>
-            </button>
+    {{-- Filters (always visible) --}}
+    <section aria-label="Фильтры">
+        <div class="rounded-2xl border border-base-300 bg-base-200/30 px-4 py-4 sm:px-5 sm:py-5 space-y-4">
+            <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+                <label class="form-control w-full min-w-0 flex-1 lg:max-w-md">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Поиск</span></span>
+                    <input
+                        type="search"
+                        class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md"
+                        placeholder="Название хакатона…"
+                        autocomplete="off"
+                        wire:model.live.debounce.300ms="q"
+                    />
+                </label>
 
-            <div
-                id="hackatons-filters-panel"
-                x-show="open"
-                x-cloak
-                class="space-y-5 border-t border-base-300/70 px-4 py-4 sm:px-5 sm:py-5"
-            >
-                <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-                    <label class="form-control w-full min-w-0 flex-1 lg:max-w-md">
-                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Поиск</span></span>
-                        <input
-                            type="search"
-                            class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md"
-                            placeholder="Название хакатона…"
-                            autocomplete="off"
-                            wire:model.live.debounce.300ms="q"
-                        />
-                    </label>
+                <label class="form-control w-full min-w-0 lg:w-64">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Сортировка</span></span>
+                    <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="sort">
+                        <option value="newest">Сначала новые</option>
+                        <option value="start_soonest">Ближайший старт</option>
+                        <option value="biggest_prize">Самый большой призовой фонд</option>
+                    </select>
+                </label>
+            </div>
 
-                    <label class="form-control w-full min-w-0 lg:w-64">
-                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Сортировка</span></span>
-                        <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="sort">
-                            <option value="newest">Сначала новые</option>
-                            <option value="start_soonest">Ближайший старт</option>
-                            <option value="biggest_prize">Самый большой призовой фонд</option>
-                        </select>
-                    </label>
-                </div>
-
-                <div>
-                    <span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Статус</span>
-                    <div class="mt-1 flex flex-wrap gap-1.5">
-                        @foreach ($statusGroupOptions as $value => $label)
-                            <button
-                                type="button"
-                                wire:click="$set('statusGroup', '{{ $value }}')"
-                                class="btn btn-sm {{ $statusGroup === $value ? 'btn-primary' : 'btn-ghost border border-base-300' }}"
-                            >
-                                {{ $label }}
-                            </button>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label class="form-control w-full min-w-0">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Уровень</span></span>
+                    <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="level">
+                        <option value="all">Любой</option>
+                        @foreach (\App\Enums\HackatonLevel::cases() as $levelCase)
+                            <option value="{{ $levelCase->value }}">{{ $levelCase->label() }}</option>
                         @endforeach
-                    </div>
-                </div>
+                    </select>
+                </label>
+                <label class="form-control w-full min-w-0">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Старт от</span></span>
+                    <input type="date" class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md" wire:model.live="start_at" />
+                </label>
+            </div>
 
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <label class="form-control w-full min-w-0">
-                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Уровень</span></span>
-                        <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="level">
-                            <option value="all">Любой</option>
-                            @foreach (\App\Enums\HackatonLevel::cases() as $levelCase)
-                                <option value="{{ $levelCase->value }}">{{ $levelCase->label() }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <label class="form-control w-full min-w-0">
-                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Старт от</span></span>
-                        <input type="date" class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md" wire:model.live="start_at" />
-                    </label>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 pt-1">
-                    <button type="button" class="btn btn-primary btn-sm gap-1.5" wire:click="search">
-                        <x-app-icon icon="heroicons:magnifying-glass" class="h-4 w-4" />
-                        Искать
-                    </button>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" class="btn btn-primary btn-sm gap-1.5" wire:click="search">
+                    <x-app-icon icon="heroicons:magnifying-glass" class="h-4 w-4" />
+                    Искать
+                </button>
+                @if ($hasFilters)
                     <button type="button" class="btn btn-ghost btn-sm gap-1.5" wire:click="clearFilters">
                         <x-app-icon icon="heroicons:arrow-path" class="h-4 w-4" />
                         Сбросить
                     </button>
-                </div>
+                @endif
             </div>
         </div>
 
         @if ($hasFilters)
-            <div class="card card-border border-base-300 bg-base-100 shadow-sm">
-                <div class="card-body p-4">
-                    <p class="text-sm font-medium">Активные фильтры</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @if (filled($q))
-                            <span class="badge badge-primary badge-outline">Поиск: {{ $q }}</span>
-                        @endif
-                        @if (filled($start_at))
-                            <span class="badge badge-primary badge-outline">Старт от: {{ \Illuminate\Support\Carbon::parse($start_at)->format('d.m.Y H:i') }}</span>
-                        @endif
-                        @if ($level !== 'all')
-                            @php $levelEnum = \App\Enums\HackatonLevel::tryFrom($level); @endphp
-                            <span class="badge badge-primary badge-outline">Уровень: {{ $levelEnum?->label() ?? $level }}</span>
-                        @endif
-                        @if ($statusGroup !== 'all')
-                            <span class="badge badge-primary badge-outline">Статус: {{ $statusGroupOptions[$statusGroup] ?? $statusGroup }}</span>
-                        @endif
-                    </div>
-                </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="text-xs font-medium text-base-content/50">Фильтры:</span>
+                @if (filled($q))
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Поиск: {{ $q }}</span>
+                @endif
+                @if (filled($start_at))
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Старт от: {{ \Illuminate\Support\Carbon::parse($start_at)->format('d.m.Y') }}</span>
+                @endif
+                @if ($level !== 'all')
+                    @php $levelEnum = \App\Enums\HackatonLevel::tryFrom($level); @endphp
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Уровень: {{ $levelEnum?->label() ?? $level }}</span>
+                @endif
+                @if ($statusGroup !== 'all')
+                    <span class="badge badge-outline border-base-300 text-base-content/80">{{ $statusGroupOptions[$statusGroup] ?? $statusGroup }}</span>
+                @endif
             </div>
         @endif
 
         @auth
-            <div class="card card-border border-base-300 bg-base-100 shadow-sm">
+            <div class="mt-3 card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end">
                     <div class="min-w-0 flex-1 space-y-2">
                         <p class="text-sm font-medium">Сохранённые фильтры</p>

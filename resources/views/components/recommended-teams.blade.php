@@ -18,13 +18,13 @@
                 @php
                     $team = $item['team'];
                 @endphp
-                <article class="card border border-primary/20 bg-base-100 shadow-sm">
+                <article class="card border border-base-300 bg-base-100">
                     <div class="card-body gap-3">
                         <div class="flex items-start justify-between gap-2">
                             <h3 class="font-semibold leading-tight">
                                 <a href="{{ route('teams.show', $team) }}" class="link link-hover" wire:navigate>{{ $team->title }}</a>
                             </h3>
-                            <span class="badge badge-primary badge-outline tabular-nums">{{ $item['match_score'] }} навыков</span>
+                            <span class="badge badge-outline border-base-300 tabular-nums text-base-content/80">{{ $item['match_score'] }} навыков</span>
                         </div>
                         <p class="text-sm text-base-content/70">{{ $team->hackaton?->title }}</p>
                         @if (! empty($item['matched_skills']))
@@ -34,7 +34,7 @@
                                 @endforeach
                             </div>
                         @endif
-                        <a href="{{ route('teams.show', $team) }}" class="btn btn-primary btn-sm mt-1" wire:navigate>Подробнее</a>
+                        <a href="{{ route('teams.show', $team) }}" class="btn btn-neutral btn-sm mt-1" wire:navigate>Подробнее</a>
                     </div>
                 </article>
             @endforeach

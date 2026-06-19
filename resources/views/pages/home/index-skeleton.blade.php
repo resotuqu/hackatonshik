@@ -7,7 +7,7 @@
 >
     <span class="sr-only">Загрузка главной страницы, пожалуйста подождите</span>
 
-    <section class="ui-page-hero relative min-h-[22rem] overflow-hidden sm:min-h-[26rem]" aria-hidden="true">
+    <section class="relative min-h-[22rem] overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 sm:min-h-[26rem]" aria-hidden="true">
         <div class="relative flex flex-col gap-6 px-5 py-8 sm:px-8 sm:py-10 lg:flex-row lg:items-center lg:gap-10">
             <div class="flex-1 space-y-4">
                 <div class="skeleton h-10 w-5/6 rounded-2xl sm:h-14"></div>

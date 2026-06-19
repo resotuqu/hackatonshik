@@ -13,7 +13,7 @@
         'search,clearFilters,setCatalogTab,toggleRoleId,saveCurrentFilter,applySavedFilter,q,hackaton_id,skills,start_from,sort,team_size,catalog_tab,only_open_roles,role_ids,nextPage,previousPage,gotoPage,setPage';
 @endphp
 
-<div class="space-y-8">
+<div class="space-y-6">
     <x-recommended-teams :recommendations="$this->recommendedTeams->all()" />
 
     @php
@@ -27,21 +27,22 @@
             default => 'команд',
         };
     @endphp
-    <section class="ui-page-hero">
-        <div class="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0 space-y-3">
+
+    <section class="ui-page-header">
+        <div class="flex flex-col gap-4 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="min-w-0 space-y-2">
                 <p class="text-sm text-base-content/60">Каталог команд</p>
-                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">Команды</h1>
+                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Команды</h1>
                 <p class="max-w-2xl text-base text-base-content/70">Команды участников хакатонов — открытые и закрытые.</p>
                 <div class="flex flex-wrap items-center gap-3">
                     <p class="text-sm font-medium tabular-nums text-base-content/60">
-                        Найдено {{ $totalTeams }} {{ $teamsWord }}
+                        {{ $totalTeams }} {{ $teamsWord }}
                     </p>
-                    <div class="flex rounded-full bg-base-200 p-1 gap-1" role="tablist" aria-label="Режим каталога команд">
+                    <div class="flex gap-1 rounded-full bg-base-200 p-1" role="tablist" aria-label="Режим каталога команд">
                         <button
                             type="button"
                             role="tab"
-                            class="rounded-full px-4 py-1 text-sm font-medium transition-all duration-200 whitespace-nowrap {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                            class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
                             aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
                             wire:click="setCatalogTab('open')"
                         >
@@ -50,7 +51,7 @@
                         <button
                             type="button"
                             role="tab"
-                            class="rounded-full px-4 py-1 text-sm font-medium transition-all duration-200 whitespace-nowrap {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                            class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
                             aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
                             wire:click="setCatalogTab('all')"
                         >
@@ -66,7 +67,7 @@
         </div>
     </section>
 
-    <section class="space-y-4" aria-label="Фильтры">
+    <section aria-label="Фильтры">
         <div class="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-200/30 p-4 sm:p-5">
             <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
                 <label class="form-control w-full min-w-0 flex-1 lg:max-w-md">
@@ -141,72 +142,64 @@
                 </div>
             </div>
 
-            <details class="group rounded-xl border border-dashed border-base-300 bg-base-100/50 open:border-primary/20">
-                <summary class="cursor-pointer list-none px-3 py-2 text-sm font-medium text-primary marker:content-none [&::-webkit-details-marker]:hidden">
-                    <span class="inline-flex items-center gap-2">
-                        <x-app-icon icon="heroicons:funnel" class="h-4 w-4" />
-                        Ещё фильтры
-                        <span class="text-base-content/50 group-open:rotate-180">▼</span>
-                    </span>
-                </summary>
-                <div class="grid grid-cols-1 gap-4 border-t border-base-300/60 p-4 sm:grid-cols-2">
-                    <label class="form-control w-full">
-                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Хакатон</span></span>
-                        <select class="select select-bordered select-sm w-full sm:select-md" wire:model.live="hackaton_id">
-                            @foreach ($this->hackatons as $opt)
-                                <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <label class="form-control w-full">
-                        <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Начало хакатона от</span></span>
-                        <input type="date" class="input input-bordered input-sm w-full sm:input-md" wire:model.live="start_from" />
-                    </label>
-                </div>
-            </details>
+            <div class="grid grid-cols-1 gap-4 border-t border-base-300/50 pt-4 sm:grid-cols-2">
+                <label class="form-control w-full">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Хакатон</span></span>
+                    <select class="select select-bordered select-sm w-full sm:select-md" wire:model.live="hackaton_id">
+                        @foreach ($this->hackatons as $opt)
+                            <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="form-control w-full">
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Начало хакатона от</span></span>
+                    <input type="date" class="input input-bordered input-sm w-full sm:input-md" wire:model.live="start_from" />
+                </label>
+            </div>
 
             <div class="flex flex-wrap gap-2">
-                <button type="button" class="btn btn-ghost btn-sm" wire:click="clearFilters">Сбросить фильтры</button>
+                @if ($hasFilters)
+                    <button type="button" class="btn btn-ghost btn-sm gap-1.5" wire:click="clearFilters">
+                        <x-app-icon icon="heroicons:arrow-path" class="h-4 w-4" />
+                        Сбросить фильтры
+                    </button>
+                @endif
             </div>
         </div>
 
         @if ($hasFilters)
-            <div class="card card-border border-base-300 bg-base-100 shadow-sm">
-                <div class="card-body p-4">
-                    <p class="text-sm font-medium">Активные фильтры</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @if (filled($q))
-                            <span class="badge badge-primary badge-outline">{{ $q }}</span>
-                        @endif
-                        @if ($hackaton_id !== '0')
-                            @php $selectedHackaton = collect($this->hackatons)->firstWhere('id', $hackaton_id); @endphp
-                            <span class="badge badge-primary badge-outline">Хакатон: {{ $selectedHackaton['name'] ?? '' }}</span>
-                        @endif
-                        @foreach ($roleIdInts as $rid)
-                            @php $rn = $this->rolesForChips->firstWhere('id', $rid); @endphp
-                            @if ($rn)
-                                <span class="badge badge-primary badge-outline">Роль: {{ $rn->name }}</span>
-                            @endif
-                        @endforeach
-                        @foreach ($this->skillsData->whereIn('id', $skills) as $skill)
-                            <span class="badge badge-primary badge-outline">{{ $skill->name }}</span>
-                        @endforeach
-                        @if (filled($start_from))
-                            <span class="badge badge-primary badge-outline">Старт от: {{ \Illuminate\Support\Carbon::parse($start_from)->format('d.m.Y H:i') }}</span>
-                        @endif
-                        @if ($team_size !== 'all')
-                            <span class="badge badge-primary badge-outline">Размер: от {{ $team_size }} ролей</span>
-                        @endif
-                        @if ($catalog_tab === 'all' && ! $only_open_roles)
-                            <span class="badge badge-secondary badge-outline">Включены команды без вакансий</span>
-                        @endif
-                    </div>
-                </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="text-xs font-medium text-base-content/50">Фильтры:</span>
+                @if (filled($q))
+                    <span class="badge badge-outline border-base-300 text-base-content/80">{{ $q }}</span>
+                @endif
+                @if ($hackaton_id !== '0')
+                    @php $selectedHackaton = collect($this->hackatons)->firstWhere('id', $hackaton_id); @endphp
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Хакатон: {{ $selectedHackaton['name'] ?? '' }}</span>
+                @endif
+                @foreach ($roleIdInts as $rid)
+                    @php $rn = $this->rolesForChips->firstWhere('id', $rid); @endphp
+                    @if ($rn)
+                        <span class="badge badge-outline border-base-300 text-base-content/80">Роль: {{ $rn->name }}</span>
+                    @endif
+                @endforeach
+                @foreach ($this->skillsData->whereIn('id', $skills) as $skill)
+                    <span class="badge badge-outline border-base-300 text-base-content/80">{{ $skill->name }}</span>
+                @endforeach
+                @if (filled($start_from))
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Старт от: {{ \Illuminate\Support\Carbon::parse($start_from)->format('d.m.Y') }}</span>
+                @endif
+                @if ($team_size !== 'all')
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Размер: от {{ $team_size }} ролей</span>
+                @endif
+                @if ($catalog_tab === 'all' && ! $only_open_roles)
+                    <span class="badge badge-outline border-base-300 text-base-content/80">Все команды</span>
+                @endif
             </div>
         @endif
 
         @auth
-            <div class="card card-border border-base-300 bg-base-100 shadow-sm">
+            <div class="mt-3 card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end">
                     <div class="min-w-0 flex-1 space-y-2">
                         <p class="text-sm font-medium">Сохранённые фильтры</p>
