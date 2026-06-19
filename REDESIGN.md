@@ -1,7 +1,7 @@
 # Редизайн — план и прогресс
 
 Тег точки отсчёта: **v0.1** (commit `3b67f31`)
-Последний выполненный этап: **Этап 4** (commit `503809d`)
+Последний выполненный этап: **Этап 5** (commit `2b6ff2e`)
 
 ---
 
@@ -76,19 +76,15 @@
 
 ---
 
-### ⬜ Этап 5 — Авторизация
+### ✅ Этап 5 — Авторизация (commit `2b6ff2e`)
 
-Файлы:
-
-| Файл | Что менять |
+| Файл | Изменение |
 |---|---|
-| `resources/views/pages/auth/login.blade.php` | Split-layout: тёмная левая (бренд+статы) + белая правая (форма) |
-| `resources/views/pages/auth/register.blade.php` | Аналогичный split-layout |
-| `resources/views/pages/auth/forgot-password.blade.php` | Привести к общему стилю форм |
-| `resources/views/pages/auth/reset-password.blade.php` | Привести к общему стилю форм |
-| `resources/views/pages/auth/verify-email.blade.php` | Привести к общему стилю форм |
-
-> Независим от этапов 3–4, можно делать параллельно.
+| `resources/views/pages/auth/login.blade.php` | Светлая левая карточка → тёмный бренд-блок (`bg-base-content`) с заголовком, буллетами и stat-рядом (500+/2000+/120+); форма: `border-base-200 shadow-sm` → `border-base-300` |
+| `resources/views/pages/auth/register.blade.php` | Аналогичный тёмный блок, переключает содержимое по `$accountType`; те же правки на форме |
+| `resources/views/pages/auth/forgot-password.blade.php` | `card card-border` → `card border border-base-300` |
+| `resources/views/pages/auth/reset-password.blade.php` | `card card-border` → `card border border-base-300` |
+| `resources/views/pages/auth/verify-email.blade.php` | `card card-border` → `card border border-base-300` |
 
 ---
 
