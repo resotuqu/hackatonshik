@@ -1,7 +1,7 @@
 # Редизайн — план и прогресс
 
 Тег точки отсчёта: **v0.1** (commit `3b67f31`)
-Последний выполненный этап: **Этап 2** (commit `80f4d03`)
+Последний выполненный этап: **Этап 4** (commit `503809d`)
 
 ---
 
@@ -52,35 +52,27 @@
 
 ---
 
-### ⬜ Этап 3 — Публичный каталог
+### ✅ Этап 3 — Публичный каталог (commit `503809d`)
 
-Файлы:
-
-| Файл | Что менять |
+| Файл | Изменение |
 |---|---|
-| `resources/views/pages/home/index.blade.php` | Убрать hero-блок, новый визуальный hero (без orb-glow) |
-| `resources/views/pages/home/index-skeleton.blade.php` | Обновить под новую структуру |
-| `resources/views/pages/hackatons/index.blade.php` | `ui-page-hero` → `ui-page-header`; collapsible-фильтры → `ui-filter-bar`; вкладки статуса в шапке |
-| `resources/views/pages/teams/index.blade.php` | `ui-page-hero` → `ui-page-header`; фильтры → `ui-filter-bar` |
-| `resources/views/components/recommended-teams.blade.php` | Привести к новому стилю карточек |
-| `resources/views/pages/about/index.blade.php` | `ui-page-hero` → `ui-page-header`, minor polish |
+| `resources/views/pages/home/index-skeleton.blade.php` | hero skeleton → `rounded border border-base-300 bg-base-100` (совпадает с реальным hero) |
+| `resources/views/pages/hackatons/index.blade.php` | `ui-page-hero` → `ui-page-header`; статус-вкладки перенесены в шапку; collapsible убран, фильтры всегда видны; active-filter chips → нейтральные badges |
+| `resources/views/pages/teams/index.blade.php` | `ui-page-hero` → `ui-page-header`; Открытые/Все-табы в шапке; `<details>` раскрыт в постоянные поля; chips → нейтральные |
+| `resources/views/components/recommended-teams.blade.php` | `border-primary/20` → `border-base-300`; score badge → нейтральный; кнопка `btn-primary` → `btn-neutral` |
+| `resources/views/pages/about/index.blade.php` | `ui-page-hero` → `ui-page-header` + `pb-5`; закрывающий блок → `border border-base-300 bg-base-100 p-6` |
 
 ---
 
-### ⬜ Этап 4 — Детальные страницы
+### ✅ Этап 4 — Детальные страницы (commit `503809d`)
 
-Файлы:
-
-| Файл | Что менять |
+| Файл | Изменение |
 |---|---|
-| `resources/views/pages/hackatons/show-inner.blade.php` | Двухколоночный layout: main (описание+детали) + aside (приз, CTA, участники) |
-| `resources/views/pages/hackatons/show-skeleton.blade.php` | Обновить скелетон |
-| `resources/views/pages/hackatons/partials/show/description.blade.php` | Привести к новому стилю |
-| `resources/views/pages/hackatons/partials/show/announcements.blade.php` | Привести к новому стилю |
-| `resources/views/pages/hackatons/partials/show/documents.blade.php` | Привести к новому стилю |
-| `resources/views/pages/teams/show.blade.php` | Hero + tabs |
-| `resources/views/pages/teams/show-skeleton.blade.php` | Обновить скелетон |
-| `resources/views/pages/profile/public-show-inner.blade.php` | Профиль: двухколоночный layout |
+| `resources/views/pages/hackatons/partials/show/description.blade.php` | `border-base-200 shadow-sm` → `border-base-300` на обеих карточках |
+| `resources/views/pages/hackatons/partials/show/announcements.blade.php` | `border-base-200 shadow-sm` → `border-base-300` |
+| `resources/views/pages/hackatons/partials/show/documents.blade.php` | `border-base-200 shadow-sm` → `border-base-300` |
+| `resources/views/pages/teams/show.blade.php` | dot-grid radial-gradient fallback → `ui-cover-placeholder` + нейтральная иконка |
+| `resources/views/pages/profile/public-show-inner.blade.php` | `ui-page-hero` → `ui-page-header`; однoколонка → `lg:grid-cols-3` (main: bio+skills+history; aside sticky: stats dl + contacts + teams + certs); `text-secondary` числа → `text-base-content`; avatar ring → `ring-base-300` |
 
 ---
 
