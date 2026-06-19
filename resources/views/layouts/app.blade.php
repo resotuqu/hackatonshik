@@ -210,7 +210,7 @@
                 aria-label="Основная навигация"
             >
                 <div class="relative flex shrink-0 flex-col gap-3">
-                    <div class="w-full rounded-2xl border border-base-300/35 bg-base-200/45 p-3 ring-1 ring-base-content/[0.06]">
+                    <div class="px-1 py-2">
                         <x-app-brand
                             :wide="true"
                             class="min-h-0 w-full border-0 p-0 hover:bg-transparent"

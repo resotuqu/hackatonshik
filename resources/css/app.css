@@ -251,11 +251,13 @@
 
 .ui-cover-placeholder {
     @apply bg-base-300;
-    background-image:
-        radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--color-primary) 10%, transparent) 1px, transparent 0),
-        radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--color-secondary) 8%, transparent) 1px, transparent 0);
-    background-size: 20px 20px, 20px 20px;
-    background-position: 0 0, 10px 10px;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        color-mix(in oklch, var(--color-base-content) 5%, transparent) 4px,
+        color-mix(in oklch, var(--color-base-content) 5%, transparent) 6px
+    );
 }
 
 .ui-surface-soft-muted {
@@ -271,6 +273,16 @@
 .ui-page-hero {
     border-radius: var(--radius-card);
     @apply relative overflow-hidden border border-base-300 border-b-base-300 bg-base-200 p-6 sm:p-8 lg:p-10;
+}
+
+/* Page header — white/base-100 bar with breadcrumb + title, replaces ui-page-hero on catalog pages */
+.ui-page-header {
+    @apply border-b border-base-200 bg-base-100 px-6 pb-0 pt-5 sm:px-8;
+}
+
+/* Inline filter bar — persistent row under page header */
+.ui-filter-bar {
+    @apply flex flex-wrap items-center gap-3 border-b border-base-200 bg-base-100 px-6 py-3 sm:px-8;
 }
 
 .ui-section-y {

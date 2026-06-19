@@ -49,17 +49,17 @@
         </p>
 
         {{-- Ищем в команду: макс 2 роли + "+N", резервируем место --}}
-        <div class="rounded-lg border border-secondary/20 bg-secondary/5 p-4" style="min-height: 5.5rem">
-            <p class="mb-2 text-xs font-medium text-secondary">
+        <div class="min-h-[5.5rem] rounded-lg border border-base-300/70 bg-base-200/40 p-4">
+            <p class="mb-2 text-xs font-medium text-base-content/60">
                 @if ($hasVacancies || ! empty($vacantRoleNames))
                     Ищем в команду ({{ $openSlots }} {{ $slotWord }}):
                 @else
-                    <span class="text-base-content/50">Набор закрыт</span>
+                    <span class="text-base-content/40">Набор закрыт</span>
                 @endif
             </p>
             <div class="flex flex-wrap gap-2">
                 @forelse ($visibleRoles as $name)
-                    <span class="badge badge-secondary badge-outline border-secondary/30 bg-secondary/10 px-3 py-3 font-semibold">
+                    <span class="badge badge-outline border-base-300 bg-base-100 px-3 py-3 font-semibold text-base-content/80">
                         {{ $name }}
                     </span>
                 @empty
@@ -78,8 +78,7 @@
         </div>
 
         {{-- Навыки: макс 2 строки бейджей с резервированием места --}}
-        {{-- Высота 2 строк: badge ~1.75rem + gap 0.5rem --}}
-        <div style="min-height: 4.5rem">
+        <div class="min-h-[4.5rem]">
             @if (! empty($skillTags))
                 <p class="mb-2 text-xs font-medium text-base-content/50">Навыки</p>
                 <div class="flex flex-wrap gap-2 overflow-hidden" style="max-height: calc(1.75rem * 2 + 0.5rem)">

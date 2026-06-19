@@ -96,111 +96,88 @@
     'border border-base-300 bg-base-100' => !$isFinished,
     'border border-base-200 bg-base-200/30 opacity-90 grayscale-[20%]' => $isFinished,
 ]) aria-labelledby="{{ $titleId }}">
-    {{-- Обложка хакатона остается без изменений --}}
-    <x-hackaton-cover :image-url="$imageUrl" :is-finished="$isFinished" />
+    <x-hackaton-cover :image-url="$imageUrl" :is-finished="$isFinished" :label="$stageLabel" />
 
-    <div class="flex min-h-0 flex-1 flex-col p-5 sm:p-6 gap-5">
-        <h3 id="{{ $titleId }}" class="line-clamp-2 font-display text-xl font-semibold leading-tight text-base-content sm:text-2xl">{{ $hackaton->title }}</h3>
+    <div class="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-5">
 
-        {{-- Группа 1: Даты и дедлайны --}}
-        <div class="flex flex-col gap-3">
-            @if ($startAt && $endAt)
-                <div class="flex items-center gap-2.5 text-sm font-medium text-base-content/80">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <x-app-icon icon="heroicons:calendar-days" class="h-4 w-4" />
-                    </div>
-                    <span class="tabular-nums tracking-wide">
-                        {{ $startAt->format('d.m.Y') }} <span class="text-base-content/40 mx-1">—</span>
-                        {{ $endAt->format('d.m.Y') }}
-                    </span>
-                </div>
-            @endif
+        {{-- Заголовок --}}
+        <h3 id="{{ $titleId }}" class="line-clamp-2 font-display text-lg font-bold leading-snug text-base-content sm:text-xl">{{ $hackaton->title }}</h3>
 
-            @if ($daysToDeadline !== null)
-                <div @class([
-                    'flex items-center gap-2.5 rounded-lg border px-4 py-2.5 text-sm font-medium',
-                    $deadlineClasses,
-                ])>
-                    <x-app-icon icon="{{ $deadlineUrgency === 'critical' ? 'heroicons:fire' : 'heroicons:bolt' }}"
-                        class="h-4 w-4" />
-                    <span>
-                        @if ($deadlineUrgency === 'critical')
-                            Регистрация закроется скоро!
-                        @else
-                            До дедлайна: <span class="tabular-nums">{{ $daysToDeadline }} {{ $deadlineWord }}</span>
-                        @endif
-                    </span>
-                </div>
-            @endif
-        </div>
-
-        {{-- Группа 2: Статистика (объединенная в один легкий блок) --}}
-        <div
-            class="flex items-center divide-x divide-base-300/50 rounded-lg border border-base-300/50 bg-base-200/40 py-3">
-            <div class="flex flex-1 flex-col items-center gap-0.5">
-                <span class="text-xs text-base-content/50">Команд</span>
-                <span
-                    class="text-lg font-semibold tabular-nums text-base-content">{{ $teamsCount }}</span>
+        {{-- 2×2 мета-сетка --}}
+        <dl class="grid grid-cols-2 gap-2">
+            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Призовой фонд</dt>
+                <dd class="mt-0.5 text-sm font-bold text-base-content">
+                    {{ $prizeFund ? number_format((float) $prizeFund, 0, '.', ' ') . ' ₽' : '—' }}
+                </dd>
             </div>
-            <div class="flex flex-1 flex-col items-center gap-0.5">
-                <span class="text-xs text-base-content/50">Участников</span>
-                <span
-                    class="text-lg font-semibold tabular-nums text-base-content">{{ $participantsCount }}</span>
+            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Приём заявок</dt>
+                <dd class="mt-0.5 text-sm font-medium text-base-content">
+                    @if ($deadlineAt)
+                        {{ $deadlineAt->format('d.m.Y') }}
+                    @elseif ($startAt)
+                        до {{ $startAt->format('d.m') }}
+                    @else
+                        —
+                    @endif
+                </dd>
             </div>
-        </div>
+            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Старт</dt>
+                <dd class="mt-0.5 text-sm font-medium text-base-content">
+                    {{ $startAt ? $startAt->format('d.m.Y') : '—' }}
+                </dd>
+            </div>
+            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Команд / участников</dt>
+                <dd class="mt-0.5 text-sm font-medium tabular-nums text-base-content">
+                    {{ $teamsCount }} / {{ $participantsCount }}
+                </dd>
+            </div>
+        </dl>
 
-        {{-- Группа 3: Призовой фонд (смягченные акценты) --}}
-        @if ($prizeFund || $prizePlacesCount > 0)
-            <div class="flex flex-wrap items-center gap-2">
-                @if ($prizeFund)
-                    <span
-                        class="badge badge-warning badge-outline gap-1.5 border-warning/30 bg-warning/10 px-3 py-3 text-sm font-bold text-warning shadow-sm">
-                        <x-app-icon icon="heroicons:trophy" class="h-4 w-4" />
-                        Фонд: {{ number_format((float) $prizeFund, 0, '.', ' ') }} ₽
-                    </span>
+        {{-- Дедлайн (только при срочности, без цветного блока) --}}
+        @if ($daysToDeadline !== null && $deadlineUrgency !== 'normal')
+            <p @class([
+                'flex items-center gap-1.5 text-xs font-medium',
+                'text-error' => $deadlineUrgency === 'critical',
+                'text-warning' => $deadlineUrgency === 'high',
+                'text-info' => $deadlineUrgency === 'medium',
+            ])>
+                <x-app-icon icon="{{ $deadlineUrgency === 'critical' ? 'heroicons:fire' : 'heroicons:bolt' }}" class="h-3.5 w-3.5 shrink-0" />
+                @if ($deadlineUrgency === 'critical')
+                    Регистрация закрывается скоро
+                @else
+                    До дедлайна: {{ $daysToDeadline }} {{ $deadlineWord }}
                 @endif
-                @if ($prizePlacesCount > 0)
-                    <span
-                        class="badge badge-outline gap-1.5 border-base-300 bg-base-200/50 px-3 py-3 text-xs font-semibold text-base-content/70">
-                        <x-app-icon icon="heroicons:star" class="h-3.5 w-3.5" />
-                        {{ $prizePlacesCount }} призовых мест
-                    </span>
-                @endif
-            </div>
-        @endif
-
-        {{-- Группа 4: Прогресс-бар (опущен вниз) --}}
-        @if ($hackaton->updated_at)
-            <p class="text-xs text-base-content/45">
-                Обновлено <x-datetime :value="$hackaton->updated_at" mode="relative" />
             </p>
         @endif
-        <div class="mt-auto flex flex-col gap-2 pt-2">
-            <div
-                class="flex items-center justify-between text-xs font-medium text-base-content/60">
-                <span class="flex items-center gap-1.5">
-                    @if ($stageLabel)
-                        <span class="h-1.5 w-1.5 rounded-full bg-current opacity-80"></span>
-                        {{ $stageLabel }}
-                    @else
-                        Таймлайн
-                    @endif
-                </span>
+
+        {{-- Прогресс + обновлено --}}
+        <div class="mt-auto flex flex-col gap-2 pt-1">
+            @if ($hackaton->updated_at)
+                <p class="text-[11px] text-base-content/40">
+                    Обновлено <x-datetime :value="$hackaton->updated_at" mode="relative" />
+                </p>
+            @endif
+            <div class="flex items-center justify-between text-[11px] font-medium text-base-content/50">
+                <span>{{ $stageLabel ?? 'Таймлайн' }}</span>
                 <span class="tabular-nums">{{ $progressPercent }}%</span>
             </div>
-            <progress class="progress {{ $progressBarClass }} h-1.5 w-full bg-base-300/50"
+            <progress class="progress {{ $progressBarClass }} h-1 w-full bg-base-300/40"
                 value="{{ $progressPercent }}" max="100" aria-label="Прогресс таймлайна хакатона"></progress>
         </div>
 
         {{-- Кнопка --}}
-        <div class="pt-2">
+        <div class="pt-1">
             @if (filled($href))
                 <a href="{{ $href }}" @if ($navigate) wire:navigate @endif
-                    class="btn btn-primary w-full sm:btn-md">
+                    class="btn btn-neutral btn-sm w-full sm:btn-md">
                     Подробнее
                 </a>
             @else
-                <button type="button" class="btn btn-primary w-full rounded-xl shadow-sm sm:btn-md"
+                <button type="button" class="btn btn-neutral btn-sm w-full sm:btn-md"
                     wire:click="openHackaton({{ $hackaton->id }})" wire:loading.attr="disabled"
                     wire:target="openHackaton({{ $hackaton->id }})">
                     <span wire:loading.remove wire:target="openHackaton({{ $hackaton->id }})">Подробнее</span>
