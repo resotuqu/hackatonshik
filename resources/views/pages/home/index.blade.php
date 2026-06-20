@@ -10,7 +10,7 @@
                 <h1 class="ui-heading-display text-5xl font-bold leading-[1.06] sm:text-6xl lg:text-7xl">
                     Найдите команду. Проведите хакатон.
                 </h1>
-                <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/85 sm:text-lg">
+                <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/70 sm:text-lg">
                     Хакатонщик помогает участникам, командам и организаторам пройти весь путь — от поиска единомышленников до финальной защиты и вручения сертификатов.
                 </p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
@@ -81,21 +81,21 @@
         <p class="mt-2 max-w-2xl text-base-content/70">Учитываются все публичные хакатоны на платформе — текущие, предстоящие, завершённые и в архиве (кроме черновиков).</p>
         <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
             <div class="ui-stat-tile p-6 text-center sm:p-7">
-                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                     <x-app-icon icon="heroicons:trophy" class="h-7 w-7" label="Хакатоны на платформе" />
                 </div>
                 <p class="text-base font-medium text-base-content/90">Хакатонов</p>
                 <p class="mt-2 text-4xl font-semibold tabular-nums text-base-content sm:text-5xl">{{ $publicHackatonsCount }}</p>
             </div>
             <div class="ui-stat-tile p-6 text-center sm:p-7">
-                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                     <x-app-icon icon="heroicons:users" class="h-7 w-7" label="Участники" />
                 </div>
                 <p class="text-base font-medium text-base-content/90">Участников</p>
                 <p class="mt-2 text-4xl font-semibold tabular-nums text-base-content sm:text-5xl">{{ $publicParticipantsCount }}</p>
             </div>
             <div class="ui-stat-tile p-6 text-center sm:p-7">
-                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-base-300 text-base-content/70">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                     <x-app-icon icon="heroicons:user-group" class="h-7 w-7" label="Команды" />
                 </div>
                 <p class="text-base font-medium text-base-content/90">Команд</p>
@@ -106,7 +106,9 @@
 
     <livewire:home-how-it-works />
 
-    {{-- Отзывы: snap-карусель до lg, сетка на больших экранах --}}
+    @php $homeTestimonials = false; @endphp
+    @if ($homeTestimonials)
+    {{-- Отзывы: snap-карусель до lg, сетка на больших экранах. Скрыто до появления реальных отзывов. --}}
     <section
         class="space-y-8"
         x-data="{
@@ -257,8 +259,9 @@
             </article>
         </div>
     </section>
+    @endif
 
-    <div class="mt-14 flex justify-center border-t border-base-300/60 px-4 pb-2 pt-10 sm:mt-16 sm:pt-12">
+    <div class="mt-14 flex justify-center border-t border-base-300 px-4 pb-2 pt-10 sm:mt-16 sm:pt-12">
         <a href="{{ route('home') }}" class="block w-1/2 max-w-[50%] shrink-0" aria-label="Хакатонщик — на главную">
             <img
                 src="{{ url('/logo_white.svg') }}"
@@ -320,8 +323,8 @@
     </header>
 
     @if ($showPhoneVerificationBanner)
-        <div role="alert" class="alert alert-warning shadow-sm" data-test="dashboard-phone-banner">
-            <span>Подтвердите номер телефона, чтобы пользоваться всеми функциями.</span>
+        <div role="alert" class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-base-300 bg-base-100 px-4 py-3" data-test="dashboard-phone-banner">
+            <span class="text-sm">Подтвердите номер телефона, чтобы пользоваться всеми функциями.</span>
             <a href="{{ route('phone.verify.notice') }}" class="btn btn-sm btn-neutral">Подтвердить</a>
         </div>
     @endif
@@ -337,12 +340,12 @@
         <div id="participant-hackaton-dashboard" class="scroll-mt-24 space-y-10">
         <x-recommended-teams :recommendations="$recommendedTeams" />
         @if ($participantNextStepTitle !== '')
-            <div class="rounded-xl border border-primary/20 bg-primary/10 p-4 shadow-sm">
-                <p class="text-xs text-primary/80">Ваш следующий шаг</p>
+            <div class="rounded-lg border border-base-300 bg-base-100 p-4">
+                <p class="text-xs font-medium uppercase tracking-wide text-base-content/50">Ваш следующий шаг</p>
                 <p class="mt-1 font-semibold">{{ $participantNextStepTitle }}</p>
-                <p class="mt-1 text-sm text-base-content/80">{{ $participantNextStepHint }}</p>
+                <p class="mt-1 text-sm text-base-content/70">{{ $participantNextStepHint }}</p>
                 @if ($participantNextStepHref && $participantNextStepLabel)
-                    <a href="{{ $participantNextStepHref }}" class="btn btn-primary btn-sm mt-3">{{ $participantNextStepLabel }}</a>
+                    <a href="{{ $participantNextStepHref }}" class="btn btn-neutral btn-sm mt-3">{{ $participantNextStepLabel }}</a>
                 @endif
             </div>
         @endif
@@ -352,7 +355,7 @@
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-base-content/50">Мои команды</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                             <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
                         </div>
                     </div>
@@ -367,7 +370,7 @@
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-base-content/50">Сертификаты</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-content transition-colors">
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                             <x-app-icon icon="heroicons:academic-cap" class="h-4 w-4" />
                         </div>
                     </div>
@@ -382,7 +385,7 @@
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-base-content/50">Заявки в команды</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content transition-colors">
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                             <x-app-icon icon="heroicons:envelope" class="h-4 w-4" />
                         </div>
                     </div>
@@ -397,7 +400,7 @@
                 <div class="flex flex-col h-full justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-base-content/50">Заявки на хакатоны</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
                             <x-app-icon icon="heroicons:rocket-launch" class="h-4 w-4" />
                         </div>
                     </div>
@@ -410,10 +413,10 @@
         </div>
 
         @if (count($hackatonApplicationsPreview) > 0)
-            <x-marycard title="Заявки команд на хакатоны" class="card card-border bg-base-100 shadow-sm w-full max-w-2xl">
+            <x-marycard title="Заявки команд на хакатоны" class="card border border-base-300 bg-base-100 w-full max-w-2xl">
                 <ul class="space-y-2">
                     @foreach ($hackatonApplicationsPreview as $row)
-                        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-200 pb-2 last:border-0">
+                        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
                             <div>
                                 <a href="{{ route('hackatons.show', $row['hackaton_id']) }}#participant-hackaton-applications" class="link link-primary font-medium">{{ $row['title'] }}</a>
                                 <span class="text-sm text-base-content/70"> — {{ $row['team_title'] }}</span>
@@ -426,10 +429,10 @@
         @endif
 
         @if (count($participantHackatonsPreview) > 0)
-            <x-marycard title="Хакатоны (ваши и ближайшие публичные)" class="card card-border bg-base-100 shadow-sm w-full max-w-2xl">
+            <x-marycard title="Хакатоны (ваши и ближайшие публичные)" class="card border border-base-300 bg-base-100 w-full max-w-2xl">
                 <ul class="space-y-2">
                     @foreach ($participantHackatonsPreview as $row)
-                        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-200 pb-2 last:border-0">
+                        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
                             <a href="{{ route('hackatons.show', $row['id']) }}" class="link link-primary font-medium">{{ $row['title'] }}</a>
                             @if ($row['start_at'])
                                 <span class="text-sm text-base-content/70">{{ $row['start_at'] }}</span>
@@ -453,13 +456,13 @@
         <section class="space-y-6" data-test="home-organizer-dashboard">
             <h2 class="ui-heading-display text-xl font-semibold">Организатор</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-marycard title="Мои хакатоны" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Мои хакатоны" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $hackatonsCount }}</p>
                 <x-slot:menu>
                     <a href="{{ route('organizer.dashboard') }}" class="btn btn-ghost btn-sm">Открыть</a>
                 </x-slot:menu>
             </x-marycard>
-            <x-marycard title="Заявки команд на рассмотрении" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Заявки команд на рассмотрении" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
                 <p class="mt-2 text-sm text-base-content/70">По всем вашим хакатонам.</p>
                 @if ($pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId)
@@ -484,13 +487,13 @@
         <section class="space-y-6" data-test="home-judge-dashboard">
             <h2 class="ui-heading-display text-xl font-semibold">Судья</h2>
         @if ($judgeHackatonsCount === 0)
-            <div class="rounded-xl border border-base-200 bg-base-100 p-6 text-center shadow-sm" data-test="judge-dashboard-empty">
-                <p class="text-base-content/80">У вас пока нет назначенных хакатонов. Когда организатор добавит вас в судьи, события появятся здесь.</p>
-                <a href="{{ route('hackatons.index') }}" class="btn btn-primary mt-4">Каталог хакатонов</a>
+            <div class="rounded-lg border border-base-300 bg-base-100 p-6 text-center" data-test="judge-dashboard-empty">
+                <p class="text-base-content/70">У вас пока нет назначенных хакатонов. Когда организатор добавит вас в судьи, события появятся здесь.</p>
+                <a href="{{ route('hackatons.index') }}" class="btn btn-neutral mt-4">Каталог хакатонов</a>
             </div>
         @else
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-marycard title="Назначенные хакатоны" class="card card-border bg-base-100 shadow-sm">
+                <x-marycard title="Назначенные хакатоны" class="card border border-base-300 bg-base-100">
                     <p class="text-3xl font-semibold tabular-nums">{{ $judgeHackatonsCount }}</p>
                     <x-slot:menu>
                         <a href="{{ route('judge.dashboard') }}" class="btn btn-ghost btn-sm">Панель судьи</a>
@@ -498,10 +501,10 @@
                 </x-marycard>
             </div>
             @if (count($judgeHackatonsPreview) > 0)
-                <x-marycard title="Ближайшие по дате начала" class="card card-border bg-base-100 shadow-sm w-full max-w-2xl">
+                <x-marycard title="Ближайшие по дате начала" class="card border border-base-300 bg-base-100 w-full max-w-2xl">
                     <ul class="space-y-2">
                         @foreach ($judgeHackatonsPreview as $row)
-                            <li class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 pb-2 last:border-0">
+                            <li class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
                                 <div class="flex min-w-0 flex-1 flex-wrap items-baseline gap-2">
                                     <a href="{{ route('hackatons.show', $row['id']) }}" class="link link-primary font-medium">{{ $row['title'] }}</a>
                                     @if ($row['start_at'])
@@ -526,16 +529,16 @@
         <section class="space-y-6" data-test="home-admin-dashboard">
             <h2 class="ui-heading-display text-xl font-semibold">Администратор</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <x-marycard title="Пользователей" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Пользователей" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $usersCount }}</p>
             </x-marycard>
-            <x-marycard title="Хакатонов" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Хакатонов" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $adminHackatonsCount }}</p>
             </x-marycard>
-            <x-marycard title="Партнёров" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Партнёров" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $adminPartnersCount }}</p>
             </x-marycard>
-            <x-marycard title="Заявок команд на рассмотрении" class="card card-border bg-base-100 shadow-sm">
+            <x-marycard title="Заявок команд на рассмотрении" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $adminPendingApplicationsCount }}</p>
                 <p class="mt-2 text-sm text-base-content/70">По всей платформе.</p>
             </x-marycard>

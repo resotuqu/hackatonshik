@@ -19,20 +19,6 @@
                     Получайте анонсы и обновления по хакатонам
                 </div>
             </div>
-            <dl class="grid grid-cols-3 border-t border-base-100/15 pt-6 text-center">
-                <div>
-                    <dt class="text-xs text-base-100/50">Хакатонов</dt>
-                    <dd class="mt-1 text-xl font-semibold tabular-nums">500+</dd>
-                </div>
-                <div>
-                    <dt class="text-xs text-base-100/50">Участников</dt>
-                    <dd class="mt-1 text-xl font-semibold tabular-nums">2 000+</dd>
-                </div>
-                <div>
-                    <dt class="text-xs text-base-100/50">Команд</dt>
-                    <dd class="mt-1 text-xl font-semibold tabular-nums">120+</dd>
-                </div>
-            </dl>
         </section>
 
         <x-maryform wire:submit="save" class="card border border-base-300 bg-base-100 p-4 sm:p-6 lg:col-span-3">

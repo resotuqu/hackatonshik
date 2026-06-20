@@ -19,7 +19,7 @@ test('guest sees marketing landing on home', function () {
     $response->assertSee('Активные хакатоны', false);
     $response->assertSee('Платформа в цифрах', false);
     $response->assertSee('Как это работает', false);
-    $response->assertSee('Отзывы участников', false);
+    $response->assertDontSee('Отзывы участников', false);
     $response->assertSee('Первые хакатоны уже скоро!', false);
     $response->assertSee('Следите за обновлениями — скоро здесь появятся интересные события.', false);
 });

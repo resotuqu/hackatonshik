@@ -214,6 +214,21 @@
 }
 
 /**
+ * Канон шкалы непрозрачности (во избежание «опасити-супа»).
+ * Используйте ТОЛЬКО эти значения — не вводите /55, /85, /60 и т.п.
+ *
+ *  Текст:    text-base-content        — заголовки, основной
+ *            text-base-content/70     — вторичный (подписи, описания)
+ *            text-base-content/50     — приглушённый (мета, dt-метки)
+ *  Границы:  border-base-200          — разделители (шапки, футер, строки)
+ *            border-base-300          — карточки и панели
+ *            border-base-content/20   — акцентная граница (hover/active)
+ *
+ * Цвет (primary/secondary/warning/error) — только для смысловых состояний
+ * (срочность, ошибка, активная навигация), не для декора.
+ */
+
+/**
  * Design system — semantic surfaces & CTAs (consumes @theme CSS variables)
  */
 .ui-surface-card {

@@ -153,6 +153,20 @@
 
 ---
 
+### ✅ Этап 10 — Auth-дашборды, фейк-контент, токены, цветовая семантика
+
+| Файл | Изменение |
+|---|---|
+| `resources/views/pages/home/index.blade.php` | `@auth`-сводка приведена к новому языку: `card card-border shadow-sm` → `card border border-base-300`; `alert-warning` баннер → нейтральный border-блок; next-step `border-primary/20 bg-primary/10` → нейтральный + `btn-neutral`; judge-empty `border-base-200 shadow-sm` → `border-base-300`; радужные иконки stat-плиток (`bg-primary/10`, `bg-secondary/10`, `bg-accent/10`) → нейтральный `bg-base-200 text-base-content/60`; секция фейковых отзывов скрыта (`@if false`); `border-base-200` разделители → `base-300`; hero-подзаголовок `/85` → `/70` |
+| `resources/views/pages/auth/login.blade.php`, `register.blade.php` | Удалён бренд-блок с выдуманной статистикой (500+/2 000+/120+) |
+| `resources/views/components/hackaton-card.blade.php` | Прогресс-бар: 5 цветов по статусу → нейтральный `progress-neutral`; убран `grayscale-[20%]` у завершённых; dl-плитки `border-base-300/60 bg-base-200/40` → `border-base-300 bg-base-200`, `dt /40` → `/50`; `bg-base-300/40` прогресса → `bg-base-300` |
+| `resources/css/app.css` | Добавлен документированный канон шкалы непрозрачности (текст: content / /70 / /50; границы: base-200 / base-300 / content-20) |
+| `tests/Feature/HomeDashboardTest.php` | Ассерт наличия секции отзывов → `assertDontSee` (секция убрана осознанно) |
+
+> Известные предсуществующие падения (не из этого этапа): `ListPagesMvpTest` — 3 теста ссылаются на старую разметку карточки/каталога («3 призовых мест», отдельное «Участников», «Найдено»), убранную ещё на Этапах 2–3. Требуют отдельного обновления ассертов.
+
+---
+
 ## Правила при реализации
 
 1. **Не менять PHP-логику** — только Blade/CSS/Tailwind.

@@ -44,19 +44,8 @@
         default => null,
     };
 
-    $progressBarClass = match (true) {
-        $status === \App\Enums\HackatonStatus::IN_PROGRESS => 'progress-primary',
-        $status === \App\Enums\HackatonStatus::JUDGING => 'progress-warning',
-        $status === \App\Enums\HackatonStatus::REGISTRATION_OPEN,
-        $status === \App\Enums\HackatonStatus::PUBLISHED
-            => 'progress-success',
-        $status === \App\Enums\HackatonStatus::REGISTRATION_CLOSED,
-        $status === \App\Enums\HackatonStatus::WAITING_START,
-        $status === \App\Enums\HackatonStatus::CASES_ANNOUNCED
-            => 'progress-info',
-        $isFinished => 'progress-neutral',
-        default => 'progress-info',
-    };
+    // Прогресс-бар — нейтральный для всех статусов; цветом выделяется только срочность дедлайна ниже.
+    $progressBarClass = 'progress-neutral';
 
     $daysToDeadline = null;
     $deadlineUrgency = 'normal';
@@ -94,7 +83,7 @@
 <article @class([
     'ui-surface-card ui-surface-card--hover group/card flex h-full flex-col overflow-hidden',
     'border border-base-300 bg-base-100' => !$isFinished,
-    'border border-base-200 bg-base-200/30 opacity-90 grayscale-[20%]' => $isFinished,
+    'border border-base-300 bg-base-200/30 opacity-90' => $isFinished,
 ]) aria-labelledby="{{ $titleId }}">
     <x-hackaton-cover :image-url="$imageUrl" :is-finished="$isFinished" :label="$stageLabel" />
 
@@ -105,14 +94,14 @@
 
         {{-- 2×2 мета-сетка --}}
         <dl class="grid grid-cols-2 gap-2">
-            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
-                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Призовой фонд</dt>
+            <div class="rounded-lg border border-base-300 bg-base-200 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/50">Призовой фонд</dt>
                 <dd class="mt-0.5 text-sm font-bold text-base-content">
                     {{ $prizeFund ? number_format((float) $prizeFund, 0, '.', ' ') . ' ₽' : '—' }}
                 </dd>
             </div>
-            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
-                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Приём заявок</dt>
+            <div class="rounded-lg border border-base-300 bg-base-200 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/50">Приём заявок</dt>
                 <dd class="mt-0.5 text-sm font-medium text-base-content">
                     @if ($deadlineAt)
                         {{ $deadlineAt->format('d.m.Y') }}
@@ -123,14 +112,14 @@
                     @endif
                 </dd>
             </div>
-            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
-                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Старт</dt>
+            <div class="rounded-lg border border-base-300 bg-base-200 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/50">Старт</dt>
                 <dd class="mt-0.5 text-sm font-medium text-base-content">
                     {{ $startAt ? $startAt->format('d.m.Y') : '—' }}
                 </dd>
             </div>
-            <div class="rounded-lg border border-base-300/60 bg-base-200/40 px-3 py-2">
-                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/40">Команд / участников</dt>
+            <div class="rounded-lg border border-base-300 bg-base-200 px-3 py-2">
+                <dt class="text-[10px] font-semibold uppercase tracking-wide text-base-content/50">Команд / участников</dt>
                 <dd class="mt-0.5 text-sm font-medium tabular-nums text-base-content">
                     {{ $teamsCount }} / {{ $participantsCount }}
                 </dd>
@@ -157,7 +146,7 @@
         {{-- Прогресс + обновлено --}}
         <div class="mt-auto flex flex-col gap-2 pt-1">
             @if ($hackaton->updated_at)
-                <p class="text-[11px] text-base-content/40">
+                <p class="text-[11px] text-base-content/50">
                     Обновлено <x-datetime :value="$hackaton->updated_at" mode="relative" />
                 </p>
             @endif
@@ -165,7 +154,7 @@
                 <span>{{ $stageLabel ?? 'Таймлайн' }}</span>
                 <span class="tabular-nums">{{ $progressPercent }}%</span>
             </div>
-            <progress class="progress {{ $progressBarClass }} h-1 w-full bg-base-300/40"
+            <progress class="progress {{ $progressBarClass }} h-1 w-full bg-base-300"
                 value="{{ $progressPercent }}" max="100" aria-label="Прогресс таймлайна хакатона"></progress>
         </div>
 
