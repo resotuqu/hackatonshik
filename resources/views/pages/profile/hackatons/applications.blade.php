@@ -8,14 +8,10 @@
         </ul>
     </div>
 
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl">Заявки на рассмотрении</h1>
-            <p class="mt-1 max-w-2xl text-sm text-base-content/70">
-                Все команды, ожидающие решения организатора. Примите или отклоните заявку — команда получит уведомление.
-            </p>
-        </div>
-    </section>
+    <x-page-header
+        title="Заявки на рассмотрении"
+        description="Все команды, ожидающие решения организатора. Примите или отклоните заявку — команда получит уведомление."
+    />
 
     @if($this->pendingApplications->isEmpty())
         <section class="ui-surface-card">
@@ -47,9 +43,9 @@
                                 {{ $application->team?->title ?? 'Команда' }}
                             </p>
                             @if(filled($application->message))
-                                <p class="text-sm text-base-content/75">{{ $application->message }}</p>
+                                <p class="text-sm text-base-content/70">{{ $application->message }}</p>
                             @endif
-                            <p class="text-xs text-base-content/55">
+                            <p class="text-xs text-base-content/50">
                                 Подана: {{ $application->created_at?->format('d.m.Y H:i') ?? '—' }}
                             </p>
                             <a

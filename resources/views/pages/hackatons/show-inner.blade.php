@@ -1,4 +1,4 @@
-﻿@section('title', $hackaton->title)
+@section('title', $hackaton->title)
 @section('meta_description', $seoDescription)
 @section('canonical_url', route('hackatons.show', $hackaton))
 @if ($heroImage)
@@ -52,7 +52,7 @@
                 class="hidden w-full shrink-0 lg:sticky lg:top-20 lg:block lg:w-52"
                 aria-label="Разделы хакатона"
             >
-                <div class="rounded-2xl border border-base-300/60 bg-base-200/40 p-2">
+                <div class="rounded-2xl border border-base-300 bg-base-200/40 p-2">
                     @foreach($hackatonNavTabs as $tab)
                         <button
                             type="button"
@@ -77,7 +77,7 @@
         <div class="min-w-0 flex-1 space-y-6">
             <div
                 @class([
-                    'tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2',
+                    'tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2',
                     'lg:hidden' => $sidebarOrganizerNav,
                 ])
                 role="tablist"

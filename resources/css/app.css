@@ -318,6 +318,36 @@
     @apply font-display tracking-tight text-base-content;
 }
 
+/**
+ * Типографическая шкала — используйте эти классы вместо россыпи text-3xl/text-[11px].
+ *  .t-eyebrow — надзаголовок (хлебная крошка/раздел над h1)
+ *  .t-h1      — заголовок страницы
+ *  .t-h2      — заголовок секции
+ *  .t-body    — основной/вторичный текст
+ *  .t-meta    — мелкая мета (даты, счётчики)
+ */
+.t-eyebrow {
+    @apply text-sm font-medium text-base-content/60;
+}
+
+.t-h1 {
+    letter-spacing: var(--tracking-tight-display);
+    @apply font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl;
+}
+
+.t-h2 {
+    letter-spacing: var(--tracking-tight-display);
+    @apply font-display text-2xl font-bold tracking-tight text-base-content;
+}
+
+.t-body {
+    @apply text-base text-base-content/70;
+}
+
+.t-meta {
+    @apply text-sm text-base-content/50;
+}
+
 .ui-cta-primary {
     @apply btn btn-primary gap-2 transition-colors duration-200;
 }

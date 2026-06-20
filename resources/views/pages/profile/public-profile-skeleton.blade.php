@@ -21,7 +21,7 @@
     >
         <div class="relative flex flex-col gap-6 md:flex-row md:items-start">
             <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div class="skeleton h-32 w-32 shrink-0 rounded-full ring-2 ring-base-300/50 sm:h-36 sm:w-36"></div>
+                <div class="skeleton h-32 w-32 shrink-0 rounded-full ring-2 ring-base-300 sm:h-36 sm:w-36"></div>
                 <div class="min-w-0 flex-1 space-y-3">
                     <div class="skeleton h-6 w-28 rounded-lg"></div>
                     <div class="skeleton h-10 w-full max-w-md rounded-xl"></div>

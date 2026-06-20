@@ -49,7 +49,7 @@
         </p>
 
         {{-- Ищем в команду: макс 2 роли + "+N", резервируем место --}}
-        <div class="min-h-[5.5rem] rounded-lg border border-base-300/70 bg-base-200/40 p-4">
+        <div class="min-h-[5.5rem] rounded-lg border border-base-300 bg-base-200/40 p-4">
             <p class="mb-2 text-xs font-medium text-base-content/60">
                 @if ($hasVacancies || ! empty($vacantRoleNames))
                     Ищем в команду ({{ $openSlots }} {{ $slotWord }}):
@@ -92,7 +92,7 @@
         </div>
 
         @if ($team->updated_at)
-            <p class="text-xs text-base-content/45">
+            <p class="text-xs text-base-content/50">
                 обновлено <x-datetime :value="$team->updated_at" mode="relative" />
             </p>
         @endif

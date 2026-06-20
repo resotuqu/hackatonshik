@@ -1,11 +1,10 @@
 
 <div class="mx-auto mt-8 w-full max-w-3xl space-y-6 sm:mt-12">
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="text-3xl font-bold">Политика использования cookie</h1>
-            <p class="mt-1 text-sm text-base-content/70">Последнее обновление: 03.05.2026</p>
-        </div>
-    </section>
+    <x-page-header title="Политика использования cookie">
+        <x-slot:lead>
+            <p class="t-meta">Последнее обновление: 03.05.2026</p>
+        </x-slot:lead>
+    </x-page-header>
 
     <article class="card border border-base-300 bg-base-100 p-6 sm:p-8">
         <div class="markdown-body">

@@ -167,6 +167,20 @@
 
 ---
 
+### ✅ Этап 11 — Дизайн-система: компонент шапки, типошкала, токен-свип
+
+| Файл | Изменение |
+|---|---|
+| `resources/css/app.css` | Добавлена типографическая шкала `.t-eyebrow / .t-h1 / .t-h2 / .t-body / .t-meta` |
+| `resources/views/components/page-header.blade.php` | **Новый** компонент `<x-page-header>`: `eyebrow` + `title` + `description` + слоты `lead` (под описанием) и `actions` (справа). Единый каркас `ui-page-header` |
+| Миграция на `<x-page-header>` | `hackatons/index` (табы+счётчик+кнопка → `actions`), `teams/index` (счётчик+табы → `lead`, кнопка → `actions`), `news/index`, `profile/watches`, `privacy-policy`, `cookie-policy`, `profile/certificates`, `participant/hackatons`, `profile/teams`, `profile/hackatons/{applications,scoring,finished}`, `hackatons/results` |
+| Свип токенов непрозрачности (26 blade-файлов) | `border-base-300/{40,50,60,70,80}` → `border-base-300`; `ring-base-300/{50,80}` → `ring-base-300`; `text-base-content/{45,55}` → `/50`; `text-base-content/{75,85}` → `/70` (фоновые `bg-*/NN` не трогались) |
+| `tests/Feature/TeamsIndexPageTest.php` | Пред­существующий стейл-ассерт `Все команды` → `Открытые` (бейдж зависел от состояния фильтра) |
+
+> Сложные шапки (`profile/index`, `profile/public-show-inner`, `about/index`, judge-компоненты) оставлены на raw `ui-page-header` — у них bespoke-вёрстка со статистикой/аватаром, не ложащаяся в общий компонент.
+
+---
+
 ## Правила при реализации
 
 1. **Не менять PHP-логику** — только Blade/CSS/Tailwind.

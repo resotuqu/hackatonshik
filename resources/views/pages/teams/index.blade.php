@@ -28,44 +28,45 @@
         };
     @endphp
 
-    <section class="ui-page-header">
-        <div class="flex flex-col gap-4 pb-4 sm:flex-row sm:items-end sm:justify-between">
-            <div class="min-w-0 space-y-2">
-                <p class="text-sm text-base-content/60">Каталог команд</p>
-                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Команды</h1>
-                <p class="max-w-2xl text-base text-base-content/70">Команды участников хакатонов — открытые и закрытые.</p>
-                <div class="flex flex-wrap items-center gap-3">
-                    <p class="text-sm font-medium tabular-nums text-base-content/60">
-                        {{ $totalTeams }} {{ $teamsWord }}
-                    </p>
-                    <div class="flex gap-1 rounded-full bg-base-200 p-1" role="tablist" aria-label="Режим каталога команд">
-                        <button
-                            type="button"
-                            role="tab"
-                            class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
-                            aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
-                            wire:click="setCatalogTab('open')"
-                        >
-                            Открытые
-                        </button>
-                        <button
-                            type="button"
-                            role="tab"
-                            class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
-                            aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
-                            wire:click="setCatalogTab('all')"
-                        >
-                            Все
-                        </button>
-                    </div>
+    <x-page-header
+        eyebrow="Каталог команд"
+        title="Команды"
+        description="Команды участников хакатонов — открытые и закрытые."
+    >
+        <x-slot:lead>
+            <div class="flex flex-wrap items-center gap-3">
+                <p class="t-meta font-medium tabular-nums">
+                    {{ $totalTeams }} {{ $teamsWord }}
+                </p>
+                <div class="flex gap-1 rounded-full bg-base-200 p-1" role="tablist" aria-label="Режим каталога команд">
+                    <button
+                        type="button"
+                        role="tab"
+                        class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                        aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
+                        wire:click="setCatalogTab('open')"
+                    >
+                        Открытые
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                        aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
+                        wire:click="setCatalogTab('all')"
+                    >
+                        Все
+                    </button>
                 </div>
             </div>
+        </x-slot:lead>
+        <x-slot:actions>
             <a href="/teams/create" wire:navigate class="ui-cta-primary shrink-0 self-start">
                 <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5" />
                 Создать команду
             </a>
-        </div>
-    </section>
+        </x-slot:actions>
+    </x-page-header>
 
     <section aria-label="Фильтры">
         <div class="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-200/30 p-4 sm:p-5">
@@ -142,7 +143,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 border-t border-base-300/50 pt-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 border-t border-base-300 pt-4 sm:grid-cols-2">
                 <label class="form-control w-full">
                     <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Хакатон</span></span>
                     <select class="select select-bordered select-sm w-full sm:select-md" wire:model.live="hackaton_id">

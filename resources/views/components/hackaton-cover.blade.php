@@ -39,7 +39,7 @@
         </div>
     @elseif ($label)
         <div class="absolute left-2.5 top-2.5 z-20" aria-hidden="true">
-            <span class="inline-flex items-center gap-1.5 rounded-md border border-base-300/40 bg-base-100/80 px-2 py-0.5 text-[11px] font-semibold leading-5 text-base-content backdrop-blur-sm">
+            <span class="inline-flex items-center gap-1.5 rounded-md border border-base-300 bg-base-100/80 px-2 py-0.5 text-[11px] font-semibold leading-5 text-base-content backdrop-blur-sm">
                 {{ $label }}
             </span>
         </div>

@@ -272,7 +272,7 @@
                                 @endif
                             </div>
                             <h2 class="ui-heading-display text-xl font-black sm:text-2xl">{{ $featuredHackaton->title }}</h2>
-                            <dl class="grid grid-cols-1 gap-2 text-sm text-base-content/75 sm:grid-cols-2">
+                            <dl class="grid grid-cols-1 gap-2 text-sm text-base-content/70 sm:grid-cols-2">
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Старт — финиш</dt>
                                     <dd class="font-medium tabular-nums">
@@ -367,7 +367,7 @@
     @endif
 
     <section class="ui-surface-soft p-4 sm:p-5">
-        <h2 class="ui-heading-display mb-3 text-sm font-bold uppercase tracking-widest text-base-content/55">Быстрые действия</h2>
+        <h2 class="ui-heading-display mb-3 text-sm font-bold uppercase tracking-widest text-base-content/50">Быстрые действия</h2>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <a href="{{ route('hackatons.create') }}" class="ui-cta-secondary btn-md h-auto min-h-[3.25rem] flex-col gap-1 py-3 sm:flex-row sm:gap-2" wire:navigate>
                 <x-app-icon icon="heroicons:plus-circle" class="h-6 w-6" />
@@ -388,7 +388,7 @@
         </div>
     </section>
 
-    <div class="flex flex-col gap-2 border-b border-base-300/60 pb-2 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-2 border-b border-base-300 pb-2 sm:flex-row sm:items-end sm:justify-between">
         <h2 class="ui-heading-display text-xl font-bold">Все хакатоны</h2>
         <p class="text-xs text-base-content/60">Управление карточками, участниками и удалением.</p>
     </div>

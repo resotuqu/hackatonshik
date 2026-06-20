@@ -9,12 +9,10 @@
 
     <x-profile-nav-tabs active="hackatons" />
 
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Мои заявки и хакатоны</h1>
-            <p class="mt-1 text-base-content/70">Заявки ваших команд, участие в событиях и быстрые переходы в рабочие пространства.</p>
-        </div>
-    </section>
+    <x-page-header
+        title="Мои заявки и хакатоны"
+        description="Заявки ваших команд, участие в событиях и быстрые переходы в рабочие пространства."
+    />
 
     @if ($participantNextStepTitle !== '')
         <div class="rounded-xl border border-base-300 bg-base-100 p-4">

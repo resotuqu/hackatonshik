@@ -30,50 +30,43 @@
 
 <div class="space-y-6">
     {{-- Page header --}}
-    <section class="ui-page-header">
-        <div class="flex flex-col gap-4 pb-4 md:flex-row md:items-end md:justify-between">
-            <div class="min-w-0 space-y-2">
-                <p class="text-sm text-base-content/60">Каталог хакатонов</p>
-                <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">
-                    Хакатоны
-                </h1>
-                <p class="max-w-2xl text-base text-base-content/70">
-                    Находите подходящие соревнования, подавайте заявки командой и сражайтесь за призы.
+    <x-page-header
+        eyebrow="Каталог хакатонов"
+        title="Хакатоны"
+        description="Находите подходящие соревнования, подавайте заявки командой и сражайтесь за призы."
+    >
+        <x-slot:actions>
+            <div class="flex flex-wrap gap-1" role="tablist" aria-label="Фильтр по статусу">
+                @foreach ($statusGroupOptions as $value => $label)
+                    <button
+                        type="button"
+                        wire:click="$set('statusGroup', '{{ $value }}')"
+                        role="tab"
+                        aria-selected="{{ $statusGroup === $value ? 'true' : 'false' }}"
+                        class="btn btn-sm {{ $statusGroup === $value ? 'btn-primary' : 'btn-ghost border border-base-300' }}"
+                    >
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <p class="t-meta font-medium tabular-nums">
+                    {{ $totalHackatons }} {{ $hackatonsWord }}
                 </p>
+                @if ($canCreate)
+                    <a href="/hackatons/create" wire:navigate class="ui-cta-primary btn-sm">
+                        <x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />
+                        Создать хакатон
+                    </a>
+                @elseif (! auth()->check())
+                    <a href="{{ route('login') }}" class="ui-cta-outline btn-sm gap-1.5">
+                        <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
+                        Войти
+                    </a>
+                @endif
             </div>
-            <div class="flex flex-col items-start gap-3 md:items-end">
-                <div class="flex flex-wrap gap-1" role="tablist" aria-label="Фильтр по статусу">
-                    @foreach ($statusGroupOptions as $value => $label)
-                        <button
-                            type="button"
-                            wire:click="$set('statusGroup', '{{ $value }}')"
-                            role="tab"
-                            aria-selected="{{ $statusGroup === $value ? 'true' : 'false' }}"
-                            class="btn btn-sm {{ $statusGroup === $value ? 'btn-primary' : 'btn-ghost border border-base-300' }}"
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <p class="text-sm font-medium tabular-nums text-base-content/60">
-                        {{ $totalHackatons }} {{ $hackatonsWord }}
-                    </p>
-                    @if ($canCreate)
-                        <a href="/hackatons/create" wire:navigate class="ui-cta-primary btn-sm">
-                            <x-app-icon icon="heroicons:plus-circle" class="h-4 w-4" />
-                            Создать хакатон
-                        </a>
-                    @elseif (! auth()->check())
-                        <a href="{{ route('login') }}" class="ui-cta-outline btn-sm gap-1.5">
-                            <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
-                            Войти
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </section>
+        </x-slot:actions>
+    </x-page-header>
 
     {{-- Filters (always visible) --}}
     <section aria-label="Фильтры">

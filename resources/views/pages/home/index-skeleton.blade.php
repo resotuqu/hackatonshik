@@ -42,7 +42,7 @@
         </div>
         <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
             @foreach (range(1, 3) as $_)
-                <div class="ui-surface-soft-muted rounded-2xl border border-base-300/80 p-6 text-center sm:p-7">
+                <div class="ui-surface-soft-muted rounded-2xl border border-base-300 p-6 text-center sm:p-7">
                     <div class="mx-auto mb-5 skeleton h-20 w-20 rounded-2xl"></div>
                     <div class="skeleton mx-auto h-4 w-24 rounded-xl"></div>
                     <div class="skeleton mx-auto mt-4 h-12 w-28 rounded-2xl"></div>

@@ -32,12 +32,7 @@
 
     <x-profile-nav-tabs active="certificates" />
 
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Мои сертификаты</h1>
-            <p class="mt-1 text-base-content/70">Сертификаты, полученные за участие в хакатонах.</p>
-        </div>
-    </section>
+    <x-page-header title="Мои сертификаты" description="Сертификаты, полученные за участие в хакатонах." />
 
     <div class="card border border-base-300 bg-base-100">
         <div class="card-body">

@@ -82,7 +82,7 @@
     <div class="mt-4 space-y-4 border-t border-base-200/70 pt-4">
         @if (filled($quickFillMethod) && filled($popularRoleTitles))
             <div>
-                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/45">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/50">
                     Быстрый выбор названия
                 </p>
 

@@ -2,7 +2,7 @@
     <section class="ui-page-header">
         <div class="space-y-2 pb-5">
             <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">О Хакатонщике</h1>
-            <p class="max-w-2xl text-base-content/75">
+            <p class="max-w-2xl text-base-content/70">
                 Мы делаем хакатоны доступнее: помогаем участникам находить команды и роли,
                 а организаторам — собирать сильные составы без хаоса в чатах и таблицах.
             </p>
@@ -93,7 +93,7 @@
 
     <section class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-6 sm:p-8">
         <h2 class="font-display text-2xl font-bold">Присоединяйтесь</h2>
-        <p class="mt-2 text-base-content/75">
+        <p class="mt-2 text-base-content/70">
             Если вы участник, соберите профиль и найдите команду. Если вы организатор,
             публикуйте хакатон и управляйте заявками в одном месте.
         </p>

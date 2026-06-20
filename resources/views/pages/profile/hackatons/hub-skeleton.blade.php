@@ -30,7 +30,7 @@
             </div>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 @foreach (range(1, 3) as $_)
-                    <div class="ui-surface-soft rounded-xl border border-base-300/60 p-4">
+                    <div class="ui-surface-soft rounded-xl border border-base-300 p-4">
                         <div class="skeleton mb-2 h-3 w-24 rounded"></div>
                         <div class="skeleton h-8 w-16 rounded-lg"></div>
                     </div>

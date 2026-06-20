@@ -169,7 +169,7 @@
                     : '#'.$replyToId;
                 $replyAuthor = $replyMsg?->user?->publicName() ?? '';
             @endphp
-            <div class="flex items-center justify-between gap-2 border-b border-base-300/60 bg-primary/5 px-4 py-2 text-xs text-base-content/70">
+            <div class="flex items-center justify-between gap-2 border-b border-base-300 bg-primary/5 px-4 py-2 text-xs text-base-content/70">
                 <div class="flex items-center gap-2 min-w-0">
                     <x-app-icon icon="heroicons:arrow-uturn-left" class="w-3.5 h-3.5 shrink-0 text-primary" />
                     <span class="font-semibold text-primary">{{ $replyAuthor }}</span>

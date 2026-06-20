@@ -4,7 +4,7 @@
     <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <article class="space-y-4">
             <h1 class="font-display text-3xl font-bold">Контакты</h1>
-            <p class="text-base-content/75">Свяжитесь с нами удобным способом</p>
+            <p class="text-base-content/70">Свяжитесь с нами удобным способом</p>
             <div class="space-y-3 text-base">
                 <p>
                     Email:

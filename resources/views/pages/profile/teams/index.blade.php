@@ -19,18 +19,17 @@
         </nav>
 
         {{-- Header --}}
-        <section class="ui-page-header">
-            <div class="flex flex-col items-start gap-4 pb-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Ваши команды</h1>
-                    <p class="mt-1 text-base-content/70">Управляйте составом, вакансиями и заявками в одном месте.</p>
-                </div>
+        <x-page-header
+            title="Ваши команды"
+            description="Управляйте составом, вакансиями и заявками в одном месте."
+        >
+            <x-slot:actions>
                 <a href="/teams/create" wire:navigate class="btn btn-neutral btn-sm shrink-0 gap-2">
                     <x-app-icon icon="heroicons:plus" class="h-4 w-4" />
                     Создать команду
                 </a>
-            </div>
-        </section>
+            </x-slot:actions>
+        </x-page-header>
 
         {{-- Заявки на роли --}}
         <section class="card border border-base-300 bg-base-100 p-6 sm:p-8" aria-labelledby="pending-apps-heading">

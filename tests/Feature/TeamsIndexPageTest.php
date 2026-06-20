@@ -6,5 +6,5 @@ test('teams catalog page renders for guests', function () {
     $this->get('/teams?tab=all')
         ->assertOk()
         ->assertSee('Каталог команд', false)
-        ->assertSee('Все команды', false);
+        ->assertSee('Открытые', false);
 });

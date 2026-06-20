@@ -30,7 +30,7 @@
             </ul>
         </div>
 
-        <div class="tabs tabs-boxed w-full overflow-x-auto rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner" role="tablist" aria-label="Разделы команды" data-tab-list="team">
+        <div class="tabs tabs-boxed w-full overflow-x-auto rounded-2xl border border-base-300 bg-base-200/50 p-1 shadow-inner" role="tablist" aria-label="Разделы команды" data-tab-list="team">
             <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="team-panel-overview" data-tab-trigger="team" data-tab-value="overview">
                 <x-app-icon icon="heroicons:squares-2x2" class="h-5 w-5 shrink-0 opacity-80" />
                 Обзор
@@ -64,7 +64,7 @@
                         @if ($teamImage)
                             <img src="{{ $teamImage }}" class="h-full w-full object-cover shadow-inner" alt="{{ $team->title }}">
                         @else
-                            <div class="ui-cover-placeholder flex h-full min-h-44 flex-col items-center justify-center gap-3 px-4 text-center text-base-content/55">
+                            <div class="ui-cover-placeholder flex h-full min-h-44 flex-col items-center justify-center gap-3 px-4 text-center text-base-content/50">
                                 <x-app-icon icon="heroicons:photo" class="h-16 w-16 text-base-content/30" />
                                 <span class="text-sm font-medium">Превью не загружено</span>
                             </div>
@@ -80,7 +80,7 @@
                                 </a>
                             @endif
                             @guest
-                                <a href="/login" class="btn btn-ghost btn-sm gap-2 border border-base-300/80">
+                                <a href="/login" class="btn btn-ghost btn-sm gap-2 border border-base-300">
                                     <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
                                     Войти
                                 </a>
@@ -100,7 +100,7 @@
                         </h2>
                         <div class="grid grid-cols-2 gap-3">
                             <div
-                                class="flex flex-col gap-2 rounded-2xl border border-base-300/60 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
+                                class="flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
                                 <div class="flex items-center gap-2 text-base-content/70">
                                     <x-app-icon icon="heroicons:user-group" class="h-5 w-5 shrink-0 text-primary" />
                                     <span class="text-[0.65rem] font-bold uppercase tracking-wider">Ролей</span>
@@ -108,7 +108,7 @@
                                 <span class="font-display text-2xl font-bold tabular-nums text-base-content">{{ $team->roles->count() }}</span>
                             </div>
                             <div
-                                class="flex flex-col gap-2 rounded-2xl border border-base-300/60 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
+                                class="flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
                                 <div class="flex items-center gap-2 text-base-content/70">
                                     <x-app-icon icon="heroicons:megaphone" class="h-5 w-5 shrink-0 text-primary" />
                                     <span class="text-[0.65rem] font-bold uppercase tracking-wider">Открыто</span>
@@ -119,7 +119,7 @@
 
                         <div class="divider my-0 text-xs text-base-content/40"></div>
 
-                        <div class="flex gap-3 rounded-2xl border border-base-300/50 bg-base-200/25 px-4 py-3">
+                        <div class="flex gap-3 rounded-2xl border border-base-300 bg-base-200/25 px-4 py-3">
                             <x-app-icon icon="heroicons:user-circle" class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                             <div class="min-w-0 text-sm">
                                 <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Капитан</span>
@@ -130,7 +130,7 @@
                         </div>
 
                         @if ($team->hackaton)
-                            <div class="flex gap-3 rounded-2xl border border-base-300/50 bg-base-200/25 px-4 py-3">
+                            <div class="flex gap-3 rounded-2xl border border-base-300 bg-base-200/25 px-4 py-3">
                                 <x-app-icon icon="heroicons:map-pin" class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                                 <div class="min-w-0 text-sm">
                                     <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Хакатон</span>
@@ -143,7 +143,7 @@
 
                         @if ($team->socialLinks->isNotEmpty())
                             <div>
-                                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-base-content/45">Ссылки</p>
+                                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-base-content/50">Ссылки</p>
                                 <ul class="space-y-2 text-sm">
                                     @foreach ($team->socialLinks as $link)
                                         <li class="flex items-center gap-2">
@@ -320,7 +320,7 @@
                                     <div class="flex items-start gap-3">
                                         <div @class(['avatar', 'placeholder' => !$memberAvatarUrl])>
                                             <div
-                                                class="w-14 rounded-full bg-neutral text-neutral-content ring-2 ring-base-300/80 ring-offset-2 ring-offset-base-100 transition duration-300 group-hover:ring-primary/40">
+                                                class="w-14 rounded-full bg-neutral text-neutral-content ring-2 ring-base-300 ring-offset-2 ring-offset-base-100 transition duration-300 group-hover:ring-primary/40">
                                                 @if ($memberAvatarUrl)
                                                     <img src="{{ $memberAvatarUrl }}" alt="{{ $displayName }}" class="h-full w-full object-cover" />
                                                 @else
@@ -343,7 +343,7 @@
                                         </div>
                                     </div>
                                     @if (auth()->check() && $team->user_id === auth()->id())
-                                        <div class="mt-auto border-t border-base-300/50 pt-4">
+                                        <div class="mt-auto border-t border-base-300 pt-4">
                                             <label for="confirm-remove-member-{{ $role->id }}" class="btn btn-error btn-xs btn-block gap-1 cursor-pointer">
                                                 <x-app-icon icon="heroicons:user-minus" class="h-4 w-4" />
                                                 Удалить из команды
@@ -506,7 +506,7 @@
 
                             <div class="space-y-4 md:hidden">
                                 @foreach ($team->applications as $app)
-                                    <div class="rounded-2xl border border-base-300/70 bg-base-200/25 p-4 shadow-sm">
+                                    <div class="rounded-2xl border border-base-300 bg-base-200/25 p-4 shadow-sm">
                                         <div class="flex flex-wrap items-start justify-between gap-2">
                                             <p class="font-semibold leading-snug">{{ $app->user->fio ?? $app->user->nickname ?? $app->user->email }}</p>
                                             <x-application-status-badge :status="$app->status" class="shrink-0" />
@@ -515,7 +515,7 @@
                                             <span class="font-medium text-base-content/80">Роль:</span> {{ $app->teamRole->title }}
                                         </p>
                                         @if (filled($app->message))
-                                            <p class="mt-2 line-clamp-4 text-sm text-base-content/75">«{{ $app->message }}»</p>
+                                            <p class="mt-2 line-clamp-4 text-sm text-base-content/70">«{{ $app->message }}»</p>
                                         @endif
                                         <dl class="mt-3 grid gap-1 text-xs text-base-content/60">
                                             <div class="flex justify-between gap-2">

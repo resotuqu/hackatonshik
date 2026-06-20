@@ -130,7 +130,7 @@
                             <img
                                 src="https://ui-avatars.com/api/?name=Анна+К.&background=a4f01d&color=16181d&size=160"
                                 alt=""
-                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300"
                                 width="64"
                                 height="64"
                                 loading="lazy"
@@ -140,7 +140,7 @@
                                 <p class="text-xs text-base-content/60">Участница, продукт</p>
                             </div>
                         </div>
-                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/70">
                             «Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»
                         </blockquote>
                     </article>
@@ -149,7 +149,7 @@
                             <img
                                 src="https://ui-avatars.com/api/?name=Михаил+Т.&background=5170ff&color=ffffff&size=160"
                                 alt=""
-                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300"
                                 width="64"
                                 height="64"
                                 loading="lazy"
@@ -159,7 +159,7 @@
                                 <p class="text-xs text-base-content/60">Разработчик</p>
                             </div>
                         </div>
-                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/70">
                             «Удобно следить за дедлайнами и анонсами без десятка чатов.»
                         </blockquote>
                     </article>
@@ -168,7 +168,7 @@
                             <img
                                 src="https://ui-avatars.com/api/?name=Елена+В.&background=374151&color=f3f4f6&size=160"
                                 alt=""
-                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                                class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300"
                                 width="64"
                                 height="64"
                                 loading="lazy"
@@ -178,7 +178,7 @@
                                 <p class="text-xs text-base-content/60">Организатор</p>
                             </div>
                         </div>
-                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                        <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/70">
                             «Организаторам стало проще модерировать команды и заявки.»
                         </blockquote>
                     </article>
@@ -205,7 +205,7 @@
                     <img
                         src="https://ui-avatars.com/api/?name=Анна+К.&background=a4f01d&color=16181d&size=160"
                         alt=""
-                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300"
                         width="64"
                         height="64"
                         loading="lazy"
@@ -215,7 +215,7 @@
                         <p class="text-xs text-base-content/60">Участница, продукт</p>
                     </div>
                 </div>
-                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/70">
                     «Нашли двух разработчиков за один вечер и подали заявку за 10 минут.»
                 </blockquote>
             </article>
@@ -224,7 +224,7 @@
                     <img
                         src="https://ui-avatars.com/api/?name=Михаил+Т.&background=5170ff&color=ffffff&size=160"
                         alt=""
-                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300"
                         width="64"
                         height="64"
                         loading="lazy"
@@ -234,7 +234,7 @@
                         <p class="text-xs text-base-content/60">Разработчик</p>
                     </div>
                 </div>
-                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/70">
                     «Удобно следить за дедлайнами и анонсами без десятка чатов.»
                 </blockquote>
             </article>
@@ -243,7 +243,7 @@
                     <img
                         src="https://ui-avatars.com/api/?name=Елена+В.&background=374151&color=f3f4f6&size=160"
                         alt=""
-                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300/80"
+                        class="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-base-300"
                         width="64"
                         height="64"
                         loading="lazy"
@@ -253,7 +253,7 @@
                         <p class="text-xs text-base-content/60">Организатор</p>
                     </div>
                 </div>
-                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/85">
+                <blockquote class="mt-5 grow text-sm leading-relaxed text-base-content/70">
                     «Организаторам стало проще модерировать команды и заявки.»
                 </blockquote>
             </article>

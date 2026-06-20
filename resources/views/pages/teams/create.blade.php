@@ -31,7 +31,7 @@
                     <span class="text-base-content/50">—</span>
                     {{ $this->currentStepMeta['title'] }}
                 </span>
-                <span class="text-xs text-base-content/55">{{ $this->currentStepMeta['subtitle'] }}</span>
+                <span class="text-xs text-base-content/50">{{ $this->currentStepMeta['subtitle'] }}</span>
             </div>
         </div>
     </x-mary-card>
@@ -189,7 +189,7 @@
                         </div>
 
                         <div class="space-y-3 pt-5">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-base-content/45">Быстро добавить</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Быстро добавить</p>
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($this->socialPresets as $preset)
                                     <button

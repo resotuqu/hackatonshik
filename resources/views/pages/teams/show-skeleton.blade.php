@@ -16,7 +16,7 @@
     </nav>
 
     <div
-        class="tabs tabs-boxed w-full overflow-x-auto rounded-2xl border border-base-300/60 bg-base-200/50 p-1 shadow-inner"
+        class="tabs tabs-boxed w-full overflow-x-auto rounded-2xl border border-base-300 bg-base-200/50 p-1 shadow-inner"
         role="tablist"
         aria-hidden="true"
     >

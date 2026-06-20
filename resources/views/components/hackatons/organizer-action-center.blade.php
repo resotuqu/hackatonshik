@@ -4,7 +4,7 @@
 ])
 
 <section class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5" aria-label="Быстрые действия организатора">
-    <h2 class="text-sm font-bold uppercase tracking-widest text-base-content/55">Центр действий</h2>
+    <h2 class="text-sm font-bold uppercase tracking-widest text-base-content/50">Центр действий</h2>
     <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <button
             type="button"

@@ -7,12 +7,10 @@
         </ul>
     </div>
 
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Мои закладки</h1>
-            <p class="mt-1 text-base-content/70">Хакатоны, за которыми вы следите. Мы уведомим вас об изменении статуса и о скором старте.</p>
-        </div>
-    </section>
+    <x-page-header
+        title="Мои закладки"
+        description="Хакатоны, за которыми вы следите. Мы уведомим вас об изменении статуса и о скором старте."
+    />
 
     @if ($watchedHackatons->isEmpty())
         <x-empty-state

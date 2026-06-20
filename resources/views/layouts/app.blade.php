@@ -116,7 +116,7 @@
                 class="btm-nav btm-nav-touch lg:hidden z-60 border-t border-base-200 bg-base-100 pb-[env(safe-area-inset-bottom)]"
                 aria-label="Нижняя навигация"
             >
-                <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/75'])>
+                <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/70'])>
                     <x-app-icon icon="heroicons:home" class="h-6 w-6" />
                     <span class="btm-nav-label">Главная</span>
                 </a>
@@ -127,74 +127,74 @@
                     @endphp
                     @if ($btmStaff)
                         @if ($btmUser->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:shield-check" class="h-6 w-6" />
                                 <span class="btm-nav-label">Админ</span>
                             </a>
                         @elseif ($btmUser->isOrganizer())
-                            <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:squares-2x2" class="h-6 w-6" />
                                 <span class="btm-nav-label">Орг.</span>
                             </a>
                         @elseif ($btmUser->isJudge())
-                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:scale" class="h-6 w-6" />
                                 <span class="btm-nav-label">Судья</span>
                             </a>
                         @endif
                     @else
-                        <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
+                        <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/70'])>
                             <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
                             <span class="btm-nav-label">Команды</span>
                         </a>
                     @endif
                 @else
-                    <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/75'])>
+                    <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
                         <span class="btm-nav-label">Команды</span>
                     </a>
                 @endauth
-                <label for="main-nav-drawer" class="flex min-h-14 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-base-content/75">
+                <label for="main-nav-drawer" class="flex min-h-14 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-base-content/70">
                     <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
                     <span class="btm-nav-label">Меню</span>
                 </label>
                 @guest
-                    <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                    <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                         <span class="btm-nav-label">Хакатоны</span>
                     </a>
                 @else
                     @if ($btmStaff)
                         @if ($btmUser->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:chart-bar-square" class="h-6 w-6" />
                                 <span class="btm-nav-label">Админ</span>
                             </a>
                         @elseif ($btmUser->isOrganizer())
-                            <a href="{{ route('organizer.applications') }}" wire:navigate @class([request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('organizer.applications') }}" wire:navigate @class([request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                                 <span class="btm-nav-label">Заявки</span>
                             </a>
                         @elseif ($btmUser->isJudge())
-                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/75'])>
+                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:clipboard-document-list" class="h-6 w-6" />
                                 <span class="btm-nav-label">Хакатоны</span>
                             </a>
                         @endif
                     @else
-                        <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/75'])>
+                        <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                             <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                             <span class="btm-nav-label">Хакатоны</span>
                         </a>
                     @endif
                 @endguest
                 @auth
-                    <a href="{{ route('profile') }}" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/75'])>
+                    <a href="{{ route('profile') }}" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:user-circle" class="h-6 w-6" />
                         <span class="btm-nav-label">Профиль</span>
                     </a>
                 @else
-                    <a href="{{ route('login') }}" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/75'])>
+                    <a href="{{ route('login') }}" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-6 w-6" />
                         <span class="btm-nav-label">Войти</span>
                     </a>
@@ -262,7 +262,7 @@
                                 <span class="min-w-0 flex-1">Команды</span>
                             </a>
                         </li>
-                        <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                        <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
                         <li>
                             <a href="{{ route('login') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('login') ? 'active' : '' }}">
                                 <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5 shrink-0" />
@@ -300,8 +300,8 @@
                                     <span class="min-w-0 flex-1">Команды</span>
                                 </a>
                             </li>
-                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Участие</span></li>
+                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
+                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">Участие</span></li>
                             <li>
                                 <a href="{{ route('profile.teams') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.teams') || request()->is('profile/teams*') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:users" class="h-5 w-5 shrink-0" />
@@ -340,8 +340,8 @@
                                 </a>
                             </li>
                             @if ($navUser->isOrganizer() || $navUser->isJudge())
-                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Хакатоны</span></li>
+                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
+                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">Хакатоны</span></li>
                                 @if ($navUser->isOrganizer())
                                     <li>
                                         <a href="{{ route('hackatons.create') }}" wire:navigate class="sidebar-nav-link sidebar-nav-link--partner-cta {{ request()->routeIs('hackatons.create') ? 'active' : '' }}">
@@ -358,8 +358,8 @@
                                     </li>
                                 @endif
                             @endif
-                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Кабинет</span></li>
+                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
+                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">Кабинет</span></li>
                             @if ($navUser->isOrganizer())
                                 <li>
                                     <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer', 'organizer.applications', 'organizer.scoring', 'organizer.finished', 'organizer.participants') ? 'active' : '' }}">
@@ -389,8 +389,8 @@
                                 </li>
                             @endif
                             @if ($navUser->isOrganizer() && isset($partnerSidebarCounts) && $partnerSidebarCounts !== null)
-                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
-                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Быстрые действия</span></li>
+                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
+                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">Быстрые действия</span></li>
                                 <li>
                                     <a href="{{ route('organizer.applications') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active' : '' }}">
                                         <x-app-icon icon="heroicons:inbox" class="h-5 w-5 shrink-0" />
@@ -413,7 +413,7 @@
                                     </a>
                                 </li>
                             @endif
-                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
                             <li>
                                 <a href="{{ route('profile') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
                                     <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 shrink-0" />
@@ -423,9 +423,9 @@
                         @endif
                     @endguest
 
-                    <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300/50"></div></li>
+                    <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
 
-                    <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/55">Настройки</span></li>
+                    <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">Настройки</span></li>
                     <li>
                         <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:border-primary/25 hover:bg-base-200/85">
                             <span class="text-[0.9375rem]">Тёмная тема</span>

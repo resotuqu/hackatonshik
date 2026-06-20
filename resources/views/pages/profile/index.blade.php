@@ -25,7 +25,7 @@
                             {{ $fio ?: 'Без имени' }}
                         </h1>
                         <p class="text-base text-base-content/70">{{ '@'.$nickname }}</p>
-                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/75">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/70">
                             <span class="inline-flex items-center gap-1.5">
                                 <span class="font-semibold text-base-content">{{ $this->joinedHackatonsCount }}</span>
                                 хакатонов
@@ -378,7 +378,7 @@
                             </div>
                         </div>
                         <p
-                            class="mt-3 line-clamp-3 text-xs text-base-content/75"
+                            class="mt-3 line-clamp-3 text-xs text-base-content/70"
                             x-data="{ placeholder: 'Описание пока не заполнено.' }"
                             x-text="(($wire.description ?? '').trim() ? $wire.description : placeholder)"
                         >

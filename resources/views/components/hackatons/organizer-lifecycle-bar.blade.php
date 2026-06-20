@@ -41,7 +41,7 @@
                                 'badge badge-sm whitespace-nowrap',
                                 'badge-success' => $isDone,
                                 'badge-primary' => $isCurrent,
-                                'badge-ghost border border-base-300/80 text-base-content/50' => ! $isDone && ! $isCurrent,
+                                'badge-ghost border border-base-300 text-base-content/50' => ! $isDone && ! $isCurrent,
                             ])
                             title="{{ $step['label'] }}"
                         >

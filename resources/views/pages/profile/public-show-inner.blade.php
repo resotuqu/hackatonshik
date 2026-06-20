@@ -85,7 +85,7 @@
                             @if ($allSkills->isNotEmpty())
                                 <span class="tabular-nums"><strong class="font-semibold text-base-content">{{ $allSkills->count() }}</strong> навыков</span>
                             @endif
-                            <span class="text-base-content/45">с <x-datetime :value="$profileUser->created_at" mode="date" class="font-medium" /></span>
+                            <span class="text-base-content/50">с <x-datetime :value="$profileUser->created_at" mode="date" class="font-medium" /></span>
                         </div>
                     </div>
                 </div>
@@ -258,15 +258,15 @@
                     <div class="card-body gap-3 p-4">
                         <dl class="grid grid-cols-3 divide-x divide-base-300 text-center">
                             <div class="px-3">
-                                <dt class="text-xs text-base-content/55">Хакатоны</dt>
+                                <dt class="text-xs text-base-content/50">Хакатоны</dt>
                                 <dd class="mt-1 text-2xl font-semibold tabular-nums">{{ $hackatonsCount + $participatedHackatons->count() }}</dd>
                             </div>
                             <div class="px-3">
-                                <dt class="text-xs text-base-content/55">Команды</dt>
+                                <dt class="text-xs text-base-content/50">Команды</dt>
                                 <dd class="mt-1 text-2xl font-semibold tabular-nums">{{ $teamsCount }}</dd>
                             </div>
                             <div class="px-3">
-                                <dt class="text-xs text-base-content/55">Навыки</dt>
+                                <dt class="text-xs text-base-content/50">Навыки</dt>
                                 <dd class="mt-1 text-2xl font-semibold tabular-nums">{{ $allSkills->count() }}</dd>
                             </div>
                         </dl>
@@ -303,7 +303,7 @@
                             Команды
                         </h2>
                         @if ($profileUser->teams->isEmpty())
-                            <p class="text-sm text-base-content/55">Команд пока нет</p>
+                            <p class="text-sm text-base-content/50">Команд пока нет</p>
                         @else
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($profileUser->teams as $team)
@@ -322,7 +322,7 @@
                             Сертификаты
                         </h2>
                         @if ($profileUser->certificates->isEmpty())
-                            <p class="text-sm text-base-content/55">Сертификатов пока нет</p>
+                            <p class="text-sm text-base-content/50">Сертификатов пока нет</p>
                         @else
                             <div class="space-y-2">
                                 @foreach ($profileUser->certificates as $certificate)

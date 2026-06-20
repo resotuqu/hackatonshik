@@ -1,13 +1,9 @@
 <div class="mx-auto mt-8 w-full max-w-7xl space-y-8 sm:mt-12">
-    <section class="ui-page-header">
-        <div class="flex flex-col gap-2 pb-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="font-display text-3xl font-bold">Новости</h1>
-                <p class="mt-1 text-base-content/75">Обновления платформы, релизы и события сообщества</p>
-            </div>
+    <x-page-header title="Новости" description="Обновления платформы, релизы и события сообщества">
+        <x-slot:actions>
             <a href="/news/rss" class="btn btn-outline btn-sm">RSS</a>
-        </div>
-    </section>
+        </x-slot:actions>
+    </x-page-header>
 
     <section class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-6">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
@@ -44,7 +40,7 @@
                         <span class="text-xs text-base-content/60">{{ $post->published_at?->format('d.m.Y') }}</span>
                     </div>
                     <h2 class="card-title text-lg">{{ $post->title }}</h2>
-                    <p class="text-sm text-base-content/75">{{ $post->excerpt }}</p>
+                    <p class="text-sm text-base-content/70">{{ $post->excerpt }}</p>
                     @if (! empty($post->tags))
                         <div class="mt-2 flex flex-wrap gap-1">
                             @foreach ($post->tags as $postTag)

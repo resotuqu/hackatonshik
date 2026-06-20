@@ -7,13 +7,11 @@
         </ul>
     </div>
 
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Итоги хакатона</h1>
-            <p class="mt-1 text-base-content/70">{{ $hackaton->title }}</p>
-            <x-marybadge class="{{ $hackaton->status->badgeClass() }} mt-2" value="{{ $hackaton->status->label() }}" />
-        </div>
-    </section>
+    <x-page-header title="Итоги хакатона" :description="$hackaton->title">
+        <x-slot:lead>
+            <x-marybadge class="{{ $hackaton->status->badgeClass() }}" value="{{ $hackaton->status->label() }}" />
+        </x-slot:lead>
+    </x-page-header>
 
     <div class="card border border-base-300 bg-base-100">
         <div class="card-body">
