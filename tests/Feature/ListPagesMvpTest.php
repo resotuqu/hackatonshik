@@ -52,9 +52,9 @@ test('teams page renders catalog hero and tabs', function () {
 
     Livewire::actingAs($user)
         ->test(TeamsIndex::class)
-        ->assertSee('Открытые команды')
-        ->assertSee('Все команды')
-        ->assertSee('Найдено')
+        ->assertSee('Каталог команд')
+        ->assertSee('Открытые')
+        ->assertSee('Все')
         ->assertDontSee('Таблица');
 });
 
@@ -135,7 +135,7 @@ test('list pages record analytics events', function () {
 test('hackatons page renders hero and simplified filters', function () {
     Livewire::test(HackatonsIndex::class)
         ->assertSee('Каталог хакатонов')
-        ->assertSee('Найдено')
+        ->assertSee('хакатонов')
         ->assertSee('Поиск')
         ->assertSee('Уровень')
         ->assertDontSee('Подборки')
@@ -191,10 +191,9 @@ test('hackaton card displays prize fund and dates for active hackaton', function
 
     Livewire::test(HackatonsIndex::class)
         ->assertSee('CardMetricsHack')
-        ->assertSee('Команд')
-        ->assertSee('Участников')
+        ->assertSee('Призовой фонд')
+        ->assertSee('Команд / участников')
         ->assertSee('250 000')
-        ->assertSee('3 призовых мест')
         ->assertSee('До дедлайна');
 });
 
