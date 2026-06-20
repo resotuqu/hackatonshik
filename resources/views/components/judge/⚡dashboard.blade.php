@@ -27,15 +27,15 @@ new class extends Component {
 ?>
 
 <div class="mx-auto w-full max-w-6xl space-y-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold">Панель судьи</h1>
-            <p class="text-sm text-base-content/70">Ваши назначенные хакатоны и быстрый переход к оцениванию.</p>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-3xl font-bold">Панель судьи</h1>
+            <p class="mt-1 text-base-content/70">Ваши назначенные хакатоны и быстрый переход к оцениванию.</p>
         </div>
-    </div>
+    </section>
 
     @if ($hackatons->isEmpty())
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body">
                 <x-empty-state embedded title="Пока нет назначенных хакатонов"
                     description="Организатор ещё не назначил вас судьёй ни на один хакатон." icon="heroicons:scale" />
@@ -45,14 +45,14 @@ new class extends Component {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @foreach ($hackatons as $hackaton)
                 <a href="{{ route('judge.hackatons.show', $hackaton) }}"
-                    class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow">
+                    class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-md">
                     <div class="card-body gap-3">
                         <div class="flex items-start gap-3">
                             @if ($hackaton->image_url)
                                 <img src="{{ PublicStorageUrl::for($hackaton->image_url) }}" alt=""
-                                    class="h-12 w-12 rounded-xl object-cover border border-base-200">
+                                    class="h-12 w-12 rounded-xl object-cover border border-base-300">
                             @else
-                                <div class="h-12 w-12 rounded-xl bg-base-200 border border-base-200"></div>
+                                <div class="h-12 w-12 rounded-xl bg-base-200 border border-base-300"></div>
                             @endif
                             <div class="min-w-0">
                                 <div class="font-bold truncate">{{ $hackaton->title }}</div>
@@ -62,7 +62,7 @@ new class extends Component {
                             </div>
                         </div>
                         <div class="card-actions justify-end">
-                            <span class="btn btn-sm btn-primary">Оценивать</span>
+                            <span class="btn btn-sm btn-neutral">Оценивать</span>
                         </div>
                     </div>
                 </a>

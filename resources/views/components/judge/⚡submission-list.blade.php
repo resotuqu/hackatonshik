@@ -88,28 +88,29 @@ new class extends Component
 ?>
 
 <div class="mx-auto w-full max-w-7xl space-y-6">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-            <div class="text-sm breadcrumbs">
-                <ul>
-                    <li><a href="{{ route('judge.dashboard') }}">Судья</a></li>
-                    <li><a href="{{ route('judge.hackatons.show', $hackaton) }}">{{ $hackaton->title }}</a></li>
-                    <li class="opacity-70">{{ $case->title }}</li>
-                </ul>
+    <section class="ui-page-header">
+        <div class="flex flex-col gap-4 pb-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <div class="text-sm breadcrumbs">
+                    <ul>
+                        <li><a href="{{ route('judge.dashboard') }}">Судья</a></li>
+                        <li><a href="{{ route('judge.hackatons.show', $hackaton) }}">{{ $hackaton->title }}</a></li>
+                        <li class="opacity-70">{{ $case->title }}</li>
+                    </ul>
+                </div>
+                <h1 class="ui-heading-display text-2xl font-bold">Оценивание: {{ $case->title }}</h1>
+                <p class="mt-0.5 text-sm text-base-content/70">Оценено {{ $ratedCount }} из {{ $totalCount }} решений.</p>
             </div>
-            <h1 class="text-2xl font-bold">Оценивание: {{ $case->title }}</h1>
-            <p class="text-sm text-base-content/70">Оценено {{ $ratedCount }} из {{ $totalCount }} решений.</p>
+            <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <select class="select select-bordered select-sm" wire:model.live="status">
+                    <option value="all">Все</option>
+                    <option value="rated">Оценено</option>
+                    <option value="unrated">Не оценено</option>
+                </select>
+                <input class="input input-bordered input-sm" wire:model.live.debounce.400ms="team" placeholder="Фильтр по команде">
+            </div>
         </div>
-
-        <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <select class="select select-bordered select-sm" wire:model.live="status">
-                <option value="all">Все</option>
-                <option value="rated">Оценено</option>
-                <option value="unrated">Не оценено</option>
-            </select>
-            <input class="input input-bordered input-sm" wire:model.live.debounce.400ms="team" placeholder="Фильтр по команде">
-        </div>
-    </div>
+    </section>
 
     <div class="overflow-x-auto">
         <table class="table table-zebra">
@@ -141,7 +142,7 @@ new class extends Component
                             @endif
                         </td>
                         <td class="text-right">
-                            <a href="{{ route('judge.submissions.evaluate', $submission) }}" class="btn btn-sm btn-primary">Открыть</a>
+                            <a href="{{ route('judge.submissions.evaluate', $submission) }}" class="btn btn-sm btn-neutral">Открыть</a>
                         </td>
                     </tr>
                 @empty

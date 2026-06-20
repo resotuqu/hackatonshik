@@ -7,11 +7,13 @@
         </ul>
     </div>
 
-    <header class="space-y-2">
-        <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Итоги хакатона</h1>
-        <p class="text-lg text-base-content/80">{{ $hackaton->title }}</p>
-        <x-marybadge class="{{ $hackaton->status->badgeClass() }}" value="{{ $hackaton->status->label() }}" />
-    </header>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Итоги хакатона</h1>
+            <p class="mt-1 text-base-content/70">{{ $hackaton->title }}</p>
+            <x-marybadge class="{{ $hackaton->status->badgeClass() }} mt-2" value="{{ $hackaton->status->label() }}" />
+        </div>
+    </section>
 
     <div class="card border border-base-300 bg-base-100">
         <div class="card-body">
@@ -41,7 +43,7 @@
                                     <td class="font-semibold tabular-nums">{{ $row['place'] }}</td>
                                     <td>
                                         @if ($row['team'])
-                                            <a href="{{ route('teams.show', $row['team']) }}" class="link link-primary font-medium" wire:navigate>
+                                            <a href="{{ route('teams.show', $row['team']) }}" class="link link-hover font-medium" wire:navigate>
                                                 {{ $row['team']->title }}
                                             </a>
                                         @else

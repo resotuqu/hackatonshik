@@ -9,31 +9,33 @@
             </ul>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold">{{ $hackaton->title }}</h1>
-                <p class="text-sm text-base-content/70">Выберите кейс для оценивания.</p>
+        <section class="ui-page-header">
+            <div class="flex flex-col items-start gap-4 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="ui-heading-display text-2xl font-bold">{{ $hackaton->title }}</h1>
+                    <p class="mt-1 text-sm text-base-content/70">Выберите кейс для оценивания.</p>
+                </div>
+                <a href="{{ route('judge.hackatons.scores.export', $hackaton) }}" class="btn btn-outline btn-sm shrink-0">
+                    Экспорт моих оценок (CSV)
+                </a>
             </div>
-            <a href="{{ route('judge.hackatons.scores.export', $hackaton) }}" class="btn btn-outline btn-sm">
-                Экспорт моих оценок (CSV)
-            </a>
-        </div>
+        </section>
 
         @if(($scoringSummary['unratedSubmissions'] ?? 0) > 0)
-            <div class="alert alert-warning">
-                <span>Осталось {{ $scoringSummary['unratedSubmissions'] }} сдач без финальной оценки.</span>
+            <div class="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-base-content/80">
+                Осталось {{ $scoringSummary['unratedSubmissions'] }} сдач без финальной оценки.
             </div>
         @endif
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto rounded-xl border border-base-300 bg-base-100">
             <table class="table table-zebra">
                 <thead>
-                    <tr>
-                        <th>Кейс</th>
-                        <th>Всего сдач</th>
-                        <th>Оценено</th>
-                        <th>Осталось</th>
-                        <th></th>
+                    <tr class="text-xs uppercase tracking-wide text-base-content/60">
+                        <th class="bg-base-200/80">Кейс</th>
+                        <th class="bg-base-200/80">Всего сдач</th>
+                        <th class="bg-base-200/80">Оценено</th>
+                        <th class="bg-base-200/80">Осталось</th>
+                        <th class="bg-base-200/80"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,7 +53,7 @@
                             </td>
                             <td class="text-right">
                                 <a href="{{ route('judge.cases.submissions', [$hackaton, $caseSummary['id']]) }}?status=unrated"
-                                   class="btn btn-sm btn-primary">
+                                   class="btn btn-sm btn-neutral">
                                     Оценить
                                 </a>
                             </td>

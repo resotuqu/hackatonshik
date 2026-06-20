@@ -164,39 +164,40 @@ new class extends Component
     x-on:keydown.window.prevent.arrow-right="$wire.goNext()"
     x-on:keydown.window.prevent.arrow-left="$wire.goPrev()"
 >
-    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
-        <div>
-            <div class="text-sm breadcrumbs">
-                <ul>
-                    <li><a href="{{ route('judge.dashboard') }}">Судья</a></li>
-                    <li><a href="{{ route('judge.hackatons.show', $submission->case->hackaton_id) }}">Хакатон</a></li>
-                    <li><a href="{{ route('judge.cases.submissions', [$submission->case->hackaton_id, $submission->case->id]) }}">Кейс</a></li>
-                    <li class="opacity-70">Оценка</li>
-                </ul>
+    <section class="ui-page-header">
+        <div class="flex flex-col gap-4 pb-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <div class="text-sm breadcrumbs">
+                    <ul>
+                        <li><a href="{{ route('judge.dashboard') }}">Судья</a></li>
+                        <li><a href="{{ route('judge.hackatons.show', $submission->case->hackaton_id) }}">Хакатон</a></li>
+                        <li><a href="{{ route('judge.cases.submissions', [$submission->case->hackaton_id, $submission->case->id]) }}">Кейс</a></li>
+                        <li class="opacity-70">Оценка</li>
+                    </ul>
+                </div>
+                <h1 class="ui-heading-display text-2xl font-bold">
+                    {{ $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение') }}
+                </h1>
+                <p class="mt-0.5 text-xs text-base-content/60">
+                    Отправлено: {{ $submission->submitted_at?->format('d.m.Y H:i') }}
+                </p>
             </div>
-            <h1 class="text-2xl font-bold">
-                {{ $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение') }}
-            </h1>
-            <p class="text-xs text-base-content/60">
-                Отправлено: {{ $submission->submitted_at?->format('d.m.Y H:i') }}
-            </p>
+            <div class="flex flex-wrap items-center gap-2">
+                @if($isFinal)
+                    <span class="badge badge-success">Final</span>
+                @else
+                    <span class="badge badge-warning">Draft</span>
+                @endif
+                <button class="btn btn-sm btn-outline" wire:click="goPrev">← Пред.</button>
+                <button class="btn btn-sm btn-outline" wire:click="goNext">След. →</button>
+                <button class="btn btn-sm btn-neutral" wire:click="goToNextUnrated">След. неоценённая</button>
+            </div>
         </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-            @if($isFinal)
-                <span class="badge badge-success">Final</span>
-            @else
-                <span class="badge badge-warning">Draft</span>
-            @endif
-            <button class="btn btn-sm btn-outline" wire:click="goPrev">← Пред.</button>
-            <button class="btn btn-sm btn-outline" wire:click="goNext">След. →</button>
-            <button class="btn btn-sm btn-primary" wire:click="goToNextUnrated">След. неоценённая</button>
-        </div>
-    </div>
+    </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="space-y-4">
-            <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card border border-base-300 bg-base-100">
                 <div class="card-body space-y-3">
                     <div class="flex items-center justify-between">
                         <h2 class="card-title text-lg">Решение</h2>
@@ -204,7 +205,7 @@ new class extends Component
                     </div>
 
                     @foreach($submission->answers as $answer)
-                        <div class="rounded-xl border border-base-200 p-3 bg-base-50/50 space-y-2">
+                        <div class="rounded-xl border border-base-300 p-3 bg-base-50/50 space-y-2">
                             <div class="text-xs font-semibold text-base-content/60">{{ $answer->field->label }}</div>
 
                             @if($answer->field->type === 'file' && $answer->file_path)
@@ -239,7 +240,7 @@ new class extends Component
         </div>
 
         <div class="space-y-4">
-            <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card border border-base-300 bg-base-100">
                 <div class="card-body space-y-4">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="card-title text-lg">Оценка</h2>
@@ -265,7 +266,7 @@ new class extends Component
                             @endphp
 
                             @if($id !== '' && $max > 0)
-                                <div class="rounded-xl border border-base-200 p-3 space-y-2">
+                                <div class="rounded-xl border border-base-300 p-3 space-y-2">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
                                             <div class="font-semibold text-sm truncate">{{ $label }}</div>
@@ -331,7 +332,7 @@ new class extends Component
                         <button class="btn btn-sm btn-outline" wire:click="saveDraft" wire:loading.attr="disabled">
                             Сохранить черновик
                         </button>
-                        <button class="btn btn-sm btn-primary" wire:click="finalize" wire:loading.attr="disabled">
+                        <button class="btn btn-sm btn-neutral" wire:click="finalize" wire:loading.attr="disabled">
                             Финализировать
                         </button>
                     </div>
