@@ -26,7 +26,7 @@
     @else
         <ul class="space-y-3">
             @foreach ($activities as $activity)
-                <li class="border-l-2 border-primary/25 pl-4">
+                <li class="border-l-2 border-base-300 pl-4">
                     <p class="text-sm text-base-content/90">{{ ActivityDescription::format($activity) }}</p>
                     <p class="mt-1 text-xs text-base-content/50">
                         {{ ActivityDescription::actorName($activity) }}

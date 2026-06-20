@@ -9,18 +9,20 @@
 
     <x-profile-nav-tabs active="hackatons" />
 
-    <header class="space-y-2">
-        <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Мои заявки и хакатоны</h1>
-        <p class="text-base-content/70">Заявки ваших команд, участие в событиях и быстрые переходы в рабочие пространства.</p>
-    </header>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Мои заявки и хакатоны</h1>
+            <p class="mt-1 text-base-content/70">Заявки ваших команд, участие в событиях и быстрые переходы в рабочие пространства.</p>
+        </div>
+    </section>
 
     @if ($participantNextStepTitle !== '')
-        <div class="rounded-xl border border-primary/20 bg-primary/10 p-4 shadow-sm">
-            <p class="text-xs text-primary/80">Ваш следующий шаг</p>
+        <div class="rounded-xl border border-base-300 bg-base-100 p-4">
+            <p class="text-xs text-base-content/60">Ваш следующий шаг</p>
             <p class="mt-1 font-semibold">{{ $participantNextStepTitle }}</p>
-            <p class="mt-1 text-sm text-base-content/80">{{ $participantNextStepHint }}</p>
+            <p class="mt-1 text-sm text-base-content/70">{{ $participantNextStepHint }}</p>
             @if ($participantNextStepHref && $participantNextStepLabel)
-                <a href="{{ $participantNextStepHref }}" class="btn btn-primary btn-sm mt-3">{{ $participantNextStepLabel }}</a>
+                <a href="{{ $participantNextStepHref }}" class="btn btn-neutral btn-sm mt-3">{{ $participantNextStepLabel }}</a>
             @endif
         </div>
     @endif
@@ -49,10 +51,10 @@
     </div>
 
     @if (count($hackatonApplicationsPreview) > 0)
-        <x-marycard title="Заявки команд на хакатоны" class="card card-border bg-base-100 shadow-sm w-full">
+        <x-marycard title="Заявки команд на хакатоны" class="card border border-base-300 bg-base-100 w-full">
             <ul class="space-y-2">
                 @foreach ($hackatonApplicationsPreview as $row)
-                    <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-200 pb-2 last:border-0">
+                    <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
                         <div>
                             <a href="{{ route('hackatons.show', $row['hackaton_id']) }}#participant-hackaton-applications" class="link link-primary font-medium">{{ $row['title'] }}</a>
                             <span class="text-sm text-base-content/70"> — {{ $row['team_title'] }}</span>
@@ -65,10 +67,10 @@
     @endif
 
     @if (count($participantHackatons) > 0)
-        <x-marycard title="Хакатоны" class="card card-border bg-base-100 shadow-sm w-full">
+        <x-marycard title="Хакатоны" class="card border border-base-300 bg-base-100 w-full">
             <ul class="space-y-2">
                 @foreach ($participantHackatons as $row)
-                    <li class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 pb-2 last:border-0">
+                    <li class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
                         <div class="flex min-w-0 flex-1 flex-wrap items-baseline gap-2">
                             <a href="{{ route('hackatons.show', $row['id']) }}" class="link link-primary font-medium">{{ $row['title'] }}</a>
                             @if ($row['start_at'])

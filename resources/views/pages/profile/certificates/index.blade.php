@@ -30,7 +30,17 @@
         </ul>
     </div>
 
-    <x-mary-card title="Мои сертификаты" class="card card-border bg-base-100">
+    <x-profile-nav-tabs active="certificates" />
+
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Мои сертификаты</h1>
+            <p class="mt-1 text-base-content/70">Сертификаты, полученные за участие в хакатонах.</p>
+        </div>
+    </section>
+
+    <div class="card border border-base-300 bg-base-100">
+        <div class="card-body">
         @if($this->certificates->isEmpty())
             <p class="text-base-content/70">Сертификаты пока не выданы.</p>
         @else
@@ -41,7 +51,7 @@
                         <p class="text-sm text-base-content/70">{{ $certificate->hackaton->title }}</p>
                         <p class="mt-1 text-xs text-base-content/60">{{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</p>
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <a href="{{ route('certificates.download', $certificate) }}" class="btn btn-sm btn-primary">Скачать</a>
+                            <a href="{{ route('certificates.download', $certificate) }}" class="btn btn-sm btn-neutral">Скачать</a>
                             <button
                                 type="button"
                                 class="btn btn-sm btn-outline"
@@ -54,6 +64,7 @@
                 @endforeach
             </div>
         @endif
-    </x-mary-card>
+        </div>
+    </div>
 </div>
     </div>

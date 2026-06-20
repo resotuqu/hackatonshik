@@ -395,7 +395,7 @@
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach($hackatons as $hackaton)
-            <x-marycard wire:key="hackaton-card-{{ $hackaton->id }}" class="card card-border @if($hackaton->pending_applications_count > 0) border-error/40 ring-1 ring-error/20 @endif">
+            <x-marycard wire:key="hackaton-card-{{ $hackaton->id }}" class="card border @if($hackaton->pending_applications_count > 0) border-error/40 ring-1 ring-error/20 @else border-base-300 @endif bg-base-100">
                 <div class="aspect-video overflow-hidden rounded-xl bg-base-200">
                     @if(filled($hackaton->image_url))
                         <img src="{{ \App\Support\PublicStorageUrl::for($hackaton->image_url) }}" class="h-full w-full object-cover" alt="{{ $hackaton->title }}">

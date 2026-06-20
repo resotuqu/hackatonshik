@@ -18,31 +18,19 @@
             </ul>
         </nav>
 
-        {{-- Hero --}}
-        <div class="card border border-base-300 bg-base-100 shadow-sm overflow-hidden">
-            <div class="bg-linear-to-br from-primary/5 to-secondary/5 px-8 py-12">
-                <div class="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
-                    <div class="space-y-4">
-                        <div class="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-                            <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
-                            МОИ КОМАНДЫ
-                        </div>
-                        <h1 class="font-display text-4xl font-semibold tracking-tight text-base-content sm:text-5xl">
-                            Ваши команды
-                        </h1>
-                        <p class="max-w-lg text-base text-base-content/70">
-                            Управляйте составом, вакансиями и заявками в одном месте
-                        </p>
-                    </div>
-
-                    <a href="/teams/create" wire:navigate
-                       class="btn btn-primary btn-lg gap-3">
-                        <x-app-icon icon="heroicons:plus" class="h-5 w-5" />
-                        Создать команду
-                    </a>
+        {{-- Header --}}
+        <section class="ui-page-header">
+            <div class="flex flex-col items-start gap-4 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl">Ваши команды</h1>
+                    <p class="mt-1 text-base-content/70">Управляйте составом, вакансиями и заявками в одном месте.</p>
                 </div>
+                <a href="/teams/create" wire:navigate class="btn btn-neutral btn-sm shrink-0 gap-2">
+                    <x-app-icon icon="heroicons:plus" class="h-4 w-4" />
+                    Создать команду
+                </a>
             </div>
-        </div>
+        </section>
 
         {{-- Заявки на роли --}}
         <section class="card border border-base-300 bg-base-100 p-6 sm:p-8" aria-labelledby="pending-apps-heading">
@@ -95,7 +83,7 @@
                     @endphp
 
                     <article wire:key="my-team-{{ $team->id }}"
-                             class="card border border-base-300 bg-base-100 overflow-hidden hover:border-primary/30 hover:shadow-xl transition-all group">
+                             class="card border border-base-300 bg-base-100 overflow-hidden transition-shadow hover:shadow-md group">
                         
                         <x-team-cover
                             :title="$team->title"
@@ -115,18 +103,18 @@
 
                             <div class="grid grid-cols-2 gap-4 mb-6">
                                 <div class="text-center bg-base-200/60 rounded-2xl py-4">
-                                    <div class="text-3xl font-bold text-primary">{{ $team->roles_count ?? $team->roles->count() }}</div>
+                                    <div class="text-3xl font-bold text-base-content">{{ $team->roles_count ?? $team->roles->count() }}</div>
                                     <div class="text-xs font-medium uppercase tracking-widest text-base-content/60">Ролей</div>
                                 </div>
                                 <div class="text-center bg-base-200/60 rounded-2xl py-4">
-                                    <div class="text-3xl font-bold text-secondary">{{ $openSlots }}</div>
+                                    <div class="text-3xl font-bold text-base-content">{{ $openSlots }}</div>
                                     <div class="text-xs font-medium uppercase tracking-widest text-base-content/60">Свободно</div>
                                 </div>
                             </div>
 
                             <div class="mt-auto flex flex-col gap-2 sm:flex-row">
                                 <a href="{{ route('teams.show', $team) }}" wire:navigate
-                                   class="btn btn-primary flex-1 gap-2">
+                                   class="btn btn-neutral flex-1 gap-2">
                                     <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
                                     Просмотреть
                                 </a>

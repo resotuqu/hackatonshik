@@ -81,7 +81,7 @@
                     <h2 class="ui-heading-display text-xl font-bold">Что сделать сейчас</h2>
                     <ul class="space-y-2">
                         @foreach($checklist['items'] as $item)
-                            <li class="flex items-start gap-3 rounded-xl border border-base-200 p-3 {{ $item['done'] ? 'bg-success/5' : 'bg-warning/5' }}">
+                            <li class="flex items-start gap-3 rounded-xl border border-base-300p-3 {{ $item['done'] ? 'bg-success/5' : 'bg-warning/5' }}">
                                 @if($item['done'])
                                     <x-app-icon icon="heroicons:check-circle" class="h-5 w-5 text-success shrink-0 mt-0.5" />
                                 @else
@@ -97,7 +97,7 @@
                         @endforeach
                     </ul>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                        <div class="rounded-xl border border-base-200 p-3">
+                        <div class="rounded-xl border border-base-300p-3">
                             <p class="text-xs text-base-content/50">Документы</p>
                             <progress
                                 class="progress progress-primary w-full mt-2"
@@ -106,7 +106,7 @@
                             ></progress>
                             <p class="mt-1 tabular-nums">{{ $checklist['documentsProgress']['uploaded'] }}/{{ $checklist['documentsProgress']['required'] }}</p>
                         </div>
-                        <div class="rounded-xl border border-base-200 p-3">
+                        <div class="rounded-xl border border-base-300p-3">
                             <p class="text-xs text-base-content/50">Сдачи кейсов (команда)</p>
                             <progress
                                 class="progress progress-secondary w-full mt-2"
@@ -148,7 +148,7 @@
         @endif
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <article class="card border border-base-200 bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body">
                     <h2 class="card-title text-lg">Статусы заявок</h2>
                     @if($applications->isEmpty())
@@ -176,7 +176,7 @@
                 </div>
             </article>
 
-            <article class="card border border-base-200 bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body">
                     <h2 class="card-title text-lg">Обязательные документы</h2>
                     @if($requiredDocuments->isEmpty())
@@ -203,7 +203,7 @@
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <article class="card border border-base-200 bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body">
                     <h2 class="card-title text-lg">Ближайшие дедлайны кейсов</h2>
                     @if($upcomingCases->isEmpty())
@@ -226,7 +226,7 @@
                 </div>
             </article>
 
-            <article class="card border border-base-200 bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body">
                     <h2 class="card-title text-lg">Последние отправки</h2>
                     @if($submissions->isEmpty())

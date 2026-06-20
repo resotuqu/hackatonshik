@@ -9,52 +9,54 @@
 
     <x-profile-nav-tabs active="personal" />
 
-    {{-- HERO --}}
-    <section class="ui-page-hero">
-        <div class="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-                <div class="avatar">
-                    <div class="w-32 rounded-full ring-2 ring-secondary/40 ring-offset-2 ring-offset-base-100 sm:w-36">
-                        <img src="{{ $this->currentAvatarUrl }}" alt="Аватар пользователя" />
+    {{-- HEADER --}}
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+                    <div class="avatar">
+                        <div class="w-24 rounded-full ring-2 ring-base-300 ring-offset-2 ring-offset-base-100 sm:w-28">
+                            <img src="{{ $this->currentAvatarUrl }}" alt="Аватар пользователя" />
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <span class="badge badge-neutral badge-outline">{{ $role }}</span>
+                        <h1 class="font-display text-3xl font-semibold tracking-tight lg:text-4xl">
+                            {{ $fio ?: 'Без имени' }}
+                        </h1>
+                        <p class="text-base text-base-content/70">{{ '@'.$nickname }}</p>
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/75">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="font-semibold text-base-content">{{ $this->joinedHackatonsCount }}</span>
+                                хакатонов
+                            </span>
+                            <span class="text-base-content/30">·</span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="font-semibold text-base-content">{{ $this->joinedTeamsCount }}</span>
+                                команд
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <span class="badge badge-primary badge-outline">{{ $role }}</span>
-                    <h1 class="font-display text-3xl font-semibold tracking-tight lg:text-4xl">
-                        {{ $fio ?: 'Без имени' }}
-                    </h1>
-                    <p class="text-base text-base-content/70">{{ '@'.$nickname }}</p>
-                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/75">
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="font-semibold text-secondary">{{ $this->joinedHackatonsCount }}</span>
-                            хакатонов
-                        </span>
-                        <span class="text-base-content/30">·</span>
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="font-semibold text-secondary">{{ $this->joinedTeamsCount }}</span>
-                            команд
-                        </span>
+
+                <div class="flex flex-row items-center gap-4 md:flex-col md:items-end">
+                    <div class="radial-progress text-base-content/40" style="--value:{{ $this->profileCompletenessPercent }};--size:4.5rem;--thickness:5px" role="progressbar" aria-valuenow="{{ $this->profileCompletenessPercent }}" aria-valuemin="0" aria-valuemax="100">
+                        <span class="text-sm font-semibold text-base-content">{{ $this->profileCompletenessPercent }}%</span>
                     </div>
+                    <a href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">
+                        <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
+                        Посмотреть как другие
+                    </a>
                 </div>
             </div>
 
-            <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-5 md:flex-col md:items-end">
-                <div class="radial-progress text-secondary" style="--value:{{ $this->profileCompletenessPercent }};--size:5rem;--thickness:6px" role="progressbar" aria-valuenow="{{ $this->profileCompletenessPercent }}" aria-valuemin="0" aria-valuemax="100">
-                    <span class="text-sm font-semibold text-base-content">{{ $this->profileCompletenessPercent }}%</span>
+            <div class="mt-4 space-y-1.5">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-base-content/60">Заполненность профиля</span>
+                    <span class="font-medium text-base-content">{{ $this->profileCompletenessPercent }}%</span>
                 </div>
-                <a href="{{ route('profile.public.show', ['user' => auth()->user()->nickname]) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline btn-secondary">
-                    <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
-                    Посмотреть как другие
-                </a>
+                <progress class="progress w-full" value="{{ $this->profileCompletenessPercent }}" max="100"></progress>
             </div>
-        </div>
-
-        <div class="relative mt-6 space-y-2">
-            <div class="flex items-center justify-between text-sm">
-                <span class="text-base-content/70">Заполненность профиля</span>
-                <span class="font-medium text-secondary">{{ $this->profileCompletenessPercent }}%</span>
-            </div>
-            <progress class="progress progress-secondary w-full" value="{{ $this->profileCompletenessPercent }}" max="100"></progress>
         </div>
     </section>
 
@@ -309,7 +311,7 @@
             <section class="card border border-base-300 bg-base-100">
                 <div class="card-body gap-3">
                     <h2 class="card-title text-base">
-                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 text-secondary" />
+                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 text-base-content/60" />
                         Верификация
                     </h2>
 
@@ -356,23 +358,23 @@
             </section>
 
             {{-- Public preview --}}
-            <section class="card border border-base-300 bg-linear-to-br from-base-100 to-primary/5">
+            <section class="card border border-base-300 bg-base-100">
                 <div class="card-body gap-4">
                     <h2 class="card-title text-base">
-                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 text-secondary" />
+                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 text-base-content/60" />
                         Как видят другие
                     </h2>
                     <div class="rounded-2xl border border-base-300 bg-base-100 p-4">
                         <div class="flex items-center gap-3">
                             <div class="avatar">
-                                <div class="w-14 rounded-full ring-1 ring-secondary/30">
+                                <div class="w-14 rounded-full ring-1 ring-base-300">
                                     <img src="{{ $this->currentAvatarUrl }}" alt="Превью аватара" />
                                 </div>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="truncate font-semibold">{{ $fio ?: '—' }}</p>
                                 <p class="truncate text-xs text-base-content/70">{{ '@'.$nickname }}</p>
-                                <span class="badge badge-primary badge-outline badge-sm mt-1">{{ $role }}</span>
+                                <span class="badge badge-neutral badge-outline badge-sm mt-1">{{ $role }}</span>
                             </div>
                         </div>
                         <p
@@ -396,16 +398,16 @@
 
             {{-- Tips --}}
             @if (! empty($this->missingProfileTips))
-                <section class="card border border-secondary/20 bg-secondary/5">
+                <section class="card border border-base-300 bg-base-100">
                     <div class="card-body gap-3">
                         <h2 class="card-title text-base">
-                            <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-secondary" />
+                            <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-base-content/60" />
                             Что добавить
                         </h2>
                         <ul class="space-y-2 text-sm">
                             @foreach ($this->missingProfileTips as $tip)
                                 <li class="flex items-start gap-2">
-                                    <x-app-icon icon="heroicons:plus-circle" class="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                                    <x-app-icon icon="heroicons:plus-circle" class="mt-0.5 h-4 w-4 shrink-0 text-base-content/50" />
                                     <span>{{ $tip }}</span>
                                 </li>
                             @endforeach
