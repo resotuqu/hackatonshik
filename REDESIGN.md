@@ -1,7 +1,7 @@
 # Редизайн — план и прогресс
 
 Тег точки отсчёта: **v0.1** (commit `3b67f31`)
-Последний выполненный этап: **Этап 6** (commit `f0cd171`)
+Последний выполненный этап: **Этап 7** (commit `25e4502`)
 
 ---
 
@@ -104,24 +104,21 @@
 
 ---
 
-### ⬜ Этап 7 — Кабинет организатора
+### ✅ Этап 7 — Кабинет организатора (commit `25e4502`)
 
-Файлы:
-
-| Файл | Что менять |
+| Файл | Изменение |
 |---|---|
-| `resources/views/pages/organizer/dashboard.blade.php` | Метрики → горизонтальный ряд stat-плашек |
-| `resources/views/components/hackatons/organizer-header-metrics.blade.php` | Привести к стилю |
-| `resources/views/components/hackatons/organizer-lifecycle-bar.blade.php` | Привести к стилю |
-| `resources/views/components/hackatons/organizer-readiness-checklist.blade.php` | Привести к стилю |
-| `resources/views/components/hackatons/organizer-action-center.blade.php` | Привести к стилю |
-| `resources/views/pages/hackatons/create.blade.php` | Двухколоночный layout полей формы |
-| `resources/views/pages/hackatons/edit.blade.php` | Двухколоночный layout полей формы |
-| `resources/views/pages/teams/create.blade.php` | Привести к стилю |
-| `resources/views/pages/teams/edit.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/hackatons/applications.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/hackatons/scoring.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/hackatons/finished.blade.php` | Привести к стилю |
+| `resources/views/components/hackatons/organizer-header-metrics.blade.php` | `border-base-300/50 bg-base-100/80` → `border-base-300 bg-base-100` |
+| `resources/views/components/hackatons/organizer-lifecycle-bar.blade.php` | `border-base-300/60` → `border-base-300` |
+| `resources/views/components/hackatons/organizer-readiness-checklist.blade.php` | `border-base-300/60 bg-base-200/30` → `border-base-300 bg-base-100` |
+| `resources/views/components/hackatons/organizer-action-center.blade.php` | `border-primary/20 bg-primary/5` → `border-base-300 bg-base-100`; `text-primary/80` → `text-base-content/55` |
+| `resources/views/pages/hackatons/create.blade.php` | `card-border` → `border border-base-300`; `badge-primary` → `badge-neutral`; `progress-primary` → `progress`; `checkbox-primary` → `checkbox`; info-блок `border-info/25 bg-info/10` → нейтральный |
+| `resources/views/pages/hackatons/edit.blade.php` | `card-border` → `border border-base-300`; `progress-primary` → `progress`; `checkbox-primary` → `checkbox`; `btn-primary` добавить документ → `btn-neutral` |
+| `resources/views/pages/teams/create.blade.php` | `card-border border-base-200/80 shadow-sm` → `border border-base-300`; `progress-primary` → `progress`; `border-base-200` → `border-base-300` |
+| `resources/views/pages/teams/edit.blade.php` | Нейтральный круг инициалов; `text-secondary/text-primary` → `text-base-content`; `bg-primary` прогресс → `bg-base-content/40`; иконки `text-primary` → `text-base-content/60`; убраны `shadow-sm` |
+| `resources/views/pages/profile/hackatons/applications.blade.php` | `<header>` → `ui-page-header` |
+| `resources/views/pages/profile/hackatons/scoring.blade.php` | `<header>` → `ui-page-header`; убран `shadow-sm` на таблице |
+| `resources/views/pages/profile/hackatons/finished.blade.php` | `<header>` → `ui-page-header` |
 
 ---
 
