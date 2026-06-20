@@ -18,7 +18,7 @@
         </ul>
     </div>
 
-    <x-marycard class="card card-border bg-base-100">
+    <x-marycard class="card border border-base-300 bg-base-100">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-semibold">Создание хакатона</h1>
@@ -26,21 +26,21 @@
                     {{ $wizardLabels[$wizardStep] ?? '' }}
                 </p>
             </div>
-            <x-marybadge class="badge-primary" value="Шаг {{ $wizardStep }} из {{ \App\Livewire\Pages\Hackatons\Create::WIZARD_LAST_STEP }}" />
+            <x-marybadge class="badge-neutral" value="Шаг {{ $wizardStep }} из {{ \App\Livewire\Pages\Hackatons\Create::WIZARD_LAST_STEP }}" />
         </div>
     </x-marycard>
 
-    <x-marycard class="card card-border bg-base-100">
+    <x-marycard class="card border border-base-300 bg-base-100">
         <div class="space-y-2">
             <div class="flex items-center justify-between gap-2">
                 <p class="text-sm font-medium">Прогресс мастера</p>
                 <span class="text-sm text-base-content/70">{{ $wizardStep }}/{{ \App\Livewire\Pages\Hackatons\Create::WIZARD_LAST_STEP }}</span>
             </div>
-            <progress class="progress progress-primary w-full" value="{{ (int) round(($wizardStep / max(\App\Livewire\Pages\Hackatons\Create::WIZARD_LAST_STEP, 1)) * 100) }}" max="100"></progress>
+            <progress class="progress w-full" value="{{ (int) round(($wizardStep / max(\App\Livewire\Pages\Hackatons\Create::WIZARD_LAST_STEP, 1)) * 100) }}" max="100"></progress>
         </div>
     </x-marycard>
 
-    <x-marycard class="w-full justify-self-center card card-border bg-base-100">
+    <x-marycard class="w-full justify-self-center card border border-base-300 bg-base-100">
         <x-maryform wire:submit="wizardSubmit" class="space-y-6">
             @if ($wizardStep === 1)
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
@@ -109,14 +109,14 @@
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
                     <h2 class="text-lg font-semibold">Шаг 3 — Видимость и кейсы</h2>
                     <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-base-300 bg-base-200/40 p-4">
-                        <input type="checkbox" class="checkbox checkbox-primary" wire:model.live="is_public" />
+                        <input type="checkbox" class="checkbox" wire:model.live="is_public" />
                         <span>
                             <span class="label-text font-semibold">Публичный хакатон</span>
                             <span class="block text-xs font-normal text-base-content/70">Если выключено, хакатон сохранится как черновик до публикации.</span>
                         </span>
                     </label>
-                    <div class="rounded-xl border border-info/25 bg-info/10 p-4 text-sm text-base-content/80">
-                        <p class="font-medium text-info">Структура кейсов</p>
+                    <div class="rounded-xl border border-base-300 bg-base-100 p-4 text-sm text-base-content/80">
+                        <p class="font-medium text-base-content">Структура кейсов</p>
                         <p class="mt-1">После создания откройте страницу хакатона → вкладка «Кейсы» / «Организация»: добавьте кейсы и поля решения (в т.ч. шаблоны полей по мере развития продукта).</p>
                     </div>
                 </div>
@@ -161,7 +161,7 @@
                                     <h3 class="text-base font-semibold">Документы хакатона</h3>
                                     <p class="text-sm text-base-content/70">Регламенты и документы для участников.</p>
                                 </div>
-                                <x-marybutton type="button" class="btn-primary btn-sm" wire:click="addHackatonDocument">
+                                <x-marybutton type="button" class="btn-neutral btn-sm" wire:click="addHackatonDocument">
                                     Добавить документ
                                 </x-marybutton>
                             </div>

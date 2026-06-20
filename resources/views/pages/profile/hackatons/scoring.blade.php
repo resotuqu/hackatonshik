@@ -8,12 +8,14 @@
         </ul>
     </div>
 
-    <header class="space-y-2">
-        <h1 class="ui-heading-display text-2xl font-black sm:text-3xl">Оценка работ</h1>
-        <p class="max-w-2xl text-sm text-base-content/70">
-            Сводка по отправкам решений и финальным оценкам. Детальная работа судей — в разделе для судей; на странице хакатона — кейсы и материалы.
-        </p>
-    </header>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl">Оценка работ</h1>
+            <p class="mt-1 max-w-2xl text-sm text-base-content/70">
+                Сводка по отправкам решений и финальным оценкам. Детальная работа судей — в разделе для судей; на странице хакатона — кейсы и материалы.
+            </p>
+        </div>
+    </section>
 
     @if($scoringRows->isEmpty())
         <section class="ui-surface-card">
@@ -30,7 +32,7 @@
             </div>
         </section>
     @else
-        <div class="overflow-x-auto rounded-2xl border border-base-300 bg-base-100 shadow-sm">
+        <div class="overflow-x-auto rounded-2xl border border-base-300 bg-base-100">
             <table class="table table-zebra min-w-full">
                 <thead>
                     <tr class="text-xs uppercase tracking-wide text-base-content/60">

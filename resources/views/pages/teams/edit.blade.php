@@ -23,11 +23,11 @@
     </div>
 
     {{-- Header --}}
-    <div class="card border border-base-300 bg-base-100 shadow-sm">
+    <div class="card border border-base-300 bg-base-100">
         <div class="flex flex-col gap-6 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-5">
                 <div
-                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-3xl font-black tracking-tighter text-primary ring-1 ring-primary/30">
+                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-base-200 text-3xl font-black tracking-tighter text-base-content ring-1 ring-base-300">
                     {{ $teamInitials }}
                 </div>
                 <div>
@@ -38,24 +38,24 @@
             </div>
 
             <div class="flex items-center gap-4 rounded-lg border border-base-300 bg-base-200 px-6 py-3">
-                <span class="font-display text-4xl font-black tabular-nums text-secondary">{{ $teamInitials }}</span>
+                <span class="font-display text-4xl font-black tabular-nums text-base-content">{{ $teamInitials }}</span>
                 <div class="max-w-52 truncate text-lg font-semibold">{{ $team->title }}</div>
             </div>
         </div>
     </div>
 
     {{-- Progress --}}
-    <div class="card border border-base-300 bg-base-100 p-6 shadow-sm">
+    <div class="card border border-base-300 bg-base-100 p-6">
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <x-app-icon icon="heroicons:chart-bar" class="h-6 w-6 text-primary" />
+                <x-app-icon icon="heroicons:chart-bar" class="h-6 w-6 text-base-content/60" />
                 <div>
                     <p class="font-semibold">Прогресс заполнения</p>
                     <p class="text-sm text-base-content/60">Чем полнее карточка — тем заметнее команда в каталоге</p>
                 </div>
             </div>
             <div class="text-sm font-semibold tabular-nums">
-                <span class="text-primary">{{ $completedSteps }}</span><span
+                <span class="text-base-content">{{ $completedSteps }}</span><span
                     class="text-base-content/40">/{{ $totalSteps }}</span>
             </div>
         </div>
@@ -65,7 +65,7 @@
                 @php $done = $progressSteps[$i] ?? false; @endphp
                 <div class="flex flex-1 flex-col items-center gap-2 text-center">
                     <div
-                        class="{{ $done ? 'bg-primary text-white ring-2 ring-primary/30' : 'bg-base-200 text-base-content/40' }} flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-semibold transition-colors">
+                        class="{{ $done ? 'bg-base-content text-base-100 ring-2 ring-base-300' : 'bg-base-200 text-base-content/40' }} flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-semibold transition-colors">
                         @if ($done)
                             <x-mary-icon name="o-check" class="h-5 w-5" />
                         @else
@@ -79,7 +79,7 @@
         </div>
 
         <div class="mt-6 h-2.5 w-full overflow-hidden rounded-full bg-base-200">
-            <div class="h-full bg-primary transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
+            <div class="h-full bg-base-content/40 transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
         </div>
         <p class="mt-2 text-right font-mono text-xs text-base-content/50">{{ $progressPercent }}% заполнено</p>
     </div>
@@ -88,9 +88,9 @@
         <div class="grid grid-cols-1 gap-8 xl:grid-cols-2">
 
             {{-- Основная информация --}}
-            <div class="card border border-base-300 bg-base-100 p-7 shadow-sm">
+            <div class="card border border-base-300 bg-base-100 p-7">
                 <div class="flex items-center gap-3 border-b pb-5">
-                    <x-app-icon icon="heroicons:identification" class="h-6 w-6 text-primary" />
+                    <x-app-icon icon="heroicons:identification" class="h-6 w-6 text-base-content/60" />
                     <div>
                         <h2 class="text-xl font-semibold">Основная информация</h2>
                         <p class="text-sm text-base-content/60">Как вас увидят участники и организаторы</p>
@@ -107,9 +107,9 @@
             </div>
 
             {{-- Обложка и хакатон --}}
-            <div class="card border border-base-300 bg-base-100 p-7 shadow-sm">
+            <div class="card border border-base-300 bg-base-100 p-7">
                 <div class="flex items-center gap-3 border-b pb-5">
-                    <x-app-icon icon="heroicons:photo" class="h-6 w-6 text-primary" />
+                    <x-app-icon icon="heroicons:photo" class="h-6 w-6 text-base-content/60" />
                     <div>
                         <h2 class="text-xl font-semibold">Обложка и хакатон</h2>
                         <p class="text-sm text-base-content/60">Яркая обложка помогает выделиться</p>
@@ -139,10 +139,10 @@
         </div>
 
         {{-- Социальные ссылки --}}
-        <div class="card border border-base-300 bg-base-100 p-7 shadow-sm">
+        <div class="card border border-base-300 bg-base-100 p-7">
             <div class="flex items-center justify-between border-b pb-5">
                 <div class="flex items-center gap-3">
-                    <x-app-icon icon="heroicons:link" class="h-6 w-6 text-primary" />
+                    <x-app-icon icon="heroicons:link" class="h-6 w-6 text-base-content/60" />
                     <div>
                         <h2 class="text-xl font-semibold">Социальные ссылки</h2>
                         <p class="text-sm text-base-content/60">Контакты для участников</p>
@@ -199,10 +199,10 @@
         </div>
 
         {{-- Роли в команде --}}
-        <div class="card border border-base-300 bg-base-100 p-7 shadow-sm">
+        <div class="card border border-base-300 bg-base-100 p-7">
             <div class="flex items-center justify-between border-b pb-5">
                 <div class="flex items-center gap-3">
-                    <x-app-icon icon="heroicons:user-group" class="h-6 w-6 text-primary" />
+                    <x-app-icon icon="heroicons:user-group" class="h-6 w-6 text-base-content/60" />
                     <div>
                         <h2 class="text-xl font-semibold">Роли в команде</h2>
                         <p class="text-sm text-base-content/60">Управляйте вакансиями и своей ролью капитана</p>

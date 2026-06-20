@@ -3,7 +3,7 @@
 ])
 
 @if(count($items) > 0)
-    <section class="rounded-2xl border border-base-300/60 bg-base-200/30 p-4 sm:p-5" aria-label="Чек-лист готовности">
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5" aria-label="Чек-лист готовности">
         <h2 class="text-sm font-bold uppercase tracking-widest text-base-content/55">Прогресс подготовки</h2>
         <ul class="mt-3 space-y-2">
             @foreach($items as $row)

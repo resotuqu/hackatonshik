@@ -35,7 +35,7 @@
         </ul>
     </div>
 
-    <x-marycard class="card card-border bg-base-100">
+    <x-marycard class="card border border-base-300 bg-base-100">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-semibold">Редактирование хакатона</h1>
@@ -47,18 +47,18 @@
         </div>
     </x-marycard>
 
-    <x-marycard class="card card-border bg-base-100">
+    <x-marycard class="card border border-base-300 bg-base-100">
         <div class="space-y-2">
             <div class="flex items-center justify-between gap-2">
                 <p class="text-sm font-medium">Прогресс заполнения</p>
                 <span class="text-sm text-base-content/70">{{ $completedSteps }}/{{ $totalSteps }}</span>
             </div>
-            <progress class="progress progress-primary w-full" value="{{ $progressPercent }}" max="100"></progress>
+            <progress class="progress w-full" value="{{ $progressPercent }}" max="100"></progress>
             <p class="text-xs text-base-content/70">{{ $progressPercent }}% заполнено</p>
         </div>
     </x-marycard>
 
-    <x-marycard class="w-full justify-self-center card card-border bg-base-100">
+    <x-marycard class="w-full justify-self-center card border border-base-300 bg-base-100">
         <x-maryform wire:submit="save" class="space-y-6">
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
@@ -158,7 +158,7 @@
                         <h2 class="text-lg font-semibold">Документы хакатона</h2>
                         <p class="text-sm text-base-content/70">Редактируйте существующие документы и добавляйте новые.</p>
                     </div>
-                    <x-marybutton type="button" class="btn-primary btn-sm" wire:click="addHackatonDocument">
+                    <x-marybutton type="button" class="btn-neutral btn-sm" wire:click="addHackatonDocument">
                         Добавить документ
                     </x-marybutton>
                 </div>
@@ -211,15 +211,15 @@
             <div class="card border border-base-300 bg-base-100/50 p-4 sm:p-5 space-y-4">
                 <h2 class="text-lg font-semibold">Автоматизации после завершения</h2>
                 <label class="label cursor-pointer justify-start gap-3">
-                    <input type="checkbox" class="checkbox checkbox-primary" wire:model="auto_publish_results_announcement" />
+                    <input type="checkbox" class="checkbox" wire:model="auto_publish_results_announcement" />
                     <span class="label-text">Автоматически опубликовать анонс с итогами</span>
                 </label>
                 <label class="label cursor-pointer justify-start gap-3">
-                    <input type="checkbox" class="checkbox checkbox-primary" wire:model="is_results_public" />
+                    <input type="checkbox" class="checkbox" wire:model="is_results_public" />
                     <span class="label-text">Публичная страница итогов (рейтинг команд)</span>
                 </label>
                 <label class="label cursor-pointer justify-start gap-3">
-                    <input type="checkbox" class="checkbox checkbox-primary" wire:model="auto_issue_certificates" />
+                    <input type="checkbox" class="checkbox" wire:model="auto_issue_certificates" />
                     <span class="label-text">Автоматически выдать сертификаты участникам</span>
                 </label>
                 <x-maryfile wire:model="certificateTemplate" label="Шаблон сертификата (PDF)" hint="Нужен для автовыдачи сертификатов" />
@@ -239,7 +239,7 @@
     </x-marycard>
 
     @can('viewActivityHistory', $hackaton)
-        <x-marycard class="card card-border bg-base-100">
+        <x-marycard class="card border border-base-300 bg-base-100">
             <x-activity-timeline :subject="$hackaton" :limit="20" />
         </x-marycard>
     @endcan

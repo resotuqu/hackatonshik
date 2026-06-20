@@ -13,7 +13,7 @@
     </div>
 
     <x-mary-card
-        class="card card-border border-base-200/80 bg-base-100 shadow-sm transition motion-safe:duration-200 hover:shadow-md"
+        class="card border border-base-300 bg-base-100"
     >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0 space-y-1">
@@ -23,7 +23,7 @@
                 </p>
             </div>
             <div
-                class="flex shrink-0 flex-col items-stretch gap-2 rounded-2xl border border-base-200 bg-base-200/40 px-4 py-3 sm:items-end sm:text-right"
+                class="flex shrink-0 flex-col items-stretch gap-2 rounded-2xl border border-base-300 bg-base-200/40 px-4 py-3 sm:items-end sm:text-right"
             >
                 <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Прогресс</span>
                 <span class="text-sm font-semibold text-base-content">
@@ -37,12 +37,12 @@
     </x-mary-card>
 
     <x-mary-card
-        class="card card-border w-full justify-self-center border-base-200/80 bg-base-100 shadow-sm transition motion-safe:duration-200 hover:shadow-md"
+        class="card card-border w-full justify-self-center border-base-300 bg-base-100 shadow-sm transition motion-safe:duration-200 hover:shadow-md"
     >
         <x-maryform wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}" class="space-y-8">
             <div class="space-y-4">
                 <progress
-                    class="progress progress-primary h-2 w-full"
+                    class="progress h-2 w-full"
                     max="100"
                     value="{{ $progressPercent }}"
                 ></progress>
@@ -79,9 +79,9 @@
             <div wire:key="wizard-step-{{ $step }}" class="space-y-6">
                 @if ($step === 1)
                     <div
-                        class="card rounded-2xl border border-base-200 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
+                        class="card rounded-2xl border border-base-300bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
                     >
-                        <div class="space-y-1 border-b border-base-200/80 pb-4">
+                        <div class="space-y-1 border-b border-base-300 pb-4">
                             <h2 class="text-xl font-semibold tracking-tight">Основная информация</h2>
                             <p class="text-sm text-base-content/65">Как вас увидят участники и организаторы.</p>
                         </div>
@@ -104,7 +104,7 @@
                                     />
                                 </div>
                                 <div
-                                    class="rounded-2xl border border-base-200 bg-base-200/40 px-4 py-3 text-sm leading-relaxed text-base-content/70"
+                                    class="rounded-2xl border border-base-300bg-base-200/40 px-4 py-3 text-sm leading-relaxed text-base-content/70"
                                 >
                                     <p class="mb-2 font-medium text-base-content/80">Пример структуры</p>
                                     <p class="mb-1 font-mono text-xs text-base-content/60">
@@ -121,9 +121,9 @@
 
                 @if ($step === 2)
                     <div
-                        class="card rounded-2xl border border-base-200 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
+                        class="card rounded-2xl border border-base-300bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
                     >
-                        <div class="space-y-1 border-b border-base-200/80 pb-4">
+                        <div class="space-y-1 border-b border-base-300 pb-4">
                             <h2 class="text-xl font-semibold tracking-tight">Обложка и хакатон</h2>
                             <p class="text-sm text-base-content/65">Яркая обложка помогает выделиться в каталоге команд.</p>
                         </div>
@@ -170,9 +170,9 @@
 
                 @if ($step === 3)
                     <div
-                        class="card rounded-2xl border border-base-200 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
+                        class="card rounded-2xl border border-base-300bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
                     >
-                        <div class="flex flex-col gap-4 border-b border-base-200/80 pb-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="flex flex-col gap-4 border-b border-base-300 pb-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="min-w-0 space-y-1">
                                 <h2 class="text-xl font-semibold tracking-tight">Социальные ссылки</h2>
                                 <p class="text-sm text-base-content/65">
@@ -263,7 +263,7 @@
                 @endif
 
                 @if ($step === 4)
-    <div class="rounded-2xl border border-base-200 bg-base-100 p-6 shadow-sm sm:p-8">
+    <div class="rounded-2xl border border-base-300bg-base-100 p-6 shadow-sm sm:p-8">
         
         {{-- Шапка секции --}}
         <div class="flex flex-col gap-5 border-b border-base-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -342,7 +342,7 @@
             </div>
 
             <x-slot:actions
-                class="flex w-full flex-col gap-3 border-t border-base-200/80 pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+                class="flex w-full flex-col gap-3 border-t border-base-300 pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
             >
                 <x-mary-button
                     link="/profile/teams"

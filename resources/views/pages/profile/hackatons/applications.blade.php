@@ -8,12 +8,14 @@
         </ul>
     </div>
 
-    <header class="space-y-2">
-        <h1 class="ui-heading-display text-2xl font-black sm:text-3xl">Заявки на рассмотрении</h1>
-        <p class="max-w-2xl text-sm text-base-content/70">
-            Все команды, ожидающие решения организатора. Примите или отклоните заявку — команда получит уведомление.
-        </p>
-    </header>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl">Заявки на рассмотрении</h1>
+            <p class="mt-1 max-w-2xl text-sm text-base-content/70">
+                Все команды, ожидающие решения организатора. Примите или отклоните заявку — команда получит уведомление.
+            </p>
+        </div>
+    </section>
 
     @if($this->pendingApplications->isEmpty())
         <section class="ui-surface-card">

@@ -10,7 +10,7 @@
 @endphp
 
 @if(count($steps) > 0)
-    <section class="ui-surface-soft rounded-2xl border border-base-300/60 p-4 sm:p-5" aria-label="Статус хакатона">
+    <section class="ui-surface-soft rounded-2xl border border-base-300 p-4 sm:p-5" aria-label="Статус хакатона">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Жизненный цикл</p>

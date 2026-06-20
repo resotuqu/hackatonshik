@@ -8,12 +8,14 @@
         </ul>
     </div>
 
-    <header class="space-y-2">
-        <h1 class="ui-heading-display text-2xl font-black sm:text-3xl">Завершённые хакатоны</h1>
-        <p class="max-w-2xl text-sm text-base-content/70">
-            События со статусом «Завершён» или «Архив» — итоги, отчёты и материалы доступны со страницы хакатона.
-        </p>
-    </header>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl">Завершённые хакатоны</h1>
+            <p class="mt-1 max-w-2xl text-sm text-base-content/70">
+                События со статусом «Завершён» или «Архив» — итоги, отчёты и материалы доступны со страницы хакатона.
+            </p>
+        </div>
+    </section>
 
     @if($this->finishedHackatons->isEmpty())
         <section class="ui-surface-card">
