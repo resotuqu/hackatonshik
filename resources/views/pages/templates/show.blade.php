@@ -9,7 +9,7 @@
     <header class="space-y-3">
         <h1 class="ui-heading-display text-3xl font-bold">{{ $template->title }}</h1>
         @if($template->level)
-            <span class="badge badge-primary badge-outline">{{ $template->level }}</span>
+            <span class="badge badge-neutral badge-outline">{{ $template->level }}</span>
         @endif
         <p class="text-base-content/80">{{ $template->description }}</p>
         <p class="text-xs text-base-content/50">Версия {{ $template->version }} · {{ strtoupper($template->locale) }}</p>

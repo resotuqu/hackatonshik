@@ -1,15 +1,15 @@
 <div class="mx-auto mt-8 w-full max-w-7xl space-y-8 sm:mt-12">
-    <header class="ui-page-hero px-6 py-5 sm:px-8">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <section class="ui-page-header">
+        <div class="flex flex-col gap-2 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="font-display text-3xl font-bold">Новости</h1>
                 <p class="mt-1 text-base-content/75">Обновления платформы, релизы и события сообщества</p>
             </div>
             <a href="/news/rss" class="btn btn-outline btn-sm">RSS</a>
         </div>
-    </header>
+    </section>
 
-    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-6">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
             <x-mary-input label="Поиск" wire:model.live.debounce.300ms="search" placeholder="Название новости" />
             <x-maryselect
@@ -29,7 +29,7 @@
 
     <section class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         @forelse($this->posts as $post)
-            <article class="card card-border border-base-300 bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <figure class="aspect-video overflow-hidden bg-base-200">
                     <img
                         src="{{ $post->cover_image ?: '/logo.svg' }}"
@@ -53,7 +53,7 @@
                         </div>
                     @endif
                     <div class="card-actions mt-3 justify-end">
-                        <a href="{{ route('news.show', $post) }}" class="btn btn-primary btn-sm">Читать дальше</a>
+                        <a href="{{ route('news.show', $post) }}" class="btn btn-neutral btn-sm">Читать дальше</a>
                     </div>
                 </div>
             </article>

@@ -1,10 +1,12 @@
 <div class="mx-auto mt-8 w-full max-w-3xl space-y-6 sm:mt-12">
-    <header class="space-y-2">
-        <h1 class="text-3xl font-bold">Политика конфиденциальности и обработки персональных данных</h1>
-        <p class="text-sm text-base-content/70">Последнее обновление: 03.05.2026</p>
-    </header>
+    <section class="ui-page-header">
+        <div class="pb-5">
+            <h1 class="text-3xl font-bold">Политика конфиденциальности и обработки персональных данных</h1>
+            <p class="mt-1 text-sm text-base-content/70">Последнее обновление: 03.05.2026</p>
+        </div>
+    </section>
 
-    <article class="card card-border bg-base-100 p-6 sm:p-8">
+    <article class="card border border-base-300 bg-base-100 p-6 sm:p-8">
         <div class="markdown-body">
             <h2>1. Общие положения</h2>
             <p>Мы обрабатываем персональные данные пользователей в соответствии с законодательством Российской Федерации и используем их только для работы платформы Хакатонщик.</p>

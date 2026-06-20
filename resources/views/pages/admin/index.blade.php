@@ -6,7 +6,7 @@
         $maxEventCount = max(array_column($listEventBreakdown, 'total') ?: [1]);
     @endphp
 
-    <x-mary-card title="Дашборд метрик" class="mb-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Дашборд метрик" class="mb-6 w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div class="rounded-xl border border-base-300 p-3">
                 <p class="text-xs text-base-content/70">Пользователи</p>
@@ -34,21 +34,21 @@
                         <span>{{ $event['name'] }}</span>
                         <span>{{ $event['total'] }}</span>
                     </div>
-                    <progress class="progress progress-primary w-full" value="{{ $event['total'] }}" max="{{ $maxEventCount }}"></progress>
+                    <progress class="progress w-full" value="{{ $event['total'] }}" max="{{ $maxEventCount }}"></progress>
                 </div>
             @endforeach
         </div>
         <div class="mt-4 flex flex-wrap gap-2">
-            <a class="btn btn-sm btn-primary" href="/admin/avatar-presets">Аватарки (паки)</a>
-            <a class="btn btn-sm btn-primary" href="{{ route('admin.news') }}">Новости</a>
-            <a class="btn btn-sm btn-primary" href="{{ route('admin.users') }}">Пользователи</a>
+            <a class="btn btn-sm btn-neutral" href="/admin/avatar-presets">Аватарки (паки)</a>
+            <a class="btn btn-sm btn-neutral" href="{{ route('admin.news') }}">Новости</a>
+            <a class="btn btn-sm btn-neutral" href="{{ route('admin.users') }}">Пользователи</a>
             <a class="btn btn-sm btn-outline" href="/hackatons">Хакатоны</a>
             <a class="btn btn-sm btn-outline" href="/teams">Команды</a>
             <a class="btn btn-sm btn-outline" href="{{ route('profile') }}">Мой профиль</a>
         </div>
     </x-mary-card>
 
-    <x-mary-card title="Публикация шаблонов хакатонов" class="mt-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Публикация шаблонов хакатонов" class="mt-6 w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
         <div class="space-y-3">
             @forelse($this->templatesForAdmin() as $template)
                 <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-base-300 px-4 py-3" wire:key="admin-template-{{ $template->id }}">
@@ -72,7 +72,7 @@
         </div>
     </x-mary-card>
 
-    <x-mary-card title="Экспериментальные функции" class="mt-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Экспериментальные функции" class="mt-6 w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
         @php
             $platformSettings = \App\Models\PlatformSetting::allSettings();
         @endphp
@@ -112,9 +112,9 @@
         @endif
     </x-mary-card>
 
-    <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
         <x-slot:menu>
-            <x-mary-button label="Выйти" class="btn-secondary" wire:click="logout" />
+            <x-mary-button label="Выйти" class="btn-outline" wire:click="logout" />
         </x-slot:menu>
 
         <x-maryform wire:submit="savePartner">
@@ -129,12 +129,12 @@
             <x-marymarkdown wire:model="description" label="Описание" :config="['toolbar' => ['bold', 'italic', '|', 'preview'], 'uploadImage' => false]" />
 
             <x-slot:actions>
-                <x-mary-button label="Создать партнёра" class="btn-primary" type="submit" />
+                <x-mary-button label="Создать партнёра" class="btn-neutral" type="submit" />
             </x-slot:actions>
         </x-maryform>
     </x-mary-card>
 
-    <x-mary-card title="Приоритеты бэклога" class="mt-6 w-full lg:w-2/3 justify-self-center card card-border bg-base-100">
+    <x-mary-card title="Приоритеты бэклога" class="mt-6 w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
         <div class="space-y-2">
             @forelse($roadmapItems as $item)
                 <div class="rounded-xl border border-base-300 px-4 py-3 flex flex-wrap items-center justify-between gap-2">

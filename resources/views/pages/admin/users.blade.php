@@ -19,7 +19,7 @@
         <input class="input input-bordered input-sm" wire:model.live.debounce.400ms="search" placeholder="Поиск по ФИО, email, никнейму" />
     </div>
 
-    <x-mary-card class="card card-border bg-base-100">
+    <x-mary-card class="card border border-base-300 bg-base-100">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
@@ -58,7 +58,7 @@
                             </td>
                             <td class="text-right space-x-1">
                                 @if($editingUserId === $user->id)
-                                    <x-mary-button wire:click="saveRole" class="btn-xs btn-primary" label="Сохранить" />
+                                    <x-mary-button wire:click="saveRole" class="btn-xs btn-neutral" label="Сохранить" />
                                 @else
                                     <x-mary-button wire:click="startEditRole({{ $user->id }})" class="btn-xs btn-outline" label="Роль" />
                                 @endif
@@ -83,7 +83,7 @@
     </x-mary-card>
 
     @if ($activityUser)
-        <x-mary-card class="card card-border bg-base-100 mt-4">
+        <x-mary-card class="card border border-base-300 bg-base-100 mt-4">
             <div class="flex items-center justify-between gap-3 mb-4">
                 <h2 class="text-lg font-semibold">История: {{ $activityUser->fio }}</h2>
                 <x-mary-button wire:click="hideActivity" class="btn-ghost btn-sm" label="Скрыть" />

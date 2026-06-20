@@ -11,7 +11,7 @@
         </ul>
     </div>
 
-    <article class="card card-border bg-base-100 p-6 shadow-sm sm:p-8">
+    <article class="card border border-base-300 bg-base-100 p-6 sm:p-8">
         <div class="space-y-2">
             <span class="badge badge-outline">{{ $post->category }}</span>
             <h1 class="font-display text-3xl font-bold">{{ $post->title }}</h1>

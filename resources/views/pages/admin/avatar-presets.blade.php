@@ -22,7 +22,7 @@
                 <x-mary-input label="Slug (латиница)" wire:model="new_pack_slug" placeholder="vesna-2026" />
                 <x-mary-input label="Порядок сортировки" type="number" wire:model="new_pack_sort_order" />
             </div>
-            <x-mary-button label="Создать пак" class="btn-primary" type="button" wire:click="createPack" />
+            <x-mary-button label="Создать пак" class="btn-neutral" type="button" wire:click="createPack" />
         </div>
     </section>
 
@@ -44,7 +44,7 @@
             @error('upload_files')
                 <p class="text-sm text-error">{{ $message }}</p>
             @enderror
-            <x-mary-button label="Загрузить" class="btn-secondary" type="button" wire:click="uploadToPack" />
+            <x-mary-button label="Загрузить" class="btn-outline" type="button" wire:click="uploadToPack" />
         </div>
     </section>
 
@@ -65,7 +65,7 @@
                         <x-mary-input label="Порядок" type="number" wire:model="packForm.{{ $pack->id }}.sort_order" />
                         <x-marytoggle label="Активен" wire:model="packForm.{{ $pack->id }}.is_active" />
                     </div>
-                    <x-mary-button label="Сохранить пак" class="btn-primary btn-sm" type="button" wire:click="updatePack({{ $pack->id }})" />
+                    <x-mary-button label="Сохранить пак" class="btn-neutral btn-sm" type="button" wire:click="updatePack({{ $pack->id }})" />
                 @endisset
 
                 <div class="divider text-sm">Файлы в паке</div>

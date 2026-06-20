@@ -16,7 +16,7 @@
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         @forelse($templates as $template)
-            <article wire:key="template-card-{{ $template->id }}" class="card card-border bg-base-100 shadow-sm">
+            <article wire:key="template-card-{{ $template->id }}" class="card border border-base-300 bg-base-100">
                 <div class="card-body gap-4">
                     <div class="flex items-start justify-between gap-3">
                         <h2 class="text-lg font-semibold">{{ $template->title }}</h2>
@@ -27,7 +27,7 @@
                     <p class="text-sm text-base-content/70 line-clamp-3">{{ $template->description }}</p>
                     <div class="card-actions justify-end">
                         <a href="{{ route('templates.show', $template->slug) }}" class="btn btn-ghost btn-sm" wire:navigate>Подробнее</a>
-                        <a href="{{ route('hackatons.create', ['template' => $template->slug]) }}" class="btn btn-primary btn-sm" wire:navigate>
+                        <a href="{{ route('hackatons.create', ['template' => $template->slug]) }}" class="btn btn-neutral btn-sm" wire:navigate>
                             Создать по шаблону
                         </a>
                     </div>
