@@ -181,6 +181,18 @@
 
 ---
 
+### ✅ Этап 12 — Масштаб лендинга, цвет-как-сигнал, унификация empty-state
+
+| Файл | Изменение |
+|---|---|
+| `resources/views/pages/home/index.blade.php` | Hero: `text-5xl…lg:text-7xl` → `text-4xl…lg:text-6xl`; убран `min-h-[70vh]`/`max-h` (только `lg:min-h-[30rem]`); секционные отступы `space-y-20…28` → `space-y-[var(--spacing-section)]` |
+| `resources/views/livewire/home-how-it-works.blade.php` | Радужные иконки шагов (`primary/secondary/accent/warning`) → нейтральный `bg-base-200 text-base-content/60`; «Шаг N» `/40` → `/50` |
+| `resources/css/app.css` | Sidebar partner-CTA: зелёный `secondary` → единый акцент `primary` |
+| `resources/views/components/empty-state.blade.php` | Добавлен вариант `bare` (без оболочки) — для пустых состояний внутри карточек |
+| Унификация empty-state | `profile/teams` (заявки на роли) и `profile/certificates` — самодельные блоки → `<x-empty-state bare>`. Документы/анонсы хакатона уже на компоненте |
+
+---
+
 ## Правила при реализации
 
 1. **Не менять PHP-логику** — только Blade/CSS/Tailwind.

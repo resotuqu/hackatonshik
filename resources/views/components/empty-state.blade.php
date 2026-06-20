@@ -9,15 +9,20 @@
     'testId' => null,
     'compact' => false,
     'embedded' => false,
+    'bare' => false,
 ])
 
 @php
-    $padding = $embedded
-        ? 'px-4 py-6 sm:px-5'
-        : ($compact ? 'px-5 py-10 sm:px-8' : 'px-6 py-12 sm:px-10');
-    $shellClasses = $embedded
-        ? 'rounded-lg border border-base-300 bg-base-200 text-center'
-        : 'rounded-[var(--radius-card)] border border-base-300 bg-base-200 text-center';
+    $padding = $bare
+        ? 'px-4 py-10 sm:py-12'
+        : ($embedded
+            ? 'px-4 py-6 sm:px-5'
+            : ($compact ? 'px-5 py-10 sm:px-8' : 'px-6 py-12 sm:px-10'));
+    $shellClasses = $bare
+        ? 'text-center'
+        : ($embedded
+            ? 'rounded-lg border border-base-300 bg-base-200 text-center'
+            : 'rounded-[var(--radius-card)] border border-base-300 bg-base-200 text-center');
 @endphp
 
 <div

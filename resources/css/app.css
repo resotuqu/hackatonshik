@@ -569,15 +569,15 @@
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta {
-    @apply min-h-[3rem] border-secondary/40 bg-secondary/10 font-semibold text-base-content;
+    @apply min-h-[3rem] border-primary/40 bg-primary/10 font-semibold text-base-content;
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta:hover {
-    @apply border-secondary/60 bg-secondary/15 text-base-content;
+    @apply border-primary/60 bg-primary/15 text-base-content;
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link--partner-cta.active {
-    @apply border-secondary bg-secondary/25 font-bold text-base-content;
+    @apply border-primary bg-primary/20 font-bold text-base-content;
 }
 
 #app-sidebar .app-sidebar-menu > li > a.sidebar-nav-link:focus-visible {

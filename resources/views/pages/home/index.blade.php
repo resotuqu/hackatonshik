@@ -1,13 +1,13 @@
 @guest
-<div class="mx-auto w-full max-w-7xl space-y-20 sm:space-y-24 xl:space-y-28">
+<div class="mx-auto w-full max-w-7xl space-y-[var(--spacing-section)]">
     {{-- Hero --}}
     <section
         id="start"
-        class="relative min-h-[26rem] overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 sm:min-h-[30rem] lg:min-h-[70vh] lg:max-h-[min(90vh,56rem)]"
+        class="relative overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 lg:min-h-[30rem]"
     >
         <div class="relative flex min-h-[inherit] flex-col gap-8 px-5 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
             <div class="flex max-w-xl flex-1 flex-col justify-center lg:max-w-[min(36rem,50%)] lg:text-left">
-                <h1 class="ui-heading-display text-5xl font-bold leading-[1.06] sm:text-6xl lg:text-7xl">
+                <h1 class="ui-heading-display text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">
                     Найдите команду. Проведите хакатон.
                 </h1>
                 <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/70 sm:text-lg">

@@ -36,11 +36,12 @@
             <h2 id="pending-apps-heading" class="text-2xl font-semibold mb-6">Заявки на роли в командах</h2>
 
             @if ($this->pendingTeamRoleApplications->isEmpty())
-                <div class="flex flex-col items-center py-16 text-center">
-                    <x-app-icon icon="heroicons:inbox" class="h-16 w-16 text-base-content/30" />
-                    <p class="mt-5 text-base-content/70">Нет заявок на рассмотрение</p>
-                    <p class="text-sm text-base-content/50 mt-1">Когда участники откликнутся — они появятся здесь</p>
-                </div>
+                <x-empty-state
+                    bare
+                    icon="heroicons:inbox"
+                    title="Нет заявок на рассмотрение"
+                    description="Когда участники откликнутся — они появятся здесь"
+                />
             @else
                 <div class="grid grid-cols-1 gap-4">
                     @foreach ($this->pendingTeamRoleApplications as $application)

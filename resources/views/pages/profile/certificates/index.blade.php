@@ -37,7 +37,12 @@
     <div class="card border border-base-300 bg-base-100">
         <div class="card-body">
         @if($this->certificates->isEmpty())
-            <p class="text-base-content/70">Сертификаты пока не выданы.</p>
+            <x-empty-state
+                bare
+                icon="heroicons:academic-cap"
+                title="Сертификатов пока нет"
+                description="Сертификаты за участие в хакатонах появятся здесь."
+            />
         @else
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 @foreach($this->certificates as $certificate)
