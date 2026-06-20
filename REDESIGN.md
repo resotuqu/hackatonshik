@@ -1,7 +1,7 @@
 # Редизайн — план и прогресс
 
 Тег точки отсчёта: **v0.1** (commit `3b67f31`)
-Последний выполненный этап: **Этап 7** (commit `25e4502`)
+Последний выполненный этап: **Этап 8** (commit `b4198b3`)
 
 ---
 
@@ -122,21 +122,16 @@
 
 ---
 
-### ⬜ Этап 8 — Панель судьи
+### ✅ Этап 8 — Панель судьи (commit `b4198b3`)
 
-Файлы:
-
-| Файл | Что менять |
+| Файл | Изменение |
 |---|---|
-| `resources/views/pages/judge/dashboard.blade.php` | `ui-page-header` |
-| `resources/views/pages/judge/hackaton-show.blade.php` | `ui-page-header` |
-| `resources/views/pages/judge/submission-list.blade.php` | Список работ — таблица вместо карточек |
-| `resources/views/pages/judge/evaluate-submission.blade.php` | Двухколоночный layout: работа слева, форма оценки справа |
-| `resources/views/pages/hackatons/results.blade.php` | Привести к стилю |
-| `resources/views/pages/judges/accept-invitation.blade.php` | Привести к стилю |
-| `resources/views/components/judge/⚡dashboard.blade.php` | Привести к стилю |
-| `resources/views/components/judge/⚡submission-list.blade.php` | Привести к стилю |
-| `resources/views/components/judge/⚡evaluate-submission.blade.php` | Привести к стилю |
+| `resources/views/components/judge/⚡dashboard.blade.php` | `<h1>` → `ui-page-header`; `border-base-200 shadow-sm` → `border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/components/judge/⚡submission-list.blade.php` | Заголовок → `ui-page-header`; `btn-primary` → `btn-neutral` |
+| `resources/views/components/judge/⚡evaluate-submission.blade.php` | Заголовок → `ui-page-header`; `border-base-200 shadow-sm` → `border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/judge/hackaton-show.blade.php` | Заголовок → `ui-page-header`; `alert-warning` → нейтральный border-блок; таблица обёрнута в `border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/hackatons/results.blade.php` | `<header>` → `ui-page-header`; `link-primary` → `link-hover` |
+| `resources/views/pages/judges/accept-invitation.blade.php` | `card-border` → `border border-base-300`; `btn-primary` → `btn-neutral` |
 
 ---
 
