@@ -1,7 +1,7 @@
 # Редизайн — план и прогресс
 
 Тег точки отсчёта: **v0.1** (commit `3b67f31`)
-Последний выполненный этап: **Этап 8** (commit `b4198b3`)
+Последний выполненный этап: **Этап 9** (commit `66e490e`)
 
 ---
 
@@ -135,23 +135,21 @@
 
 ---
 
-### ⬜ Этап 9 — Вспомогательные страницы
+### ✅ Этап 9 — Вспомогательные страницы (commit `66e490e`)
 
-Низкий трафик, минимальные изменения — только `ui-page-hero` → `ui-page-header`.
-
-| Файл |
-|---|
-| `resources/views/pages/news/index.blade.php` |
-| `resources/views/pages/news/show.blade.php` |
-| `resources/views/pages/contacts/index.blade.php` |
-| `resources/views/pages/privacy-policy/index.blade.php` |
-| `resources/views/pages/cookie-policy/index.blade.php` |
-| `resources/views/pages/templates/index.blade.php` |
-| `resources/views/pages/templates/show.blade.php` |
-| `resources/views/pages/admin/index.blade.php` |
-| `resources/views/pages/admin/users.blade.php` |
-| `resources/views/pages/admin/news.blade.php` |
-| `resources/views/pages/admin/avatar-presets.blade.php` |
+| Файл | Изменение |
+|---|---|
+| `resources/views/pages/news/index.blade.php` | `ui-page-hero` → `ui-page-header`; `card-border shadow-sm` → `border border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/news/show.blade.php` | `card-border shadow-sm` → `border border-base-300` |
+| `resources/views/pages/contacts/index.blade.php` | `ui-page-hero` → `space-y-4`; `link-primary` → `link-hover`; `card-border shadow-sm` → `border border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/privacy-policy/index.blade.php` | `<header>` → `ui-page-header`; `card-border` → `border border-base-300` |
+| `resources/views/pages/cookie-policy/index.blade.php` | `<header>` → `ui-page-header`; `card-border` → `border border-base-300` |
+| `resources/views/pages/templates/index.blade.php` | `card-border shadow-sm` → `border border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/templates/show.blade.php` | `badge-primary` → `badge-neutral` |
+| `resources/views/pages/admin/index.blade.php` | `card-border` → `border border-base-300`; `progress-primary` → `progress`; `btn-primary` nav → `btn-neutral`; `btn-secondary` → `btn-outline` |
+| `resources/views/pages/admin/users.blade.php` | `card-border` → `border border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/admin/news.blade.php` | `card-border` → `border border-base-300`; `checkbox-primary` → `checkbox`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/admin/avatar-presets.blade.php` | `btn-primary` → `btn-neutral`; `btn-secondary` → `btn-outline` |
 
 ---
 
