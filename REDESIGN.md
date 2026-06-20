@@ -1,7 +1,7 @@
 # Редизайн — план и прогресс
 
 Тег точки отсчёта: **v0.1** (commit `3b67f31`)
-Последний выполненный этап: **Этап 5** (commit `2b6ff2e`)
+Последний выполненный этап: **Этап 6** (commit `f0cd171`)
 
 ---
 
@@ -88,21 +88,19 @@
 
 ---
 
-### ⬜ Этап 6 — Кабинет участника
+### ✅ Этап 6 — Кабинет участника (commit `f0cd171`)
 
-Файлы:
-
-| Файл | Что менять |
+| Файл | Изменение |
 |---|---|
-| `resources/views/pages/profile/index.blade.php` | `ui-page-hero` → `ui-page-header`, profile-tabs под шапкой |
-| `resources/views/components/profile-nav-tabs.blade.php` | Горизонтальная полоска вкладок |
-| `resources/views/components/activity-timeline.blade.php` | Minor polish |
-| `resources/views/pages/participant/hackatons/index.blade.php` | `ui-page-header` + `ui-filter-bar` |
-| `resources/views/pages/profile/hackatons/hub-inner.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/hackatons/hub-body.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/teams/index.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/certificates/index.blade.php` | Привести к стилю |
-| `resources/views/pages/profile/watches/index.blade.php` | Привести к стилю |
+| `resources/views/pages/profile/index.blade.php` | `ui-page-hero` → `ui-page-header`; `ring-secondary` → `ring-base-300`; `badge-primary` → `badge-neutral`; `text-secondary` цифры → `text-base-content`; `progress-secondary` → `progress`; tips-карточка `border-secondary/20 bg-secondary/5` → `border-base-300 bg-base-100` |
+| `resources/views/components/profile-nav-tabs.blade.php` | `tabs-boxed` → `tabs-bordered` |
+| `resources/views/components/activity-timeline.blade.php` | `border-primary/25` → `border-base-300` |
+| `resources/views/pages/participant/hackatons/index.blade.php` | `<header>` → `ui-page-header`; next-step блок `border-primary/20 bg-primary/10` → нейтральный; `card-border shadow-sm` → `border border-base-300`; `border-base-200` → `border-base-300` в списках |
+| `resources/views/pages/profile/hackatons/hub-inner.blade.php` | `border-base-200` → `border-base-300` на всех article-карточках |
+| `resources/views/pages/profile/hackatons/hub-body.blade.php` | `card card-border` → `card border border-base-300 bg-base-100` |
+| `resources/views/pages/profile/teams/index.blade.php` | Gradient-hero → `ui-page-header`; `text-primary/text-secondary` числа → `text-base-content`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/profile/certificates/index.blade.php` | Добавлены `x-profile-nav-tabs` и `ui-page-header`; `card-border` → `border border-base-300`; `btn-primary` → `btn-neutral` |
+| `resources/views/pages/profile/watches/index.blade.php` | `<header>` → `ui-page-header` |
 
 ---
 
