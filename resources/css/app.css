@@ -405,6 +405,11 @@
 .delay-400 { animation-delay: 400ms !important; }
 .delay-500 { animation-delay: 500ms !important; }
 
+/* Единый фокус-ринг для всех кнопок daisyUI (сырые btn-* без ui-cta тоже получают видимый фокус) */
+.btn:focus-visible {
+    @apply outline-none ring-2 ring-primary/60 ring-offset-2 ring-offset-base-100;
+}
+
 .hover-lift {
     @apply transition-colors duration-200 ease-out motion-reduce:transition-none;
 }

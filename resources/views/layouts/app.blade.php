@@ -92,7 +92,7 @@
                 </div>
             </main>
 
-            <footer class="footer sm:footer-horizontal mt-auto border-t border-primary/15 bg-base-200 text-base-content px-6 py-8 sm:px-10 sm:py-10 gap-6">
+            <footer class="footer sm:footer-horizontal mt-auto border-t border-base-300 bg-base-200 text-base-content px-6 py-8 sm:px-10 sm:py-10 gap-6">
                 <nav>
                     <h6 class="footer-title">Основные страницы</h6>
                     <a href="/" class="link link-hover">Главная</a>
