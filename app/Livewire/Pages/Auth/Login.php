@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Pages\Auth;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -53,17 +55,32 @@ class Login extends Component
             return;
         }
 
-        if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            RateLimiter::clear($throttleKey);
-            $this->success('Успешная авторизация !', position: 'toast-center toast-top');
-            session()->regenerate();
+        $user = User::where('email', $this->email)->first();
 
-            return $this->redirect('/');
+        if (! $user || ! Hash::check($this->password, $user->password)) {
+            RateLimiter::hit($throttleKey);
+            $this->error('Не удалось войти. Проверьте email и пароль.', position: 'toast-center toast-top');
+            $this->addError('email', 'Неверный email или пароль.');
+
+            return;
         }
 
-        RateLimiter::hit($throttleKey);
-        $this->error('Не удалось войти. Проверьте email и пароль.', position: 'toast-center toast-top');
-        $this->addError('email', 'Неверный email или пароль.');
+        RateLimiter::clear($throttleKey);
+
+        if ($user->hasEnabledTwoFactorAuthentication()) {
+            session()->put([
+                'login.id' => $user->getKey(),
+                'login.remember' => $this->remember,
+            ]);
+
+            return $this->redirect(route('two-factor.login'));
+        }
+
+        Auth::login($user, $this->remember);
+        $this->success('Успешная авторизация !', position: 'toast-center toast-top');
+        session()->regenerate();
+
+        return $this->redirect('/');
     }
 
     public function render()

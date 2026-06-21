@@ -302,6 +302,9 @@
                         </button>
                     </div>
                 </section>
+
+                {{-- Two-factor authentication --}}
+                @livewire('pages.profile.two-factor')
             </div>
         </div>
 
