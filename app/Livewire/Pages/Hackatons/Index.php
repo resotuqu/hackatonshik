@@ -61,7 +61,7 @@ class Index extends Component
             ->withCount(['roles as participants_count' => fn (Builder $query) => $query->whereNotNull('team_roles.user_id')])
 
             ->when($this->q !== '', function (Builder $query): void {
-                $query->where('title', 'like', '%'.$this->q.'%');
+                $query->whereLikeInsensitive('title', $this->q);
             })
             ->when($this->start_at !== '', function (Builder $query): void {
                 $query->where('start_at', '>=', $this->start_at);

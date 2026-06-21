@@ -132,9 +132,8 @@ class Index extends Component
             ->when($this->q !== '', function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery
-                        ->where('title', 'like', '%'.$this->q.'%')
-                        ->orWhere('description', 'like', '%'.$this->q.'%')
-                        ->orWhereHas('roles.skills', fn ($skillsQuery) => $skillsQuery->where('skills.name', 'like', '%'.$this->q.'%'));
+                        ->whereLikeInsensitive(['title', 'description'], $this->q)
+                        ->orWhereHas('roles.skills', fn ($skillsQuery) => $skillsQuery->whereLikeInsensitive('skills.name', $this->q));
                 });
             })
             ->when($this->hackaton_id !== '0', function ($query) {

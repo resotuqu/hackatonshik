@@ -29,6 +29,8 @@ use App\ViewModels\PartnerSidebarCounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\SQLiteConnection;
 use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Events\NotificationSent;
@@ -66,6 +68,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerCaseInsensitiveSearch();
+
         $mailViews = resource_path('views/vendor/mail');
         View::addNamespace('mail', is_dir($mailViews)
             ? $mailViews
@@ -241,6 +245,41 @@ class AppServiceProvider extends ServiceProvider
         });
         User::deleted(static function (User $user) use ($cache): void {
             $cache->forget("profile:public-show:{$user->id}:v2");
+        });
+    }
+
+    /**
+     * Provide a portable, accent/case-insensitive substring search.
+     *
+     * PostgreSQL (production) lowercases Cyrillic natively via `lower()`, but SQLite's
+     * built-in `lower()` only handles ASCII. We override it with a multibyte-aware
+     * implementation so `whereLikeInsensitive` behaves identically across both drivers.
+     */
+    private function registerCaseInsensitiveSearch(): void
+    {
+        $connection = DB::connection();
+
+        if ($connection instanceof SQLiteConnection) {
+            $connection->getPdo()->sqliteCreateFunction(
+                'lower',
+                static fn (?string $value): ?string => $value === null ? null : mb_strtolower($value),
+                1,
+            );
+        }
+
+        EloquentBuilder::macro('whereLikeInsensitive', function (array|string $columns, string $term): EloquentBuilder {
+            /** @var EloquentBuilder $this */
+            $needle = '%'.mb_strtolower(trim($term)).'%';
+            $columns = (array) $columns;
+
+            return $this->where(function (EloquentBuilder $query) use ($columns, $needle): void {
+                foreach (array_values($columns) as $index => $column) {
+                    $expression = 'lower('.$column.') like ?';
+                    $index === 0
+                        ? $query->whereRaw($expression, [$needle])
+                        : $query->orWhereRaw($expression, [$needle]);
+                }
+            });
         });
     }
 }
