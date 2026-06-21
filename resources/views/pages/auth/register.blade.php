@@ -6,37 +6,33 @@
             <div class="space-y-3">
                 <p class="text-xs font-semibold uppercase tracking-widest text-base-100/50">Хакатонщик</p>
                 @if ($accountType === 'partner')
-                    <h2 class="text-2xl font-semibold leading-tight">Проводите хакатоны</h2>
-                    <p class="text-sm text-base-100/70">
-                        Создайте аккаунт организатора, чтобы публиковать хакатоны, принимать заявки команд и управлять соревнованиями.
-                    </p>
+                    <h2 class="text-2xl font-semibold leading-tight">{{ __('ui.auth.register.brand_heading_partner') }}</h2>
+                    <p class="text-sm text-base-100/70">{{ __('ui.auth.register.brand_subtitle_partner') }}</p>
                 @else
-                    <h2 class="text-2xl font-semibold leading-tight">Добро пожаловать</h2>
-                    <p class="text-sm text-base-100/70">
-                        Создайте аккаунт, чтобы участвовать в хакатонах, собирать команды и отправлять решения кейсов.
-                    </p>
+                    <h2 class="text-2xl font-semibold leading-tight">{{ __('ui.auth.register.brand_heading_participant') }}</h2>
+                    <p class="text-sm text-base-100/70">{{ __('ui.auth.register.brand_subtitle_participant') }}</p>
                 @endif
             </div>
             <div class="grid gap-2 text-sm">
                 @if ($accountType === 'partner')
                     <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        Создавайте и публикуйте хакатоны с призовым фондом
+                        {{ __('ui.auth.register.feature_partner_1') }}
                     </div>
                     <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        Принимайте и отклоняйте заявки команд
+                        {{ __('ui.auth.register.feature_partner_2') }}
                     </div>
                     <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        Добавляйте кейсы, судей и выдавайте сертификаты
+                        {{ __('ui.auth.register.feature_partner_3') }}
                     </div>
                 @else
                     <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        Создавайте профиль участника и вступайте в команды
+                        {{ __('ui.auth.register.feature_participant_1') }}
                     </div>
                     <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        Подавайте заявки на хакатоны и отслеживайте статусы
+                        {{ __('ui.auth.register.feature_participant_2') }}
                     </div>
                     <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        Получайте анонсы и сертификаты в личном кабинете
+                        {{ __('ui.auth.register.feature_participant_3') }}
                     </div>
                 @endif
             </div>
@@ -49,17 +45,17 @@
             @php
                 $progressPercent = (int) round(($step / 4) * 100);
             @endphp
-            <x-mary-header title="Регистрация" separator />
+            <x-mary-header title="{{ __('ui.auth.register.form_title') }}" separator />
 
             <ul class="steps steps-horizontal mb-6 w-full max-w-full flex-wrap justify-start gap-y-2 text-[0.65rem] sm:text-xs">
-                <li class="step {{ $step >= 1 ? 'step-primary' : '' }}">Личные данные</li>
-                <li class="step {{ $step >= 2 ? 'step-primary' : '' }}">Аккаунт</li>
-                <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">Пароль</li>
-                <li class="step {{ $step >= 4 ? 'step-primary' : '' }}">Телефон</li>
+                <li class="step {{ $step >= 1 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_personal') }}</li>
+                <li class="step {{ $step >= 2 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_account') }}</li>
+                <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_password') }}</li>
+                <li class="step {{ $step >= 4 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_phone') }}</li>
             </ul>
             <div class="mb-6">
                 <div class="mb-1 flex items-center justify-between text-xs text-base-content/70">
-                    <span>Прогресс регистрации</span>
+                    <span>{{ __('ui.auth.register.progress_label') }}</span>
                     <span class="tabular-nums">{{ $progressPercent }}%</span>
                 </div>
                 <progress class="progress progress-primary h-2 w-full" value="{{ $progressPercent }}" max="100"></progress>
@@ -68,7 +64,7 @@
             @if ($step === 1)
                 {{-- Account type picker --}}
                 <div class="mb-4">
-                    <p class="mb-2 text-sm font-medium text-base-content/80">Тип аккаунта</p>
+                    <p class="mb-2 text-sm font-medium text-base-content/80">{{ __('ui.auth.register.account_type_label') }}</p>
                     <div class="grid grid-cols-2 gap-2">
                         <label class="cursor-pointer">
                             <input type="radio" wire:model.live="accountType" value="user" class="peer sr-only" />
@@ -76,8 +72,8 @@
                                 peer-checked:border-primary peer-checked:bg-primary/5
                                 border-base-300 bg-base-200/40 hover:border-base-400">
                                 <x-app-icon icon="heroicons:user" class="h-6 w-6 text-base-content/60 peer-checked:text-primary" />
-                                <span class="text-sm font-semibold">Участник</span>
-                                <span class="text-[11px] text-base-content/60">Участвую в хакатонах</span>
+                                <span class="text-sm font-semibold">{{ __('ui.auth.register.account_type_participant') }}</span>
+                                <span class="text-[11px] text-base-content/60">{{ __('ui.auth.register.account_type_participant_hint') }}</span>
                             </div>
                         </label>
                         <label class="cursor-pointer">
@@ -86,8 +82,8 @@
                                 peer-checked:border-secondary peer-checked:bg-secondary/5
                                 border-base-300 bg-base-200/40 hover:border-base-400">
                                 <x-app-icon icon="heroicons:building-office-2" class="h-6 w-6 text-base-content/60" />
-                                <span class="text-sm font-semibold">Организатор</span>
-                                <span class="text-[11px] text-base-content/60">Провожу хакатоны</span>
+                                <span class="text-sm font-semibold">{{ __('ui.auth.register.account_type_partner') }}</span>
+                                <span class="text-[11px] text-base-content/60">{{ __('ui.auth.register.account_type_partner_hint') }}</span>
                             </div>
                         </label>
                     </div>
@@ -97,21 +93,21 @@
                 </div>
 
                 <p class="text-xs text-base-content/60 mb-2 rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">
-                    Если вы закроете страницу до завершения регистрации, данные не сохранятся — позже нужно будет заполнить форму заново.
+                    {{ __('ui.auth.register.unsaved_warning') }}
                 </p>
-                <x-mary-input label="Фамилия, Имя, Отчество" wire:model="fio" placeholder="Владимир" hint="Введите ваше фио" />
-                <x-marydatetime label="Дата рождения" hint="Введите вашу дату рождения" wire:model="date_of_birth" />
+                <x-mary-input label="{{ __('ui.auth.register.fio_label') }}" wire:model="fio" placeholder="Владимир" hint="{{ __('ui.auth.register.fio_hint') }}" />
+                <x-marydatetime label="{{ __('ui.auth.register.dob_label') }}" hint="{{ __('ui.auth.register.dob_hint') }}" wire:model="date_of_birth" />
             @endif
 
             @if ($step === 2)
-                <x-mary-input label="Адрес электронной почты" wire:model="email" placeholder="example@mail.com"
-                    hint="Введите вашу электронную почту" />
-                <x-mary-input label="Псевдоним" wire:model="nickname" placeholder="vova_vlad_123" hint="Введите ваш псевдоним" />
+                <x-mary-input label="{{ __('ui.auth.register.email_label') }}" wire:model="email" placeholder="example@mail.com"
+                    hint="{{ __('ui.auth.register.email_hint') }}" />
+                <x-mary-input label="{{ __('ui.auth.register.nickname_label') }}" wire:model="nickname" placeholder="vova_vlad_123" hint="{{ __('ui.auth.register.nickname_hint') }}" />
             @endif
 
             @if ($step === 3)
                 <div x-data="{ password: @entangle('password').live }" class="space-y-2">
-                    <x-marypassword label="Пароль" wire:model="password" />
+                    <x-marypassword label="{{ __('ui.auth.register.password_label') }}" wire:model="password" />
                     <div class="space-y-1">
                         <div class="h-2 w-full rounded-full bg-base-300">
                             <div
@@ -120,25 +116,27 @@
                                 :style="`width: ${Math.min(100, Math.max(15, password.length * 8))}%`"
                             ></div>
                         </div>
-                        <p class="text-xs text-base-content/70" x-text="password.length >= 12 ? 'Сильный пароль' : (password.length >= 8 ? 'Средний пароль' : 'Слабый пароль')"></p>
+                        <p class="text-xs text-base-content/70"
+                            x-text="password.length >= 12 ? '{{ __('ui.auth.register.password_strong') }}' : (password.length >= 8 ? '{{ __('ui.auth.register.password_medium') }}' : '{{ __('ui.auth.register.password_weak') }}')"
+                        ></p>
                     </div>
                 </div>
-                <x-marypassword label="Подтверждение пароля" wire:model="password_confirmation" />
+                <x-marypassword label="{{ __('ui.auth.register.password_confirm_label') }}" wire:model="password_confirmation" />
             @endif
 
             @if ($step === 4)
-                <x-mary-input label="Контактный номер телефона" wire:model="phone" prefix="+" />
+                <x-mary-input label="{{ __('ui.auth.register.phone_label') }}" wire:model="phone" prefix="+" />
             @endif
 
             <x-slot:actions class="w-full">
                 <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
                     @if ($step > 1)
-                        <x-marybutton class="btn-outline w-full sm:w-auto" label="Назад" type="button" wire:click="previousStep" />
+                        <x-marybutton class="btn-outline w-full sm:w-auto" label="{{ __('ui.auth.register.btn_back') }}" type="button" wire:click="previousStep" />
                     @endif
                     @if ($step < 4)
-                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="Далее" type="submit" />
+                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="{{ __('ui.auth.register.btn_next') }}" type="submit" />
                     @else
-                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="Зарегистрироваться" type="submit" />
+                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="{{ __('ui.auth.register.btn_submit') }}" type="submit" />
                     @endif
                 </div>
             </x-slot:actions>
@@ -146,11 +144,11 @@
                 <a href="/auth/yandex/redirect" class="block w-full rounded-xl bg-[#FC3F1D] px-4 py-3 text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#FC3F1D]/40">
                     <span class="inline-flex w-full items-center justify-center gap-3 text-sm font-semibold">
                         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#FC3F1D]">Я</span>
-                        Войти или зарегистрироваться через Яндекс
+                        {{ __('ui.auth.register.yandex') }}
                     </span>
                 </a>
                 <a href="/auth/vk/redirect" class="btn btn-outline w-full">
-                    Войти или зарегистрироваться через VK
+                    {{ __('ui.auth.register.vk') }}
                 </a>
             </div>
         </x-maryform>

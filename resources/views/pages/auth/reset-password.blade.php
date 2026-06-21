@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Новый пароль')
+@section('title', __('ui.auth.reset_password.page_title'))
 
 @section('slot')
     <div class="mx-auto w-full max-w-xl space-y-4">
-        <x-mary-card title="Установите новый пароль" class="card border border-base-300 bg-base-100">
+        <x-mary-card title="{{ __('ui.auth.reset_password.card_title') }}" class="card border border-base-300 bg-base-100">
             <p class="text-sm text-base-content/70">
-                Введите новый пароль для вашего аккаунта.
+                {{ __('ui.auth.reset_password.description') }}
             </p>
 
             <form method="POST" action="{{ route('password.update') }}" class="mt-4 space-y-4">
@@ -15,7 +15,7 @@
 
                 <div class="form-control w-full">
                     <label class="label" for="email">
-                        <span class="label-text">Адрес электронной почты</span>
+                        <span class="label-text">{{ __('ui.auth.reset_password.email_label') }}</span>
                     </label>
                     <input
                         id="email"
@@ -33,7 +33,7 @@
 
                 <div class="form-control w-full">
                     <label class="label" for="password">
-                        <span class="label-text">Новый пароль</span>
+                        <span class="label-text">{{ __('ui.auth.reset_password.password_label') }}</span>
                     </label>
                     <input
                         id="password"
@@ -50,7 +50,7 @@
 
                 <div class="form-control w-full">
                     <label class="label" for="password_confirmation">
-                        <span class="label-text">Подтверждение пароля</span>
+                        <span class="label-text">{{ __('ui.auth.reset_password.password_confirm_label') }}</span>
                     </label>
                     <input
                         id="password_confirmation"
@@ -62,11 +62,11 @@
                     />
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full">Сохранить пароль</button>
+                <button type="submit" class="btn btn-primary w-full">{{ __('ui.auth.reset_password.submit') }}</button>
             </form>
 
             <p class="mt-4 text-center text-sm text-base-content/70">
-                <a href="{{ route('login') }}" class="link link-primary">Вернуться ко входу</a>
+                <a href="{{ route('login') }}" class="link link-primary">{{ __('ui.auth.reset_password.back_to_login') }}</a>
             </p>
         </x-mary-card>
     </div>

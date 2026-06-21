@@ -143,6 +143,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'open_to_teams',
         'show_skills_on_profile',
         'avatar_path',
+        'locale',
     ];
 
     /**

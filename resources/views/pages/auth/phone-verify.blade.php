@@ -1,33 +1,33 @@
 @extends('layouts.app')
 
-@section('title', 'Подтверждение телефона')
+@section('title', __('ui.auth.phone_verify.page_title'))
 
 @section('slot')
     <div class="mx-auto w-full max-w-xl space-y-4" x-data="{ code: '', cooldown: 0, isSubmitting: false }" x-init="setInterval(() => { if (cooldown > 0) cooldown--; }, 1000)">
-        <x-mary-card title="Подтверждение телефона по звонку" class="card card-border bg-base-100 shadow-sm">
+        <x-mary-card title="{{ __('ui.auth.phone_verify.card_title') }}" class="card card-border bg-base-100 shadow-sm">
             <p class="text-sm text-base-content/70">
-                Мы позвоним на номер <span class="font-medium">{{ auth()->user()?->phone }}</span>. Ответьте на звонок и запомните 4 цифры, которые проговорит ассистент. После ввода кода подтверждение выполнится автоматически.
+                {!! __('ui.auth.phone_verify.description', ['phone' => '<span class="font-medium">'.e(auth()->user()?->phone).'</span>']) !!}
             </p>
 
             <div class="mt-4 space-y-3">
                 <div class="steps steps-horizontal w-full">
-                    <div class="step step-primary">Запрос звонка</div>
-                    <div class="step" :class="code.length > 0 ? 'step-primary' : ''">Ввод кода</div>
-                    <div class="step" :class="isSubmitting ? 'step-primary' : ''">Подтверждение</div>
+                    <div class="step step-primary">{{ __('ui.auth.phone_verify.step_request') }}</div>
+                    <div class="step" :class="code.length > 0 ? 'step-primary' : ''">{{ __('ui.auth.phone_verify.step_code') }}</div>
+                    <div class="step" :class="isSubmitting ? 'step-primary' : ''">{{ __('ui.auth.phone_verify.step_confirm') }}</div>
                 </div>
 
                 <form method="POST" action="{{ route('phone.verify.send') }}" @submit="cooldown = 60">
                     @csrf
                     <button type="submit" class="btn btn-outline w-full" :disabled="cooldown > 0">
-                        <span x-show="cooldown === 0">Позвонить с кодом</span>
-                        <span x-show="cooldown > 0">Повторный звонок через <span x-text="cooldown"></span> сек.</span>
+                        <span x-show="cooldown === 0">{{ __('ui.auth.phone_verify.call_btn') }}</span>
+                        <span x-show="cooldown > 0">{{ __('ui.auth.phone_verify.call_cooldown', ['seconds' => '']) }}<span x-text="cooldown"></span></span>
                     </button>
                 </form>
 
                 <form method="POST" action="{{ route('phone.verify') }}" class="space-y-2" x-ref="verifyForm">
                     @csrf
                     <label class="form-control w-full">
-                        <span class="label-text">Код из звонка</span>
+                        <span class="label-text">{{ __('ui.auth.phone_verify.code_label') }}</span>
                         <input
                             type="text"
                             name="code"
@@ -43,7 +43,7 @@
                     @error('code')
                         <p class="text-sm text-error">{{ $message }}</p>
                     @enderror
-                    <button type="submit" class="btn btn-primary w-full">Подтвердить номер</button>
+                    <button type="submit" class="btn btn-primary w-full">{{ __('ui.auth.phone_verify.submit') }}</button>
                 </form>
             </div>
         </x-mary-card>

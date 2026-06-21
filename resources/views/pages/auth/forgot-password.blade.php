@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Восстановление пароля')
+@section('title', __('ui.auth.forgot_password.page_title'))
 
 @section('slot')
     <div class="mx-auto w-full max-w-xl space-y-4">
-        <x-mary-card title="Забыли пароль?" class="card border border-base-300 bg-base-100">
+        <x-mary-card title="{{ __('ui.auth.forgot_password.card_title') }}" class="card border border-base-300 bg-base-100">
             <p class="text-sm text-base-content/70">
-                Укажите email аккаунта — мы отправим ссылку для сброса пароля.
+                {{ __('ui.auth.forgot_password.description') }}
             </p>
 
             @if (session('status'))
@@ -19,7 +19,7 @@
                 @csrf
                 <div class="form-control w-full">
                     <label class="label" for="email">
-                        <span class="label-text">Адрес электронной почты</span>
+                        <span class="label-text">{{ __('ui.auth.forgot_password.email_label') }}</span>
                     </label>
                     <input
                         id="email"
@@ -35,11 +35,11 @@
                         <p class="label-text-alt text-error mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                <button type="submit" class="btn btn-primary w-full">Отправить ссылку</button>
+                <button type="submit" class="btn btn-primary w-full">{{ __('ui.auth.forgot_password.submit') }}</button>
             </form>
 
             <p class="mt-4 text-center text-sm text-base-content/70">
-                <a href="{{ route('login') }}" class="link link-primary">Вернуться ко входу</a>
+                <a href="{{ route('login') }}" class="link link-primary">{{ __('ui.auth.forgot_password.back_to_login') }}</a>
             </p>
         </x-mary-card>
     </div>
