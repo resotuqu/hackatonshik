@@ -1,10 +1,10 @@
-@php use Illuminate\Support\Facades\Auth; @endphp
+@php use App\Support\ThemeResolver; use Illuminate\Support\Facades\Auth; @endphp
 <!DOCTYPE html>
 @php
-    $validThemes = ['hackatonshik', 'hackatonshik-light'];
-    $serverTheme = isset($_COOKIE['theme']) && in_array($_COOKIE['theme'], $validThemes)
-        ? $_COOKIE['theme']
-        : 'hackatonshik';
+    $serverTheme = ThemeResolver::fromCookie(request()->cookie('theme'));
+    $darkTheme = config('theme.dark');
+    $lightTheme = config('theme.light');
+    $legacyThemes = config('theme.legacy');
 @endphp
 <html lang="ru" class="group" data-theme="{{ $serverTheme }}">
 <head>
@@ -42,16 +42,28 @@
     <script>
         (function () {
             const cookieName = 'theme';
-            const darkTheme = 'hackatonshik';
-            const lightTheme = 'hackatonshik-light';
+            const darkTheme = @json($darkTheme);
+            const lightTheme = @json($lightTheme);
+            const legacyThemes = @json($legacyThemes);
+
+            function resolveTheme(saved) {
+                if (saved === darkTheme || saved === lightTheme) {
+                    return saved;
+                }
+
+                if (saved && legacyThemes[saved]) {
+                    return legacyThemes[saved];
+                }
+
+                return window.matchMedia('(prefers-color-scheme: dark)').matches
+                    ? darkTheme
+                    : lightTheme;
+            }
+
             const cookieMatch = document.cookie.match(new RegExp('(?:^|; )' + cookieName + '=([^;]*)'));
             const savedTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = savedTheme === darkTheme || savedTheme === lightTheme
-                ? savedTheme
-                : (systemPrefersDark ? darkTheme : lightTheme);
 
-            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('data-theme', resolveTheme(savedTheme));
         })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -112,6 +124,38 @@
                 </nav>
             </footer>
 
+            {{-- Cookie consent banner (152-ФЗ / ePrivacy) --}}
+            <div
+                x-data="{ visible: !document.cookie.split(';').some(c => c.trim().startsWith('cookie_consent=')) }"
+                x-show="visible"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="translate-y-full opacity-0"
+                x-transition:enter-end="translate-y-0 opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="translate-y-0 opacity-100"
+                x-transition:leave-end="translate-y-full opacity-0"
+                class="fixed bottom-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:bottom-0 left-0 right-0 z-50 border-t border-base-300 bg-base-100 shadow-lg"
+            >
+                <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8">
+                    <p class="text-sm text-base-content/80">
+                        Мы используем файлы cookie для корректной работы сервиса и аналитики.
+                        Продолжая пользоваться сайтом, вы соглашаетесь с нашей
+                        <a href="/cookie-policy" class="link link-primary">Политикой куки</a> и
+                        <a href="/privacy-policy" class="link link-primary">Политикой конфиденциальности</a>.
+                    </p>
+                    <div class="flex shrink-0 gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="document.cookie='cookie_consent=accepted;path=/;max-age=31536000;SameSite=Lax'; visible=false"
+                        >
+                            Принять
+                        </button>
+                        <a href="/cookie-policy" class="btn btn-ghost btn-sm">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
             <nav
                 class="btm-nav btm-nav-touch lg:hidden z-60 border-t border-base-200 bg-base-100 pb-[env(safe-area-inset-bottom)]"
                 aria-label="Нижняя навигация"
@@ -123,7 +167,7 @@
                 @auth
                     @php
                         $btmUser = Auth::user();
-                        $btmStaff = $btmUser->isOrganizer() || $btmUser->isJudge() || $btmUser->isAdmin();
+                        $btmStaff = $btmUser->isOrganizer() || $btmUser->isJudge() || $btmUser->isAdmin() || $btmUser->isModerator();
                     @endphp
                     @if ($btmStaff)
                         @if ($btmUser->isAdmin())
@@ -140,6 +184,11 @@
                             <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:scale" class="h-6 w-6" />
                                 <span class="btm-nav-label">Судья</span>
+                            </a>
+                        @elseif ($btmUser->isModerator())
+                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/70'])>
+                                <x-app-icon icon="heroicons:shield-exclamation" class="h-6 w-6" />
+                                <span class="btm-nav-label">Модер.</span>
                             </a>
                         @endif
                     @else
@@ -166,9 +215,9 @@
                 @else
                     @if ($btmStaff)
                         @if ($btmUser->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/70'])>
-                                <x-app-icon icon="heroicons:chart-bar-square" class="h-6 w-6" />
-                                <span class="btm-nav-label">Админ</span>
+                            <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
+                                <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
+                                <span class="btm-nav-label">Хакатоны</span>
                             </a>
                         @elseif ($btmUser->isOrganizer())
                             <a href="{{ route('organizer.applications') }}" wire:navigate @class([request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active text-primary' : 'text-base-content/70'])>
@@ -178,6 +227,11 @@
                         @elseif ($btmUser->isJudge())
                             <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:clipboard-document-list" class="h-6 w-6" />
+                                <span class="btm-nav-label">Хакатоны</span>
+                            </a>
+                        @elseif ($btmUser->isModerator())
+                            <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
+                                <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                                 <span class="btm-nav-label">Хакатоны</span>
                             </a>
                         @endif
@@ -243,207 +297,87 @@
                     @endauth
                 </div>
 
-                <ul class="menu menu-vertical app-sidebar-menu mt-5 w-full min-w-0 flex-1 gap-0.5 px-0 py-1" role="navigation" aria-label="Меню сайта">
+                <x-mary-menu activate-by-route class="mt-5 w-full flex-1 px-0" role="navigation" aria-label="Меню сайта">
                     @guest
-                        <li>
-                            <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-                                <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
-                                <span class="min-w-0 flex-1">{{ __('ui.nav.home') }}</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('hackatons.index') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('hackatons.index', 'hackatons.show') || request()->is('hackatons/*') ? 'active' : '' }}">
-                                <x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5 shrink-0" />
-                                <span class="min-w-0 flex-1">{{ __('ui.nav.hackatons') }}</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('teams.index') }}" wire:navigate class="sidebar-nav-link {{ request()->is('teams*') ? 'active' : '' }}">
-                                <x-app-icon icon="heroicons:user-group" class="h-5 w-5 shrink-0" />
-                                <span class="min-w-0 flex-1">{{ __('ui.nav.teams') }}</span>
-                            </a>
-                        </li>
-                        <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-                        <li>
-                            <a href="{{ route('login') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('login') ? 'active' : '' }}">
-                                <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-5 w-5 shrink-0" />
-                                <span class="min-w-0 flex-1">{{ __('ui.nav.login') }}</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('register') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('register') ? 'active' : '' }}">
-                                <x-app-icon icon="heroicons:user-plus" class="h-5 w-5 shrink-0" />
-                                <span class="min-w-0 flex-1">{{ __('ui.nav.register') }}</span>
-                            </a>
-                        </li>
+                        <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
+                        <x-mary-menu-item title="{{ __('ui.nav.hackatons') }}" icon="o-rocket-launch" link="{{ route('hackatons.index') }}" />
+                        <x-mary-menu-item title="{{ __('ui.nav.teams') }}" icon="o-user-group" link="{{ route('teams.index') }}" />
+                        <x-marymenu-separator />
+                        <x-mary-menu-item title="{{ __('ui.nav.login') }}" icon="o-arrow-right-on-rectangle" link="{{ route('login') }}" />
+                        <x-mary-menu-item title="{{ __('ui.nav.register') }}" icon="o-user-plus" link="{{ route('register') }}" />
                     @else
-                        @php
-                            $navUser = Auth::user();
-                            $isPureParticipant = $navUser->canParticipate();
-                        @endphp
+                        @php $navUser = Auth::user(); $isPureParticipant = $navUser->canParticipate(); @endphp
 
                         @if ($isPureParticipant)
-                            <li>
-                                <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.home') }}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('hackatons.index') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('hackatons.index', 'hackatons.show') || request()->is('hackatons/*') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:rocket-launch" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.hackatons') }}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('teams.index') }}" wire:navigate class="sidebar-nav-link {{ request()->is('teams*') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:user-group" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.teams') }}</span>
-                                </a>
-                            </li>
-                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">{{ __('ui.nav.group_participation') }}</span></li>
-                            <li>
-                                <a href="{{ route('profile.teams') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.teams') || request()->is('profile/teams*') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:users" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.my_teams') }}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('teams.create') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('teams.create') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:plus-circle" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.create_team') }}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('participant.hackatons') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('participant.hackatons', 'participant.hackatons.hub') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:rectangle-stack" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.my_hackatons') }}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('profile.certificates') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile.certificates') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:academic-cap" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.certificates') }}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('profile') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.profile') }}</span>
-                                </a>
-                            </li>
+                            <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
+                            <x-mary-menu-item title="{{ __('ui.nav.hackatons') }}" icon="o-rocket-launch" link="{{ route('hackatons.index') }}" />
+                            <x-mary-menu-item title="{{ __('ui.nav.teams') }}" icon="o-user-group" link="{{ route('teams.index') }}" />
+                            <x-marymenu-separator />
+                            <x-mary-menu-item title="{{ __('ui.nav.my_teams') }}" icon="o-users" link="{{ route('profile.teams') }}" />
+                            <x-mary-menu-item title="{{ __('ui.nav.create_team') }}" icon="o-plus-circle" link="{{ route('teams.create') }}" />
+                            <x-mary-menu-item title="{{ __('ui.nav.my_hackatons') }}" icon="o-rectangle-stack" link="{{ route('participant.hackatons') }}" />
+                            <x-mary-menu-item title="{{ __('ui.nav.certificates') }}" icon="o-academic-cap" link="{{ route('profile.certificates') }}" />
+                            <x-marymenu-separator />
+                            <x-mary-menu-item title="{{ __('ui.nav.profile') }}" icon="o-user-circle" link="{{ route('profile') }}" />
                         @else
-                            <li>
-                                <a href="{{ route('home') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:home" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.home') }}</span>
-                                </a>
-                            </li>
+                            <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
                             @if ($navUser->isOrganizer() || $navUser->isJudge())
-                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">{{ __('ui.nav.group_hackatons') }}</span></li>
+                                <x-marymenu-separator />
                                 @if ($navUser->isOrganizer())
-                                    <li>
-                                        <a href="{{ route('hackatons.create') }}" wire:navigate class="sidebar-nav-link sidebar-nav-link--partner-cta {{ request()->routeIs('hackatons.create') ? 'active' : '' }}">
-                                            <x-app-icon icon="heroicons:plus" class="h-5 w-5 shrink-0" />
-                                            <span class="min-w-0 flex-1">{{ __('ui.nav.create_hackaton') }}</span>
-                                        </a>
-                                    </li>
+                                    <x-mary-menu-item title="{{ __('ui.nav.create_hackaton') }}" icon="o-plus" link="{{ route('hackatons.create') }}" />
                                 @elseif ($navUser->isJudge())
-                                    <li>
-                                        <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
-                                            <x-app-icon icon="heroicons:clipboard-document-list" class="h-5 w-5 shrink-0" />
-                                            <span class="min-w-0 flex-1">{{ __('ui.nav.assigned_hackatons') }}</span>
-                                        </a>
-                                    </li>
+                                    <x-mary-menu-item title="{{ __('ui.nav.assigned_hackatons') }}" icon="o-clipboard-document-list" link="{{ route('judge.dashboard') }}" />
                                 @endif
                             @endif
-                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-                            <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">{{ __('ui.nav.group_cabinet') }}</span></li>
+                            <x-marymenu-separator />
                             @if ($navUser->isOrganizer())
-                                <li>
-                                    <a href="{{ route('organizer.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer', 'organizer.applications', 'organizer.scoring', 'organizer.finished', 'organizer.participants') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:squares-2x2" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">{{ __('ui.nav.organizer_cabinet') }}</span>
-                                        @if (isset($partnerSidebarCounts) && $partnerSidebarCounts !== null && $partnerSidebarCounts->totalHackatonsCount > 0)
-                                            <span class="badge badge-sm badge-ghost shrink-0 tabular-nums" title="Активные / всего">
-                                                {{ $partnerSidebarCounts->activeHackatonsCount }}/{{ $partnerSidebarCounts->totalHackatonsCount }}
-                                            </span>
-                                        @endif
-                                    </a>
-                                </li>
+                                <x-mary-menu-item
+                                    title="{{ __('ui.nav.organizer_cabinet') }}"
+                                    icon="o-squares-2x2"
+                                    link="{{ route('organizer.dashboard') }}"
+                                    :active="request()->routeIs('organizer.dashboard', 'profile.hackatons', 'profile.organizer', 'organizer.applications', 'organizer.scoring', 'organizer.finished', 'organizer.participants')"
+                                    :badge="isset($partnerSidebarCounts) && $partnerSidebarCounts?->totalHackatonsCount > 0 ? $partnerSidebarCounts->activeHackatonsCount.'/'.$partnerSidebarCounts->totalHackatonsCount : null"
+                                />
                             @elseif ($navUser->isAdmin())
-                                <li>
-                                    <a href="{{ route('admin.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('admin*') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">{{ __('ui.nav.admin_panel') }}</span>
-                                    </a>
-                                </li>
+                                <x-mary-menu-item title="{{ __('ui.nav.admin_panel') }}" icon="o-shield-check" link="{{ route('admin.dashboard') }}" />
+                            @elseif ($navUser->isModerator())
+                                <x-mary-menu-item title="{{ __('ui.nav.moderator_panel') }}" icon="o-shield-exclamation" link="{{ route('admin.dashboard') }}" />
                             @endif
                             @if ($navUser->isJudge())
-                                <li>
-                                    <a href="{{ route('judge.dashboard') }}" wire:navigate class="sidebar-nav-link {{ request()->is('judge*') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:scale" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">{{ __('ui.nav.judge_panel') }}</span>
-                                    </a>
-                                </li>
+                                <x-mary-menu-item title="{{ __('ui.nav.judge_panel') }}" icon="o-scale" link="{{ route('judge.dashboard') }}" />
                             @endif
                             @if ($navUser->isOrganizer() && isset($partnerSidebarCounts) && $partnerSidebarCounts !== null)
-                                <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-                                <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">{{ __('ui.nav.group_quick_actions') }}</span></li>
-                                <li>
-                                    <a href="{{ route('organizer.applications') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:inbox" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">{{ __('ui.nav.pending_applications') }}</span>
-                                        @if ($partnerSidebarCounts->pendingApplicationsCount > 0)
-                                            <span class="badge badge-sm badge-error shrink-0 tabular-nums">{{ min($partnerSidebarCounts->pendingApplicationsCount, 99) }}</span>
-                                        @endif
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('organizer.scoring') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.scoring', 'profile.hackatons.scoring') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:clipboard-document-check" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">{{ __('ui.nav.scoring_summary') }}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('organizer.finished') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('organizer.finished', 'profile.hackatons.finished') ? 'active' : '' }}">
-                                        <x-app-icon icon="heroicons:archive-box" class="h-5 w-5 shrink-0" />
-                                        <span class="min-w-0 flex-1">{{ __('ui.nav.finished_hackatons') }}</span>
-                                    </a>
-                                </li>
+                                <x-marymenu-separator />
+                                <x-mary-menu-item
+                                    title="{{ __('ui.nav.pending_applications') }}"
+                                    icon="o-inbox"
+                                    link="{{ route('organizer.applications') }}"
+                                    :badge="$partnerSidebarCounts->pendingApplicationsCount > 0 ? min($partnerSidebarCounts->pendingApplicationsCount, 99) : null"
+                                    badge-classes="badge-error"
+                                />
+                                <x-mary-menu-item title="{{ __('ui.nav.scoring_summary') }}" icon="o-clipboard-document-check" link="{{ route('organizer.scoring') }}" />
+                                <x-mary-menu-item title="{{ __('ui.nav.finished_hackatons') }}" icon="o-archive-box" link="{{ route('organizer.finished') }}" />
                             @endif
-                            <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-                            <li>
-                                <a href="{{ route('profile') }}" wire:navigate class="sidebar-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
-                                    <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 shrink-0" />
-                                    <span class="min-w-0 flex-1">{{ __('ui.nav.profile') }}</span>
-                                </a>
-                            </li>
+                            <x-marymenu-separator />
+                            <x-mary-menu-item title="{{ __('ui.nav.profile') }}" icon="o-user-circle" link="{{ route('profile') }}" />
                         @endif
                     @endguest
+                </x-mary-menu>
 
-                    <li role="presentation" class="sidebar-nav-divider list-none px-2 py-0"><div class="divider my-0 border-base-300"></div></li>
-
-                    <li class="menu-title px-1"><span class="font-display text-xs font-medium text-base-content/50">{{ __('ui.nav.settings') }}</span></li>
-                    <li>
-                        <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:border-primary/25 hover:bg-base-200/85">
-                            <span class="text-[0.9375rem]">{{ __('ui.nav.dark_theme') }}</span>
-                            <input
-                                type="checkbox"
-                                class="toggle toggle-primary shrink-0"
-                                data-theme-toggle
-                                role="switch"
-                                aria-label="Переключить тёмную тему"
-                                aria-checked="false"
-                            />
-                        </label>
-                    </li>
-                    <li>
-                        <livewire:locale-switcher />
-                    </li>
-                </ul>
+                <div class="mt-2 border-t border-base-200 pt-2">
+                    <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:bg-base-200">
+                        <span class="text-[0.9375rem]">{{ __('ui.nav.dark_theme') }}</span>
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-primary shrink-0"
+                            data-theme-toggle
+                            role="switch"
+                            aria-label="Переключить тёмную тему"
+                            aria-checked="false"
+                        />
+                    </label>
+                    <livewire:locale-switcher />
+                </div>
             </aside>
         </div>
     </div>
@@ -454,9 +388,10 @@
     @livewireScripts
     <script>
         (function () {
+            const darkTheme = @json($darkTheme);
+            const lightTheme = @json($lightTheme);
+            const legacyThemes = @json($legacyThemes);
             const cookieName = 'theme';
-            const darkTheme = 'hackatonshik';
-            const lightTheme = 'hackatonshik-light';
             const toggle = document.querySelector('[data-theme-toggle]');
 
             if (!toggle) {

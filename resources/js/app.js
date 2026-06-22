@@ -276,5 +276,3 @@ window.createAvatarCropperModal = function createAvatarCropperModal(config) {
 import { setupTabGroup } from './tabs';
 
 window.setupTabGroup = setupTabGroup;
-
-import './echo';
