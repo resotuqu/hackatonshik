@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Enums\ReportStatus;
 use App\Events\MessageSent;
 use App\Events\ReactionUpdated;
 use App\Models\PlatformSetting;
+use App\Models\Report;
 use App\Models\Team;
 use App\Models\TeamMessage;
 use App\Models\TeamMessageReaction;
 use App\Models\User;
 use App\Notifications\TeamChatMention;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -19,13 +22,14 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Mary\Traits\Toast;
 
 /**
  * @property-read Collection<int, TeamMessage> $messages
  */
 class TeamChat extends Component
 {
-    use WithFileUploads;
+    use Toast, WithFileUploads;
 
     /** @var array<string> */
     public const ALLOWED_EMOJI = ['👍', '❤️', '😂', '🎉', '😮'];
@@ -40,7 +44,8 @@ class TeamChat extends Component
 
     public ?int $replyToId = null;
 
-    public $file;
+    /** @var array<int, TemporaryUploadedFile> */
+    public array $files = [];
 
     public function mount(Team $team): void
     {
@@ -60,7 +65,6 @@ class TeamChat extends Component
                 'reactions.user:id,fio',
                 'parent.user:id,fio,nickname',
             ])
-            ->whereNull('parent_id')
             ->latest()
             ->limit(50)
             ->get()
@@ -76,36 +80,55 @@ class TeamChat extends Component
         $maxKb = $largeFilesEnabled ? self::FILE_SIZE_LARGE_KB : self::FILE_SIZE_DEFAULT_KB;
 
         $this->validate([
-            'message' => 'required_without:file|string|max:2000',
-            'file' => "nullable|file|max:{$maxKb}|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip",
+            'message' => 'nullable|string|max:2000',
+            'files' => 'nullable|array|max:5',
+            'files.*' => "nullable|file|max:{$maxKb}|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip",
             'replyToId' => 'nullable|integer|exists:team_messages,id',
         ]);
 
-        $type = 'text';
-        $content = $this->message;
+        if (blank($this->message) && empty($this->files)) {
+            $this->addError('message', 'Введите сообщение или прикрепите файл.');
 
-        if ($this->file) {
-            $path = $this->file->store('team-chat', 'public');
-            $content = $path;
-            $type = $this->isImage($this->file) ? 'image' : 'file';
+            return;
         }
 
-        $teamMessage = $this->team->messages()->create([
-            'user_id' => auth()->id(),
-            'content' => $content,
-            'type' => $type,
-            'parent_id' => $this->replyToId,
-        ]);
+        $replyToId = $this->replyToId;
+        $lastMessage = null;
+
+        if (filled($this->message)) {
+            $lastMessage = $this->team->messages()->create([
+                'user_id' => auth()->id(),
+                'content' => $this->message,
+                'type' => 'text',
+                'parent_id' => $replyToId,
+            ]);
+
+            $this->notifyMentions($lastMessage);
+        }
+
+        foreach ($this->files as $file) {
+            $path = $file->store('team-chat', 'public');
+            $lastMessage = $this->team->messages()->create([
+                'user_id' => auth()->id(),
+                'content' => $path,
+                'type' => $this->isImage($file) ? 'image' : 'file',
+                'parent_id' => $replyToId,
+            ]);
+        }
 
         $this->message = '';
-        $this->file = null;
+        $this->files = [];
         $this->replyToId = null;
 
-        broadcast(new MessageSent($teamMessage))->toOthers();
-
-        if ($type === 'text') {
-            $this->notifyMentions($teamMessage);
+        if ($lastMessage) {
+            $this->broadcastToOthers(new MessageSent($lastMessage));
         }
+    }
+
+    public function removeFile(int $index): void
+    {
+        unset($this->files[$index]);
+        $this->files = array_values($this->files);
     }
 
     public function setReply(int $messageId): void
@@ -149,7 +172,38 @@ class TeamChat extends Component
             ]);
         }
 
-        broadcast(new ReactionUpdated($message))->toOthers();
+        $this->broadcastToOthers(new ReactionUpdated($message));
+    }
+
+    public function reportMessage(int $messageId): void
+    {
+        Gate::authorize('chat', $this->team);
+
+        $message = TeamMessage::query()
+            ->where('id', $messageId)
+            ->where('team_id', $this->team->id)
+            ->where('user_id', '!=', auth()->id())
+            ->first();
+
+        if (! $message) {
+            $this->dispatch('$refresh');
+
+            return;
+        }
+
+        Report::query()->firstOrCreate(
+            [
+                'reporter_id' => auth()->id(),
+                'reportable_type' => TeamMessage::class,
+                'reportable_id' => $message->id,
+            ],
+            [
+                'reason' => 'Жалоба на сообщение в чате команды',
+                'status' => ReportStatus::Pending,
+            ],
+        );
+
+        $this->success('Жалоба отправлена. Модераторы рассмотрят её в ближайшее время.', position: 'toast-center toast-top');
     }
 
     #[On('echo-private:team.{team.id},MessageSent')]
@@ -202,6 +256,20 @@ class TeamChat extends Component
         return array_values(array_unique(
             array_map('mb_strtolower', $matches[1])
         ));
+    }
+
+    private function broadcastToOthers(mixed $event): void
+    {
+        try {
+            $socketId = request()->header('X-Socket-ID');
+            $pending = broadcast($event);
+
+            if ($socketId && $socketId !== 'undefined') {
+                $pending->toOthers();
+            }
+        } catch (BroadcastException $e) {
+            // Reverb/Pusher unreachable — message still saved, real-time delivery skipped.
+        }
     }
 
     private function isImage(TemporaryUploadedFile $file): bool

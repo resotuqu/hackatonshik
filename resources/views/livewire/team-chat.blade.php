@@ -1,5 +1,5 @@
 <div
-    class="flex flex-col h-[560px] bg-base-100 border border-base-200 rounded-xl overflow-hidden shadow-sm"
+    class="ui-surface-card flex flex-col h-[560px] overflow-hidden"
     x-data="{
         allowedEmoji: @js(\App\Livewire\TeamChat::ALLOWED_EMOJI),
         pickerFor: null,
@@ -9,12 +9,43 @@
     @click.outside="closePicker()"
 >
     {{-- Header --}}
-    <div class="p-4 border-b border-base-200 bg-base-200/30 flex items-center justify-between shrink-0">
-        <h3 class="font-bold flex items-center gap-2">
-            <x-app-icon icon="heroicons:chat-bubble-left-right" class="w-5 h-5 text-primary" />
-            Командный чат
-        </h3>
-        <span class="badge badge-sm badge-outline">{{ $team->title }}</span>
+    <div class="border-b border-base-200 bg-base-200/30 shrink-0">
+        <div class="p-4 flex items-center justify-between">
+            <h3 class="font-bold flex items-center gap-2">
+                <x-app-icon icon="heroicons:chat-bubble-left-right" class="w-5 h-5 text-primary" />
+                Командный чат
+            </h3>
+            <span class="badge badge-sm badge-outline">{{ $team->title }}</span>
+        </div>
+
+        {{-- Disclaimer --}}
+        <div
+            x-data="{ open: !localStorage.getItem('chat_disclaimer_dismissed') }"
+            x-show="open"
+            x-cloak
+            class="border-t border-amber-200/60 bg-amber-50/80 dark:bg-amber-900/20 dark:border-amber-700/40 px-4 py-2.5"
+        >
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-2 min-w-0">
+                    <x-app-icon icon="heroicons:information-circle" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <p class="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                        Чат предоставляется платформой как инструмент для командного общения.
+                        Мы не несём ответственности за содержание переписки, внешние ссылки и переходы на сторонние ресурсы.
+                        Если вы столкнулись с оскорбительным или запрещённым контентом — используйте кнопку
+                        <x-app-icon icon="heroicons:flag" class="w-3 h-3 inline-block text-amber-600" />
+                        рядом с сообщением для подачи жалобы.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-xs btn-circle shrink-0 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-800/40"
+                    @click="open = false; localStorage.setItem('chat_disclaimer_dismissed', '1')"
+                    title="Скрыть"
+                >
+                    <x-app-icon icon="heroicons:x-mark" class="w-3.5 h-3.5" />
+                </button>
+            </div>
+        </div>
     </div>
 
     {{-- Messages --}}
@@ -37,11 +68,18 @@
             @endphp
 
             <div
-                class="group relative flex flex-col gap-0.5 @if($isMine) items-end @else items-start @endif"
+                @class([
+                    'group relative flex flex-col gap-0.5',
+                    'items-end' => $isMine,
+                    'items-start' => ! $isMine,
+                ])
                 wire:key="msg-{{ $msg->id }}"
             >
                 {{-- Avatar + name --}}
-                <div class="flex items-center gap-1.5 @if($isMine) flex-row-reverse @endif">
+                <div @class([
+                    'flex items-center gap-1.5',
+                    'flex-row-reverse' => $isMine,
+                ])>
                     <div class="w-6 h-6 rounded-full bg-base-300 shrink-0 flex items-center justify-center overflow-hidden">
                         @if($msg->user->avatar_path)
                             <img src="{{ asset('storage/' . $msg->user->avatar_path) }}" class="w-full h-full object-cover" />
@@ -55,15 +93,26 @@
 
                 {{-- Reply context --}}
                 @if($msg->parent)
-                    <div class="@if($isMine) mr-8 @else ml-8 @endif px-2 py-1 rounded border-l-2 border-primary/40 bg-base-200/60 text-[11px] text-base-content/60 max-w-[260px] truncate">
+                    <div @class([
+                        'px-2 py-1 rounded border-l-2 border-primary/40 bg-base-200/50 text-[11px] text-base-content/70 max-w-[260px] truncate',
+                        'mr-8' => $isMine,
+                        'ml-8' => ! $isMine,
+                    ])>
                         <span class="font-semibold text-primary/70">{{ $msg->parent->user?->publicName() }}</span>:
                         {{ Str::limit($msg->parent->content, 60) }}
                     </div>
                 @endif
 
                 {{-- Bubble + action buttons --}}
-                <div class="flex items-end gap-1 @if($isMine) flex-row-reverse @endif">
-                    <div class="chat-bubble @if($isMine) chat-bubble-primary @else bg-base-200 text-base-content @endif text-sm max-w-xs lg:max-w-sm break-words">
+                <div @class([
+                    'flex items-end gap-1',
+                    'flex-row-reverse' => $isMine,
+                ])>
+                    <div @class([
+                        'chat-bubble text-sm max-w-xs lg:max-w-sm break-words',
+                        'chat-bubble-primary' => $isMine,
+                        'bg-base-200 text-base-content' => ! $isMine,
+                    ])>
                         @if($msg->type === 'image')
                             <a href="{{ asset('storage/' . $msg->content) }}" target="_blank" class="block">
                                 <img src="{{ asset('storage/' . $msg->content) }}" class="max-w-full rounded-lg shadow-sm hover:opacity-90 transition-opacity" />
@@ -105,7 +154,11 @@
                                 x-show="pickerFor === {{ $msg->id }}"
                                 x-cloak
                                 @click.stop
-                                class="absolute bottom-full @if($isMine) right-0 @else left-0 @endif mb-1 z-50 flex gap-1 rounded-2xl border border-base-300 bg-base-100 px-2 py-1.5 shadow-lg"
+                                @class([
+                                    'absolute bottom-full mb-1 z-50 flex gap-1 rounded-panel border border-base-300 bg-base-100 px-2 py-1.5 shadow-lg',
+                                    'right-0' => $isMine,
+                                    'left-0' => ! $isMine,
+                                ])
                             >
                                 <template x-for="emoji in allowedEmoji" :key="emoji">
                                     <button
@@ -126,12 +179,28 @@
                         >
                             <x-app-icon icon="heroicons:arrow-uturn-left" class="w-4 h-4" />
                         </button>
+
+                        @if(! $isMine)
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-xs btn-circle text-base-content/30 hover:text-error"
+                                wire:click="reportMessage({{ $msg->id }})"
+                                wire:confirm="Пожаловаться на это сообщение? Жалоба будет передана модераторам платформы."
+                                title="Пожаловаться"
+                            >
+                                <x-app-icon icon="heroicons:flag" class="w-4 h-4" />
+                            </button>
+                        @endif
                     </div>
                 </div>
 
                 {{-- Reaction pills --}}
                 @if($reactionGroups->isNotEmpty())
-                    <div class="flex flex-wrap gap-1 @if($isMine) justify-end mr-8 @else ml-8 @endif">
+                    <div @class([
+                        'flex flex-wrap gap-1',
+                        'justify-end mr-8' => $isMine,
+                        'ml-8' => ! $isMine,
+                    ])>
                         @foreach($reactionGroups as $emoji => $group)
                             @php
                                 $meReacted = $group->contains('user_id', auth()->id());
@@ -142,7 +211,7 @@
                                 wire:click="toggleReaction({{ $msg->id }}, '{{ $emoji }}')"
                                 title="{{ $names }}"
                                 class="inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-xs transition-colors
-                                    @if($meReacted) border-primary/40 bg-primary/10 text-primary font-semibold @else border-base-300 bg-base-200/60 text-base-content/70 hover:bg-base-200 @endif"
+                                    @if($meReacted) border-primary/40 bg-primary/10 text-primary font-semibold @else border-base-300 bg-base-200/50 text-base-content/70 hover:bg-base-200 @endif"
                             >
                                 {{ $emoji }}<span class="tabular-nums">{{ $group->count() }}</span>
                             </button>
@@ -182,15 +251,19 @@
         @endif
 
         <div class="p-4">
-            @if($file)
-                <div class="mb-2 p-2 bg-base-200 rounded-lg flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-2">
-                        <x-app-icon icon="heroicons:paper-clip" class="w-4 h-4" />
-                        <span>{{ $file->getClientOriginalName() }}</span>
-                    </div>
-                    <button type="button" wire:click="$set('file', null)" class="btn btn-ghost btn-xs btn-circle">
-                        <x-app-icon icon="heroicons:x-mark" class="w-4 h-4" />
-                    </button>
+            @if($files)
+                <div class="mb-2 flex flex-col gap-1">
+                    @foreach($files as $i => $f)
+                        <div class="p-2 bg-base-200 rounded-lg flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <x-app-icon icon="heroicons:paper-clip" class="w-4 h-4 shrink-0" />
+                                <span class="truncate">{{ $f->getClientOriginalName() }}</span>
+                            </div>
+                            <button type="button" wire:click="removeFile({{ $i }})" class="btn btn-ghost btn-xs btn-circle shrink-0">
+                                <x-app-icon icon="heroicons:x-mark" class="w-4 h-4" />
+                            </button>
+                        </div>
+                    @endforeach
                 </div>
             @endif
 
@@ -204,8 +277,8 @@
                         autocomplete="off"
                     />
                     @if($fileUploadEnabled)
-                        <label class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors" title="Прикрепить файл (до {{ $maxFileMb }} МБ)">
-                            <input type="file" wire:model="file" class="hidden" />
+                        <label class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors" title="Прикрепить файлы (до {{ $maxFileMb }} МБ каждый)">
+                            <input type="file" wire:model="files" class="hidden" multiple />
                             <x-app-icon icon="heroicons:paper-clip" class="w-4 h-4" />
                         </label>
                     @endif
@@ -215,7 +288,7 @@
                 </button>
             </form>
             @if($fileUploadEnabled)
-                <div wire:loading wire:target="file" class="text-[10px] text-primary mt-1">Загрузка файла...</div>
+                <div wire:loading wire:target="files" class="text-[10px] text-primary mt-1">Загрузка файла...</div>
             @endif
         </div>
     </div>

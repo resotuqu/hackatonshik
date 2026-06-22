@@ -7,6 +7,7 @@ use App\Models\TeamMessageReaction;
 use App\Models\TeamRole;
 use App\Models\User;
 use App\Notifications\TeamChatMention;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -207,4 +208,52 @@ test('file message does not trigger mention parsing', function () {
     ]);
 
     Notification::assertNotSentTo($member, TeamChatMention::class);
+});
+
+test('sending text and file together creates two separate messages', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->for($owner)->create();
+
+    $this->actingAs($owner);
+
+    $file = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
+
+    Livewire::test(TeamChat::class, ['team' => $team])
+        ->set('message', 'Вот документ')
+        ->set('files', [$file])
+        ->call('sendMessage')
+        ->assertHasNoErrors();
+
+    expect($team->messages()->where('type', 'text')->where('content', 'Вот документ')->exists())->toBeTrue();
+    expect($team->messages()->where('type', 'file')->exists())->toBeTrue();
+    expect($team->messages()->count())->toBe(2);
+});
+
+test('reply messages appear in the messages list', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->for($owner)->create();
+    $parent = TeamMessage::factory()->for($team)->for($owner)->create(['content' => 'Оригинал']);
+
+    $this->actingAs($owner);
+
+    Livewire::test(TeamChat::class, ['team' => $team])
+        ->call('setReply', $parent->id)
+        ->set('message', 'Ответ')
+        ->call('sendMessage')
+        ->assertHasNoErrors();
+
+    // Both parent and reply must appear in the rendered message list
+    expect($team->messages()->count())->toBe(2);
+    expect($team->messages()->whereNotNull('parent_id')->exists())->toBeTrue();
+});
+
+test('submitting without message or files returns a validation error', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->for($owner)->create();
+
+    $this->actingAs($owner);
+
+    Livewire::test(TeamChat::class, ['team' => $team])
+        ->call('sendMessage')
+        ->assertHasErrors(['message']);
 });
