@@ -14,7 +14,20 @@ test('organizer dashboard is reachable for partner', function () {
     actingAs($organizer)
         ->get(route('organizer.dashboard'))
         ->assertOk()
-        ->assertSeeLivewire('organizer.dashboard');
+        ->assertSeeLivewire('organizer.dashboard')
+        ->assertSee('data-test="organizer-dashboard-summary"', false)
+        ->assertSee('Организатор', false)
+        ->assertDontSee('Дашборд организатора', false);
+});
+
+test('judge dashboard uses role-aligned page header', function () {
+    $judge = User::factory()->judge()->create();
+
+    actingAs($judge)
+        ->get(route('judge.dashboard'))
+        ->assertOk()
+        ->assertSee('Судья', false)
+        ->assertSee('Оценка проектов и экспертиза', false);
 });
 
 test('profile organizer route redirects to organizer dashboard', function () {

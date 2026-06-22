@@ -1,3 +1,4 @@
+<div>
 @guest
 <div class="mx-auto w-full max-w-7xl space-y-[var(--spacing-section)]">
     {{-- Hero --}}
@@ -155,15 +156,25 @@
 @endguest
 
 @auth
+@php
+    $dashboardUser = auth()->user();
+    $dashboardHeading = match (true) {
+        $dashboardUser->isParticipant() => 'Участник',
+        $dashboardUser->isOrganizer() => 'Организатор',
+        $dashboardUser->isJudge() => 'Судья',
+        $dashboardUser->isAdmin() => 'Администратор',
+        default => 'Краткая сводка',
+    };
+@endphp
 <section
     class="mx-auto w-full max-w-7xl space-y-10"
     data-test="home-dashboard"
     aria-labelledby="dashboard-heading"
 >
     <header class="flex flex-col gap-1">
-        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-bold sm:text-4xl">Краткая сводка</h1>
-        <p class="text-base-content/60 font-medium">
-            Здравствуйте, <span class="text-base-content font-bold">{{ auth()->user()->fio }}</span>. Рады вас видеть!
+        <h1 id="dashboard-heading" class="ui-heading-display text-3xl font-bold sm:text-4xl">{{ $dashboardHeading }}</h1>
+        <p class="text-base-content/70 font-medium">
+            Здравствуйте, <span class="text-base-content font-bold">{{ $dashboardUser->fio }}</span>. Рады вас видеть!
         </p>
     </header>
 
@@ -181,227 +192,7 @@
         </p>
     @endif
 
-    @if (auth()->user()->isParticipant())
-        <div id="participant-hackaton-dashboard" class="scroll-mt-24 space-y-10">
-        <x-recommended-teams :recommendations="$recommendedTeams" />
-        @if ($participantNextStepTitle !== '')
-            <div class="rounded-lg border border-base-300 bg-base-100 p-4">
-                <p class="text-xs font-medium uppercase tracking-wide text-base-content/50">Ваш следующий шаг</p>
-                <p class="mt-1 font-semibold">{{ $participantNextStepTitle }}</p>
-                <p class="mt-1 text-sm text-base-content/70">{{ $participantNextStepHint }}</p>
-                @if ($participantNextStepHref && $participantNextStepLabel)
-                    <a href="{{ $participantNextStepHref }}" class="btn btn-neutral btn-sm mt-3">{{ $participantNextStepLabel }}</a>
-                @endif
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="ui-surface-card p-5 group">
-                <div class="flex flex-col h-full justify-between">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/50">Мои команды</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
-                            <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $teamsCount }}</p>
-                    </div>
-                    <a href="/profile/teams" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
-                </div>
-            </div>
-
-            <div class="ui-surface-card p-5 group">
-                <div class="flex flex-col h-full justify-between">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/50">Сертификаты</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
-                            <x-app-icon icon="heroicons:academic-cap" class="h-4 w-4" />
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $certificatesCount }}</p>
-                    </div>
-                    <a href="/profile/certificates" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
-                </div>
-            </div>
-
-            <div class="ui-surface-card p-5 group">
-                <div class="flex flex-col h-full justify-between">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/50">Заявки в команды</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
-                            <x-app-icon icon="heroicons:envelope" class="h-4 w-4" />
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $pendingTeamApplicationsCount }}</p>
-                    </div>
-                    <a href="/profile/teams#pending-team-role-applications" class="ui-cta-ghost btn-xs mt-4 self-end">Открыть</a>
-                </div>
-            </div>
-
-            <div class="ui-surface-card p-5 group">
-                <div class="flex flex-col h-full justify-between">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/50">Заявки на хакатоны</span>
-                        <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-base-200 text-base-content/60">
-                            <x-app-icon icon="heroicons:rocket-launch" class="h-4 w-4" />
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
-                    </div>
-                    <a href="/hackatons" class="ui-cta-ghost btn-xs mt-4 self-end">Каталог</a>
-                </div>
-            </div>
-        </div>
-
-        @if (count($hackatonApplicationsPreview) > 0)
-            <x-marycard title="Заявки команд на хакатоны" class="card border border-base-300 bg-base-100 w-full max-w-2xl">
-                <ul class="space-y-2">
-                    @foreach ($hackatonApplicationsPreview as $row)
-                        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
-                            <div>
-                                <a href="{{ route('hackatons.show', $row['hackaton_id']) }}#participant-hackaton-applications" class="link link-primary font-medium">{{ $row['title'] }}</a>
-                                <span class="text-sm text-base-content/70"> — {{ $row['team_title'] }}</span>
-                            </div>
-                            <span class="badge badge-warning badge-sm">{{ $row['status_label'] }}</span>
-                        </li>
-                    @endforeach
-                </ul>
-            </x-marycard>
-        @endif
-
-        @if (count($participantHackatonsPreview) > 0)
-            <x-marycard title="Хакатоны (ваши и ближайшие публичные)" class="card border border-base-300 bg-base-100 w-full max-w-2xl">
-                <ul class="space-y-2">
-                    @foreach ($participantHackatonsPreview as $row)
-                        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
-                            <a href="{{ route('hackatons.show', $row['id']) }}" class="link link-primary font-medium">{{ $row['title'] }}</a>
-                            @if ($row['start_at'])
-                                <span class="text-sm text-base-content/70">{{ $row['start_at'] }}</span>
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-            </x-marycard>
-        @endif
-
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('participant.hackatons') }}" class="btn btn-primary">Мои заявки и хакатоны</a>
-            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Каталог</a>
-            <a href="{{ route('teams.create') }}" class="btn btn-outline">Создать команду</a>
-            <a href="{{ route('profile.teams') }}" class="btn btn-outline">Мои команды</a>
-        </div>
-        </div>
-    @endif
-
-    @if (auth()->user()->isOrganizer())
-        <section class="space-y-6" data-test="home-organizer-dashboard">
-            <h2 class="ui-heading-display text-xl font-semibold">Организатор</h2>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-marycard title="Мои хакатоны" class="card border border-base-300 bg-base-100">
-                <p class="text-3xl font-semibold tabular-nums">{{ $hackatonsCount }}</p>
-                <x-slot:menu>
-                    <a href="{{ route('organizer.dashboard') }}" class="btn btn-ghost btn-sm">Открыть</a>
-                </x-slot:menu>
-            </x-marycard>
-            <x-marycard title="Заявки команд на рассмотрении" class="card border border-base-300 bg-base-100">
-                <p class="text-3xl font-semibold tabular-nums">{{ $pendingHackatonApplicationsCount }}</p>
-                <p class="mt-2 text-sm text-base-content/70">По всем вашим хакатонам.</p>
-                @if ($pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId)
-                    <x-slot:menu>
-                        <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#hackaton-tab-participants" class="btn btn-ghost btn-sm">Рассмотреть</a>
-                    </x-slot:menu>
-                @endif
-            </x-marycard>
-        </div>
-        <div class="flex flex-wrap gap-3">
-            @if ($pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId)
-                <a href="{{ route('hackatons.show', $organizerFirstPendingHackatonId) }}?applications_status=pending#hackaton-tab-participants" class="btn btn-primary">Рассмотреть заявки</a>
-            @endif
-            <a href="{{ route('organizer.dashboard') }}" class="btn {{ $pendingHackatonApplicationsCount > 0 && $organizerFirstPendingHackatonId ? 'btn-outline' : 'btn-primary' }}">Мои хакатоны</a>
-            <a href="{{ route('hackatons.create') }}" class="btn btn-outline">Создать хакатон</a>
-            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Каталог хакатонов</a>
-        </div>
-        </section>
-    @endif
-
-    @if (auth()->user()->isJudge())
-        <section class="space-y-6" data-test="home-judge-dashboard">
-            <h2 class="ui-heading-display text-xl font-semibold">Судья</h2>
-        @if ($judgeHackatonsCount === 0)
-            <div class="rounded-lg border border-base-300 bg-base-100 p-6 text-center" data-test="judge-dashboard-empty">
-                <p class="text-base-content/70">У вас пока нет назначенных хакатонов. Когда организатор добавит вас в судьи, события появятся здесь.</p>
-                <a href="{{ route('hackatons.index') }}" class="btn btn-neutral mt-4">Каталог хакатонов</a>
-            </div>
-        @else
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-marycard title="Назначенные хакатоны" class="card border border-base-300 bg-base-100">
-                    <p class="text-3xl font-semibold tabular-nums">{{ $judgeHackatonsCount }}</p>
-                    <x-slot:menu>
-                        <a href="{{ route('judge.dashboard') }}" class="btn btn-ghost btn-sm">Панель судьи</a>
-                    </x-slot:menu>
-                </x-marycard>
-            </div>
-            @if (count($judgeHackatonsPreview) > 0)
-                <x-marycard title="Ближайшие по дате начала" class="card border border-base-300 bg-base-100 w-full max-w-2xl">
-                    <ul class="space-y-2">
-                        @foreach ($judgeHackatonsPreview as $row)
-                            <li class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 pb-2 last:border-0">
-                                <div class="flex min-w-0 flex-1 flex-wrap items-baseline gap-2">
-                                    <a href="{{ route('hackatons.show', $row['id']) }}" class="link link-primary font-medium">{{ $row['title'] }}</a>
-                                    @if ($row['start_at'])
-                                        <span class="text-sm text-base-content/70">{{ $row['start_at'] }}</span>
-                                    @endif
-                                </div>
-                                <a href="{{ route('judge.hackatons.show', $row['id']) }}" class="btn btn-ghost btn-xs shrink-0">К оценке</a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </x-marycard>
-            @endif
-        @endif
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('judge.dashboard') }}" class="btn btn-primary">Панель судьи</a>
-            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Каталог</a>
-        </div>
-        </section>
-    @endif
-
-    @if (auth()->user()->isAdmin())
-        <section class="space-y-6" data-test="home-admin-dashboard">
-            <h2 class="ui-heading-display text-xl font-semibold">Администратор</h2>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <x-marycard title="Пользователей" class="card border border-base-300 bg-base-100">
-                <p class="text-3xl font-semibold tabular-nums">{{ $usersCount }}</p>
-            </x-marycard>
-            <x-marycard title="Хакатонов" class="card border border-base-300 bg-base-100">
-                <p class="text-3xl font-semibold tabular-nums">{{ $adminHackatonsCount }}</p>
-            </x-marycard>
-            <x-marycard title="Партнёров" class="card border border-base-300 bg-base-100">
-                <p class="text-3xl font-semibold tabular-nums">{{ $adminPartnersCount }}</p>
-            </x-marycard>
-            <x-marycard title="Заявок команд на рассмотрении" class="card border border-base-300 bg-base-100">
-                <p class="text-3xl font-semibold tabular-nums">{{ $adminPendingApplicationsCount }}</p>
-                <p class="mt-2 text-sm text-base-content/70">По всей платформе.</p>
-            </x-marycard>
-        </div>
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Админ-панель</a>
-            <a href="{{ route('hackatons.index') }}" class="btn btn-outline">Хакатоны</a>
-        </div>
-        </section>
-    @endif
-
-    @if (! auth()->user()->isParticipant() && ! auth()->user()->isOrganizer() && ! auth()->user()->isJudge() && ! auth()->user()->isAdmin())
-        <p class="text-base-content/80">Выберите раздел в меню слева или перейдите к хакатонам.</p>
-        <div class="flex flex-wrap gap-3">
-            <a href="/hackatons" class="btn btn-primary">Хакатоны</a>
-            <a href="/profile" class="btn btn-outline">Профиль</a>
-        </div>
-    @endif
-</section>
     @include('pages.home.dashboard')
+</section>
 @endauth
+</div>

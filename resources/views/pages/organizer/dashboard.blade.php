@@ -6,13 +6,11 @@
     </div>
 
     <div wire:loading.remove class="space-y-8">
-        <div class="text-sm breadcrumbs">
-            <ul>
-                <li><a href="/">Главная</a></li>
-                <li><a href="{{ route('profile') }}">Профиль</a></li>
-                <li class="opacity-70">Организатор</li>
-            </ul>
-        </div>
+        <x-breadcrumbs :items="[
+            ['label' => 'Главная', 'href' => '/'],
+            ['label' => 'Профиль', 'href' => route('profile')],
+            ['label' => 'Организатор'],
+        ]" />
 
         <x-mary-modal wire:model="deleteHackatonModal" title="Подтверждение удаления" class="backdrop-blur">
             Вы действительно хотите удалить хакатон? Это действие нельзя отменить.
@@ -23,6 +21,11 @@
             </x-slot:actions>
         </x-mary-modal>
 
-        @include('pages.profile.hackatons.hub-body', ['showGlobalPendingStrip' => true])
+        @include('pages.home.dashboard._organizer', ['context' => 'full'])
+
+        @include('pages.profile.hackatons.hub-body', [
+            'showGlobalPendingStrip' => true,
+            'hideSummaryHeader' => true,
+        ])
     </div>
 </div>

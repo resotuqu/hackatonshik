@@ -26,44 +26,57 @@ new class extends Component {
 
 ?>
 
-<div class="mx-auto w-full max-w-6xl space-y-6">
-    <section class="ui-page-header">
-        <div class="pb-5">
-            <h1 class="ui-heading-display text-3xl font-bold">Панель судьи</h1>
-            <p class="mt-1 text-base-content/70">Ваши назначенные хакатоны и быстрый переход к оцениванию.</p>
+<div class="mx-auto w-full max-w-6xl space-y-8">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl lg:text-4xl">Судья</h1>
+            <p class="mt-1 text-sm text-base-content/70">Оценка проектов и экспертиза. Назначенные хакатоны и быстрый переход к оцениванию.</p>
         </div>
-    </section>
+        <a href="{{ route('hackatons.index') }}" class="ui-cta-outline btn-sm shrink-0 self-start gap-2 sm:self-auto" wire:navigate>
+            <x-app-icon icon="heroicons:trophy" class="h-4 w-4" />
+            Каталог событий
+        </a>
+    </header>
 
     @if ($hackatons->isEmpty())
-        <div class="card border border-base-300 bg-base-100">
-            <div class="card-body">
-                <x-empty-state embedded title="Пока нет назначенных хакатонов"
-                    description="Организатор ещё не назначил вас судьёй ни на один хакатон." icon="heroicons:scale" />
-            </div>
-        </div>
+        <x-empty-state
+            embedded
+            title="Пока нет назначенных хакатонов"
+            description="Организатор ещё не назначил вас судьёй ни на один хакатон."
+            icon="heroicons:scale"
+            test-id="judge-dashboard-empty"
+        />
     @else
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             @foreach ($hackatons as $hackaton)
                 <a href="{{ route('judge.hackatons.show', $hackaton) }}"
-                    class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-md">
-                    <div class="card-body gap-3">
-                        <div class="flex items-start gap-3">
-                            @if ($hackaton->image_url)
-                                <img src="{{ PublicStorageUrl::for($hackaton->image_url) }}" alt=""
-                                    class="h-12 w-12 rounded-xl object-cover border border-base-300">
-                            @else
-                                <div class="h-12 w-12 rounded-xl bg-base-200 border border-base-300"></div>
-                            @endif
-                            <div class="min-w-0">
-                                <div class="font-bold truncate">{{ $hackaton->title }}</div>
-                                <div class="text-xs text-base-content/60">
-                                    Кейсов: {{ $hackaton->cases_count }}
-                                </div>
+                    class="ui-surface-card group flex flex-col gap-4 p-5 transition-shadow hover:shadow-md">
+                    <div class="flex items-start gap-3">
+                        @if ($hackaton->image_url)
+                            <img src="{{ PublicStorageUrl::for($hackaton->image_url) }}" alt=""
+                                class="h-12 w-12 shrink-0 rounded-xl border border-base-300 object-cover">
+                        @else
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-base-300 bg-base-200">
+                                <x-app-icon icon="heroicons:trophy" class="h-6 w-6 text-base-content/30" />
                             </div>
+                        @endif
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate font-semibold leading-tight transition-colors group-hover:text-primary">{{ $hackaton->title }}</p>
+                            @if ($hackaton->start_at)
+                                <div class="mt-1 flex items-center gap-1 text-xs text-base-content/50">
+                                    <x-app-icon icon="heroicons:calendar" class="h-3 w-3" />
+                                    {{ $hackaton->start_at->translatedFormat('d M Y') }}
+                                </div>
+                            @endif
                         </div>
-                        <div class="card-actions justify-end">
-                            <span class="btn btn-sm btn-neutral">Оценивать</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="{{ $hackaton->status->badgeClass() }} badge badge-sm">{{ $hackaton->status->label() }}</span>
+                            <span class="text-xs text-base-content/50">{{ $hackaton->cases_count }} {{ $hackaton->cases_count === 1 ? 'кейс' : ($hackaton->cases_count < 5 ? 'кейса' : 'кейсов') }}</span>
                         </div>
+                        <span class="btn btn-primary btn-xs">Оценивать</span>
                     </div>
                 </a>
             @endforeach

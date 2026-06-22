@@ -43,10 +43,11 @@
                     @endif
                 @endif
             </div>
-            <p class="mt-2 text-xs text-base-content/60">Откройте страницу хакатона — вкладка «Организация» — чтобы обработать приглашения.</p>
+            <p class="mt-2 text-xs text-base-content/70">Откройте страницу хакатона — вкладка «Организация» — чтобы обработать приглашения.</p>
         </section>
     @endif
 
+    @unless ($hideSummaryHeader ?? false)
     <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl lg:text-4xl">Дашборд организатора</h1>
@@ -106,6 +107,7 @@
             </div>
         </div>
     </section>
+    @endunless
 
     @if(!empty($analytics))
         @php
@@ -120,7 +122,7 @@
                         <p class="text-2xl font-semibold tabular-nums">
                             {{ $analytics['conversionRate'] !== null ? $analytics['conversionRate'].'%' : '—' }}
                         </p>
-                        <p class="text-xs text-base-content/60">
+                        <p class="text-xs text-base-content/50">
                             {{ $analytics['acceptedApplications'] }} / {{ $analytics['totalApplications'] }} заявок
                         </p>
                     </div>
@@ -156,14 +158,14 @@
                     <div class="ui-stat-tile p-4">
                         <p class="text-xs text-base-content/50">Заявки</p>
                         <p class="text-2xl font-semibold tabular-nums">{{ $funnel['summary']['applications'] }}</p>
-                        <p class="text-xs text-base-content/60">
+                        <p class="text-xs text-base-content/50">
                             Конверсия: {{ $funnel['summary']['viewToApplicationRate'] !== null ? $funnel['summary']['viewToApplicationRate'].'%' : '—' }}
                         </p>
                     </div>
                     <div class="ui-stat-tile p-4">
                         <p class="text-xs text-base-content/50">Принятые</p>
                         <p class="text-2xl font-semibold tabular-nums">{{ $funnel['summary']['accepted'] }}</p>
-                        <p class="text-xs text-base-content/60">
+                        <p class="text-xs text-base-content/50">
                             Retention: {{ $funnel['retentionRate'] !== null ? $funnel['retentionRate'].'%' : '—' }}
                         </p>
                     </div>
@@ -390,7 +392,7 @@
 
     <div class="flex flex-col gap-2 border-b border-base-300 pb-2 sm:flex-row sm:items-end sm:justify-between">
         <h2 class="ui-heading-display text-xl font-bold">Все хакатоны</h2>
-        <p class="text-xs text-base-content/60">Управление карточками, участниками и удалением.</p>
+        <p class="text-xs text-base-content/70">Управление карточками, участниками и удалением.</p>
     </div>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -415,13 +417,13 @@
                             {{ $hackaton->pending_applications_count }} заявок на рассмотрении
                         </div>
                     @endif
-                    <x-mary-card class="card card-border bg-base-200">
+                    <x-mary-card class="card border border-base-300 bg-base-200">
                         <p>Участники: <span class="font-semibold tabular-nums">{{ $hackaton->participants_count }}</span></p>
                         <p class="text-sm text-base-content/80">
                             {{ $hackaton->start_at->format('d.m.Y H:i') }} — {{ $hackaton->end_at->format('d.m.Y H:i') }}
                         </p>
                         @if($hackaton->registration_deadline_at)
-                            <p class="text-xs text-base-content/65">
+                            <p class="text-xs text-base-content/50">
                                 Регистрация до: {{ $hackaton->registration_deadline_at->format('d.m.Y H:i') }}
                             </p>
                         @endif

@@ -53,10 +53,10 @@ test('authenticated participant sees dashboard summary on home', function () {
     $response = $this->actingAs($user)->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Краткая сводка', false);
+    $response->assertSee('Участник', false);
     $response->assertSee('data-test="home-dashboard"', false);
     $response->assertSee('Создайте команду', false);
-    $response->assertSee('Ваш следующий шаг', false);
+    $response->assertSee('Следующий шаг', false);
 });
 
 test('participant with unverified phone is redirected from home to phone verification', function () {
@@ -99,8 +99,8 @@ test('judge without assigned hackatons sees empty state', function () {
     $this->actingAs($judge)
         ->get(route('home'))
         ->assertOk()
-        ->assertSee('data-test="judge-dashboard-empty"', false)
-        ->assertSee('пока нет назначенных хакатонов', false);
+        ->assertSee('data-testid="judge-dashboard-empty"', false)
+        ->assertSee('Пока нет назначенных хакатонов', false);
 });
 
 test('admin sees extended kpi cards on home', function () {
