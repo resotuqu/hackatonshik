@@ -1,42 +1,24 @@
 
 <div class="mx-auto w-full max-w-5xl">
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        {{-- Dark brand panel — switches content based on account type --}}
-        <section class="flex flex-col justify-between gap-8 rounded-2xl bg-base-content px-6 py-8 text-base-100 lg:col-span-2">
-            <div class="space-y-3">
-                <p class="text-xs font-semibold uppercase tracking-widest text-base-100/50">Хакатонщик</p>
-                @if ($accountType === 'partner')
-                    <h2 class="text-2xl font-semibold leading-tight">{{ __('ui.auth.register.brand_heading_partner') }}</h2>
-                    <p class="text-sm text-base-100/70">{{ __('ui.auth.register.brand_subtitle_partner') }}</p>
-                @else
-                    <h2 class="text-2xl font-semibold leading-tight">{{ __('ui.auth.register.brand_heading_participant') }}</h2>
-                    <p class="text-sm text-base-100/70">{{ __('ui.auth.register.brand_subtitle_participant') }}</p>
-                @endif
-            </div>
-            <div class="grid gap-2 text-sm">
-                @if ($accountType === 'partner')
-                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        {{ __('ui.auth.register.feature_partner_1') }}
-                    </div>
-                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        {{ __('ui.auth.register.feature_partner_2') }}
-                    </div>
-                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        {{ __('ui.auth.register.feature_partner_3') }}
-                    </div>
-                @else
-                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        {{ __('ui.auth.register.feature_participant_1') }}
-                    </div>
-                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        {{ __('ui.auth.register.feature_participant_2') }}
-                    </div>
-                    <div class="rounded-lg border border-base-100/10 bg-base-100/10 px-3 py-2.5 text-base-100/80">
-                        {{ __('ui.auth.register.feature_participant_3') }}
-                    </div>
-                @endif
-            </div>
-        </section>
+        <x-auth-brand-panel
+            :heading="$accountType === 'partner'
+                ? __('ui.auth.register.brand_heading_partner')
+                : __('ui.auth.register.brand_heading_participant')"
+            :subtitle="$accountType === 'partner'
+                ? __('ui.auth.register.brand_subtitle_partner')
+                : __('ui.auth.register.brand_subtitle_participant')"
+        >
+            @if ($accountType === 'partner')
+                <x-auth-brand-panel.feature>{{ __('ui.auth.register.feature_partner_1') }}</x-auth-brand-panel.feature>
+                <x-auth-brand-panel.feature>{{ __('ui.auth.register.feature_partner_2') }}</x-auth-brand-panel.feature>
+                <x-auth-brand-panel.feature>{{ __('ui.auth.register.feature_partner_3') }}</x-auth-brand-panel.feature>
+            @else
+                <x-auth-brand-panel.feature>{{ __('ui.auth.register.feature_participant_1') }}</x-auth-brand-panel.feature>
+                <x-auth-brand-panel.feature>{{ __('ui.auth.register.feature_participant_2') }}</x-auth-brand-panel.feature>
+                <x-auth-brand-panel.feature>{{ __('ui.auth.register.feature_participant_3') }}</x-auth-brand-panel.feature>
+            @endif
+        </x-auth-brand-panel>
 
         <x-maryform
             wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}"
@@ -71,9 +53,9 @@
                             <div class="flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 text-center transition
                                 peer-checked:border-primary peer-checked:bg-primary/5
                                 border-base-300 bg-base-200/40 hover:border-base-400">
-                                <x-app-icon icon="heroicons:user" class="h-6 w-6 text-base-content/60 peer-checked:text-primary" />
+                                <x-app-icon icon="heroicons:user" class="h-6 w-6 text-base-content/70 peer-checked:text-primary" />
                                 <span class="text-sm font-semibold">{{ __('ui.auth.register.account_type_participant') }}</span>
-                                <span class="text-[11px] text-base-content/60">{{ __('ui.auth.register.account_type_participant_hint') }}</span>
+                                <span class="text-[11px] text-base-content/50">{{ __('ui.auth.register.account_type_participant_hint') }}</span>
                             </div>
                         </label>
                         <label class="cursor-pointer">
@@ -81,9 +63,9 @@
                             <div class="flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 text-center transition
                                 peer-checked:border-secondary peer-checked:bg-secondary/5
                                 border-base-300 bg-base-200/40 hover:border-base-400">
-                                <x-app-icon icon="heroicons:building-office-2" class="h-6 w-6 text-base-content/60" />
+                                <x-app-icon icon="heroicons:building-office-2" class="h-6 w-6 text-base-content/70" />
                                 <span class="text-sm font-semibold">{{ __('ui.auth.register.account_type_partner') }}</span>
-                                <span class="text-[11px] text-base-content/60">{{ __('ui.auth.register.account_type_partner_hint') }}</span>
+                                <span class="text-[11px] text-base-content/50">{{ __('ui.auth.register.account_type_partner_hint') }}</span>
                             </div>
                         </label>
                     </div>
@@ -92,7 +74,7 @@
                     @enderror
                 </div>
 
-                <p class="text-xs text-base-content/60 mb-2 rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">
+                <p class="text-xs text-base-content/70 mb-2 rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">
                     {{ __('ui.auth.register.unsaved_warning') }}
                 </p>
                 <x-mary-input label="{{ __('ui.auth.register.fio_label') }}" wire:model="fio" placeholder="Владимир" hint="{{ __('ui.auth.register.fio_hint') }}" />
@@ -126,6 +108,15 @@
 
             @if ($step === 4)
                 <x-mary-input label="{{ __('ui.auth.register.phone_label') }}" wire:model="phone" prefix="+" />
+                <div class="mt-4 space-y-1">
+                    <label class="flex cursor-pointer items-start gap-3">
+                        <input type="checkbox" wire:model="pd_consent" class="checkbox checkbox-primary mt-0.5 shrink-0" />
+                        <span class="text-sm text-base-content/80">{!! __('ui.auth.register.pd_consent_label') !!}</span>
+                    </label>
+                    @error('pd_consent')
+                        <p class="text-xs text-error">{{ __('ui.auth.register.pd_consent_error') }}</p>
+                    @enderror
+                </div>
             @endif
 
             <x-slot:actions class="w-full">
@@ -140,17 +131,7 @@
                     @endif
                 </div>
             </x-slot:actions>
-            <div class="mt-2 grid gap-2">
-                <a href="/auth/yandex/redirect" class="block w-full rounded-xl bg-[#FC3F1D] px-4 py-3 text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#FC3F1D]/40">
-                    <span class="inline-flex w-full items-center justify-center gap-3 text-sm font-semibold">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#FC3F1D]">Я</span>
-                        {{ __('ui.auth.register.yandex') }}
-                    </span>
-                </a>
-                <a href="/auth/vk/redirect" class="btn btn-outline w-full">
-                    {{ __('ui.auth.register.vk') }}
-                </a>
-            </div>
+            <x-oauth-buttons mode="register" />
         </x-maryform>
     </div>
 </div>

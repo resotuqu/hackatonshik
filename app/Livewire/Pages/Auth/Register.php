@@ -37,6 +37,8 @@ class Register extends Component
 
     public $password_confirmation = '';
 
+    public bool $pd_consent = false;
+
     /**
      * @return array<string, list<\Illuminate\Contracts\Validation\Rule|string>|string>
      */
@@ -58,6 +60,7 @@ class Register extends Component
             ],
             4 => [
                 'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
+                'pd_consent' => ['accepted'],
             ],
             default => [],
         };
@@ -76,6 +79,7 @@ class Register extends Component
             'password' => [...$this->passwordRules(), 'confirmed'],
             'password_confirmation' => ['required'],
             'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
+            'pd_consent' => ['accepted'],
         ];
     }
 
@@ -119,6 +123,7 @@ class Register extends Component
             'phone' => $this->phone,
             'date_of_birth' => $this->date_of_birth,
             'password' => $this->password,
+            'pd_consent_accepted_at' => now(),
         ]);
 
         if ($this->accountType === 'partner') {

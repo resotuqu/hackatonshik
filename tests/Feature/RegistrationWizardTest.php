@@ -26,6 +26,7 @@ test('registration wizard completes all steps and redirects to phone verificatio
         ->call('nextStep')
         ->assertSet('step', 4)
         ->set('phone', $phone)
+        ->set('pd_consent', true)
         ->call('save')
         ->assertRedirect(route('verification.notice'));
 
@@ -34,7 +35,8 @@ test('registration wizard completes all steps and redirects to phone verificatio
     expect($user)->not->toBeNull()
         ->and($user->nickname)->toBe($nickname)
         ->and($user->phone)->toBe($phone)
-        ->and($user->hasVerifiedEmail())->toBeFalse();
+        ->and($user->hasVerifiedEmail())->toBeFalse()
+        ->and($user->pd_consent_accepted_at)->not->toBeNull();
 
     expect(Auth::check())->toBeTrue()
         ->and(Auth::id())->toBe($user->id);
@@ -70,6 +72,7 @@ test('partner registration assigns partner role on completion', function () {
         ->call('nextStep')
         ->assertSet('step', 4)
         ->set('phone', $phone)
+        ->set('pd_consent', true)
         ->call('save')
         ->assertRedirect(route('verification.notice'));
 
@@ -97,12 +100,37 @@ test('user registration keeps default user role', function () {
         ->set('password_confirmation', 'Password1!')
         ->call('nextStep')
         ->set('phone', $phone)
+        ->set('pd_consent', true)
         ->call('save');
 
     $user = User::query()->where('email', $email)->firstOrFail();
 
     expect($user->role)->toBe(UserRole::USER)
         ->and($user->isOrganizer())->toBeFalse();
+});
+
+test('registration is rejected without pd consent', function () {
+    $suffix = uniqid('nc', true);
+    $email = "nc_{$suffix}@example.com";
+    $nickname = "nc_{$suffix}";
+    $phone = '79'.str_pad((string) random_int(0, 999999999), 9, '0', STR_PAD_LEFT);
+
+    Livewire::test(RegisterPage::class)
+        ->set('fio', 'Тестов Тест Тестович')
+        ->set('date_of_birth', '1995-01-01')
+        ->call('nextStep')
+        ->set('email', $email)
+        ->set('nickname', $nickname)
+        ->call('nextStep')
+        ->set('password', 'Password1!')
+        ->set('password_confirmation', 'Password1!')
+        ->call('nextStep')
+        ->set('phone', $phone)
+        ->set('pd_consent', false)
+        ->call('save')
+        ->assertHasErrors(['pd_consent']);
+
+    expect(User::query()->where('email', $email)->exists())->toBeFalse();
 });
 
 test('invalid account type is rejected on step 1', function () {
