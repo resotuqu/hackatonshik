@@ -16,12 +16,7 @@ class HackatonCaseScoreController extends Controller
         Hackaton $hackaton,
         StoreSubmissionScoreAction $storeSubmissionScore,
     ): RedirectResponse {
-        $isOrganizer = (int) $hackaton->user_id === (int) $request->user()->id;
-        $isJudge = $hackaton->judges()->where('users.id', $request->user()->id)->exists();
-
-        if (! $isOrganizer && ! $isJudge) {
-            abort(403);
-        }
+        $this->authorize('viewOrganizationDashboard', $hackaton);
 
         $validated = $request->validated();
         $submission = HackatonCaseSubmission::query()

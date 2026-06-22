@@ -11,7 +11,7 @@ test('admin can access admin panel but not participant routes', function () {
     $admin = User::factory()->admin()->create();
 
     $this->actingAs($admin)
-        ->get(route('admin.dashboard'))
+        ->get('/admin')
         ->assertOk();
 
     $this->actingAs($admin)
@@ -86,7 +86,7 @@ test('participant can access participant routes but not staff routes', function 
         ->assertForbidden();
 
     $this->actingAs($participant)
-        ->get(route('admin.dashboard'))
+        ->get('/admin')
         ->assertForbidden();
 });
 
@@ -101,6 +101,18 @@ test('judge cannot submit team application', function () {
             'team_role_id' => $role->id,
         ])
         ->assertSessionHasErrors('team_role_id');
+});
+
+test('moderator can access admin panel but not user management', function () {
+    $moderator = User::factory()->moderator()->create();
+
+    $this->actingAs($moderator)
+        ->get('/admin')
+        ->assertOk();
+
+    $this->actingAs($moderator)
+        ->get(route('filament.admin.resources.users.index'))
+        ->assertForbidden();
 });
 
 test('admin cannot submit team application', function () {

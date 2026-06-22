@@ -103,6 +103,31 @@ test('a regular user cannot score a submission', function () {
         ->assertForbidden();
 });
 
+test('the hackaton organizer can score a submission', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+    $case = HackatonCase::factory()->withoutRubric()->create(['hackaton_id' => $hackaton->id]);
+    $team = Team::factory()->create();
+    $submission = HackatonCaseSubmission::factory()->create([
+        'hackaton_case_id' => $case->id,
+        'team_id' => $team->id,
+    ]);
+
+    actingAs($organizer)
+        ->post(route('hackatons.scores.store', $hackaton), [
+            'hackaton_case_submission_id' => $submission->id,
+            'score' => 75,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseHas('hackaton_case_scores', [
+        'hackaton_case_submission_id' => $submission->id,
+        'reviewed_by' => $organizer->id,
+        'score' => 75,
+    ]);
+});
+
 test('score submission endpoint uses csrf middleware in web group', function () {
     $webMiddleware = app('router')->getMiddlewareGroups()['web'] ?? [];
 

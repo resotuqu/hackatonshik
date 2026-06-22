@@ -38,43 +38,28 @@ class Scoring extends Component
 
         $ids = $hackatons->pluck('id')->all();
 
-        $submissionCounts = DB::table('hackaton_case_submissions as s')
+        $stats = DB::table('hackaton_case_submissions as s')
             ->join('hackaton_cases as c', 'c.id', '=', 's.hackaton_case_id')
-            ->whereIn('c.hackaton_id', $ids)
-            ->groupBy('c.hackaton_id')
-            ->selectRaw('c.hackaton_id as hackaton_id, COUNT(*) as cnt')
-            ->pluck('cnt', 'hackaton_id');
-
-        $finalScoreCounts = DB::table('hackaton_case_scores as sc')
-            ->join('hackaton_case_submissions as s', 's.id', '=', 'sc.hackaton_case_submission_id')
-            ->join('hackaton_cases as c', 'c.id', '=', 's.hackaton_case_id')
-            ->whereIn('c.hackaton_id', $ids)
-            ->where('sc.is_final', true)
-            ->groupBy('c.hackaton_id')
-            ->selectRaw('c.hackaton_id as hackaton_id, COUNT(*) as cnt')
-            ->pluck('cnt', 'hackaton_id');
-
-        $withoutFinalCounts = DB::table('hackaton_case_submissions as s')
-            ->join('hackaton_cases as c', 'c.id', '=', 's.hackaton_case_id')
-            ->whereIn('c.hackaton_id', $ids)
-            ->whereNotExists(function ($q): void {
-                $q->selectRaw('1')
-                    ->from('hackaton_case_scores as sc')
-                    ->whereColumn('sc.hackaton_case_submission_id', 's.id')
-                    ->where('sc.is_final', true);
+            ->leftJoin('hackaton_case_scores as sc', function ($join): void {
+                $join->on('sc.hackaton_case_submission_id', '=', 's.id')
+                    ->where('sc.is_final', '=', 1);
             })
+            ->whereIn('c.hackaton_id', $ids)
             ->groupBy('c.hackaton_id')
-            ->selectRaw('c.hackaton_id as hackaton_id, COUNT(*) as cnt')
-            ->pluck('cnt', 'hackaton_id');
+            ->selectRaw('c.hackaton_id, COUNT(s.id) as total_cnt, SUM(CASE WHEN sc.id IS NOT NULL THEN 1 ELSE 0 END) as final_cnt')
+            ->get()
+            ->keyBy('hackaton_id');
 
-        return $hackatons->map(function (Hackaton $hackaton) use ($submissionCounts, $finalScoreCounts, $withoutFinalCounts): array {
-            $hid = $hackaton->id;
+        return $hackatons->map(function (Hackaton $hackaton) use ($stats): array {
+            $row = $stats->get($hackaton->id);
+            $total = (int) ($row?->total_cnt ?? 0);
+            $final = (int) ($row?->final_cnt ?? 0);
 
             return [
                 'hackaton' => $hackaton,
-                'submissions_count' => (int) ($submissionCounts[$hid] ?? 0),
-                'final_scores_count' => (int) ($finalScoreCounts[$hid] ?? 0),
-                'submissions_without_final' => (int) ($withoutFinalCounts[$hid] ?? 0),
+                'submissions_count' => $total,
+                'final_scores_count' => $final,
+                'submissions_without_final' => $total - $final,
             ];
         });
     }
