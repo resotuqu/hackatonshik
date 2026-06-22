@@ -33,6 +33,46 @@ afterEach(function (): void {
     config()->set('services.plusofon_flash_call.client_id', $config['client_id']);
 });
 
+test('flash call code request requires phone number first', function () {
+    $user = User::factory()->create([
+        'phone_verified_at' => null,
+        'phone' => null,
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('phone.verify.send'));
+
+    $response->assertSessionHas('error', 'Сначала укажите номер телефона.');
+});
+
+test('authenticated user can store phone before flash call verification', function () {
+    $user = User::factory()->create([
+        'phone_verified_at' => null,
+        'phone' => null,
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('phone.verify.phone'), [
+            'phone' => '9991234567',
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+    expect($user->fresh()->phone)->toBe('+79991234567');
+});
+
+test('verified phone notice redirects to home', function () {
+    $user = User::factory()->create([
+        'phone_verified_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('phone.verify.notice'))
+        ->assertRedirect(route('home'));
+});
+
 test('authenticated user can request flash call verification code', function () {
     config()->set('services.plusofon_flash_call.enabled', true);
     config()->set('services.plusofon_flash_call.base_url', 'https://restapi.plusofon.ru/api/v1');

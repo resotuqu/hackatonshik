@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Contracts\Auth\Authenticatable;
+use App\Services\OAuth\OAuthPhoneResolver;
+use App\Support\PostLoginRedirect;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Events\TwoFactorAuthenticationChallenged;
+use Laravel\Fortify\Fortify;
+use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Throwable;
@@ -25,12 +29,20 @@ class SocialAuthController extends Controller
         'vk' => 'vkontakte',
     ];
 
+    public function __construct(private readonly OAuthPhoneResolver $oauthPhoneResolver) {}
+
     public function redirect(string $provider): RedirectResponse
     {
-        return Socialite::driver($this->resolveDriver($provider))->redirect();
+        $driver = Socialite::driver($this->resolveDriver($provider));
+
+        if ($provider === 'yandex') {
+            $driver->scopes(['login:default_phone']);
+        }
+
+        return $driver->redirect();
     }
 
-    public function callback(string $provider): RedirectResponse
+    public function callback(string $provider, Request $request): RedirectResponse
     {
         try {
             $oauthUser = Socialite::driver($this->resolveDriver($provider))->user();
@@ -47,24 +59,23 @@ class SocialAuthController extends Controller
         }
 
         $name = $oauthUser->getName() ?: $oauthUser->getNickname() ?: 'OAuth пользователь';
+        $providerId = (string) $oauthUser->getId();
+        $rawPayload = $this->socialiteRawPayload($oauthUser);
 
-        /** @var Authenticatable $user */
-        $user = User::query()->firstOrCreate(
-            ['email' => $email],
-            [
-                'fio' => $name,
-                'nickname' => "{$driver}_".Str::lower(Str::random(10)),
-                'date_of_birth' => now()->subYears(18)->toDateString(),
-                'phone' => $this->uniquePlaceholderPhone(),
-                'password' => Hash::make(Str::random(40)),
-                'phone_verified_at' => null,
-                'email_verified_at' => now(),
-            ],
+        $linkCheck = $this->ensureOAuthLinkAllowed($email, $provider, $providerId);
+        if ($linkCheck !== null) {
+            return $linkCheck;
+        }
+
+        $user = $this->upsertOAuthUser(
+            email: $email,
+            name: $name,
+            provider: $provider,
+            providerId: $providerId,
+            rawPayload: $rawPayload,
         );
 
-        Auth::login($user);
-
-        return redirect()->route('phone.verify.notice');
+        return $this->loginUserOrChallengeTwoFactor($user, $request);
     }
 
     public function yandexTokenPage(): View
@@ -97,23 +108,22 @@ class SocialAuthController extends Controller
         }
 
         $name = ($yaUser['real_name'] ?? '') ?: ($yaUser['display_name'] ?? '') ?: 'Яндекс пользователь';
+        $providerId = (string) ($yaUser['id'] ?? '');
 
-        /** @var Authenticatable $user */
-        $user = User::query()->firstOrCreate(
-            ['email' => $email],
-            [
-                'fio' => $name,
-                'nickname' => 'ya_'.Str::lower(Str::random(10)),
-                'oauth_provider' => 'yandex',
-                'oauth_provider_id' => (string) ($yaUser['id'] ?? ''),
-                'email_verified_at' => now(),
-                'pd_consent_accepted_at' => now(),
-            ],
+        $linkCheck = $this->ensureOAuthLinkAllowed($email, 'yandex', $providerId);
+        if ($linkCheck !== null) {
+            return $linkCheck;
+        }
+
+        $user = $this->upsertOAuthUser(
+            email: $email,
+            name: $name,
+            provider: 'yandex',
+            providerId: $providerId,
+            rawPayload: is_array($yaUser) ? $yaUser : [],
         );
 
-        Auth::login($user);
-
-        return redirect()->route('phone.verify.notice');
+        return $this->loginUserOrChallengeTwoFactor($user, $request);
     }
 
     public function vkRedirect(): RedirectResponse
@@ -125,7 +135,7 @@ class SocialAuthController extends Controller
             'response_type' => 'code',
             'client_id' => config('services.vkontakte.client_id'),
             'redirect_uri' => route('auth.vk.callback'),
-            'scope' => 'email',
+            'scope' => 'email phone',
             'state' => $state,
         ]);
 
@@ -158,7 +168,7 @@ class SocialAuthController extends Controller
             return redirect()->route('login')->with('error', 'Не удалось получить токен VK ID.');
         }
 
-        return $this->loginVkUser($tokenResponse->json('access_token'));
+        return $this->loginVkUser($tokenResponse->json('access_token'), $request);
     }
 
     public function vkToken(Request $request): RedirectResponse
@@ -169,10 +179,10 @@ class SocialAuthController extends Controller
             return redirect()->route('login')->with('error', 'Не удалось получить токен VK ID.');
         }
 
-        return $this->loginVkUser($accessToken);
+        return $this->loginVkUser($accessToken, $request);
     }
 
-    private function loginVkUser(string $accessToken): RedirectResponse
+    private function loginVkUser(string $accessToken, Request $request): RedirectResponse
     {
         $response = Http::asForm()->post('https://id.vk.com/oauth2/user_info', [
             'access_token' => $accessToken,
@@ -192,23 +202,72 @@ class SocialAuthController extends Controller
         }
 
         $name = trim(($vkUser['first_name'] ?? '').' '.($vkUser['last_name'] ?? '')) ?: 'VK пользователь';
+        $providerId = (string) ($vkUser['user_id'] ?? '');
 
-        /** @var Authenticatable $user */
+        $linkCheck = $this->ensureOAuthLinkAllowed($email, 'vk', $providerId);
+        if ($linkCheck !== null) {
+            return $linkCheck;
+        }
+
+        $user = $this->upsertOAuthUser(
+            email: $email,
+            name: $name,
+            provider: 'vk',
+            providerId: $providerId,
+            rawPayload: is_array($vkUser) ? $vkUser : [],
+        );
+
+        return $this->loginUserOrChallengeTwoFactor($user, $request);
+    }
+
+    /**
+     * @param  array<string, mixed>  $rawPayload
+     */
+    private function upsertOAuthUser(
+        string $email,
+        string $name,
+        string $provider,
+        string $providerId,
+        array $rawPayload,
+    ): User {
+        /** @var User $user */
         $user = User::query()->firstOrCreate(
             ['email' => $email],
             [
                 'fio' => $name,
-                'nickname' => 'vk_'.Str::lower(Str::random(10)),
-                'oauth_provider' => 'vk',
-                'oauth_provider_id' => (string) ($vkUser['user_id'] ?? ''),
+                'nickname' => "{$provider}_".Str::lower(Str::random(10)),
+                'date_of_birth' => now()->subYears(18)->toDateString(),
+                'password' => Hash::make(Str::random(40)),
                 'email_verified_at' => now(),
+                'oauth_provider' => $provider,
+                'oauth_provider_id' => $providerId,
                 'pd_consent_accepted_at' => now(),
             ],
         );
 
-        Auth::login($user);
+        if (! $user->wasRecentlyCreated) {
+            $user->forceFill([
+                'oauth_provider' => $provider,
+                'oauth_provider_id' => $providerId,
+            ])->save();
+        }
 
-        return redirect()->route('phone.verify.notice');
+        $oauthPhone = $this->oauthPhoneResolver->extractPhone($provider, $rawPayload);
+        $this->oauthPhoneResolver->applyToUser($user->fresh(), $oauthPhone);
+
+        return $user->fresh();
+    }
+
+    private function ensureOAuthLinkAllowed(string $email, string $provider, string $providerId): ?RedirectResponse
+    {
+        $existingUser = User::query()->where('email', $email)->first();
+
+        if ($existingUser !== null && ! $this->isOAuthLinked($existingUser, $provider, $providerId)) {
+            return redirect()->route('login')
+                ->with('error', 'Аккаунт с этим email уже зарегистрирован другим способом. Войдите через email и пароль.');
+        }
+
+        return null;
     }
 
     private function resolveDriver(string $provider): string
@@ -218,12 +277,58 @@ class SocialAuthController extends Controller
         return self::PROVIDERS[$provider];
     }
 
-    private function uniquePlaceholderPhone(): string
+    private function isOAuthLinked(User $user, string $provider, string $providerId): bool
     {
-        do {
-            $phone = '+79'.str_pad((string) random_int(0, 999_999_999), 9, '0', STR_PAD_LEFT);
-        } while (User::query()->where('phone', $phone)->exists());
+        return $user->oauth_provider === $provider && $user->oauth_provider_id === $providerId;
+    }
 
-        return $phone;
+    private function loginUserOrChallengeTwoFactor(User $user, Request $request): RedirectResponse
+    {
+        if ($user->two_factor_secret &&
+            (! Fortify::confirmsTwoFactorAuthentication() || ! is_null($user->two_factor_confirmed_at))) {
+            $request->session()->put([
+                'login.id' => $user->getKey(),
+                'login.remember' => false,
+            ]);
+
+            TwoFactorAuthenticationChallenged::dispatch($user);
+
+            return redirect()->route('two-factor.login');
+        }
+
+        Auth::login($user);
+
+        return $this->finalizeOAuthLogin($user);
+    }
+
+    private function finalizeOAuthLogin(User $user): RedirectResponse
+    {
+        $user->refresh();
+
+        if ($user->hasVerifiedContactChannels()) {
+            return redirect()->to(PostLoginRedirect::intendedUrl($user));
+        }
+
+        return redirect()->route('phone.verify.notice');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function socialiteRawPayload(SocialiteUserContract $oauthUser): array
+    {
+        if (is_callable([$oauthUser, 'getRaw'])) {
+            $raw = $oauthUser->getRaw();
+
+            if (is_array($raw)) {
+                return $raw;
+            }
+        }
+
+        if (property_exists($oauthUser, 'user') && is_array($oauthUser->user)) {
+            return $oauthUser->user;
+        }
+
+        return [];
     }
 }

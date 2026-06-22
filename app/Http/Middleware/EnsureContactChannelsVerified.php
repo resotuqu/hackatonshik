@@ -58,6 +58,7 @@ class EnsureContactChannelsVerified
             'verification.verify',
             'verification.send',
             'phone.verify.notice',
+            'phone.verify.phone',
             'phone.verify.send',
             'phone.verify',
             'login',

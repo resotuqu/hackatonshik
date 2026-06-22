@@ -134,6 +134,9 @@ return [
         'phone_verify' => [
             'page_title' => 'Phone verification',
             'card_title' => 'Phone verification by call',
+            'enter_phone_description' => 'Enter your phone number to verify it via a call.',
+            'phone_label' => 'Phone number',
+            'phone_submit' => 'Continue',
             'description' => 'We will call :phone. Answer the call and remember the 4 digits announced by the assistant. Verification completes automatically after you enter the code.',
             'step_request' => 'Request call',
             'step_code' => 'Enter code',

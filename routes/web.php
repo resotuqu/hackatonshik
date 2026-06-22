@@ -210,6 +210,7 @@ Route::middleware(['auth', 'verified', 'judge'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
+    Route::post('/phone/verify/phone', [PhoneVerificationController::class, 'storePhone'])->name('phone.verify.phone');
     Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
 

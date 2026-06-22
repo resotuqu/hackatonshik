@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Services\OAuth\OAuthPhoneResolver;
 use App\Services\Sms\PlusofonFlashCallSender;
 use App\Support\PostLoginRedirect;
 use Illuminate\Contracts\View\View;
@@ -11,15 +13,71 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class PhoneVerificationController extends Controller
 {
-    public function __construct(private readonly PlusofonFlashCallSender $flashCallSender) {}
+    public function __construct(
+        private readonly PlusofonFlashCallSender $flashCallSender,
+        private readonly OAuthPhoneResolver $oauthPhoneResolver,
+    ) {}
 
-    public function notice(): View
+    public function notice(Request $request): View|RedirectResponse
     {
-        return view('pages.auth.phone-verify');
+        $user = $request->user();
+        abort_if(! $user, 401);
+
+        if ($user->phone_verified_at !== null) {
+            return redirect()->to(PostLoginRedirect::intendedUrl($user));
+        }
+
+        return view('pages.auth.phone-verify', [
+            'needsPhone' => blank($user->phone),
+        ]);
+    }
+
+    public function storePhone(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_if(! $user, 401);
+
+        if ($user->phone_verified_at !== null) {
+            return redirect()->to(PostLoginRedirect::intendedUrl($user));
+        }
+
+        $validated = $request->validate([
+            'phone' => [
+                'required',
+                'string',
+                'min:10',
+                'max:12',
+                Rule::unique(User::class, 'phone')->ignore($user->id),
+            ],
+        ], [
+            'phone.required' => 'Укажите номер телефона.',
+            'phone.min' => 'Номер телефона указан неверно.',
+            'phone.max' => 'Номер телефона указан неверно.',
+            'phone.unique' => 'Этот номер уже используется.',
+        ]);
+
+        $normalizedPhone = $this->oauthPhoneResolver->normalize($validated['phone']);
+
+        if ($normalizedPhone === null) {
+            throw ValidationException::withMessages([
+                'phone' => 'Номер телефона указан неверно.',
+            ]);
+        }
+
+        if (User::query()->where('phone', $normalizedPhone)->whereKeyNot($user->id)->exists()) {
+            throw ValidationException::withMessages([
+                'phone' => 'Этот номер уже используется.',
+            ]);
+        }
+
+        $user->forceFill(['phone' => $normalizedPhone])->save();
+
+        return back()->with('success', 'Номер сохранён. Запросите звонок с кодом.');
     }
 
     public function sendCode(Request $request): RedirectResponse
@@ -29,6 +87,10 @@ class PhoneVerificationController extends Controller
 
         if ($user->phone_verified_at !== null) {
             return redirect()->to(PostLoginRedirect::intendedUrl($user))->with('success', 'Телефон уже подтвержден.');
+        }
+
+        if (blank($user->phone)) {
+            return back()->with('error', 'Сначала укажите номер телефона.');
         }
 
         $key = "phone-verification-send:{$user->id}";
