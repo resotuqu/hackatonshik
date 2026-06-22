@@ -89,6 +89,10 @@ class Index extends Component
 
     public bool $passwordChangeModal = false;
 
+    public bool $deleteAccountModal = false;
+
+    public string $delete_confirm_password = '';
+
     private function normalizedProfileDescription(mixed $raw): ?string
     {
         if (! is_string($raw) || trim($raw) === '') {
@@ -693,6 +697,34 @@ class Index extends Component
         }
 
         return $tips;
+    }
+
+    public function deleteAccount(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+
+        $this->validate([
+            'delete_confirm_password' => ['required'],
+        ], [
+            'delete_confirm_password.required' => 'Введите пароль для подтверждения.',
+        ]);
+
+        if (! Hash::check($this->delete_confirm_password, $user->password)) {
+            $this->addError('delete_confirm_password', 'Неверный пароль.');
+
+            return;
+        }
+
+        Auth::logout();
+        $user->delete();
+
+        session()->invalidate();
+        session()->regenerateToken();
+
+        $this->redirect('/', navigate: true);
     }
 
     #[Layout('layouts::app', ['title' => 'Профиль'])]
