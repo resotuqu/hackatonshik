@@ -4,7 +4,7 @@
     {{-- Hero --}}
     <section
         id="start"
-        class="relative overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 lg:min-h-[30rem]"
+        class="relative overflow-hidden rounded-card border border-base-300 bg-base-100 lg:min-h-[30rem]"
     >
         <div class="relative flex min-h-[inherit] flex-col gap-8 px-5 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
             <div class="flex max-w-xl flex-1 flex-col justify-center lg:max-w-[min(36rem,50%)] lg:text-left">
@@ -28,7 +28,7 @@
             </div>
             <div class="relative flex max-w-[18rem] flex-1 shrink-0 items-center justify-center self-center sm:max-w-[20rem] lg:max-w-[min(24rem,40%)] lg:justify-end">
                 <div class="relative aspect-square w-full max-w-full">
-                    <div class="relative flex h-full w-full items-center justify-center rounded-[var(--radius-card)] border border-base-300 bg-base-200 p-4 sm:p-5">
+                    <div class="relative flex h-full w-full items-center justify-center rounded-card border border-base-300 bg-base-200 p-4 sm:p-5">
                         <img
                             src="{{ url('/hackatonshik.svg') }}"
                             alt=""
@@ -76,7 +76,7 @@
     {{-- Платформа в цифрах --}}
     <section
         id="home-stats"
-        class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-6 sm:p-8"
+        class="rounded-card border border-base-300 bg-base-100 p-6 sm:p-8"
     >
         <h2 class="ui-heading-display text-3xl font-bold sm:text-4xl">Платформа в цифрах</h2>
         <p class="mt-2 max-w-2xl text-base-content/70">Учитываются все публичные хакатоны на платформе — текущие, предстоящие, завершённые и в архиве (кроме черновиков).</p>
@@ -113,7 +113,7 @@
                 src="{{ url('/logo_white.svg') }}"
                 onerror="this.onerror=null;this.src='{{ url('/logo.svg') }}';"
                 alt="Хакатонщик"
-                class="block h-auto w-full object-contain group-data-[theme=hackatonshik-light]:hidden"
+                class="block h-auto w-full object-contain group-data-[theme=cmyk]:hidden"
                 loading="lazy"
                 decoding="async"
             />
@@ -121,7 +121,7 @@
                 src="{{ url('/logo_black.svg') }}"
                 onerror="this.onerror=null;this.src='{{ url('/logo.svg') }}';"
                 alt="Хакатонщик"
-                class="hidden h-auto w-full object-contain group-data-[theme=hackatonshik-light]:block"
+                class="hidden h-auto w-full object-contain group-data-[theme=cmyk]:block"
                 loading="lazy"
                 decoding="async"
             />

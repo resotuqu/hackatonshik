@@ -10,13 +10,13 @@
 @endphp
 
 @if(count($steps) > 0)
-    <section class="ui-surface-soft rounded-2xl border border-base-300 p-4 sm:p-5" aria-label="Статус хакатона">
+    <section class="ui-surface-soft p-4 sm:p-5" aria-label="Статус хакатона">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-widest text-base-content/50">Жизненный цикл</p>
                 <p class="mt-0.5 text-sm font-semibold">Текущий этап: {{ $presentation['current_label'] ?? '' }}</p>
                 @if(filled($nextLabel))
-                    <p class="text-xs text-base-content/65">Далее: {{ $nextLabel }}</p>
+                    <p class="text-xs text-base-content/70">Далее: {{ $nextLabel }}</p>
                 @endif
             </div>
         </div>

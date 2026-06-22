@@ -24,7 +24,7 @@
             description="Управляйте составом, вакансиями и заявками в одном месте."
         >
             <x-slot:actions>
-                <a href="/teams/create" wire:navigate class="btn btn-neutral btn-sm shrink-0 gap-2">
+                <a href="/teams/create" wire:navigate class="ui-cta-primary btn-sm shrink-0 gap-2">
                     <x-app-icon icon="heroicons:plus" class="h-4 w-4" />
                     Создать команду
                 </a>
@@ -49,14 +49,14 @@
                             $appTeam = $application->teamRole?->team;
                             $role = $application->teamRole?->role ?? $application->teamRole;
                         @endphp
-                        <div class="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex flex-col gap-3 rounded-panel border border-base-300 bg-base-100 p-5 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p class="font-medium">{{ $appTeam?->title ?? '—' }}</p>
                                 @if ($role)
                                     <p class="text-sm text-base-content/70">Роль: <span class="font-medium">{{ $role->name ?? $role->title }}</span></p>
                                 @endif
                                 @if ($appTeam?->hackaton)
-                                    <p class="text-sm text-base-content/60">{{ $appTeam->hackaton->title }}</p>
+                                    <p class="text-sm text-base-content/70">{{ $appTeam->hackaton->title }}</p>
                                 @endif
                                 <p class="text-xs text-base-content/50">
                                     Подана <x-datetime :value="$application->created_at" mode="relative" />
@@ -102,19 +102,19 @@
                             @endif
 
                             <div class="grid grid-cols-2 gap-4 mb-6">
-                                <div class="text-center bg-base-200/60 rounded-2xl py-4">
+                                <div class="text-center bg-base-200/50 rounded-panel py-4">
                                     <div class="text-3xl font-bold text-base-content">{{ $team->roles_count ?? $team->roles->count() }}</div>
-                                    <div class="text-xs font-medium uppercase tracking-widest text-base-content/60">Ролей</div>
+                                    <div class="text-xs font-medium uppercase tracking-widest text-base-content/50">Ролей</div>
                                 </div>
-                                <div class="text-center bg-base-200/60 rounded-2xl py-4">
+                                <div class="text-center bg-base-200/50 rounded-panel py-4">
                                     <div class="text-3xl font-bold text-base-content">{{ $openSlots }}</div>
-                                    <div class="text-xs font-medium uppercase tracking-widest text-base-content/60">Свободно</div>
+                                    <div class="text-xs font-medium uppercase tracking-widest text-base-content/50">Свободно</div>
                                 </div>
                             </div>
 
                             <div class="mt-auto flex flex-col gap-2 sm:flex-row">
                                 <a href="{{ route('teams.show', $team) }}" wire:navigate
-                                   class="btn btn-neutral flex-1 gap-2">
+                                   class="ui-cta-outline flex-1 gap-2">
                                     <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
                                     Просмотреть
                                 </a>

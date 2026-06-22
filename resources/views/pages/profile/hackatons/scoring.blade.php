@@ -8,6 +8,8 @@
         </ul>
     </div>
 
+    <x-organizer-nav-tabs active="scoring" />
+
     <x-page-header
         title="Оценка работ"
         description="Сводка по отправкам решений и финальным оценкам. Детальная работа судей — в разделе для судей; на странице хакатона — кейсы и материалы."
@@ -28,10 +30,10 @@
             </div>
         </section>
     @else
-        <div class="overflow-x-auto rounded-2xl border border-base-300 bg-base-100">
+        <div class="overflow-x-auto rounded-panel border border-base-300 bg-base-100">
             <table class="table table-zebra min-w-full">
                 <thead>
-                    <tr class="text-xs uppercase tracking-wide text-base-content/60">
+                    <tr class="text-xs uppercase tracking-wide text-base-content/50">
                         <th class="bg-base-200/80">Хакатон</th>
                         <th class="bg-base-200/80 text-end">Отправки</th>
                         <th class="bg-base-200/80 text-end">Финальных оценок</th>
@@ -53,7 +55,7 @@
                             <td class="text-end tabular-nums">{{ $row['submissions_count'] }}</td>
                             <td class="text-end tabular-nums">{{ $row['final_scores_count'] }}</td>
                             <td class="text-end">
-                                <span class="@if($row['submissions_without_final'] > 0) font-bold text-warning @else text-base-content/60 @endif tabular-nums">
+                                <span class="@if($row['submissions_without_final'] > 0) font-bold text-warning @else text-base-content/50 @endif tabular-nums">
                                     {{ $row['submissions_without_final'] }}
                                 </span>
                             </td>

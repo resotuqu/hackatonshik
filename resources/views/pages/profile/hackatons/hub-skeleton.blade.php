@@ -19,7 +19,7 @@
         </ul>
     </nav>
 
-    <section class="card border border-base-200 bg-base-100 shadow-sm">
+    <section class="card border border-base-300 bg-base-100">
         <div class="card-body space-y-4">
             <div class="skeleton h-8 w-2/3 max-w-md rounded-xl"></div>
             <div class="skeleton h-4 w-full max-w-xl rounded-lg"></div>
@@ -30,7 +30,7 @@
             </div>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 @foreach (range(1, 3) as $_)
-                    <div class="ui-surface-soft rounded-xl border border-base-300 p-4">
+                    <div class="ui-surface-soft border border-base-300 p-4">
                         <div class="skeleton mb-2 h-3 w-24 rounded"></div>
                         <div class="skeleton h-8 w-16 rounded-lg"></div>
                     </div>
@@ -41,7 +41,7 @@
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         @foreach (range(1, 4) as $_)
-            <article class="card border border-base-200 bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body space-y-3">
                     <div class="skeleton h-6 w-40 rounded-lg"></div>
                     <div class="space-y-2">

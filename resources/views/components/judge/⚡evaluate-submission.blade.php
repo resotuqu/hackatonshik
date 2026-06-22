@@ -178,7 +178,7 @@ new class extends Component
                 <h1 class="ui-heading-display text-2xl font-bold">
                     {{ $submission->team?->title ?? ($submission->user?->nickname ?? $submission->user?->email ?? 'Личное решение') }}
                 </h1>
-                <p class="mt-0.5 text-xs text-base-content/60">
+                <p class="mt-0.5 text-xs text-base-content/50">
                     Отправлено: {{ $submission->submitted_at?->format('d.m.Y H:i') }}
                 </p>
             </div>
@@ -201,12 +201,12 @@ new class extends Component
                 <div class="card-body space-y-3">
                     <div class="flex items-center justify-between">
                         <h2 class="card-title text-lg">Решение</h2>
-                        <span class="text-xs text-base-content/60">Side-by-side</span>
+                        <span class="text-xs text-base-content/50">Side-by-side</span>
                     </div>
 
                     @foreach($submission->answers as $answer)
                         <div class="rounded-xl border border-base-300 p-3 bg-base-50/50 space-y-2">
-                            <div class="text-xs font-semibold text-base-content/60">{{ $answer->field->label }}</div>
+                            <div class="text-xs font-semibold text-base-content/50">{{ $answer->field->label }}</div>
 
                             @if($answer->field->type === 'file' && $answer->file_path)
                                 <a href="{{ asset('storage/' . $answer->file_path) }}" target="_blank" class="link link-primary flex items-center gap-1">
@@ -223,7 +223,7 @@ new class extends Component
 
                             <div class="form-control">
                                 <label class="label py-1">
-                                    <span class="label-text text-[11px] text-base-content/60">Комментарий судьи к этому полю</span>
+                                    <span class="label-text text-[11px] text-base-content/50">Комментарий судьи к этому полю</span>
                                 </label>
                                 <textarea
                                     class="textarea textarea-bordered textarea-sm"
@@ -244,7 +244,7 @@ new class extends Component
                 <div class="card-body space-y-4">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="card-title text-lg">Оценка</h2>
-                        <div class="flex items-center gap-2 text-xs text-base-content/60">
+                        <div class="flex items-center gap-2 text-xs text-base-content/50">
                             <span x-show="$wire.isSaving" class="loading loading-spinner loading-xs"></span>
                             <span x-show="!$wire.isSaving">Ctrl+S — сохранить</span>
                         </div>
@@ -270,7 +270,7 @@ new class extends Component
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
                                             <div class="font-semibold text-sm truncate">{{ $label }}</div>
-                                            <div class="text-[11px] text-base-content/60">Макс: {{ $max }} • Домен: {{ $cDomain }}</div>
+                                            <div class="text-[11px] text-base-content/50">Макс: {{ $max }} • Домен: {{ $cDomain }}</div>
                                         </div>
                                         @if(!$canEdit)
                                             <span class="badge badge-ghost badge-sm">read-only</span>

@@ -1,7 +1,7 @@
 <div class="mx-auto w-full max-w-5xl space-y-4">
     <div wire:loading class="space-y-4" aria-busy="true" aria-label="Загрузка сертификатов">
         <div class="skeleton h-4 w-52 rounded-xl"></div>
-        <div class="card card-border bg-base-100">
+        <div class="card border border-base-300 bg-base-100">
             <div class="p-5 space-y-4">
                 <div class="skeleton h-6 w-44 rounded-xl"></div>
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -49,7 +49,7 @@
                     <article class="rounded-xl border border-base-300 p-4">
                         <p class="font-semibold">{{ $certificate->title }}</p>
                         <p class="text-sm text-base-content/70">{{ $certificate->hackaton->title }}</p>
-                        <p class="mt-1 text-xs text-base-content/60">{{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</p>
+                        <p class="mt-1 text-xs text-base-content/50">{{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</p>
                         <div class="mt-3 flex flex-wrap gap-2">
                             <a href="{{ route('certificates.download', $certificate) }}" class="btn btn-sm btn-neutral">Скачать</a>
                             <button

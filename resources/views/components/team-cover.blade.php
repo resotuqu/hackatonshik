@@ -10,7 +10,7 @@
 @endphp
 
 <div
-    class="group/cover relative h-44 w-full shrink-0 overflow-hidden rounded-t-[var(--radius-card)] bg-base-300 transition-colors duration-200"
+    class="group/cover relative h-44 w-full shrink-0 overflow-hidden rounded-t-card bg-base-300 transition-colors duration-200"
     aria-hidden="true"
 >
     @if ($hasPhoto)
@@ -26,7 +26,7 @@
     @endif
 
     <div
-        class="pointer-events-none absolute inset-0 bg-linear-to-b from-base-100/40 via-base-100/10 to-base-100/60 [html[data-theme=hackatonshik-light]_&]:from-base-content/15 [html[data-theme=hackatonshik-light]_&]:to-base-content/35"
+        class="pointer-events-none absolute inset-0 bg-linear-to-b from-base-100/40 via-base-100/10 to-base-100/60 [html[data-theme=cmyk]_&]:from-base-content/15 [html[data-theme=cmyk]_&]:to-base-content/35"
         aria-hidden="true"
     ></div>
 
@@ -36,18 +36,18 @@
         'gap-1' => ! $showBrandStrip,
     ])>
         @if (filled($title))
-            <p class="line-clamp-2 max-w-full font-display text-lg font-semibold leading-tight text-base-100 [html[data-theme=hackatonshik-light]_&]:text-base-content sm:text-xl">
+            <p class="line-clamp-2 max-w-full font-display text-lg font-semibold leading-tight text-base-100 [html[data-theme=cmyk]_&]:text-base-content sm:text-xl">
                 {{ $title }}
             </p>
         @endif
         @if ($showBrandStrip)
-            <p class="max-w-full truncate text-[10px] font-medium text-base-100/80 [html[data-theme=hackatonshik-light]_&]:text-base-content/70 sm:text-xs">
+            <p class="max-w-full truncate text-[10px] font-medium text-base-100/80 [html[data-theme=cmyk]_&]:text-base-content/70 sm:text-xs">
                 Хакатонщик
             </p>
         @endif
         <span
             @class([
-                'font-display font-bold tabular-nums tracking-tight text-secondary [html[data-theme=hackatonshik-light]_&]:text-primary',
+                'font-display font-bold tabular-nums tracking-tight text-secondary [html[data-theme=cmyk]_&]:text-primary',
                 'text-2xl sm:text-3xl' => $showBrandStrip,
                 'text-3xl sm:text-4xl' => ! $showBrandStrip,
             ])

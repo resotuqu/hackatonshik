@@ -27,7 +27,7 @@
         <div class="flex flex-col gap-6 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-5">
                 <div
-                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-base-200 text-3xl font-black tracking-tighter text-base-content ring-1 ring-base-300">
+                    class="flex h-14 w-14 items-center justify-center rounded-panel bg-base-200 text-3xl font-black tracking-tighter text-base-content ring-1 ring-base-300">
                     {{ $teamInitials }}
                 </div>
                 <div>
@@ -48,10 +48,10 @@
     <div class="card border border-base-300 bg-base-100 p-6">
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <x-app-icon icon="heroicons:chart-bar" class="h-6 w-6 text-base-content/60" />
+                <x-app-icon icon="heroicons:chart-bar" class="h-6 w-6 text-base-content/70" />
                 <div>
                     <p class="font-semibold">Прогресс заполнения</p>
-                    <p class="text-sm text-base-content/60">Чем полнее карточка — тем заметнее команда в каталоге</p>
+                    <p class="text-sm text-base-content/70">Чем полнее карточка — тем заметнее команда в каталоге</p>
                 </div>
             </div>
             <div class="text-sm font-semibold tabular-nums">
@@ -65,7 +65,7 @@
                 @php $done = $progressSteps[$i] ?? false; @endphp
                 <div class="flex flex-1 flex-col items-center gap-2 text-center">
                     <div
-                        class="{{ $done ? 'bg-base-content text-base-100 ring-2 ring-base-300' : 'bg-base-200 text-base-content/40' }} flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-semibold transition-colors">
+                        class="{{ $done ? 'bg-base-content text-base-100 ring-2 ring-base-300' : 'bg-base-200 text-base-content/40' }} flex h-9 w-9 items-center justify-center rounded-panel text-sm font-semibold transition-colors">
                         @if ($done)
                             <x-mary-icon name="o-check" class="h-5 w-5" />
                         @else
@@ -90,10 +90,10 @@
             {{-- Основная информация --}}
             <div class="card border border-base-300 bg-base-100 p-7">
                 <div class="flex items-center gap-3 border-b pb-5">
-                    <x-app-icon icon="heroicons:identification" class="h-6 w-6 text-base-content/60" />
+                    <x-app-icon icon="heroicons:identification" class="h-6 w-6 text-base-content/70" />
                     <div>
                         <h2 class="text-xl font-semibold">Основная информация</h2>
-                        <p class="text-sm text-base-content/60">Как вас увидят участники и организаторы</p>
+                        <p class="text-sm text-base-content/70">Как вас увидят участники и организаторы</p>
                     </div>
                 </div>
 
@@ -109,10 +109,10 @@
             {{-- Обложка и хакатон --}}
             <div class="card border border-base-300 bg-base-100 p-7">
                 <div class="flex items-center gap-3 border-b pb-5">
-                    <x-app-icon icon="heroicons:photo" class="h-6 w-6 text-base-content/60" />
+                    <x-app-icon icon="heroicons:photo" class="h-6 w-6 text-base-content/70" />
                     <div>
                         <h2 class="text-xl font-semibold">Обложка и хакатон</h2>
-                        <p class="text-sm text-base-content/60">Яркая обложка помогает выделиться</p>
+                        <p class="text-sm text-base-content/70">Яркая обложка помогает выделиться</p>
                     </div>
                 </div>
 
@@ -120,13 +120,13 @@
                     @if ($photo)
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
                             <img src="{{ $photo->temporaryUrl() }}" alt="Превью обложки"
-                                class="aspect-video w-full max-h-72 rounded-2xl object-cover ring-1 ring-base-300">
+                                class="aspect-video w-full max-h-72 rounded-panel object-cover ring-1 ring-base-300">
                             <x-mary-button type="button" wire:click="removePhoto" label="Отменить замену"
                                 class="btn-ghost btn-sm text-error" />
                         </div>
                     @elseif (!empty($team->image_url))
                         <img src="{{ asset('storage/' . $team->image_url) }}" alt="Текущая обложка"
-                            class="aspect-video w-full max-h-72 rounded-2xl object-cover ring-1 ring-base-300">
+                            class="aspect-video w-full max-h-72 rounded-panel object-cover ring-1 ring-base-300">
                     @endif
 
                     <x-maryfile wire:model="photo" accept="image/png, image/jpeg, image/webp" label="Загрузить обложку"
@@ -142,10 +142,10 @@
         <div class="card border border-base-300 bg-base-100 p-7">
             <div class="flex items-center justify-between border-b pb-5">
                 <div class="flex items-center gap-3">
-                    <x-app-icon icon="heroicons:link" class="h-6 w-6 text-base-content/60" />
+                    <x-app-icon icon="heroicons:link" class="h-6 w-6 text-base-content/70" />
                     <div>
                         <h2 class="text-xl font-semibold">Социальные ссылки</h2>
-                        <p class="text-sm text-base-content/60">Контакты для участников</p>
+                        <p class="text-sm text-base-content/70">Контакты для участников</p>
                     </div>
                 </div>
                 <x-mary-button type="button" wire:click="addSocialLink" label="Добавить ссылку" icon="o-plus" />
@@ -166,7 +166,7 @@
 
             @if (empty($socialLinks))
                 <div
-                    class="mt-8 rounded-2xl border border-dashed border-base-300 py-12 text-center text-sm text-base-content/60">
+                    class="mt-8 rounded-panel border border-dashed border-base-300 py-12 text-center text-sm text-base-content/70">
                     Пока нет ссылок
                 </div>
             @endif
@@ -175,7 +175,7 @@
                 @foreach ($socialLinks as $index => $socialLink)
                     <x-mary-card wire:key="socialLink-{{ $socialLink['id'] }}">
                         <div class="flex items-start gap-4">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-base-200">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-panel bg-base-200">
                                 <x-app-icon icon="{{ $this->socialLinkIcon($socialLink) }}" class="h-6 w-6" />
                             </div>
                             <div class="flex-1 space-y-4">
@@ -202,10 +202,10 @@
         <div class="card border border-base-300 bg-base-100 p-7">
             <div class="flex items-center justify-between border-b pb-5">
                 <div class="flex items-center gap-3">
-                    <x-app-icon icon="heroicons:user-group" class="h-6 w-6 text-base-content/60" />
+                    <x-app-icon icon="heroicons:user-group" class="h-6 w-6 text-base-content/70" />
                     <div>
                         <h2 class="text-xl font-semibold">Роли в команде</h2>
-                        <p class="text-sm text-base-content/60">Управляйте вакансиями и своей ролью капитана</p>
+                        <p class="text-sm text-base-content/70">Управляйте вакансиями и своей ролью капитана</p>
                     </div>
                 </div>
                 <x-mary-button type="button" wire:click="addRole" label="Добавить роль" icon="o-plus" />
@@ -222,7 +222,7 @@
 
             @if (empty($roles))
                 <div
-                    class="rounded-2xl border border-dashed border-base-300 py-12 text-center text-sm text-base-content/60">
+                    class="rounded-panel border border-dashed border-base-300 py-12 text-center text-sm text-base-content/70">
                     Добавьте роли, если ищете участников
                 </div>
             @endif

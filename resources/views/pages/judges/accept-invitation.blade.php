@@ -12,7 +12,7 @@
 
             <form method="POST" action="{{ route('judges.invitations.accept.store', $invitation->token) }}" class="mt-4">
                 @csrf
-                <button type="submit" class="btn btn-neutral w-full">
+                <button type="submit" class="ui-cta-primary w-full">
                     Принять приглашение
                 </button>
             </form>

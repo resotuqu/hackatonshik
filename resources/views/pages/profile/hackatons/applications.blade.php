@@ -8,6 +8,8 @@
         </ul>
     </div>
 
+    <x-organizer-nav-tabs active="applications" />
+
     <x-page-header
         title="Заявки на рассмотрении"
         description="Все команды, ожидающие решения организатора. Примите или отклоните заявку — команда получит уведомление."

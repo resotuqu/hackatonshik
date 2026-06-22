@@ -3,13 +3,11 @@
 @section('canonical_url', route('news.show', $post))
 
 <div class="mx-auto mt-8 w-full max-w-4xl space-y-6 sm:mt-12">
-    <div class="text-sm breadcrumbs">
-        <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="/news">Новости</a></li>
-            <li class="opacity-70">{{ $post->title }}</li>
-        </ul>
-    </div>
+    <x-breadcrumbs :items="[
+        ['label' => 'Главная', 'href' => '/'],
+        ['label' => 'Новости', 'href' => route('news.index')],
+        ['label' => $post->title],
+    ]" />
 
     <article class="card border border-base-300 bg-base-100 p-6 sm:p-8">
         <div class="space-y-2">

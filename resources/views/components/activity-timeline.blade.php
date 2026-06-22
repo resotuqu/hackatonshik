@@ -22,7 +22,7 @@
     <h3 class="text-sm font-semibold text-base-content">История изменений</h3>
 
     @if ($activities->isEmpty())
-        <p class="text-sm text-base-content/60">История изменений пока пуста.</p>
+        <p class="text-sm text-base-content/70">История изменений пока пуста.</p>
     @else
         <ul class="space-y-3">
             @foreach ($activities as $activity)

@@ -5,7 +5,7 @@
         </x-slot:actions>
     </x-page-header>
 
-    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-6">
+    <section class="ui-surface-card p-4 sm:p-6">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
             <x-mary-input label="Поиск" wire:model.live.debounce.300ms="search" placeholder="Название новости" />
             <x-maryselect
@@ -37,7 +37,7 @@
                 <div class="card-body">
                     <div class="flex items-center justify-between gap-2">
                         <span class="badge badge-outline">{{ $post->category }}</span>
-                        <span class="text-xs text-base-content/60">{{ $post->published_at?->format('d.m.Y') }}</span>
+                        <span class="text-xs text-base-content/50">{{ $post->published_at?->format('d.m.Y') }}</span>
                     </div>
                     <h2 class="card-title text-lg">{{ $post->title }}</h2>
                     <p class="text-sm text-base-content/70">{{ $post->excerpt }}</p>
@@ -49,7 +49,7 @@
                         </div>
                     @endif
                     <div class="card-actions mt-3 justify-end">
-                        <a href="{{ route('news.show', $post) }}" class="btn btn-neutral btn-sm">Читать дальше</a>
+                        <a href="{{ route('news.show', $post) }}" class="ui-cta-outline btn-sm">Читать дальше</a>
                     </div>
                 </div>
             </article>

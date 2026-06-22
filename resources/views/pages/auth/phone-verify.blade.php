@@ -4,7 +4,7 @@
 
 @section('slot')
     <div class="mx-auto w-full max-w-xl space-y-4" x-data="{ code: '', cooldown: 0, isSubmitting: false }" x-init="setInterval(() => { if (cooldown > 0) cooldown--; }, 1000)">
-        <x-mary-card title="{{ __('ui.auth.phone_verify.card_title') }}" class="card card-border bg-base-100 shadow-sm">
+        <x-mary-card title="{{ __('ui.auth.phone_verify.card_title') }}" class="card border border-base-300 bg-base-100">
             <p class="text-sm text-base-content/70">
                 {!! __('ui.auth.phone_verify.description', ['phone' => '<span class="font-medium">'.e(auth()->user()?->phone).'</span>']) !!}
             </p>

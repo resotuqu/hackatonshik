@@ -76,44 +76,58 @@
         </section>
 
         @if(!empty($checklist))
-            <section class="ui-surface-soft">
+            <section class="ui-surface-card">
                 <div class="card-body space-y-4">
                     <h2 class="ui-heading-display text-xl font-bold">Что сделать сейчас</h2>
+
                     <ul class="space-y-2">
                         @foreach($checklist['items'] as $item)
-                            <li class="flex items-start gap-3 rounded-xl border border-base-300p-3 {{ $item['done'] ? 'bg-success/5' : 'bg-warning/5' }}">
+                            <li @class([
+                                'flex items-center gap-3 rounded-xl border p-3',
+                                'border-success/20 bg-success/5' => $item['done'],
+                                'border-warning/20 bg-warning/5' => !$item['done'],
+                            ])>
                                 @if($item['done'])
-                                    <x-app-icon icon="heroicons:check-circle" class="h-5 w-5 text-success shrink-0 mt-0.5" />
+                                    <x-app-icon icon="heroicons:check-circle" class="h-5 w-5 text-success shrink-0" />
                                 @else
-                                    <x-app-icon icon="heroicons:exclamation-circle" class="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                                    <x-app-icon icon="heroicons:exclamation-circle" class="h-5 w-5 text-warning shrink-0" />
                                 @endif
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium">{{ $item['label'] }}</p>
-                                    @if(!$item['done'] && $item['href'])
-                                        <a href="{{ $item['href'] }}" class="link link-primary text-xs">Перейти</a>
-                                    @endif
-                                </div>
+                                <p class="min-w-0 flex-1 text-sm font-medium">{{ $item['label'] }}</p>
+                                @if(!$item['done'] && $item['href'])
+                                    <a href="{{ $item['href'] }}" class="btn btn-warning btn-xs shrink-0">Перейти</a>
+                                @endif
                             </li>
                         @endforeach
                     </ul>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                        <div class="rounded-xl border border-base-300p-3">
-                            <p class="text-xs text-base-content/50">Документы</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @php
+                            $docsUploaded = $checklist['documentsProgress']['uploaded'];
+                            $docsRequired = $checklist['documentsProgress']['required'];
+                            $subsDone     = $checklist['teamSubmissionsProgress']['submitted'];
+                            $subsTotal    = $checklist['teamSubmissionsProgress']['totalCases'];
+                        @endphp
+                        <div class="rounded-xl border border-base-300 bg-base-200/40 p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs font-medium text-base-content/60">Документы</p>
+                                <span class="text-xs font-semibold tabular-nums text-base-content/70">{{ $docsUploaded }}/{{ $docsRequired }}</span>
+                            </div>
                             <progress
-                                class="progress progress-primary w-full mt-2"
-                                value="{{ $checklist['documentsProgress']['uploaded'] }}"
-                                max="{{ max($checklist['documentsProgress']['required'], 1) }}"
+                                class="progress progress-success w-full"
+                                value="{{ $docsUploaded }}"
+                                max="{{ max($docsRequired, 1) }}"
                             ></progress>
-                            <p class="mt-1 tabular-nums">{{ $checklist['documentsProgress']['uploaded'] }}/{{ $checklist['documentsProgress']['required'] }}</p>
                         </div>
-                        <div class="rounded-xl border border-base-300p-3">
-                            <p class="text-xs text-base-content/50">Сдачи кейсов (команда)</p>
+                        <div class="rounded-xl border border-base-300 bg-base-200/40 p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs font-medium text-base-content/60">Сдачи кейсов (команда)</p>
+                                <span class="text-xs font-semibold tabular-nums text-base-content/70">{{ $subsDone }}/{{ $subsTotal }}</span>
+                            </div>
                             <progress
-                                class="progress progress-secondary w-full mt-2"
-                                value="{{ $checklist['teamSubmissionsProgress']['submitted'] }}"
-                                max="{{ max($checklist['teamSubmissionsProgress']['totalCases'], 1) }}"
+                                class="progress progress-primary w-full"
+                                value="{{ $subsDone }}"
+                                max="{{ max($subsTotal, 1) }}"
                             ></progress>
-                            <p class="mt-1 tabular-nums">{{ $checklist['teamSubmissionsProgress']['submitted'] }}/{{ $checklist['teamSubmissionsProgress']['totalCases'] }}</p>
                         </div>
                     </div>
                 </div>
@@ -133,7 +147,7 @@
                             <div class="flex flex-col gap-3">
                                 <div class="space-y-1">
                                     <p class="font-bold leading-tight">{{ $certificate->title }}</p>
-                                    <p class="text-xs text-base-content/60">Выдан: {{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</p>
+                                    <p class="text-xs text-base-content/50">Выдан: {{ $certificate->issued_at?->format('d.m.Y') ?? '—' }}</p>
                                 </div>
                                 <a href="{{ route('certificates.download', $certificate) }}" class="ui-cta-primary btn-sm w-full">
                                     <x-app-icon icon="heroicons:arrow-down-tray" class="h-4 w-4" />

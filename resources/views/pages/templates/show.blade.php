@@ -16,9 +16,9 @@
     </header>
 
     <div class="flex flex-wrap gap-3">
-        <a href="{{ route('hackatons.create', ['template' => $template->slug]) }}" class="btn btn-primary" wire:navigate>
+        <a href="{{ route('hackatons.create', ['template' => $template->slug]) }}" class="ui-cta-primary" wire:navigate>
             Создать хакатон по шаблону
         </a>
-        <a href="{{ route('templates.index') }}" class="btn btn-ghost" wire:navigate>Назад к галерее</a>
+        <a href="{{ route('templates.index') }}" class="ui-cta-ghost" wire:navigate>Назад к галерее</a>
     </div>
 </div>

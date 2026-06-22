@@ -95,21 +95,21 @@ new #[Lazy] class extends Component
     <div class="divider">{{ $isOrganizer ? 'Для организатора' : 'Для судьи' }}</div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body">
                 <p class="text-sm text-base-content/70">Заявки (всего)</p>
                 <p class="text-3xl font-semibold">{{ $metrics['applications_total'] }}</p>
                 <p class="text-xs">В работе: {{ $metrics['applications_pending'] }}</p>
             </div>
         </div>
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body">
                 <p class="text-sm text-base-content/70">Решения кейсов</p>
                 <p class="text-3xl font-semibold">{{ $metrics['submissions_total'] }}</p>
                 <p class="text-xs">Оценено: {{ $metrics['submissions_scored'] }}</p>
             </div>
         </div>
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body">
                 <p class="text-sm text-base-content/70">Прогресс оценивания</p>
                 <p class="text-3xl font-semibold">{{ $metrics['submissions_scored_percent'] }}%</p>
@@ -117,11 +117,11 @@ new #[Lazy] class extends Component
         </div>
     </div>
 
-    <div class="card bg-base-100 border border-base-200 shadow-sm">
+    <div class="card border border-base-300 bg-base-100">
         <div class="card-body">
             <h2 class="card-title text-xl">Рейтинг команд</h2>
             @if($leaderboard === [])
-                <p class="text-base-content/60">Пока нет оцененных решений команд.</p>
+                <p class="text-base-content/70">Пока нет оцененных решений команд.</p>
             @else
                 <div class="overflow-x-auto">
                     <table class="table table-sm">
@@ -150,7 +150,7 @@ new #[Lazy] class extends Component
     </div>
 
 @if($isOrganizer)
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body">
                 <h2 class="card-title text-xl">Экспорт данных</h2>
                 <p class="text-sm text-base-content/70">Скачайте команды, участников или архив подписанных документов.</p>
@@ -162,7 +162,7 @@ new #[Lazy] class extends Component
             </div>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <h2 class="card-title text-xl">Судьи хакатона</h2>
@@ -244,7 +244,7 @@ new #[Lazy] class extends Component
             </div>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body space-y-4">
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="card-title text-xl">Управление кейсами</h2>
@@ -274,7 +274,7 @@ new #[Lazy] class extends Component
     @endif
 
     @if($isOrganizer)
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <h2 class="card-title text-xl">Сертификаты участников</h2>
@@ -307,7 +307,7 @@ new #[Lazy] class extends Component
                     @endif
                 </div>
                 @if($participantUsers->isEmpty())
-                    <p class="text-base-content/60">Пока нет участников для выдачи сертификатов.</p>
+                    <p class="text-base-content/70">Пока нет участников для выдачи сертификатов.</p>
                 @endif
 
                 @if($hackaton->certificates->isNotEmpty())

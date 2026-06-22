@@ -34,7 +34,7 @@
                                 @endforeach
                             </div>
                         @endif
-                        <a href="{{ route('teams.show', $team) }}" class="btn btn-neutral btn-sm mt-1" wire:navigate>Подробнее</a>
+                        <a href="{{ route('teams.show', $team) }}" class="ui-cta-outline btn-sm mt-1" wire:navigate>Подробнее</a>
                     </div>
                 </article>
             @endforeach

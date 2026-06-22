@@ -212,7 +212,7 @@
                         <div><dt class="text-xs uppercase text-base-content/50">Документов</dt><dd>{{ count($hackatonDocuments) }}</dd></div>
                         <div><dt class="text-xs uppercase text-base-content/50">Фото в галерее</dt><dd>{{ count($galleryPhotos) }}</dd></div>
                     </dl>
-                    <p class="text-xs text-base-content/60">Нажмите «Создать хакатон», чтобы сохранить событие и перейти в дашборд организатора.</p>
+                    <p class="text-xs text-base-content/70">Нажмите «Создать хакатон», чтобы сохранить событие и перейти в дашборд организатора.</p>
                 </div>
             @endif
 

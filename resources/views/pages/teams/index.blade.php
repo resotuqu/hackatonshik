@@ -42,7 +42,7 @@
                     <button
                         type="button"
                         role="tab"
-                        class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                        class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'open' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/70 hover:text-base-content' }}"
                         aria-selected="{{ $catalog_tab === 'open' ? 'true' : 'false' }}"
                         wire:click="setCatalogTab('open')"
                     >
@@ -51,7 +51,7 @@
                     <button
                         type="button"
                         role="tab"
-                        class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/60 hover:text-base-content' }}"
+                        class="rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap transition-all duration-200 {{ $catalog_tab === 'all' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/70 hover:text-base-content' }}"
                         aria-selected="{{ $catalog_tab === 'all' ? 'true' : 'false' }}"
                         wire:click="setCatalogTab('all')"
                     >
@@ -69,10 +69,10 @@
     </x-page-header>
 
     <section aria-label="Фильтры">
-        <div class="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-200/30 p-4 sm:p-5">
+        <div class="ui-surface-soft p-4 sm:p-5">
             <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
                 <label class="form-control w-full min-w-0 flex-1 lg:max-w-md">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Поиск</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Поиск</span></span>
                     <input
                         type="search"
                         class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md"
@@ -98,7 +98,7 @@
             </div>
 
             <div class="flex flex-col gap-2">
-                <span class="text-xs font-medium uppercase tracking-wide text-base-content/60">Роли</span>
+                <span class="text-xs font-medium uppercase tracking-wide text-base-content/50">Роли</span>
                 <div class="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Фильтр по ролям">
                     @foreach ($this->rolesForChips as $chipRole)
                         @php $pressed = in_array($chipRole->id, $roleIdInts, true); @endphp
@@ -116,7 +116,7 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <label class="form-control w-full min-w-0 sm:col-span-2 xl:col-span-2">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Размер команды</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Размер команды</span></span>
                     <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="team_size">
                         <option value="all">Любой</option>
                         <option value="2">От 2 ролей</option>
@@ -125,14 +125,14 @@
                     </select>
                 </label>
                 <label class="form-control w-full min-w-0">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Сортировка</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Сортировка</span></span>
                     <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="sort">
                         <option value="newest">Сначала новые</option>
                         <option value="start_soonest">Ближайший старт</option>
                     </select>
                 </label>
                 <div class="form-control w-full min-w-0 sm:col-span-2 xl:col-span-1">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Навыки</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Навыки</span></span>
                     <x-marychoices-offline
                         wire:model.live="skills"
                         :options="$this->skillsData"
@@ -145,7 +145,7 @@
 
             <div class="grid grid-cols-1 gap-4 border-t border-base-300 pt-4 sm:grid-cols-2">
                 <label class="form-control w-full">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Хакатон</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Хакатон</span></span>
                     <select class="select select-bordered select-sm w-full sm:select-md" wire:model.live="hackaton_id">
                         @foreach ($this->hackatons as $opt)
                             <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>
@@ -153,7 +153,7 @@
                     </select>
                 </label>
                 <label class="form-control w-full">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Начало хакатона от</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Начало хакатона от</span></span>
                     <input type="date" class="input input-bordered input-sm w-full sm:input-md" wire:model.live="start_from" />
                 </label>
             </div>
@@ -200,7 +200,7 @@
         @endif
 
         @auth
-            <div class="mt-3 card card-border border-base-300 bg-base-100">
+            <div class="mt-3 card border border-base-300 bg-base-100">
                 <div class="card-body gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end">
                     <div class="min-w-0 flex-1 space-y-2">
                         <p class="text-sm font-medium">Сохранённые фильтры</p>
@@ -214,7 +214,7 @@
                                     {{ $savedFilter->name }}
                                 </button>
                             @empty
-                                <p class="text-sm text-base-content/60">Пока нет сохранённых фильтров.</p>
+                                <p class="text-sm text-base-content/70">Пока нет сохранённых фильтров.</p>
                             @endforelse
                         </div>
                     </div>
@@ -232,14 +232,21 @@
         @endauth
     </section>
 
-    <div wire:loading class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" wire:target="{{ $loadingTargets }}">
-        @foreach (range(1, 6) as $_)
-            <x-team-card-skeleton />
-        @endforeach
-    </div>
+    <div class="relative">
+        <div
+            wire:loading
+            wire:key="teams-catalog-loading"
+            wire:target="{{ $loadingTargets }}"
+            class="absolute inset-0 z-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        >
+            @foreach (range(1, 6) as $skeletonIndex)
+                <div wire:key="team-skeleton-{{ $skeletonIndex }}">
+                    <x-team-card-skeleton />
+                </div>
+            @endforeach
+        </div>
 
-    <div wire:loading.remove wire:target="{{ $loadingTargets }}">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="grid min-h-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @forelse ($this->teams as $team)
                 @php
                     $vacantRoleNames = $team->roles
@@ -269,17 +276,17 @@
                         ->values()
                         ->take(4);
                 @endphp
-                <div wire:key="team-wrap-{{ $team->id }}">
-                    <x-team-card
-                        :team="$team"
-                        :can-quick-apply="$canQuickApply"
-                        :vacant-role-names="$vacantRoleNames"
-                        :skill-tags="$skillTags"
-                        :participant-users="$participantUsers"
-                    />
-                </div>
+                <x-team-card
+                    wire:key="team-wrap-{{ $team->id }}"
+                    class="min-h-0"
+                    :team="$team"
+                    :can-quick-apply="$canQuickApply"
+                    :vacant-role-names="$vacantRoleNames"
+                    :skill-tags="$skillTags"
+                    :participant-users="$participantUsers"
+                />
             @empty
-                <div class="col-span-full">
+                <div wire:key="teams-catalog-empty" class="col-span-full">
                     <x-empty-state
                         :title="__('ui.teams.empty_title')"
                         :description="__('ui.teams.empty_description')"
@@ -293,9 +300,11 @@
                 </div>
             @endforelse
         </div>
-
-        @if ($this->teams->isNotEmpty())
-            <div class="mt-6">{{ $this->teams->links(data: ['scrollTo' => false]) }}</div>
-        @endif
     </div>
+
+    @if ($this->teams->isNotEmpty())
+        <div class="mt-6">
+            {{ $this->teams->links(data: ['scrollTo' => false]) }}
+        </div>
+    @endif
 </div>

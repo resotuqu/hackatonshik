@@ -45,7 +45,7 @@
                                                 {{ $row['team']->title }}
                                             </a>
                                         @else
-                                            <span class="text-base-content/60">—</span>
+                                            <span class="text-base-content/70">—</span>
                                         @endif
                                     </td>
                                     <td class="tabular-nums">{{ $row['total_score'] }} / {{ $row['max_score'] }}</td>

@@ -15,6 +15,7 @@ return [
         'certificates' => 'Certificates',
         'organizer_cabinet' => 'Organizer cabinet',
         'admin_panel' => 'Admin panel',
+        'moderator_panel' => 'Moderator panel',
         'judge_panel' => 'Judge panel',
         'create_hackaton' => 'Create new hackathon',
         'assigned_hackatons' => 'Assigned hackathons',
@@ -31,6 +32,10 @@ return [
     ],
 
     'auth' => [
+        'oauth' => [
+            'or' => 'or',
+        ],
+
         'login' => [
             'page_title' => 'Sign in',
             'brand_heading' => 'Welcome back',
@@ -94,6 +99,8 @@ return [
             'btn_submit' => 'Create account',
             'yandex' => 'Sign in or sign up with Yandex',
             'vk' => 'Sign in or sign up with VK',
+            'pd_consent_label' => 'I consent to the processing of my personal data in accordance with the <a href="/privacy-policy" target="_blank" class="link link-primary">Privacy Policy</a> (Federal Law No. 152-FZ)',
+            'pd_consent_error' => 'You must consent to the processing of your personal data',
         ],
 
         'forgot_password' => [

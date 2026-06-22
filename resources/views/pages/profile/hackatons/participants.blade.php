@@ -1,5 +1,5 @@
 <div>
-    <x-mary-card class="card card-border bg-base-100">
+    <x-mary-card class="card border border-base-300 bg-base-100">
         <div class="text-sm breadcrumbs mb-4">
             <ul>
                 <li><a href="/">Главная</a></li>

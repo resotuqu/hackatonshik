@@ -27,7 +27,9 @@
 @endphp
 
 <article
-    class="ui-surface-card ui-surface-card--hover ui-surface-card--team group/card flex h-full flex-col overflow-hidden"
+    {{ $attributes->class([
+        'ui-surface-card ui-surface-card--hover ui-surface-card--team group/card flex h-full min-h-0 flex-col overflow-clip rounded-card',
+    ]) }}
     aria-labelledby="{{ $titleId }}"
 >
     <x-team-cover
@@ -50,7 +52,7 @@
 
         {{-- Ищем в команду: макс 2 роли + "+N", резервируем место --}}
         <div class="min-h-[5.5rem] rounded-lg border border-base-300 bg-base-200/40 p-4">
-            <p class="mb-2 text-xs font-medium text-base-content/60">
+            <p class="mb-2 text-xs font-medium text-base-content/70">
                 @if ($hasVacancies || ! empty($vacantRoleNames))
                     Ищем в команду ({{ $openSlots }} {{ $slotWord }}):
                 @else
@@ -66,11 +68,11 @@
                     @if (! $hasVacancies)
                         {{-- пустое место для выравнивания --}}
                     @else
-                        <span class="text-sm font-medium text-base-content/60">Любые роли</span>
+                        <span class="text-sm font-medium text-base-content/70">Любые роли</span>
                     @endif
                 @endforelse
                 @if ($extraRoles > 0)
-                    <span class="badge badge-outline border-base-300 bg-base-200/50 px-3 py-3 text-xs font-semibold text-base-content/60">
+                    <span class="badge badge-outline border-base-300 bg-base-200/50 px-3 py-3 text-xs font-semibold text-base-content/50">
                         +{{ $extraRoles }}
                     </span>
                 @endif
@@ -135,14 +137,14 @@
                     <a
                         href="{{ $href }}"
                         @if ($navigate) wire:navigate @endif
-                        class="btn btn-neutral w-full sm:w-auto px-6"
+                        class="ui-cta-outline w-full sm:w-auto px-6"
                     >
                         Подробнее
                     </a>
                 @else
                     <button
                         type="button"
-                        class="btn btn-neutral w-full sm:w-auto px-6"
+                        class="ui-cta-outline w-full sm:w-auto px-6"
                         wire:click="openTeam({{ $team->id }})"
                     >
                         Подробнее

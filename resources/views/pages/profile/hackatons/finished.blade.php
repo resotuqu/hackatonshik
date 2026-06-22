@@ -8,6 +8,8 @@
         </ul>
     </div>
 
+    <x-organizer-nav-tabs active="finished" />
+
     <x-page-header
         title="Завершённые хакатоны"
         description="События со статусом «Завершён» или «Архив» — итоги, отчёты и материалы доступны со страницы хакатона."

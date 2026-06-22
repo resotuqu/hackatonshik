@@ -52,7 +52,7 @@
 
             <div class="mt-4 space-y-1.5">
                 <div class="flex items-center justify-between text-sm">
-                    <span class="text-base-content/60">Заполненность профиля</span>
+                    <span class="text-base-content/70">Заполненность профиля</span>
                     <span class="font-medium text-base-content">{{ $this->profileCompletenessPercent }}%</span>
                 </div>
                 <progress class="progress w-full" value="{{ $this->profileCompletenessPercent }}" max="100"></progress>
@@ -87,7 +87,7 @@
                                                 <button
                                                     type="button"
                                                     wire:click="selectPreset({{ json_encode($pPath) }})"
-                                                    class="group relative aspect-square overflow-hidden rounded-2xl border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary {{ $isActive ? 'border-primary ring-2 ring-primary/30' : 'border-base-300 hover:border-primary/50' }}"
+                                                    class="group relative aspect-square overflow-hidden rounded-panel border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary {{ $isActive ? 'border-primary ring-2 ring-primary/30' : 'border-base-300 hover:border-primary/50' }}"
                                                     title="Аватар"
                                                     aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                                                 >
@@ -109,7 +109,7 @@
                                 <span class="h-px flex-1 bg-base-300"></span>
                             </div>
                         @endif
-                        <div class="flex flex-col items-start gap-4 rounded-2xl border border-dashed border-base-300 p-4 transition hover:border-primary/50 sm:flex-row sm:items-center">
+                        <div class="flex flex-col items-start gap-4 rounded-panel border border-dashed border-base-300 p-4 transition hover:border-primary/50 sm:flex-row sm:items-center">
                             <div class="avatar">
                                 <div class="w-24 rounded-full ring-1 ring-base-300">
                                     <img src="{{ $this->currentAvatarUrl }}" alt="Текущий аватар" />
@@ -133,9 +133,9 @@
                             Личные данные
                         </h2>
                         <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                            <div class="flex items-start justify-between gap-3 rounded-panel border border-base-300 bg-base-200/30 px-4 py-3">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-xs font-medium text-base-content/60">ФИО</p>
+                                    <p class="text-xs font-medium text-base-content/50">ФИО</p>
                                     <p class="mt-0.5 font-medium text-base-content">{{ $fio !== '' ? $fio : '—' }}</p>
                                     <p class="mt-1 text-xs text-base-content/50">Формат: Фамилия Имя или Фамилия Имя Отчество</p>
                                 </div>
@@ -143,27 +143,27 @@
                                     <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
                                 </button>
                             </div>
-                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                            <div class="flex items-start justify-between gap-3 rounded-panel border border-base-300 bg-base-200/30 px-4 py-3">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-xs font-medium text-base-content/60">Дата рождения</p>
+                                    <p class="text-xs font-medium text-base-content/50">Дата рождения</p>
                                     <p class="mt-0.5 font-medium text-base-content">{{ $date_of_birth !== '' ? $date_of_birth : '—' }}</p>
                                 </div>
                                 <button type="button" wire:click="openPersonalEdit('date_of_birth')" class="btn btn-ghost btn-square btn-sm shrink-0" title="Изменить дату рождения">
                                     <x-app-icon icon="heroicons:pencil-square" class="h-5 w-5" />
                                 </button>
                             </div>
-                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                            <div class="flex items-start justify-between gap-3 rounded-panel border border-base-300 bg-base-200/30 px-4 py-3">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-xs font-medium text-base-content/60">Никнейм</p>
+                                    <p class="text-xs font-medium text-base-content/50">Никнейм</p>
                                     <p class="mt-0.5 font-medium text-base-content">{{ '@'.$nickname }}</p>
                                 </div>
                                 <span class="btn btn-ghost btn-square btn-sm shrink-0 cursor-default border-0 bg-transparent" title="Никнейм нельзя изменить">
                                     <x-app-icon icon="heroicons:lock-closed" class="h-5 w-5 text-base-content/40" />
                                 </span>
                             </div>
-                            <div class="flex items-start justify-between gap-3 rounded-2xl border border-base-300 bg-base-200/30 px-4 py-3">
+                            <div class="flex items-start justify-between gap-3 rounded-panel border border-base-300 bg-base-200/30 px-4 py-3">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-xs font-medium text-base-content/60">Роль</p>
+                                    <p class="text-xs font-medium text-base-content/50">Роль</p>
                                     <p class="mt-0.5 font-medium text-base-content">{{ $role }}</p>
                                 </div>
                                 <span class="btn btn-ghost btn-square btn-sm shrink-0 cursor-default border-0 bg-transparent" title="Роль назначается системой">
@@ -230,7 +230,7 @@
                         <p class="text-sm text-base-content/70">
                             Расскажите о навыках, интересах и опыте — этот текст увидят на вашем публичном профиле.
                         </p>
-                        <div class="rounded-2xl border border-base-300 bg-base-200/40 p-1">
+                        <div class="rounded-panel border border-base-300 bg-base-200/40 p-1">
                             <x-marymarkdown wire:model.live.debounce.1500ms="description" :config="$this->config" />
                         </div>
                         @error('description')
@@ -252,7 +252,7 @@
                         <x-marytoggle label="Ищу команду" wire:model.live="open_to_teams" />
                         <x-marytoggle label="Показывать навыки в публичном профиле" wire:model.live="show_skills_on_profile" />
                         <div class="form-control w-full">
-                            <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Мои навыки</span></span>
+                            <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">Мои навыки</span></span>
                             <x-marychoices-offline
                                 wire:model.live="skill_ids"
                                 :options="$this->skillsData"
@@ -314,7 +314,7 @@
             <section class="card border border-base-300 bg-base-100">
                 <div class="card-body gap-3">
                     <h2 class="card-title text-base">
-                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 text-base-content/60" />
+                        <x-app-icon icon="heroicons:shield-check" class="h-5 w-5 text-base-content/70" />
                         Верификация
                     </h2>
 
@@ -364,10 +364,10 @@
             <section class="card border border-base-300 bg-base-100">
                 <div class="card-body gap-4">
                     <h2 class="card-title text-base">
-                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 text-base-content/60" />
+                        <x-app-icon icon="heroicons:user-circle" class="h-5 w-5 text-base-content/70" />
                         Как видят другие
                     </h2>
-                    <div class="rounded-2xl border border-base-300 bg-base-100 p-4">
+                    <div class="rounded-panel border border-base-300 bg-base-100 p-4">
                         <div class="flex items-center gap-3">
                             <div class="avatar">
                                 <div class="w-14 rounded-full ring-1 ring-base-300">
@@ -404,7 +404,7 @@
                 <section class="card border border-base-300 bg-base-100">
                     <div class="card-body gap-3">
                         <h2 class="card-title text-base">
-                            <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-base-content/60" />
+                            <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-base-content/70" />
                             Что добавить
                         </h2>
                         <ul class="space-y-2 text-sm">
@@ -420,6 +420,42 @@
             @endif
         </aside>
     </div>
+
+    {{-- Data export (152-ФЗ, ст. 14) --}}
+    <section class="card border border-base-300 bg-base-100">
+        <div class="card-body gap-3">
+            <h2 class="card-title text-base">
+                <x-app-icon icon="heroicons:arrow-down-tray" class="h-5 w-5 text-base-content/70" />
+                Скачать мои данные
+            </h2>
+            <p class="text-sm text-base-content/70">
+                В соответствии с ФЗ-152 (ст.&nbsp;14) вы вправе получить копию всех персональных данных,
+                которые хранятся о вас в системе. Файл формируется в формате PDF.
+            </p>
+            <div>
+                <a href="{{ route('profile.export') }}" class="btn btn-outline btn-sm" target="_blank">
+                    <x-app-icon icon="heroicons:document-arrow-down" class="h-4 w-4" />
+                    Скачать PDF с данными аккаунта
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {{-- Danger zone --}}
+    <section class="card border border-error/30 bg-base-100">
+        <div class="card-body gap-3">
+            <h2 class="card-title text-base text-error">
+                <x-app-icon icon="heroicons:exclamation-triangle" class="h-5 w-5" />
+                Опасная зона
+            </h2>
+            <p class="text-sm text-base-content/70">
+                Удаление аккаунта повлечёт безвозвратное уничтожение всех ваших данных: профиля, команд, заявок и переписки. Восстановление невозможно.
+            </p>
+            <div>
+                <x-mary-button label="Удалить аккаунт" class="btn-error btn-outline btn-sm" type="button" wire:click="$set('deleteAccountModal', true)" />
+            </div>
+        </div>
+    </section>
 
     <x-mary-modal wire:model="phoneChangeModal" title="Смена номера телефона" class="backdrop-blur">
         <div class="space-y-4">
@@ -506,6 +542,23 @@
             <div class="flex flex-wrap justify-end gap-2">
                 <x-mary-button label="Отмена" class="btn-ghost" type="button" wire:click="closePersonalEdit" />
                 <x-mary-button label="Сохранить" class="btn-primary" type="button" wire:click="savePersonalFromModal" />
+            </div>
+        </div>
+    </x-mary-modal>
+
+    {{-- Delete account modal --}}
+    <x-mary-modal wire:model="deleteAccountModal" title="Удаление аккаунта" class="backdrop-blur">
+        <div class="space-y-4">
+            <div class="rounded-lg border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+                Это действие необратимо. Все ваши данные будут удалены, и восстановить их будет невозможно.
+            </div>
+            <x-marypassword label="Введите текущий пароль для подтверждения" wire:model="delete_confirm_password" />
+            @error('delete_confirm_password')
+                <p class="text-xs text-error">{{ $message }}</p>
+            @enderror
+            <div class="flex flex-wrap justify-end gap-2">
+                <x-mary-button label="Отмена" class="btn-ghost" type="button" wire:click="$set('deleteAccountModal', false)" />
+                <x-mary-button label="Удалить аккаунт навсегда" class="btn-error" type="button" wire:click="deleteAccount" wire:confirm="Вы уверены? Это действие нельзя отменить." />
             </div>
         </div>
     </x-mary-modal>

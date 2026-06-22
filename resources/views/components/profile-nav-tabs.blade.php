@@ -11,8 +11,12 @@
     @endphp
     <div {{ $attributes->merge(['class' => 'tabs tabs-bordered w-full overflow-x-auto border-b border-base-200']) }}>
         <a @class(['tab', 'tab-active' => $active === 'personal' || ($active === null && request()->routeIs('profile'))]) href="{{ route('profile') }}">Личные данные</a>
-        <a @class(['tab', 'tab-active' => $active === 'teams' || ($active === null && request()->routeIs('profile.teams'))]) href="{{ route('profile.teams') }}">Мои команды</a>
+        @if ($navUser->canParticipate())
+            <a @class(['tab', 'tab-active' => $active === 'teams' || ($active === null && request()->routeIs('profile.teams'))]) href="{{ route('profile.teams') }}">Мои команды</a>
+        @endif
         <a @class(['tab', 'tab-active' => $hackatonsActive]) href="{{ $hackatonsHref }}">{{ $hackatonsLabel }}</a>
-        <a @class(['tab', 'tab-active' => $active === 'certificates' || ($active === null && request()->routeIs('profile.certificates'))]) href="{{ route('profile.certificates') }}">Сертификаты</a>
+        @if ($navUser->canParticipate())
+            <a @class(['tab', 'tab-active' => $active === 'certificates' || ($active === null && request()->routeIs('profile.certificates'))]) href="{{ route('profile.certificates') }}">Сертификаты</a>
+        @endif
     </div>
 @endauth

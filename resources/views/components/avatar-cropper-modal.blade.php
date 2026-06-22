@@ -34,7 +34,7 @@
             Выбрать файл@if ($multiple)ы@endif
         </button>
         @if (filled($hint))
-            <p class="text-sm text-base-content/60">{{ $hint }}</p>
+            <p class="text-sm text-base-content/70">{{ $hint }}</p>
         @endif
         <p x-show="state === 'error'" x-cloak class="text-sm text-error">
             Не удалось загрузить файл. Попробуйте ещё раз или выберите другое изображение.
@@ -59,7 +59,7 @@
                     <img x-ref="cropImg" alt="" class="block max-w-full" />
                 </div>
                 <div class="flex flex-col items-center gap-2">
-                    <span class="text-xs text-base-content/60">Предпросмотр</span>
+                    <span class="text-xs text-base-content/50">Предпросмотр</span>
                     <div class="avatar-crop-preview h-32 w-32 shrink-0 border border-base-300 bg-base-200">
                         <div x-ref="previewBox" class="h-full w-full overflow-hidden"></div>
                     </div>
@@ -77,7 +77,7 @@
                 </button>
                 <button
                     type="button"
-                    class="btn btn-primary"
+                    class="ui-cta-primary"
                     :disabled="state !== 'cropping'"
                     @click="applyCrop"
                 >

@@ -44,8 +44,11 @@
         default => null,
     };
 
-    // Прогресс-бар — нейтральный для всех статусов; цветом выделяется только срочность дедлайна ниже.
-    $progressBarClass = 'progress-neutral';
+    $progressBarClass = match (true) {
+        $isActive => 'progress-primary',
+        $status === \App\Enums\HackatonStatus::JUDGING => 'progress-warning',
+        default => 'progress-neutral',
+    };
 
     $daysToDeadline = null;
     $deadlineUrgency = 'normal';
@@ -81,10 +84,10 @@
 @endphp
 
 <article @class([
-    'ui-surface-card ui-surface-card--hover group/card flex h-full flex-col overflow-hidden',
+    'ui-surface-card ui-surface-card--hover group/card flex h-full min-h-0 flex-col overflow-clip rounded-card',
     'border border-base-300 bg-base-100' => !$isFinished,
     'border border-base-300 bg-base-200/30 opacity-90' => $isFinished,
-]) aria-labelledby="{{ $titleId }}">
+]) aria-labelledby="{{ $titleId }}" {{ $attributes }}>
     <x-hackaton-cover :image-url="$imageUrl" :is-finished="$isFinished" :label="$stageLabel" />
 
     <div class="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-5">
@@ -162,11 +165,11 @@
         <div class="pt-1">
             @if (filled($href))
                 <a href="{{ $href }}" @if ($navigate) wire:navigate @endif
-                    class="btn btn-neutral btn-sm w-full sm:btn-md">
+                    class="ui-cta-outline btn-sm w-full sm:btn-md">
                     Подробнее
                 </a>
             @else
-                <button type="button" class="btn btn-neutral btn-sm w-full sm:btn-md"
+                <button type="button" class="ui-cta-outline btn-sm w-full sm:btn-md"
                     wire:click="openHackaton({{ $hackaton->id }})" wire:loading.attr="disabled"
                     wire:target="openHackaton({{ $hackaton->id }})">
                     <span wire:loading.remove wire:target="openHackaton({{ $hackaton->id }})">Подробнее</span>

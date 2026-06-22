@@ -18,12 +18,12 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0 space-y-1">
                 <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Создание команды</h1>
-                <p class="text-sm leading-relaxed text-base-content/60 sm:text-base">
+                <p class="text-sm leading-relaxed text-base-content/70 sm:text-base">
                     Заполните профиль команды, добавьте роли и ссылки на ваши ресурсы — шаг за шагом.
                 </p>
             </div>
             <div
-                class="flex shrink-0 flex-col items-stretch gap-2 rounded-2xl border border-base-300 bg-base-200/40 px-4 py-3 sm:items-end sm:text-right"
+                class="flex shrink-0 flex-col items-stretch gap-2 rounded-panel border border-base-300 bg-base-200/40 px-4 py-3 sm:items-end sm:text-right"
             >
                 <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Прогресс</span>
                 <span class="text-sm font-semibold text-base-content">
@@ -37,7 +37,7 @@
     </x-mary-card>
 
     <x-mary-card
-        class="card card-border w-full justify-self-center border-base-300 bg-base-100 shadow-sm transition motion-safe:duration-200 hover:shadow-md"
+        class="card w-full justify-self-center border border-base-300 bg-base-100"
     >
         <x-maryform wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}" class="space-y-8">
             <div class="space-y-4">
@@ -79,11 +79,11 @@
             <div wire:key="wizard-step-{{ $step }}" class="space-y-6">
                 @if ($step === 1)
                     <div
-                        class="card rounded-2xl border border-base-300bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
+                        class="card border border-base-300 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
                     >
                         <div class="space-y-1 border-b border-base-300 pb-4">
                             <h2 class="text-xl font-semibold tracking-tight">Основная информация</h2>
-                            <p class="text-sm text-base-content/65">Как вас увидят участники и организаторы.</p>
+                            <p class="text-sm text-base-content/70">Как вас увидят участники и организаторы.</p>
                         </div>
 
                         <div class="space-y-5 pt-6">
@@ -104,10 +104,10 @@
                                     />
                                 </div>
                                 <div
-                                    class="rounded-2xl border border-base-300bg-base-200/40 px-4 py-3 text-sm leading-relaxed text-base-content/70"
+                                    class="rounded-panel border border-base-300 bg-base-200/40 px-4 py-3 text-sm leading-relaxed text-base-content/70"
                                 >
                                     <p class="mb-2 font-medium text-base-content/80">Пример структуры</p>
-                                    <p class="mb-1 font-mono text-xs text-base-content/60">
+                                    <p class="mb-1 font-mono text-xs text-base-content/70">
                                         **Мы** делаем _MVP за 48 часов_.<br />
                                         - фокус на UX<br />
                                         - стек: Laravel + Livewire<br />
@@ -121,16 +121,16 @@
 
                 @if ($step === 2)
                     <div
-                        class="card rounded-2xl border border-base-300bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
+                        class="card border border-base-300 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
                     >
                         <div class="space-y-1 border-b border-base-300 pb-4">
                             <h2 class="text-xl font-semibold tracking-tight">Обложка и хакатон</h2>
-                            <p class="text-sm text-base-content/65">Яркая обложка помогает выделиться в каталоге команд.</p>
+                            <p class="text-sm text-base-content/70">Яркая обложка помогает выделиться в каталоге команд.</p>
                         </div>
 
                         <div class="space-y-6 pt-6">
                             <x-maryfile
-                                class="rounded-2xl border-2 border-dashed border-base-300 bg-base-200/30 p-4 transition motion-safe:duration-200 hover:border-primary/35 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 sm:p-5"
+                                class="rounded-panel border-2 border-dashed border-base-300 bg-base-200/30 p-4 transition motion-safe:duration-200 hover:border-primary/35 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 sm:p-5"
                                 label="Обложка команды"
                                 wire:model="photo"
                                 accept="image/png, image/jpeg, image/webp"
@@ -140,7 +140,7 @@
                             @if ($photo)
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                     <div
-                                        class="group relative overflow-hidden rounded-2xl shadow-lg shadow-base-300/35 ring-1 ring-base-200 transition motion-safe:duration-300 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-xl"
+                                        class="group relative overflow-hidden rounded-panel shadow-lg shadow-base-300/35 ring-1 ring-base-200 transition motion-safe:duration-300 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-xl"
                                     >
                                         <img
                                             class="aspect-video max-h-72 w-full object-cover sm:max-h-none"
@@ -170,12 +170,12 @@
 
                 @if ($step === 3)
                     <div
-                        class="card rounded-2xl border border-base-300bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
+                        class="card border border-base-300 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
                     >
                         <div class="flex flex-col gap-4 border-b border-base-300 pb-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="min-w-0 space-y-1">
                                 <h2 class="text-xl font-semibold tracking-tight">Социальные ссылки</h2>
-                                <p class="text-sm text-base-content/65">
+                                <p class="text-sm text-base-content/70">
                                     Добавьте контакты — с пресетами или вручную. Иконка подставится по ссылке.
                                 </p>
                             </div>
@@ -206,7 +206,7 @@
 
                         @if (empty($socialLinks))
                             <div
-                                class="mt-6 rounded-2xl border border-dashed border-base-300 bg-base-200/25 px-4 py-6 text-center text-sm text-base-content/65"
+                                class="mt-6 rounded-panel border border-dashed border-base-300 bg-base-200/25 px-4 py-6 text-center text-sm text-base-content/70"
                             >
                                 Пока нет социальных ссылок — выберите пресет выше или добавьте пустую строку.
                             </div>
@@ -215,12 +215,12 @@
                         <div class="mt-6 space-y-4">
                             @foreach ($socialLinks as $index => $socialLink)
                                 <x-mary-card
-                                    class="border border-base-200 bg-base-200/50 shadow-sm transition motion-safe:duration-200 motion-safe:hover:border-primary/20 motion-safe:hover:shadow-md"
+                                    class="border border-base-300 bg-base-200/50 transition motion-safe:duration-200 motion-safe:hover:border-primary/20"
                                     wire:key="socialLink-{{ $socialLink['id'] }}"
                                 >
                                     <div class="flex flex-wrap items-start gap-4">
                                         <div
-                                            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-base-100 shadow-inner ring-1 ring-base-200"
+                                            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-panel bg-base-100 shadow-inner ring-1 ring-base-200"
                                             title="{{ $socialLink['name'] ?: 'Ссылка' }}"
                                         >
                                             <x-app-icon
@@ -263,7 +263,7 @@
                 @endif
 
                 @if ($step === 4)
-    <div class="rounded-2xl border border-base-300bg-base-100 p-6 shadow-sm sm:p-8">
+    <div class="rounded-panel border border-base-300 bg-base-100 p-6 sm:p-8">
         
         {{-- Шапка секции --}}
         <div class="flex flex-col gap-5 border-b border-base-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -275,7 +275,7 @@
             </div>
             <x-mary-button
                 type="button"
-                class="btn-primary btn-sm shrink-0 px-4 font-medium shadow-sm transition-transform active:scale-95"
+                class="btn btn-primary btn-sm shrink-0"
                 wire:click="addRole"
                 label="Добавить вакансию"
                 icon="o-plus"
@@ -307,11 +307,11 @@
 
         @if (empty($roles))
             {{-- Пустое состояние (Empty State) --}}
-            <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-200/30 px-6 py-10 text-center">
+            <div class="flex flex-col items-center justify-center rounded-panel border border-dashed border-base-300 bg-base-200/30 px-6 py-10 text-center">
                 <p class="text-sm font-medium text-base-content/80">
                     В команде пока нет открытых вакансий
                 </p>
-                <p class="mt-1 text-sm text-base-content/60">
+                <p class="mt-1 text-sm text-base-content/70">
                     Добавьте роли, чтобы другие пользователи платформы могли подать заявку на участие.
                 </p>
             </div>

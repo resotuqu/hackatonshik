@@ -70,10 +70,10 @@
 
     {{-- Filters (always visible) --}}
     <section aria-label="Фильтры">
-        <div class="rounded-2xl border border-base-300 bg-base-200/30 px-4 py-4 sm:px-5 sm:py-5 space-y-4">
+        <div class="ui-surface-soft space-y-4 px-4 py-4 sm:px-5 sm:py-5">
             <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
                 <label class="form-control w-full min-w-0 flex-1 lg:max-w-md">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Поиск</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/70">Поиск</span></span>
                     <input
                         type="search"
                         class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md"
@@ -84,7 +84,7 @@
                 </label>
 
                 <label class="form-control w-full min-w-0 lg:w-64">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Сортировка</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/70">Сортировка</span></span>
                     <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="sort">
                         <option value="newest">Сначала новые</option>
                         <option value="start_soonest">Ближайший старт</option>
@@ -95,7 +95,7 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label class="form-control w-full min-w-0">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Уровень</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/70">Уровень</span></span>
                     <select class="select select-bordered select-sm w-full border-base-300 bg-base-100 sm:select-md" wire:model.live="level">
                         <option value="all">Любой</option>
                         @foreach (\App\Enums\HackatonLevel::cases() as $levelCase)
@@ -104,18 +104,18 @@
                     </select>
                 </label>
                 <label class="form-control w-full min-w-0">
-                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/60">Старт от</span></span>
+                    <span class="label py-0 pb-1"><span class="label-text text-xs font-medium uppercase tracking-wide text-base-content/70">Старт от</span></span>
                     <input type="date" class="input input-bordered input-sm w-full border-base-300 bg-base-100 sm:input-md" wire:model.live="start_at" />
                 </label>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <button type="button" class="btn btn-primary btn-sm gap-1.5" wire:click="search">
+                <button type="button" class="ui-cta-primary btn-sm gap-1.5" wire:click="search">
                     <x-app-icon icon="heroicons:magnifying-glass" class="h-4 w-4" />
                     Искать
                 </button>
                 @if ($hasFilters)
-                    <button type="button" class="btn btn-ghost btn-sm gap-1.5" wire:click="clearFilters">
+                    <button type="button" class="ui-cta-ghost btn-sm gap-1.5" wire:click="clearFilters">
                         <x-app-icon icon="heroicons:arrow-path" class="h-4 w-4" />
                         Сбросить
                     </button>
@@ -143,7 +143,7 @@
         @endif
 
         @auth
-            <div class="mt-3 card card-border border-base-300 bg-base-100">
+            <div class="mt-3 card border border-base-300 bg-base-100">
                 <div class="card-body gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end">
                     <div class="min-w-0 flex-1 space-y-2">
                         <p class="text-sm font-medium">Сохранённые фильтры</p>
@@ -157,7 +157,7 @@
                                     {{ $savedFilter->name }}
                                 </button>
                             @empty
-                                <p class="text-sm text-base-content/60">Пока нет сохранённых фильтров.</p>
+                                <p class="text-sm text-base-content/70">Пока нет сохранённых фильтров.</p>
                             @endforelse
                         </div>
                     </div>
@@ -175,28 +175,33 @@
         @endauth
     </section>
 
-    {{-- Loading state --}}
-    <div wire:loading wire:target="{{ $loadingTargets }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        @foreach (range(1, 6) as $_)
-            <x-hackaton-card-skeleton />
-        @endforeach
-    </div>
+    <div class="relative">
+        <div
+            wire:loading
+            wire:key="hackatons-catalog-loading"
+            wire:target="{{ $loadingTargets }}"
+            class="absolute inset-0 z-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        >
+            @foreach (range(1, 6) as $skeletonIndex)
+                <div wire:key="hackaton-skeleton-{{ $skeletonIndex }}">
+                    <x-hackaton-card-skeleton />
+                </div>
+            @endforeach
+        </div>
 
-    {{-- Results --}}
-    <div wire:loading.remove wire:target="{{ $loadingTargets }}">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="grid min-h-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @forelse ($this->hackatons as $hackaton)
                 @php
                     $canQuickApply = auth()->check() && auth()->user()->canParticipate();
                 @endphp
-                <div wire:key="hackaton-card-{{ $hackaton->id }}">
-                    <x-hackaton-card
-                        :hackaton="$hackaton"
-                        :can-quick-apply="$canQuickApply"
-                    />
-                </div>
+                <x-hackaton-card
+                    wire:key="hackaton-card-{{ $hackaton->id }}"
+                    class="min-h-0"
+                    :hackaton="$hackaton"
+                    :can-quick-apply="$canQuickApply"
+                />
             @empty
-                <div class="col-span-full">
+                <div wire:key="hackatons-catalog-empty" class="col-span-full">
                     <x-empty-state
                         :title="__('ui.hackatons.empty_title')"
                         :description="__('ui.hackatons.empty_description')"
@@ -208,9 +213,11 @@
                 </div>
             @endforelse
         </div>
-
-        @if ($this->hackatons->isNotEmpty())
-            <div class="mt-6">{{ $this->hackatons->links(data: ['scrollTo' => false]) }}</div>
-        @endif
     </div>
+
+    @if ($this->hackatons->isNotEmpty())
+        <div class="mt-6">
+            {{ $this->hackatons->links(data: ['scrollTo' => false]) }}
+        </div>
+    @endif
 </div>

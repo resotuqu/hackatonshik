@@ -30,8 +30,8 @@
 
 <x-mary-card
     {{ $attributes->class([
-        'border bg-base-200/50 shadow-sm transition motion-safe:duration-200 motion-safe:hover:border-primary/20 motion-safe:hover:shadow-md',
-        'border-base-200' => ! $highlight && ! $hasValidationError,
+        'border bg-base-200/50 transition motion-safe:duration-200 motion-safe:hover:border-primary/20',
+        'border-base-300' => ! $highlight && ! $hasValidationError,
         'border-primary/35 bg-primary/5 shadow-primary/10' => $highlight && ! $hasValidationError,
         'border-error/50 ring-1 ring-error/20' => $hasValidationError,
     ]) }}
@@ -40,7 +40,7 @@
         <div class="min-w-0 space-y-2">
             <div class="flex flex-wrap items-center gap-2">
                 @if (filled($badge))
-                    <x-marybadge class="badge-primary badge-sm font-medium" :value="$badge" />
+                    <x-marybadge class="badge-neutral badge-sm font-medium" :value="$badge" />
                 @endif
 
                 <h3 class="text-base font-semibold tracking-tight text-base-content">
@@ -56,7 +56,7 @@
             </div>
 
             @if (filled($description))
-                <p class="text-sm leading-relaxed text-base-content/65">
+                <p class="text-sm leading-relaxed text-base-content/70">
                     {{ $description }}
                 </p>
             @endif

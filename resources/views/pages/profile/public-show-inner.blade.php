@@ -61,7 +61,7 @@
                     </div>
                     <div class="space-y-1.5">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="badge badge-primary badge-outline">{{ $publicRoleLabel }}</span>
+                            <span class="badge badge-neutral badge-outline">{{ $publicRoleLabel }}</span>
                             @if ($profileUser->hasVerifiedContactChannels())
                                 <span class="badge badge-success badge-outline gap-1">
                                     <x-app-icon icon="heroicons:shield-check" class="h-3.5 w-3.5" />
@@ -78,7 +78,7 @@
                         <h1 class="ui-heading-display text-2xl font-semibold sm:text-3xl">
                             {{ $profileUser->publicName() }}
                         </h1>
-                        <p class="text-sm text-base-content/60">{{ '@'.$profileUser->nickname }}</p>
+                        <p class="text-sm text-base-content/70">{{ '@'.$profileUser->nickname }}</p>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/70">
                             <span class="tabular-nums"><strong class="font-semibold text-base-content">{{ $hackatonsCount + $participatedHackatons->count() }}</strong> хакатонов</span>
                             <span class="tabular-nums"><strong class="font-semibold text-base-content">{{ $teamsCount }}</strong> команд</span>
@@ -195,7 +195,7 @@
                                                         {{ $hackaton->status->label() }}
                                                     </span>
                                                 </div>
-                                                <p class="text-xs text-base-content/60">
+                                                <p class="text-xs text-base-content/50">
                                                     {{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y') }}
                                                     –
                                                     {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y') }}
@@ -220,7 +220,7 @@
                                                         {{ $hackaton->status->label() }}
                                                     </span>
                                                 </div>
-                                                <p class="text-xs text-base-content/60">
+                                                <p class="text-xs text-base-content/50">
                                                     {{ \Illuminate\Support\Carbon::parse($hackaton->start_at)->format('d.m.Y') }}
                                                     –
                                                     {{ \Illuminate\Support\Carbon::parse($hackaton->end_at)->format('d.m.Y') }}
@@ -328,7 +328,7 @@
                                 @foreach ($profileUser->certificates as $certificate)
                                     <div class="rounded-lg border border-base-300 px-3 py-2">
                                         <p class="text-sm font-medium">{{ $certificate->title }}</p>
-                                        <p class="text-xs text-base-content/60">{{ $certificate->hackaton->title }}</p>
+                                        <p class="text-xs text-base-content/70">{{ $certificate->hackaton->title }}</p>
                                     </div>
                                 @endforeach
                             </div>

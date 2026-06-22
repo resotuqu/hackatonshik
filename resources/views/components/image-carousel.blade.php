@@ -55,7 +55,7 @@
     }"
 >
     @if ($slideRows->isEmpty())
-        <div class="{{ $aspectClass }} flex items-center justify-center text-base-content/60">
+        <div class="{{ $aspectClass }} flex items-center justify-center text-base-content/70">
             {{ $emptyText }}
         </div>
     @else

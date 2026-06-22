@@ -1,4 +1,4 @@
-<div class="flex items-center justify-between gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-medium leading-snug text-base-content">
+<div class="flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-medium leading-snug text-base-content">
     <span class="text-[0.9375rem]">{{ __('ui.nav.language') }}</span>
     <div class="join">
         <button

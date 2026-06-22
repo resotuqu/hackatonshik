@@ -10,7 +10,7 @@
                 $occupiedRoles->contains(fn ($r) => (int) $r->user_id === (int) auth()->id()));
         $canHeroApply =
             auth()->check() && auth()->user()->canParticipate() && !$isTeamMember && $openRoles->isNotEmpty();
-        $sectionCard = 'card rounded-[var(--radius-card)] border border-base-300 bg-base-100';
+        $sectionCard = 'card border border-base-300 bg-base-100';
         $heroApplyBtn = 'btn btn-primary gap-2';
         $modalTriggerClass = 'btn btn-primary btn-lg inline-flex cursor-pointer items-center justify-center gap-2';
     @endphp
@@ -22,15 +22,13 @@
     @endif
 
     <div class="team-page mx-auto w-full max-w-7xl space-y-6" data-testid="team-page-root">
-        <div class="text-sm breadcrumbs">
-            <ul>
-                <li><a href="/">Главная</a></li>
-                <li><a href="/teams">Команды</a></li>
-                <li class="opacity-70">{{ $team->title }}</li>
-            </ul>
-        </div>
+        <x-breadcrumbs :items="[
+            ['label' => __('ui.nav.home'), 'href' => '/'],
+            ['label' => __('ui.nav.teams'), 'href' => '/teams'],
+            ['label' => $team->title],
+        ]" />
 
-        <div class="tabs tabs-boxed w-full overflow-x-auto rounded-2xl border border-base-300 bg-base-200/50 p-1 shadow-inner" role="tablist" aria-label="Разделы команды" data-tab-list="team">
+        <div class="flex gap-1 w-full overflow-x-auto rounded-panel border border-base-300 bg-base-200/50 p-1 shadow-inner" role="tablist" aria-label="Разделы команды" data-tab-list="team">
             <button type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="team-panel-overview" data-tab-trigger="team" data-tab-value="overview">
                 <x-app-icon icon="heroicons:squares-2x2" class="h-5 w-5 shrink-0 opacity-80" />
                 Обзор
@@ -53,7 +51,7 @@
 
         <section id="team-panel-overview" role="tabpanel" data-tab-panel="team" data-tab-value="overview">
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div class="relative overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100 lg:col-span-2">
+                <div class="relative overflow-hidden rounded-card border border-base-300 bg-base-100 lg:col-span-2">
                     <div class="relative border-b border-base-300 px-5 pb-5 pt-6 sm:px-7 sm:pt-8">
                         <h1 class="font-display text-pretty text-4xl font-bold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
                             {{ $team->title }}
@@ -100,7 +98,7 @@
                         </h2>
                         <div class="grid grid-cols-2 gap-3">
                             <div
-                                class="flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
+                                class="flex flex-col gap-2 rounded-panel border border-base-300 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
                                 <div class="flex items-center gap-2 text-base-content/70">
                                     <x-app-icon icon="heroicons:user-group" class="h-5 w-5 shrink-0 text-primary" />
                                     <span class="text-[0.65rem] font-bold uppercase tracking-wider">Ролей</span>
@@ -108,7 +106,7 @@
                                 <span class="font-display text-2xl font-bold tabular-nums text-base-content">{{ $team->roles->count() }}</span>
                             </div>
                             <div
-                                class="flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
+                                class="flex flex-col gap-2 rounded-panel border border-base-300 bg-base-200/35 p-4 transition duration-200 hover:border-primary/35 hover:bg-base-200/50">
                                 <div class="flex items-center gap-2 text-base-content/70">
                                     <x-app-icon icon="heroicons:megaphone" class="h-5 w-5 shrink-0 text-primary" />
                                     <span class="text-[0.65rem] font-bold uppercase tracking-wider">Открыто</span>
@@ -119,7 +117,7 @@
 
                         <div class="divider my-0 text-xs text-base-content/40"></div>
 
-                        <div class="flex gap-3 rounded-2xl border border-base-300 bg-base-200/25 px-4 py-3">
+                        <div class="flex gap-3 rounded-panel border border-base-300 bg-base-200/25 px-4 py-3">
                             <x-app-icon icon="heroicons:user-circle" class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                             <div class="min-w-0 text-sm">
                                 <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Капитан</span>
@@ -130,7 +128,7 @@
                         </div>
 
                         @if ($team->hackaton)
-                            <div class="flex gap-3 rounded-2xl border border-base-300 bg-base-200/25 px-4 py-3">
+                            <div class="flex gap-3 rounded-panel border border-base-300 bg-base-200/25 px-4 py-3">
                                 <x-app-icon icon="heroicons:map-pin" class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                                 <div class="min-w-0 text-sm">
                                     <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Хакатон</span>
@@ -257,7 +255,7 @@
                                     <div class="flex flex-wrap gap-2">
                                         @foreach ($role->skills as $skill)
                                             <span
-                                                class="badge badge-sm border-0 bg-primary/12 font-medium text-primary ring-1 ring-primary/30 transition duration-200 hover:ring-primary/55 hover:shadow-[0_0_14px_color-mix(in_oklch,var(--color-primary)_40%,transparent)]">
+                                                class="badge badge-sm border-0 bg-primary/12 font-medium text-primary ring-1 ring-primary/30 transition duration-200 hover:ring-primary/50 hover:shadow-[0_0_14px_color-mix(in_oklch,var(--color-primary)_40%,transparent)]">
                                                 {{ $skill->name }}
                                             </span>
                                         @endforeach
@@ -336,7 +334,7 @@
                                             @else
                                                 <p class="truncate font-display font-bold leading-snug text-base-content" title="{{ $displayName }}">{{ $displayName }}</p>
                                             @endif
-                                            <p class="mt-1 flex items-center gap-1.5 text-sm text-base-content/65">
+                                            <p class="mt-1 flex items-center gap-1.5 text-sm text-base-content/70">
                                                 <x-app-icon icon="heroicons:identification" class="h-4 w-4 shrink-0 opacity-70" />
                                                 {{ $role->title }}
                                             </p>
@@ -506,7 +504,7 @@
 
                             <div class="space-y-4 md:hidden">
                                 @foreach ($team->applications as $app)
-                                    <div class="rounded-2xl border border-base-300 bg-base-200/25 p-4 shadow-sm">
+                                    <div class="rounded-panel border border-base-300 bg-base-200/25 p-4">
                                         <div class="flex flex-wrap items-start justify-between gap-2">
                                             <p class="font-semibold leading-snug">{{ $app->user->fio ?? $app->user->nickname ?? $app->user->email }}</p>
                                             <x-application-status-badge :status="$app->status" class="shrink-0" />
@@ -517,7 +515,7 @@
                                         @if (filled($app->message))
                                             <p class="mt-2 line-clamp-4 text-sm text-base-content/70">«{{ $app->message }}»</p>
                                         @endif
-                                        <dl class="mt-3 grid gap-1 text-xs text-base-content/60">
+                                        <dl class="mt-3 grid gap-1 text-xs text-base-content/50">
                                             <div class="flex justify-between gap-2">
                                                 <dt>Отправлена</dt>
                                                 <dd class="font-medium text-base-content/80">{{ $app->created_at?->format('d.m.Y H:i') ?? '—' }}</dd>

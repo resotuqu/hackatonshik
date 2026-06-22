@@ -38,9 +38,9 @@ class LocaleSwitcher extends Component
 
         $this->current = $locale;
 
-        $this->redirect(request()->fullUrl(), navigate: true);
-
         cookie()->queue($cookie);
+
+        $this->redirect(request()->header('Referer', '/'), navigate: true);
     }
 
     public function render()

@@ -15,6 +15,7 @@ return [
         'certificates' => 'Сертификаты',
         'organizer_cabinet' => 'Организаторский кабинет',
         'admin_panel' => 'Админ-панель',
+        'moderator_panel' => 'Панель модератора',
         'judge_panel' => 'Панель судьи',
         'create_hackaton' => 'Создать новый хакатон',
         'assigned_hackatons' => 'Назначенные хакатоны',
@@ -31,6 +32,10 @@ return [
     ],
 
     'auth' => [
+        'oauth' => [
+            'or' => 'или',
+        ],
+
         'login' => [
             'page_title' => 'Авторизация',
             'brand_heading' => 'С возвращением',
@@ -94,6 +99,8 @@ return [
             'btn_submit' => 'Зарегистрироваться',
             'yandex' => 'Войти или зарегистрироваться через Яндекс',
             'vk' => 'Войти или зарегистрироваться через VK',
+            'pd_consent_label' => 'Я даю согласие на обработку моих персональных данных в соответствии с <a href="/privacy-policy" target="_blank" class="link link-primary">Политикой конфиденциальности</a> (ФЗ-152)',
+            'pd_consent_error' => 'Необходимо дать согласие на обработку персональных данных',
         ],
 
         'forgot_password' => [

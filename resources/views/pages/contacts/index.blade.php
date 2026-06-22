@@ -21,23 +21,23 @@
             </div>
         </article>
 
-        <x-mary-form wire:submit="send" class="card border border-base-300 bg-base-100 p-4 sm:p-6">
+        <x-maryform wire:submit="send" class="card border border-base-300 bg-base-100 p-4 sm:p-6">
             <x-mary-header title="Форма обратной связи" separator />
             <x-mary-input label="Ваше имя" wire:model="name" />
             <x-mary-input label="Email" wire:model="email" />
             <x-mary-input label="Тема" wire:model="subject" />
             <x-mary-input label="Telegram (опционально)" wire:model="telegram" placeholder="@username" />
-            <x-mary-textarea label="Сообщение" wire:model="message" rows="5" />
+            <x-marytextarea label="Сообщение" wire:model="message" rows="5" />
             <x-slot:actions>
                 <x-mary-button type="submit" label="Отправить сообщение" class="btn-neutral" />
             </x-slot:actions>
-        </x-mary-form>
+        </x-maryform>
     </section>
 
     @if (filled(env('YANDEX_MAPS_EMBED_URL')) || filled(env('GOOGLE_MAPS_EMBED_URL')))
-        <section class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-4 sm:p-6">
+        <section class="ui-surface-card p-4 sm:p-6">
             <h2 class="font-display text-2xl font-bold">Мы на карте</h2>
-            <div class="mt-4 overflow-hidden rounded-2xl border border-base-300">
+            <div class="mt-4 overflow-hidden rounded-card border border-base-300">
                 <iframe
                     src="{{ env('YANDEX_MAPS_EMBED_URL', env('GOOGLE_MAPS_EMBED_URL')) }}"
                     title="Карта офиса Хакатонщика"

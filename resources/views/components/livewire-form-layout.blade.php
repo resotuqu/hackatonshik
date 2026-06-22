@@ -4,7 +4,7 @@
 ])
 
 <div class="mx-auto w-full max-w-3xl">
-    <form wire:submit="save" class="card border border-base-200 bg-base-100 shadow-sm">
+    <form wire:submit="save" class="card border border-base-300 bg-base-100">
         <div class="card-body gap-5 p-4 sm:p-6">
             @if ($title !== '')
                 <h3 class="text-xl font-semibold sm:text-2xl">{{ $title }}</h3>

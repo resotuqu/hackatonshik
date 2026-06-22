@@ -12,6 +12,8 @@
             ['label' => 'Организатор'],
         ]" />
 
+        <x-organizer-nav-tabs active="dashboard" />
+
         <x-mary-modal wire:model="deleteHackatonModal" title="Подтверждение удаления" class="backdrop-blur">
             Вы действительно хотите удалить хакатон? Это действие нельзя отменить.
 

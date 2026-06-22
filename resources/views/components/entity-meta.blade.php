@@ -9,7 +9,7 @@
     use App\Models\User;
 @endphp
 
-<div {{ $attributes->merge(['class' => 'space-y-2 text-sm text-base-content/60']) }}>
+<div {{ $attributes->merge(['class' => 'space-y-2 text-sm text-base-content/70']) }}>
     @if ($updatedAt)
         <p class="flex flex-wrap items-center gap-1.5">
             <x-app-icon icon="heroicons:arrow-path" class="h-4 w-4 shrink-0 opacity-70" />

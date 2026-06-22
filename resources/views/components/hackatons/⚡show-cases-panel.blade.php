@@ -48,7 +48,7 @@ new #[Lazy] class extends Component
 ?>
 
 <div class="space-y-4">
-    <div class="card bg-base-100 border border-base-200 shadow-sm">
+    <div class="card border border-base-300 bg-base-100">
         <div class="card-body space-y-4">
             <h2 class="card-title text-xl">Кейсы</h2>
 
@@ -150,7 +150,7 @@ new #[Lazy] class extends Component
                                         </div>
                                         <div class="collapse-content px-0">
                                             @if($isOrganizer)
-                                                <p class="px-4 pb-2 text-xs text-base-content/60">Меняйте порядок полей в форме участника кнопками «Вверх» / «Вниз».</p>
+                                                <p class="px-4 pb-2 text-xs text-base-content/70">Меняйте порядок полей в форме участника кнопками «Вверх» / «Вниз».</p>
                                             @endif
                                             <table class="table table-sm">
                                                 <thead>
@@ -251,7 +251,7 @@ new #[Lazy] class extends Component
                                                 @endphp
                                                 <form method="POST" enctype="multipart/form-data"
                                                     action="{{ route('hackatons.cases.submissions.store', [$hackaton, $case]) }}"
-                                                    class="space-y-3 rounded-xl border border-base-300 p-4 bg-base-100 shadow-sm">
+                                                    class="space-y-3 rounded-xl border border-base-300 bg-base-100 p-4">
                                                     @csrf
                                                     <div class="flex items-center justify-between border-b pb-2">
                                                         <h4 class="font-bold text-lg">Личное решение</h4>
@@ -372,7 +372,7 @@ new #[Lazy] class extends Component
                                                 </div>
                                             </div>
                                         @else
-                                            <div class="alert alert-info shadow-sm">
+                                            <div class="alert alert-info">
                                                 <x-app-icon icon="heroicons:information-circle" class="h-5 w-5" />
                                                 <div class="flex flex-col">
                                                     <span class="font-bold">Вы не выбрали этот кейс</span>

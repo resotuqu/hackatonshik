@@ -54,7 +54,7 @@
                 @endforeach
             @endif
         @else
-            <p class="px-2 py-3 text-center text-sm text-base-content/60">Ничего не найдено.</p>
+            <p class="px-2 py-3 text-center text-sm text-base-content/70">Ничего не найдено.</p>
         @endif
     </div>
 </div>

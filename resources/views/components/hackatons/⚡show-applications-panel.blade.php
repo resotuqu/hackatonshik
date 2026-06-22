@@ -41,7 +41,7 @@ new #[Lazy] class extends Component
 ?>
 
 @if($isOrganizer)
-        <div class="card bg-base-100 border border-base-200 shadow-sm" id="organizer-team-applications">
+        <div class="card border border-base-300 bg-base-100" id="organizer-team-applications">
             <div class="card-body">
                 <h2 class="card-title text-xl">Заявки команд</h2>
                 <form method="GET" class="my-3 flex items-center gap-2">
@@ -55,7 +55,7 @@ new #[Lazy] class extends Component
                 </form>
 
                 @if($applications->isEmpty())
-                    <p class="text-base-content/60">Пока нет заявок. Когда команды подадут заявки, они появятся в этом списке.</p>
+                    <p class="text-base-content/70">Пока нет заявок. Когда команды подадут заявки, они появятся в этом списке.</p>
                 @else
                     <div class="mb-3 flex flex-wrap items-center gap-2" role="group" aria-label="Групповая модерация заявок">
                         <select form="bulk-status-update" name="status" class="select select-bordered select-sm">
@@ -125,7 +125,7 @@ new #[Lazy] class extends Component
             </div>
         </div>
 @else
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card border border-base-300 bg-base-100">
             <div class="card-body">
                 <h2 class="card-title text-xl">Участники хакатона</h2>
                 <p class="text-base-content/70">Статистика участников доступна в разделе «Описание». Для заявок вашей команды используйте карточку «Информация о хакатоне».</p>

@@ -6,7 +6,7 @@
     <section class="ui-page-hero">
         <div class="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div class="min-w-0 space-y-3">
-                <p class="text-sm text-base-content/60">Панель судьи</p>
+                <p class="text-sm text-base-content/70">Панель судьи</p>
                 <h1 class="ui-heading-display text-3xl font-bold sm:text-4xl lg:text-5xl">
                     Ваша экспертиза
                 </h1>
@@ -35,7 +35,7 @@
                 <div class="ui-surface-card h-full p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-base-content/60">Всего хакатонов</p>
+                            <p class="text-sm font-medium text-base-content/50">Всего хакатонов</p>
                             <p class="ui-heading-display text-4xl font-semibold tabular-nums">{{ $judgeHackatonsCount }}</p>
                         </div>
                         <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -64,7 +64,7 @@
                                         {{ $row['title'] }}
                                     </a>
                                     @if ($row['start_at'])
-                                        <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+                                        <div class="flex items-center gap-1.5 text-xs text-base-content/50">
                                             <x-app-icon icon="heroicons:calendar" class="h-3.5 w-3.5" />
                                             {{ $row['start_at'] }}
                                         </div>

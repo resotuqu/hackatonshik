@@ -22,13 +22,11 @@
 @endphp
 
 <div class="mx-auto w-full max-w-7xl space-y-6">
-    <div class="text-sm breadcrumbs">
-        <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="/hackatons">Хакатоны</a></li>
-            <li class="opacity-70">{{ $hackaton->title }}</li>
-        </ul>
-    </div>
+    <x-breadcrumbs :items="[
+        ['label' => __('ui.nav.home'), 'href' => '/'],
+        ['label' => __('ui.nav.hackatons'), 'href' => '/hackatons'],
+        ['label' => $hackaton->title],
+    ]" />
 
     @if($isOrganizer && $lifecyclePresentation)
         <x-hackatons.organizer-lifecycle-bar :presentation="$lifecyclePresentation" />
@@ -52,7 +50,7 @@
                 class="hidden w-full shrink-0 lg:sticky lg:top-20 lg:block lg:w-52"
                 aria-label="Разделы хакатона"
             >
-                <div class="rounded-2xl border border-base-300 bg-base-200/40 p-2">
+                <div class="rounded-panel border border-base-300 bg-base-200/40 p-2">
                     @foreach($hackatonNavTabs as $tab)
                         <button
                             type="button"
@@ -77,7 +75,7 @@
         <div class="min-w-0 flex-1 space-y-6">
             <div
                 @class([
-                    'tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2',
+                    'flex gap-1 w-full overflow-x-auto scroll-smooth rounded-panel border border-base-300 bg-base-200/50 p-1 shadow-inner focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2',
                     'lg:hidden' => $sidebarOrganizerNav,
                 ])
                 role="tablist"

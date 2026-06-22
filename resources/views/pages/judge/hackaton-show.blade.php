@@ -4,6 +4,7 @@
     <div class="mx-auto w-full max-w-6xl space-y-6">
         <div class="text-sm breadcrumbs">
             <ul>
+                <li><a href="{{ route('home') }}">Главная</a></li>
                 <li><a href="{{ route('judge.dashboard') }}">Судья</a></li>
                 <li class="opacity-70">{{ $hackaton->title }}</li>
             </ul>
@@ -30,7 +31,7 @@
         <div class="overflow-x-auto rounded-xl border border-base-300 bg-base-100">
             <table class="table table-zebra">
                 <thead>
-                    <tr class="text-xs uppercase tracking-wide text-base-content/60">
+                    <tr class="text-xs uppercase tracking-wide text-base-content/50">
                         <th class="bg-base-200/80">Кейс</th>
                         <th class="bg-base-200/80">Всего сдач</th>
                         <th class="bg-base-200/80">Оценено</th>
