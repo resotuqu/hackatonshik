@@ -54,7 +54,7 @@
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h2 class="card-title text-base">{{ $pack->name }}</h2>
-                        <p class="text-sm text-base-content/60">slug: <code>{{ $pack->slug }}</code></p>
+                        <p class="text-sm text-base-content/70">slug: <code>{{ $pack->slug }}</code></p>
                     </div>
                     <x-mary-button label="Удалить пак" class="btn-error btn-outline btn-sm" type="button" wire:click="deletePack({{ $pack->id }})" wire:confirm="Удалить пак и все аватарки в нём?" />
                 </div>

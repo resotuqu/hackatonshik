@@ -57,7 +57,7 @@ class Users extends Component
         $this->authorizeAdminAccess();
 
         $this->validate([
-            'editRole' => ['required', 'in:admin,partner,judge,user'],
+            'editRole' => ['required', 'in:admin,moderator,partner,judge,user'],
         ]);
 
         $user = User::query()->findOrFail($this->editingUserId);

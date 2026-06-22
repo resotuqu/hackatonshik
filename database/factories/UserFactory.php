@@ -96,6 +96,13 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function moderator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::MODERATOR->value,
+        ]);
+    }
+
     public function judge(): static
     {
         return $this->state(fn (array $attributes) => [

@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Enums\UserRole;
 use App\Support\InitialsGenerator;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,7 +30,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property Carbon|null $email_verified_at
  * @property string|null $avatar_path
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasName, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, LogsActivity, Notifiable, TwoFactorAuthenticatable;
@@ -144,6 +147,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'show_skills_on_profile',
         'avatar_path',
         'locale',
+        'pd_consent_accepted_at',
+        'oauth_provider',
+        'oauth_provider_id',
     ];
 
     /**
@@ -177,6 +183,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'phone_verified_at' => 'datetime',
             'suspended_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'pd_consent_accepted_at' => 'datetime',
         ];
     }
 
@@ -218,9 +225,29 @@ class User extends Authenticatable implements MustVerifyEmail
         return $firstName.($initials ? ' '.$initials : '');
     }
 
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return in_array($this->role, [UserRole::ADMIN, UserRole::MODERATOR], true);
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->fio;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;
+    }
+
+    public function isModerator(): bool
+    {
+        return $this->role === UserRole::MODERATOR;
+    }
+
+    public function isAdminOrModerator(): bool
+    {
+        return $this->isAdmin() || $this->isModerator();
     }
 
     public function isOrganizer(): bool
