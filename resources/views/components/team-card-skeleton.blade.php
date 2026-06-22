@@ -1,5 +1,5 @@
-<div class="flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-base-300 bg-base-100" aria-hidden="true">
-    <div class="skeleton h-44 w-full shrink-0 rounded-none rounded-t-[var(--radius-card)]"></div>
+<div class="flex h-full flex-col overflow-hidden rounded-card border border-base-300 bg-base-100" aria-hidden="true">
+    <div class="skeleton h-44 w-full shrink-0 rounded-none rounded-t-card"></div>
     <div class="flex flex-1 flex-col gap-4 p-4 sm:p-5">
         <div class="skeleton h-8 w-3/4 rounded-lg"></div>
         <div class="skeleton h-4 w-full rounded-lg"></div>

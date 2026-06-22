@@ -6,10 +6,10 @@
         </p>
     </div>
     <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
+        <div class="ui-surface-card p-5">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/60">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/70">
                         <x-app-icon icon="heroicons:identification" class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold uppercase tracking-wider text-base-content/50">Шаг 1</span>
@@ -22,10 +22,10 @@
                 </div>
             </div>
         </div>
-        <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
+        <div class="ui-surface-card p-5">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/60">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/70">
                         <x-app-icon icon="heroicons:magnifying-glass" class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold uppercase tracking-wider text-base-content/50">Шаг 2</span>
@@ -38,10 +38,10 @@
                 </div>
             </div>
         </div>
-        <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
+        <div class="ui-surface-card p-5">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/60">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/70">
                         <x-app-icon icon="heroicons:bolt" class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold uppercase tracking-wider text-base-content/50">Шаг 3</span>
@@ -54,10 +54,10 @@
                 </div>
             </div>
         </div>
-        <div class="rounded-[var(--radius-card)] border border-base-300 bg-base-100 p-5">
+        <div class="ui-surface-card p-5">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/60">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-base-200 text-base-content/70">
                         <x-app-icon icon="heroicons:trophy" class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold uppercase tracking-wider text-base-content/50">Шаг 4</span>

@@ -21,8 +21,8 @@
     $shellClasses = $bare
         ? 'text-center'
         : ($embedded
-            ? 'rounded-lg border border-base-300 bg-base-200 text-center'
-            : 'rounded-[var(--radius-card)] border border-base-300 bg-base-200 text-center');
+            ? 'rounded-panel border border-base-300 bg-base-200 text-center'
+            : 'rounded-card border border-base-300 bg-base-200 text-center');
 @endphp
 
 <div

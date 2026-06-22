@@ -18,7 +18,7 @@
     </nav>
 
     <div
-        class="tabs tabs-boxed w-full overflow-x-auto scroll-smooth rounded-2xl border border-base-300 bg-base-200/50 p-1 shadow-inner"
+        class="flex gap-1 w-full overflow-x-auto scroll-smooth rounded-panel border border-base-300 bg-base-200/50 p-1 shadow-inner"
         role="tablist"
         aria-hidden="true"
     >
@@ -43,7 +43,7 @@
             <div class="skeleton h-6 w-2/3 rounded-lg"></div>
             <div class="skeleton h-10 w-full rounded-xl"></div>
             <div class="skeleton h-10 w-full rounded-xl"></div>
-            <div class="skeleton h-24 w-full rounded-2xl"></div>
+            <div class="skeleton h-24 w-full rounded-panel"></div>
         </aside>
     </div>
 </div>

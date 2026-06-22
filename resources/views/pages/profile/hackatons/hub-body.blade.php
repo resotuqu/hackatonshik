@@ -2,7 +2,7 @@
     <section class="ui-surface-soft">
         <div class="card-body space-y-4 py-10 sm:py-12">
             <div class="mx-auto max-w-lg text-center">
-                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/15 ring-2 ring-secondary/25">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-panel bg-secondary/15 ring-2 ring-secondary/25">
                     <x-app-icon icon="heroicons:rocket-launch" class="h-8 w-8 text-secondary" />
                 </div>
                 <x-empty-state
@@ -19,7 +19,7 @@
     </section>
 @else
     @if(($showGlobalPendingStrip ?? false) && (($globalPending['applications'] ?? 0) > 0 || ($globalPending['judgeInvitations'] ?? 0) > 0))
-        <section class="rounded-2xl border border-warning/30 bg-warning/10 p-4 sm:p-5" aria-label="Глобальные задачи">
+        <section class="rounded-panel border border-warning/30 bg-warning/10 p-4 sm:p-5" aria-label="Глобальные задачи">
             <h2 class="ui-heading-display text-sm font-medium text-warning">Требуют внимания (все хакатоны)</h2>
             <div class="mt-3 flex flex-wrap gap-4 text-sm">
                 @if(($globalPending['applications'] ?? 0) > 0)

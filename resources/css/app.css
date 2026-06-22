@@ -55,9 +55,10 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Space Grotesk', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-    --radius-card: 1rem;
-    --radius-panel: 0.75rem;
-    --radius-control: 0.5rem;
+    /* Border-radius scale — use semantic classes or rounded-{card,panel,control} utilities */
+    --radius-card: 1rem;      /* cards, heroes, ui-surface-card, ui-surface-soft, daisyUI card/modal */
+    --radius-panel: 0.75rem;  /* nested panels, ui-stat-tile, inner sections inside cards */
+    --radius-control: 0.5rem; /* tabs, chips, small callouts, form-adjacent blocks */
     --shadow-card: 0 1px 2px oklch(8% 0.01 40 / 0.12);
     --shadow-card-hover: 0 2px 6px oklch(8% 0.015 40 / 0.16);
     --shadow-surface-soft: 0 1px 2px oklch(8% 0.01 40 / 0.08);
@@ -117,7 +118,7 @@
     --color-error-content: oklch(98% 0.01 25);
     --radius-selector: 0.5rem;
     --radius-field: 0.5rem;
-    --radius-box: 0.75rem;
+    --radius-box: 1rem;
     --size-selector: 0.25rem;
     --size-field: 0.25rem;
     --border: 1px;
@@ -152,7 +153,7 @@
     --color-error-content: oklch(98% 0.01 25);
     --radius-selector: 0.5rem;
     --radius-field: 0.5rem;
-    --radius-box: 0.75rem;
+    --radius-box: 1rem;
     --size-selector: 0.25rem;
     --size-field: 0.25rem;
     --border: 1px;
@@ -229,6 +230,11 @@
  */
 
 /**
+ * Border-radius scale (do not override with raw rounded-* on semantic classes):
+ *   card (1rem)    — ui-surface-card, ui-surface-soft, top-level sections
+ *   panel (0.75rem)— ui-stat-tile, nested blocks inside cards
+ *   control (0.5rem)— tabs, chips, compact callouts
+ *
  * Design system — semantic surfaces & CTAs (consumes @theme CSS variables)
  */
 .ui-surface-card {
