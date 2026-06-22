@@ -64,6 +64,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Force HTTPS
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, insecure requests are redirected to HTTPS and generated
+    | URLs use the https scheme. Defaults to true when APP_URL uses https.
+    |
+    */
+
+    'force_https' => filter_var(
+        env('FORCE_HTTPS', str_starts_with((string) env('APP_URL', ''), 'https://')),
+        FILTER_VALIDATE_BOOL,
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureJudge;
 use App\Http\Middleware\EnsureOrganizer;
 use App\Http\Middleware\EnsureParticipant;
 use App\Http\Middleware\EnsureUserNotSuspended;
+use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->encryptCookies(except: [
+            'theme',
+        ]);
+
         $middleware->validateCsrfTokens();
 
         // Signed mail links must validate after HTTPS redirects / proxies; relative signatures ignore scheme & host.
@@ -46,6 +51,10 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             EnsureUserNotSuspended::class,
             EnsureContactChannelsVerified::class,
+        ]);
+
+        $middleware->web(prepend: [
+            ForceHttps::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
