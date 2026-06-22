@@ -6,9 +6,9 @@
             wire:model.live.debounce.350ms="q"
             x-on:focus="open = true"
             x-on:input="open = true"
-            placeholder="Поиск по платформе…"
+            placeholder="{{ __('ui.search.placeholder') }}"
             class="grow"
-            aria-label="Глобальный поиск"
+            aria-label="{{ __('ui.search.aria_label') }}"
         />
         <span wire:loading wire:target="q" class="loading loading-spinner loading-xs text-base-content/50"></span>
     </label>
@@ -21,7 +21,7 @@
     >
         @if ($this->hasResults)
             @if ($this->results['hackatons']->isNotEmpty())
-                <p class="px-2 pb-1 pt-2 text-xs font-medium text-base-content/50">Хакатоны</p>
+                <p class="px-2 pb-1 pt-2 text-xs font-medium text-base-content/50">{{ __('ui.search.section_hackatons') }}</p>
                 @foreach ($this->results['hackatons'] as $hackaton)
                     <a href="{{ route('hackatons.show', $hackaton) }}" wire:navigate
                         class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-base-200">
@@ -32,7 +32,7 @@
             @endif
 
             @if ($this->results['teams']->isNotEmpty())
-                <p class="px-2 pb-1 pt-2 text-xs font-medium text-base-content/50">Команды</p>
+                <p class="px-2 pb-1 pt-2 text-xs font-medium text-base-content/50">{{ __('ui.search.section_teams') }}</p>
                 @foreach ($this->results['teams'] as $team)
                     <a href="{{ route('teams.show', $team) }}" wire:navigate
                         class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-base-200">
@@ -43,18 +43,18 @@
             @endif
 
             @if ($this->results['users']->isNotEmpty())
-                <p class="px-2 pb-1 pt-2 text-xs font-medium text-base-content/50">Участники</p>
+                <p class="px-2 pb-1 pt-2 text-xs font-medium text-base-content/50">{{ __('ui.search.section_users') }}</p>
                 @foreach ($this->results['users'] as $user)
                     <a href="{{ route('profile.public.show', $user->nickname) }}" wire:navigate
-                        class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-base-200">
+                        class="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-base-200">
                         <x-app-icon icon="heroicons:user-circle" class="h-4 w-4 shrink-0 text-base-content/50" />
-                        <span class="truncate">{{ $user->fio ?: '@'.$user->nickname }}</span>
-                        <span class="ml-auto truncate text-xs text-base-content/50">{{ '@'.$user->nickname }}</span>
+                        <span class="min-w-0 truncate">{{ $user->fio ?: '@'.$user->nickname }}</span>
+                        <span class="ml-auto shrink-0 truncate text-xs text-base-content/50">{{ '@'.$user->nickname }}</span>
                     </a>
                 @endforeach
             @endif
         @else
-            <p class="px-2 py-3 text-center text-sm text-base-content/70">Ничего не найдено.</p>
+            <p class="px-2 py-3 text-center text-sm text-base-content/70">{{ __('ui.search.empty') }}</p>
         @endif
     </div>
 </div>

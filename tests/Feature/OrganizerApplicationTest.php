@@ -21,6 +21,20 @@ test('approve organizer application assigns partner role', function () {
         ->and($user->fresh()->isOrganizer())->toBeTrue();
 });
 
+test('approve organizer application updates status and role atomically', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create();
+    $application = OrganizerApplication::factory()->for($user)->pending()->create();
+
+    $application->approve($admin);
+
+    $application->refresh();
+    $user->refresh();
+
+    expect($application->status)->toBe(OrganizerApplicationStatus::Approved)
+        ->and($user->role)->toBe(UserRole::PARTNER);
+});
+
 test('reject organizer application keeps user role', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create();

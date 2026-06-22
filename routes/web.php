@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\HackatonAnnouncementController;
 use App\Http\Controllers\HackatonApplicationController;
 use App\Http\Controllers\HackatonCaseController;
@@ -10,18 +9,13 @@ use App\Http\Controllers\HackatonCaseSubmissionController;
 use App\Http\Controllers\HackatonCertificateController;
 use App\Http\Controllers\HackatonExportController;
 use App\Http\Controllers\HackatonWatchController;
-use App\Http\Controllers\JudgeExportController;
 use App\Http\Controllers\JudgeManagementController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\OrganizerAnalyticsExportController;
 use App\Http\Controllers\PhoneVerificationController;
 use App\Http\Controllers\Profile\ExportAccountDataController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
-use App\Livewire\Organizer\Dashboard as OrganizerDashboard;
 use App\Livewire\Pages\About\Index as AboutIndex;
-use App\Livewire\Pages\Auth\Login as AuthLogin;
-use App\Livewire\Pages\Auth\Register as AuthRegister;
 use App\Livewire\Pages\Contacts\Index as ContactsIndex;
 use App\Livewire\Pages\CookiePolicy\Index as CookiePolicyIndex;
 use App\Livewire\Pages\Hackatons\Create as HackatonsCreate;
@@ -30,20 +24,12 @@ use App\Livewire\Pages\Hackatons\Index as HackatonsIndex;
 use App\Livewire\Pages\Hackatons\Results as HackatonsResults;
 use App\Livewire\Pages\Hackatons\Show as HackatonsShow;
 use App\Livewire\Pages\Home\Index as HomeIndex;
-use App\Livewire\Pages\Judge\Dashboard as JudgeDashboard;
-use App\Livewire\Pages\Judge\EvaluateSubmission as JudgeEvaluateSubmission;
-use App\Livewire\Pages\Judge\HackatonShow as JudgeHackatonShow;
-use App\Livewire\Pages\Judge\SubmissionList as JudgeSubmissionList;
 use App\Livewire\Pages\News\Index as NewsIndex;
 use App\Livewire\Pages\News\Show as NewsShow;
 use App\Livewire\Pages\Participant\Hackatons\Index as ParticipantHackatonsIndex;
 use App\Livewire\Pages\PrivacyPolicy\Index as PrivacyPolicyIndex;
 use App\Livewire\Pages\Profile\Certificates\Index as ProfileCertificatesIndex;
-use App\Livewire\Pages\Profile\Hackatons\Applications as ProfileHackatonsApplications;
-use App\Livewire\Pages\Profile\Hackatons\Finished as ProfileHackatonsFinished;
 use App\Livewire\Pages\Profile\Hackatons\Hub as ProfileHackatonsHub;
-use App\Livewire\Pages\Profile\Hackatons\Participants as ProfileHackatonsParticipants;
-use App\Livewire\Pages\Profile\Hackatons\Scoring as ProfileHackatonsScoring;
 use App\Livewire\Pages\Profile\Index as ProfileIndex;
 use App\Livewire\Pages\Profile\PublicProfileShow;
 use App\Livewire\Pages\Profile\Teams\Index as ProfileTeamsIndex;
@@ -112,8 +98,6 @@ Route::get('/contacts', ContactsIndex::class);
 Route::get('/privacy-policy', PrivacyPolicyIndex::class);
 Route::get('/cookie-policy', CookiePolicyIndex::class);
 
-Route::get('/login', AuthLogin::class)->name('login');
-Route::get('/register', AuthRegister::class)->name('register');
 Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified'])->name('profile');
 Route::get('/profile/export', ExportAccountDataController::class)->middleware(['auth', 'verified'])->name('profile.export');
 // Filament admin panel handles /admin/* (see AdminPanelProvider)
@@ -152,23 +136,6 @@ Route::get('/profile/hackatons', function () {
     return redirect()->route('participant.hackatons');
 })->middleware($authMiddleware)->name('profile.hackatons');
 
-Route::redirect('/profile/organizer', '/organizer')->middleware($organizerMiddleware)->name('profile.organizer');
-Route::get('/organizer', OrganizerDashboard::class)->middleware($organizerMiddleware)->name('organizer.dashboard');
-Route::get('/organizer/analytics/export', OrganizerAnalyticsExportController::class)
-    ->middleware(['throttle:exports', ...$organizerMiddleware])
-    ->name('organizer.analytics.export');
-Route::get('/organizer/applications', ProfileHackatonsApplications::class)->middleware($organizerMiddleware)->name('organizer.applications');
-Route::get('/organizer/scoring', ProfileHackatonsScoring::class)->middleware($organizerMiddleware)->name('organizer.scoring');
-Route::get('/organizer/finished', ProfileHackatonsFinished::class)->middleware($organizerMiddleware)->name('organizer.finished');
-Route::get('/organizer/hackatons/{hackaton}/participants', ProfileHackatonsParticipants::class)->middleware($organizerMiddleware)->name('organizer.participants');
-
-Route::redirect('/profile/hackatons/applications', '/organizer/applications')->middleware($organizerMiddleware)->name('profile.hackatons.applications');
-Route::redirect('/profile/hackatons/scoring', '/organizer/scoring')->middleware($organizerMiddleware)->name('profile.hackatons.scoring');
-Route::redirect('/profile/hackatons/finished', '/organizer/finished')->middleware($organizerMiddleware)->name('profile.hackatons.finished');
-Route::get('/profile/hackatons/{hackaton}/participants', function (Hackaton $hackaton) {
-    return redirect()->route('organizer.participants', $hackaton);
-})->middleware($organizerMiddleware)->name('profile.hackatons.participants');
-
 Route::get('/participant/hackatons', ParticipantHackatonsIndex::class)->middleware($participantMiddleware)->name('participant.hackatons');
 Route::get('/participant/hackatons/{hackaton}/hub', ProfileHackatonsHub::class)
     ->middleware($participantMiddleware)
@@ -191,22 +158,6 @@ Route::get('/hackatons/{hackaton}/results', HackatonsResults::class)->name('hack
 Route::get('/hackatons/{hackaton}/edit', HackatonsEdit::class)
     ->middleware($organizerMiddleware)
     ->name('hackatons.edit');
-
-Route::get('/auth/yandex/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'yandex')->name('auth.yandex.redirect');
-Route::get('/auth/yandex/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'yandex');
-Route::get('/auth/yandex/token-page', [SocialAuthController::class, 'yandexTokenPage'])->name('auth.yandex.token-page');
-Route::post('/auth/yandex/token', [SocialAuthController::class, 'yandexToken'])->name('auth.yandex.token');
-Route::get('/auth/vk/redirect', [SocialAuthController::class, 'vkRedirect'])->name('auth.vk.redirect');
-Route::get('/auth/vk/callback', [SocialAuthController::class, 'vkCallback'])->name('auth.vk.callback');
-Route::post('/auth/vk/token', [SocialAuthController::class, 'vkToken'])->name('auth.vk.token');
-
-Route::middleware(['auth', 'verified', 'judge'])->group(function () {
-    Route::get('/judge', JudgeDashboard::class)->name('judge.dashboard');
-    Route::get('/judge/hackatons/{hackaton}', JudgeHackatonShow::class)->name('judge.hackatons.show');
-    Route::get('/judge/hackatons/{hackaton}/scores/export', [JudgeExportController::class, 'scores'])->name('judge.hackatons.scores.export');
-    Route::get('/judge/hackatons/{hackaton}/cases/{case}', JudgeSubmissionList::class)->name('judge.cases.submissions');
-    Route::get('/judge/submissions/{submission}', JudgeEvaluateSubmission::class)->name('judge.submissions.evaluate');
-});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/phone/verify', [PhoneVerificationController::class, 'notice'])->name('phone.verify.notice');
@@ -298,3 +249,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/judge-invitations/{token}', [JudgeManagementController::class, 'showAccept'])->name('judges.invitations.accept');
     Route::post('/judge-invitations/{token}/accept', [JudgeManagementController::class, 'accept'])->name('judges.invitations.accept.store');
 });
+
+require __DIR__.'/auth.php';
+require __DIR__.'/organizer.php';
+require __DIR__.'/judge.php';

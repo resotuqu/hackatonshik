@@ -5,5 +5,5 @@ parameters:
     paths:
         - app
         - routes
-    level: 5
+    level: 6
     tmpDir: storage/framework/phpstan

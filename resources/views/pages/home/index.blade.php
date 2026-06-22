@@ -16,13 +16,13 @@
                 </p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
                     <a
-                        href="/contacts"
+                        href="{{ route('register', ['type' => 'partner']) }}"
                         class="ui-cta-secondary btn-lg order-1 text-base sm:text-lg sm:order-2"
                     >
-                        Стать организатором
+                        {{ __('ui.home.become_organizer') }}
                     </a>
-                    <a href="/teams" class="ui-cta-outline-primary btn-lg order-2 sm:order-1">
-                        Найти команду
+                    <a href="{{ route('teams.index') }}" class="ui-cta-outline-primary btn-lg order-2 sm:order-1">
+                        {{ __('ui.home.find_team') }}
                     </a>
                 </div>
             </div>
@@ -158,13 +158,7 @@
 @auth
 @php
     $dashboardUser = auth()->user();
-    $dashboardHeading = match (true) {
-        $dashboardUser->isParticipant() => 'Участник',
-        $dashboardUser->isOrganizer() => 'Организатор',
-        $dashboardUser->isJudge() => 'Судья',
-        $dashboardUser->isAdmin() => 'Администратор',
-        default => 'Краткая сводка',
-    };
+    $dashboardHeading = $this->availableDashboardRoles($dashboardUser)[$activeDashboardRole] ?? __('ui.dashboard.summary');
 @endphp
 <section
     class="mx-auto w-full max-w-7xl space-y-10"

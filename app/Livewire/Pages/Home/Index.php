@@ -77,6 +77,8 @@ class Index extends Component
     /** @var list<array{team: Team, match_score: int, matched_skills: list<string>}> */
     public array $recommendedTeams = [];
 
+    public string $activeDashboardRole = '';
+
     public function mount(): void
     {
         $homeCatalogCache = Cache::supportsTags()
@@ -168,6 +170,59 @@ class Index extends Component
                 ->handle($user, 3)
                 ->all();
         }
+
+        $availableRoles = $this->availableDashboardRoles($user);
+        $sessionRole = session('home.dashboard_role');
+
+        $this->activeDashboardRole = is_string($sessionRole) && array_key_exists($sessionRole, $availableRoles)
+            ? $sessionRole
+            : array_key_first($availableRoles);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function availableDashboardRoles(User $user): array
+    {
+        $roles = [];
+
+        if ($user->isParticipant()) {
+            $roles['participant'] = __('ui.dashboard.roles.participant');
+        }
+
+        if ($user->isOrganizer()) {
+            $roles['organizer'] = __('ui.dashboard.roles.organizer');
+        }
+
+        if ($user->isJudge()) {
+            $roles['judge'] = __('ui.dashboard.roles.judge');
+        }
+
+        if ($user->isModerator()) {
+            $roles['moderator'] = __('ui.dashboard.roles.moderator');
+        }
+
+        if ($user->isAdmin()) {
+            $roles['admin'] = __('ui.dashboard.roles.admin');
+        }
+
+        return $roles;
+    }
+
+    public function switchDashboardRole(string $role): void
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return;
+        }
+
+        $availableRoles = $this->availableDashboardRoles($user);
+
+        abort_unless(array_key_exists($role, $availableRoles), 403);
+
+        $this->activeDashboardRole = $role;
+        session(['home.dashboard_role' => $role]);
     }
 
     public function placeholder()

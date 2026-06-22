@@ -6,14 +6,12 @@
             </div>
         </div>
 
-        <div class="text-sm breadcrumbs">
-            <ul>
-                <li><a href="/">Главная</a></li>
-                <li><a href="/profile">Профиль</a></li>
-                <li><a href="{{ route('hackatons.show', $hackaton) }}">{{ $hackaton->title }}</a></li>
-                <li class="opacity-70">Мой хакатон</li>
-            </ul>
-        </div>
+        <x-breadcrumbs :items="[
+            ['label' => __('ui.nav.home'), 'href' => route('home')],
+            ['label' => __('ui.nav.profile'), 'href' => route('profile')],
+            ['label' => $hackaton->title, 'href' => route('hackatons.show', $hackaton)],
+            ['label' => __('ui.hub.breadcrumb')],
+        ]" class="mb-2" />
 
         <x-recommended-teams :recommendations="$recommendedTeams ?? []" />
 
@@ -76,7 +74,7 @@
         </section>
 
         @if(!empty($checklist))
-            <section class="ui-surface-card">
+            <section class="ui-surface-card relative z-0">
                 <div class="card-body space-y-4">
                     <h2 class="ui-heading-display text-xl font-bold">Что сделать сейчас</h2>
 
@@ -271,7 +269,7 @@
                 </div>
             </article>
 
-            <article>
+            <article class="relative z-10">
                 @if($teams->isNotEmpty())
                     <livewire:team-chat :team="$teams->first()" />
                 @endif

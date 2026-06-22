@@ -1,5 +1,5 @@
 <div
-    class="ui-surface-card flex flex-col h-[560px] overflow-hidden"
+    class="ui-surface-card flex flex-col h-[560px] !overflow-visible"
     x-data="{
         allowedEmoji: @js(\App\Livewire\TeamChat::ALLOWED_EMOJI),
         pickerFor: null,
@@ -10,12 +10,12 @@
 >
     {{-- Header --}}
     <div class="border-b border-base-200 bg-base-200/30 shrink-0">
-        <div class="p-4 flex items-center justify-between">
-            <h3 class="font-bold flex items-center gap-2">
+        <div class="p-4 flex min-w-0 items-center justify-between gap-2">
+            <h3 class="font-bold flex min-w-0 items-center gap-2">
                 <x-app-icon icon="heroicons:chat-bubble-left-right" class="w-5 h-5 text-primary" />
                 Командный чат
             </h3>
-            <span class="badge badge-sm badge-outline">{{ $team->title }}</span>
+            <span class="badge badge-sm badge-outline max-w-[50%] truncate shrink-0">{{ $team->title }}</span>
         </div>
 
         {{-- Disclaimer --}}
@@ -138,7 +138,7 @@
                     </div>
 
                     {{-- Hover actions --}}
-                    <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="flex items-center gap-0.5 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100">
                         <div class="relative">
                             <button
                                 type="button"
@@ -155,7 +155,7 @@
                                 x-cloak
                                 @click.stop
                                 @class([
-                                    'absolute bottom-full mb-1 z-50 flex gap-1 rounded-panel border border-base-300 bg-base-100 px-2 py-1.5 shadow-lg',
+                                    'absolute top-full mt-1 z-50 flex gap-1 rounded-panel border border-base-300 bg-base-100 px-2 py-1.5 shadow-lg',
                                     'right-0' => $isMine,
                                     'left-0' => ! $isMine,
                                 ])

@@ -118,7 +118,7 @@ test('registration wizard completes all steps and redirects to phone verificatio
 
     expect($user)->not->toBeNull()
         ->and($user->nickname)->toBe($nickname)
-        ->and($user->phone)->toBe($phone)
+        ->and($user->phone)->toBe('+'.$phone)
         ->and($user->hasVerifiedEmail())->toBeFalse()
         ->and($user->pd_consent_accepted_at)->not->toBeNull();
 
@@ -167,4 +167,27 @@ test('invalid account type is rejected on step 1', function () {
         ->call('nextStep')
         ->assertHasErrors(['accountType'])
         ->assertSet('step', 1);
+});
+
+test('registration normalizes formatted phone number', function () {
+    $suffix = uniqid('fmt', true);
+    $email = "fmt_{$suffix}@example.com";
+    $nickname = "fmt_{$suffix}";
+
+    Livewire::test(RegisterPage::class)
+        ->set('fio', 'Тестов Пользователь Иванович')
+        ->set('date_of_birth', '1995-05-15')
+        ->call('nextStep')
+        ->set('email', $email)
+        ->set('nickname', $nickname)
+        ->call('nextStep')
+        ->set('password', 'Password1!')
+        ->set('password_confirmation', 'Password1!')
+        ->call('nextStep')
+        ->set('phone', '8 (999) 123-45-67')
+        ->set('pd_consent', true)
+        ->call('save')
+        ->assertRedirect(route('verification.notice'));
+
+    expect(User::query()->where('email', $email)->value('phone'))->toBe('+79991234567');
 });

@@ -81,6 +81,7 @@ class OrganizerApplicationsTable
                     ->action(function (OrganizerApplication $record): void {
                         /** @var User $reviewer */
                         $reviewer = auth()->user();
+                        abort_unless($reviewer !== null && $reviewer->can('approve', $record), 403);
                         $record->approve($reviewer);
                     }),
 
@@ -98,6 +99,7 @@ class OrganizerApplicationsTable
                     ->action(function (OrganizerApplication $record, array $data): void {
                         /** @var User $reviewer */
                         $reviewer = auth()->user();
+                        abort_unless($reviewer !== null && $reviewer->can('reject', $record), 403);
                         $record->reject($reviewer, $data['admin_note'] ?? null);
                     }),
             ]);

@@ -16,7 +16,56 @@
 - Node.js 22+ (как в CI)
 - Composer 2
 
-## Установка
+### Локальная разработка через Laravel Sail (Docker)
+
+Альтернатива Herd: полный стек в Docker (PostgreSQL, Redis, Mailpit, Reverb).
+
+**Требования:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (на Windows — WSL2).
+
+```bash
+composer sail:setup   # копирует .env.sail → .env, поднимает контейнеры, migrate --seed, npm build
+composer sail:up -d   # поднять контейнеры (если ещё не запущены)
+composer sail:dev     # horizon + reverb + vite (через docker compose exec)
+```
+
+Приложение: `http://localhost`  
+Почта (Mailpit): `http://localhost:8025`  
+Vite HMR: порт `5173`
+
+Полезные команды:
+
+```bash
+composer sail:up
+composer sail:dev
+docker compose exec laravel.test php artisan test --compact
+docker compose exec laravel.test php artisan migrate:fresh --seed
+docker compose exec laravel.test bash
+```
+
+На Windows в PowerShell не используйте `./vendor/bin/sail` — он требует bash. Все команды выше работают через `docker compose`.
+
+Переключение окружений:
+
+- **Sail:** `cp .env.sail .env` (или `composer sail:setup`)
+- **Herd / без Docker:** свой `.env` с SQLite и `https://*.test`
+
+OAuth: на `http://localhost` виджет Яндекс ID недоступен (нужен HTTPS) — работает server-side redirect (`/auth/yandex/redirect`). VK OAuth проверяйте с redirect URI `http://localhost/auth/vk/callback`.
+
+Production-образ (Octane): `docker compose -f compose.prod.yaml up --build`
+
+`compose.prod.yaml` поднимает `app` (Octane), `horizon`, `reverb`, `redis` и `pgsql`. Для внешнего managed PostgreSQL/Redis замените сервисы и переменные `DB_*` / `REDIS_*` в `.env`.
+
+## Production runbook (кратко)
+
+1. `php artisan migrate --force`
+2. `php artisan config:cache && php artisan route:cache && php artisan view:cache`
+3. Запустить Horizon (`php artisan horizon`) и Reverb (`php artisan reverb:start`) — или контейнеры `horizon` / `reverb` из `compose.prod.yaml`
+4. Проверить `/up` (health) и очереди в Horizon
+5. Убедиться, что `APP_URL` HTTPS и OAuth redirect URI совпадают с production-доменом
+
+Подробнее: [docs/DEPLOY_CHECKLIST.md](docs/DEPLOY_CHECKLIST.md).
+
+## Установка (без Docker)
 
 ```bash
 cp .env.example .env

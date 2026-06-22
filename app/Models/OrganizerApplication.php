@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class OrganizerApplication extends Model
 {
@@ -70,14 +71,20 @@ class OrganizerApplication extends Model
 
     public function approve(User $reviewer): void
     {
-        $this->update([
-            'status' => OrganizerApplicationStatus::Approved,
-            'reviewed_by' => $reviewer->id,
-            'reviewed_at' => now(),
-            'admin_note' => null,
-        ]);
+        DB::transaction(function () use ($reviewer): void {
+            $locked = self::query()->lockForUpdate()->findOrFail($this->id);
 
-        $this->user->forceFill(['role' => UserRole::PARTNER])->save();
+            $locked->update([
+                'status' => OrganizerApplicationStatus::Approved,
+                'reviewed_by' => $reviewer->id,
+                'reviewed_at' => now(),
+                'admin_note' => null,
+            ]);
+
+            $locked->user->forceFill(['role' => UserRole::PARTNER])->save();
+        });
+
+        $this->refresh();
     }
 
     public function reject(User $reviewer, ?string $adminNote = null): void

@@ -6,6 +6,8 @@ return [
         'home' => 'Home',
         'hackatons' => 'Hackathons',
         'teams' => 'Teams',
+        'templates' => 'Templates',
+        'watches' => 'Watched',
         'login' => 'Sign in',
         'register' => 'Sign up',
         'profile' => 'Profile',
@@ -94,6 +96,7 @@ return [
             'password_medium' => 'Medium password',
             'password_strong' => 'Strong password',
             'phone_label' => 'Phone number',
+            'phone_invalid' => 'Enter a valid phone number in +7XXXXXXXXXX format.',
             'btn_back' => 'Back',
             'btn_next' => 'Next',
             'btn_submit' => 'Create account',
@@ -158,12 +161,66 @@ return [
             'use_recovery' => 'Use a recovery code',
             'use_app' => 'Use authenticator app code',
         ],
+
+        'oauth_consent' => [
+            'title' => 'Personal data consent',
+            'description' => 'To complete OAuth sign-in, confirm your consent to personal data processing. If your date of birth was not provided earlier, enter it below.',
+            'submit' => 'Continue',
+        ],
+    ],
+
+    'hub' => [
+        'breadcrumb' => 'My hackathon',
+    ],
+
+    'dashboard' => [
+        'summary' => 'Summary',
+        'roles' => [
+            'participant' => 'Participant',
+            'organizer' => 'Organizer',
+            'judge' => 'Judge',
+            'moderator' => 'Moderator',
+            'admin' => 'Administrator',
+        ],
     ],
 
     'home' => [
+        'hero_title' => 'Find a team. Run a hackathon.',
+        'hero_subtitle' => 'Hackatonshik helps participants, teams, and organizers through the full journey — from finding teammates to final demos and certificates.',
+        'become_organizer' => 'Become an organizer',
+        'find_team' => 'Find a team',
         'featured_empty_title' => 'First hackathons coming soon!',
         'featured_empty_description' => 'Stay tuned — exciting events will appear here soon.',
         'open_catalog' => 'Open catalog',
+    ],
+
+    'search' => [
+        'placeholder' => 'Search the platform…',
+        'aria_label' => 'Global search',
+        'section_hackatons' => 'Hackathons',
+        'section_teams' => 'Teams',
+        'section_users' => 'Participants',
+        'empty' => 'Nothing found.',
+    ],
+
+    'organizer_application' => [
+        'banner_pending' => 'Your organizer application is under review.',
+        'banner_rejected' => 'Your organizer application was rejected. You can resubmit it.',
+        'details' => 'Details',
+        'modal_title_pending' => 'Your application is under review',
+        'modal_title_resubmit' => 'Resubmit application',
+        'modal_body_pending' => 'Your organizer application has been submitted and is awaiting an admin decision. While it is pending, you can use the platform as a participant.',
+        'modal_ok' => 'Got it',
+        'admin_note' => 'Admin comment:',
+        'entity_type_label' => 'Organizer type',
+        'entity_individual' => 'Individual',
+        'entity_company' => 'Company',
+    ],
+
+    'chat' => [
+        'reaction' => 'React',
+        'reply' => 'Reply',
+        'report' => 'Report',
     ],
 
     'hackatons' => [
@@ -177,6 +234,19 @@ return [
         'empty_description' => 'Change the filters or create your own team — participants can apply for open roles.',
         'create_team' => 'Create team',
         'reset_filters' => 'Reset filters',
+        'card' => [
+            'description_placeholder' => 'No project description yet. The team lead will add it soon...',
+            'recruiting' => 'Open roles (:count :slots):',
+            'recruitment_closed' => 'Recruitment closed',
+            'any_roles' => 'Any roles',
+            'skills' => 'Skills',
+            'participants' => 'Members',
+            'updated' => 'updated',
+            'details' => 'Details',
+            'slot_one' => 'slot',
+            'slot_few' => 'slots',
+            'slot_many' => 'slots',
+        ],
     ],
 
 ];

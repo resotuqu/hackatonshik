@@ -1,10 +1,12 @@
 <?php
 
+use App\Livewire\Pages\Auth\OAuthConsent;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 use Laravel\Socialite\Facades\Socialite;
+use Livewire\Livewire;
 
 test('authenticated user can store phone before verification', function () {
     $user = User::factory()->create([
@@ -61,12 +63,19 @@ test('oauth user without phone completes manual onboarding flow', function () {
         ->with('yandex')
         ->andReturn($driver);
 
-    $this->get('/auth/yandex/callback')->assertRedirect(route('phone.verify.notice'));
+    $this->get('/auth/yandex/callback')->assertRedirect(route('auth.oauth.consent'));
 
     $user = User::query()->where('email', 'manual-oauth@example.com')->first();
     expect($user)->not->toBeNull()
         ->and($user->phone)->toBeNull()
         ->and($user->phone_verified_at)->toBeNull();
+
+    Livewire::actingAs($user)
+        ->test(OAuthConsent::class)
+        ->set('pd_consent', true)
+        ->set('date_of_birth', '1995-01-01')
+        ->call('save')
+        ->assertRedirect(route('phone.verify.notice'));
 
     $this->actingAs($user)
         ->post(route('phone.verify.phone'), ['phone' => '9992223344'])
@@ -105,12 +114,19 @@ test('yandex callback auto verifies phone when provider returns default phone', 
 
     $response = $this->get('/auth/yandex/callback');
 
-    $response->assertRedirect(route('home'));
+    $response->assertRedirect(route('auth.oauth.consent'));
     $this->assertAuthenticated();
 
     $user = User::query()->where('email', 'verified-oauth@example.com')->first();
     expect($user->phone)->toBe('+79991112233')
         ->and($user->phone_verified_at)->not->toBeNull();
+
+    Livewire::actingAs($user)
+        ->test(OAuthConsent::class)
+        ->set('pd_consent', true)
+        ->set('date_of_birth', '1990-01-01')
+        ->call('save')
+        ->assertRedirect(route('home'));
 });
 
 test('yandex token auto verifies phone when default phone is present', function () {
@@ -125,12 +141,19 @@ test('yandex token auto verifies phone when default phone is present', function 
 
     $response = $this->post(route('auth.yandex.token'), ['access_token' => 'fake-token']);
 
-    $response->assertRedirect(route('home'));
+    $response->assertRedirect(route('auth.oauth.consent'));
     $this->assertAuthenticated();
 
     $user = User::query()->where('email', 'ya-phone@example.com')->first();
     expect($user->phone)->toBe('+79993334455')
         ->and($user->phone_verified_at)->not->toBeNull();
+
+    Livewire::actingAs($user)
+        ->test(OAuthConsent::class)
+        ->set('pd_consent', true)
+        ->set('date_of_birth', '1990-01-01')
+        ->call('save')
+        ->assertRedirect(route('home'));
 });
 
 test('vk callback auto verifies phone when provider returns phone', function () {
@@ -155,12 +178,19 @@ test('vk callback auto verifies phone when provider returns phone', function () 
         'state' => 'test-state-456',
     ]));
 
-    $response->assertRedirect(route('home'));
+    $response->assertRedirect(route('auth.oauth.consent'));
     $this->assertAuthenticated();
 
     $user = User::query()->where('email', 'vk-phone@example.com')->first();
     expect($user->phone)->toBe('+79995556677')
         ->and($user->phone_verified_at)->not->toBeNull();
+
+    Livewire::actingAs($user)
+        ->test(OAuthConsent::class)
+        ->set('pd_consent', true)
+        ->set('date_of_birth', '1990-01-01')
+        ->call('save')
+        ->assertRedirect(route('home'));
 });
 
 test('returning oauth user with verified phone redirects to home', function () {
@@ -171,6 +201,8 @@ test('returning oauth user with verified phone redirects to home', function () {
         'phone' => '+79991112233',
         'phone_verified_at' => now(),
         'email_verified_at' => now(),
+        'pd_consent_accepted_at' => now(),
+        'date_of_birth' => '1990-01-01',
     ]);
 
     $socialiteUser = mock(SocialiteUserContract::class);
@@ -199,6 +231,8 @@ test('returning oauth user with placeholder phone clears phone and requires manu
         'phone' => '+79998887766',
         'phone_verified_at' => null,
         'email_verified_at' => now(),
+        'pd_consent_accepted_at' => now(),
+        'date_of_birth' => '1990-01-01',
     ]);
 
     $socialiteUser = mock(SocialiteUserContract::class);

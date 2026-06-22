@@ -28,15 +28,16 @@ class SecurityHeaders
         }
 
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-site');
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'credentialless');
 
+        // unsafe-inline / unsafe-eval: required for Livewire, Alpine, VK/Yandex SDK today.
+        // Roadmap: migrate app scripts to Vite nonces and tighten script-src (drop unsafe-eval).
         $csp = "default-src 'self'; ".
                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://yastatic.net; ".
                "style-src 'self' 'unsafe-inline' https://yastatic.net; ".
                "img-src 'self' data: https:; ".
                "font-src 'self' data: https://yastatic.net; ".
-               "connect-src 'self' https://id.vk.com https://login.yandex.ru https://autofill.yandex.ru https://yastatic.net ".(config('app.env') === 'local' ? 'ws: wss:' : 'wss:').'; '.
-               "frame-src 'self' https://id.vk.com https://oauth.vk.com https://yandex.ru https://passport.yandex.ru https://autofill.yandex.ru; ".
+               "connect-src 'self' https://id.vk.com https://id.vk.ru https://login.yandex.ru https://autofill.yandex.ru https://yastatic.net ".(config('app.env') === 'local' ? 'ws: wss:' : 'wss:').'; '.
+               "frame-src 'self' https://id.vk.com https://id.vk.ru https://oauth.vk.com https://yandex.ru https://passport.yandex.ru https://autofill.yandex.ru; ".
                "base-uri 'self'; ".
                "form-action 'self'; ".
                "object-src 'none'; ".

@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Pages\Auth;
 
+use App\Actions\Auth\RegisterUserWithApplication;
 use App\Actions\Fortify\PasswordValidationRules;
-use App\Enums\OrganizerEntityType;
-use App\Models\OrganizerApplication;
 use App\Models\User;
+use App\Services\OAuth\OAuthPhoneResolver;
 use App\Support\OrganizerApplicationRules;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -14,7 +14,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Mary\Traits\Toast;
 
-#[Layout('layouts::app', ['title' => 'Регистрация'])]
+#[Layout('layouts::app', ['title' => 'Регистрация', 'compactMain' => true])]
 class Register extends Component
 {
     use PasswordValidationRules, Toast;
@@ -47,6 +47,13 @@ class Register extends Component
 
     public string $organizerNote = '';
 
+    public function mount(): void
+    {
+        if (request()->query('type') === 'partner') {
+            $this->accountType = 'partner';
+        }
+    }
+
     /**
      * @return array<string, list<\Illuminate\Contracts\Validation\Rule|string>|string>
      */
@@ -67,7 +74,7 @@ class Register extends Component
                 'password_confirmation' => ['required'],
             ],
             4 => [
-                'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
+                'phone' => ['required', 'string', 'min:10', 'max:20', Rule::unique(User::class)],
                 'pd_consent' => ['accepted'],
             ],
             default => [],
@@ -95,7 +102,7 @@ class Register extends Component
             'nickname' => ['required', 'string', 'max:255', Rule::unique(User::class)],
             'password' => [...$this->passwordRules(), 'confirmed'],
             'password_confirmation' => ['required'],
-            'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
+            'phone' => ['required', 'string', 'min:10', 'max:20', Rule::unique(User::class)],
             'pd_consent' => ['accepted'],
         ];
 
@@ -127,13 +134,23 @@ class Register extends Component
         }
     }
 
-    public function save()
+    public function save(OAuthPhoneResolver $phoneResolver)
     {
         if ($this->step < self::TOTAL_STEPS) {
             $this->nextStep();
 
             return;
         }
+
+        $normalizedPhone = $phoneResolver->normalize($this->phone);
+
+        if ($normalizedPhone === null) {
+            throw ValidationException::withMessages([
+                'phone' => [__('ui.auth.register.phone_invalid')],
+            ]);
+        }
+
+        $this->phone = $normalizedPhone;
 
         try {
             $this->validate($this->allRules());
@@ -142,28 +159,18 @@ class Register extends Component
             throw $e;
         }
 
-        $user = User::create([
+        $user = app(RegisterUserWithApplication::class)->create([
             'fio' => $this->fio,
             'email' => $this->email,
             'nickname' => $this->nickname,
             'phone' => $this->phone,
             'date_of_birth' => $this->date_of_birth,
             'password' => $this->password,
-            'pd_consent_accepted_at' => now(),
+            'account_type' => $this->accountType,
+            'organizer_entity_type' => $this->organizerEntityType,
+            'organizer_company_name' => $this->organizerCompanyName,
+            'organizer_note' => $this->organizerNote,
         ]);
-
-        if ($this->accountType === 'partner') {
-            OrganizerApplication::createPendingForUser(
-                $user,
-                OrganizerEntityType::from($this->organizerEntityType),
-                $this->organizerEntityType === OrganizerEntityType::Company->value
-                    ? $this->organizerCompanyName
-                    : null,
-                $this->organizerNote,
-            );
-        }
-
-        $user->sendEmailVerificationNotification();
 
         Auth::login($user);
         session()->regenerate();

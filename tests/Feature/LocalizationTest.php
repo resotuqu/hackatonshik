@@ -86,3 +86,21 @@ describe('LocaleSwitcher component', function () {
         expect($cookies->first(fn ($c) => $c->getName() === 'locale')?->getValue())->toBe('en');
     });
 });
+
+describe('Localized UI rendering', function () {
+    it('sets html lang attribute from active locale', function () {
+        $response = $this->withCookie('locale', 'en')->get(route('home'));
+
+        $response->assertSuccessful();
+        $response->assertSee('lang="en"', false);
+    });
+
+    it('renders global search placeholder in english when locale is en', function () {
+        $user = User::factory()->create(['locale' => 'en']);
+
+        $response = $this->actingAs($user)->get(route('home'));
+
+        $response->assertSuccessful();
+        $response->assertSee(__('ui.search.placeholder', locale: 'en'), false);
+    });
+});

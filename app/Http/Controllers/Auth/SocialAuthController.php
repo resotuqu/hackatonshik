@@ -236,12 +236,12 @@ class SocialAuthController extends Controller
             [
                 'fio' => $name,
                 'nickname' => "{$provider}_".Str::lower(Str::random(10)),
-                'date_of_birth' => now()->subYears(18)->toDateString(),
+                'date_of_birth' => null,
                 'password' => Hash::make(Str::random(40)),
                 'email_verified_at' => now(),
                 'oauth_provider' => $provider,
                 'oauth_provider_id' => $providerId,
-                'pd_consent_accepted_at' => now(),
+                'pd_consent_accepted_at' => null,
             ],
         );
 
@@ -304,6 +304,10 @@ class SocialAuthController extends Controller
     private function finalizeOAuthLogin(User $user): RedirectResponse
     {
         $user->refresh();
+
+        if ($user->pd_consent_accepted_at === null) {
+            return redirect()->route('auth.oauth.consent');
+        }
 
         if ($user->hasVerifiedContactChannels()) {
             return redirect()->to(PostLoginRedirect::intendedUrl($user));

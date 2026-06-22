@@ -23,7 +23,7 @@ test('yandex callback creates local user and logs in', function () {
 
     $response = $this->get('/auth/yandex/callback');
 
-    $response->assertRedirect(route('phone.verify.notice'));
+    $response->assertRedirect(route('auth.oauth.consent'));
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
         'email' => 'oauth-user@example.com',
@@ -100,7 +100,7 @@ test('vk callback creates local user and logs in', function () {
         'state' => 'test-state-123',
     ]));
 
-    $response->assertRedirect(route('phone.verify.notice'));
+    $response->assertRedirect(route('auth.oauth.consent'));
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
         'email' => 'vk-user@example.com',
@@ -137,7 +137,7 @@ test('vk token endpoint creates local user and logs in', function () {
         'access_token' => 'fake-vk-access-token',
     ]);
 
-    $response->assertRedirect(route('phone.verify.notice'));
+    $response->assertRedirect(route('auth.oauth.consent'));
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
         'email' => 'vk-user@example.com',
@@ -256,6 +256,9 @@ test('yandex callback allows returning oauth user with matching provider and id'
         'email' => 'ya@example.com',
         'oauth_provider' => 'yandex',
         'oauth_provider_id' => '321',
+        'pd_consent_accepted_at' => now(),
+        'date_of_birth' => '1990-01-01',
+        'email_verified_at' => now(),
     ]);
 
     $socialiteUser = mock(SocialiteUserContract::class);
@@ -281,6 +284,9 @@ test('yandex token allows returning oauth user with matching provider and id', f
         'email' => 'ya@example.com',
         'oauth_provider' => 'yandex',
         'oauth_provider_id' => '42',
+        'pd_consent_accepted_at' => now(),
+        'date_of_birth' => '1990-01-01',
+        'email_verified_at' => now(),
     ]);
 
     Http::fake([
@@ -348,4 +354,34 @@ test('vk token redirects to 2fa challenge when user has 2fa enabled', function (
     $response->assertRedirect(route('two-factor.login'));
     $this->assertGuest();
     expect(session('login.id'))->not->toBeNull();
+});
+
+test('yandex token endpoint is rate limited', function () {
+    Http::fake([
+        'login.yandex.ru/*' => Http::response(['id' => '1', 'default_email' => 'a@example.com'], 200),
+    ]);
+
+    for ($i = 0; $i < 5; $i++) {
+        $this->post(route('auth.yandex.token'), ['access_token' => "token-{$i}"]);
+    }
+
+    $response = $this->post(route('auth.yandex.token'), ['access_token' => 'token-final']);
+
+    $response->assertStatus(429);
+});
+
+test('vk token endpoint is rate limited', function () {
+    Http::fake([
+        'id.vk.com/oauth2/user_info' => Http::response([
+            'user' => ['user_id' => '1', 'email' => 'a@example.com', 'first_name' => 'A', 'last_name' => 'B'],
+        ], 200),
+    ]);
+
+    for ($i = 0; $i < 5; $i++) {
+        $this->post(route('auth.vk.token'), ['access_token' => "token-{$i}"]);
+    }
+
+    $response = $this->post(route('auth.vk.token'), ['access_token' => 'token-final']);
+
+    $response->assertStatus(429);
 });

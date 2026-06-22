@@ -6,7 +6,7 @@
     $lightTheme = config('theme.light');
     $legacyThemes = config('theme.legacy');
 @endphp
-<html lang="ru" class="group" data-theme="{{ $serverTheme }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="group" data-theme="{{ $serverTheme }}">
 <head>
     @php
         $pageTitle = isset($title) ? trim($title) : trim($__env->yieldContent('title', config('app.name')));
@@ -69,7 +69,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen overflow-x-hidden bg-base-300 font-sans antialiased">
+<body class="min-h-screen overflow-x-hidden bg-base-300 font-sans antialiased" x-data="{ cookieConsent: !document.cookie.split(';').some(c => c.trim().startsWith('cookie_consent=')) }" @cookie-consent-accepted.window="cookieConsent = false">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:shadow">
         Перейти к основному контенту
     </a>
@@ -92,7 +92,16 @@
                 </div>
             </header>
 
-            <main id="main-content" class="flex-1 pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:pb-0" tabindex="-1">
+            <main
+                id="main-content"
+                @class([
+                    'flex-1' => ! ($compactMain ?? false),
+                ])
+                :class="cookieConsent
+                    ? 'pb-[max(10.5rem,calc(9.5rem+env(safe-area-inset-bottom)))] lg:pb-24'
+                    : 'pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:pb-0'"
+                tabindex="-1"
+            >
                 <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
                     @auth
                         <livewire:organizer-application-modal />
@@ -129,28 +138,33 @@
 
             {{-- Cookie consent banner (152-ФЗ / ePrivacy) --}}
             <div
-                x-data="{ visible: !document.cookie.split(';').some(c => c.trim().startsWith('cookie_consent=')) }"
-                x-show="visible"
+                x-show="cookieConsent"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="translate-y-full opacity-0"
                 x-transition:enter-end="translate-y-0 opacity-100"
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="translate-y-0 opacity-100"
                 x-transition:leave-end="translate-y-full opacity-0"
-                class="fixed bottom-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:bottom-0 left-0 right-0 z-50 border-t border-base-300 bg-base-100 shadow-lg"
+                class="fixed bottom-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] left-0 right-0 z-[65] border-t border-base-300 bg-base-100 shadow-lg lg:bottom-0 lg:left-80"
             >
-                <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8">
-                    <p class="text-sm text-base-content/80">
-                        Мы используем файлы cookie для корректной работы сервиса и аналитики.
-                        Продолжая пользоваться сайтом, вы соглашаетесь с нашей
-                        <a href="/cookie-policy" class="link link-primary">Политикой куки</a> и
-                        <a href="/privacy-policy" class="link link-primary">Политикой конфиденциальности</a>.
+                <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 sm:py-4 lg:px-8">
+                    <p class="text-xs text-base-content/80 sm:text-sm">
+                        <span class="sm:hidden">
+                            Cookie для работы сервиса и аналитики.
+                            <a href="/cookie-policy" class="link link-primary">Подробнее</a>.
+                        </span>
+                        <span class="hidden sm:inline">
+                            Мы используем файлы cookie для корректной работы сервиса и аналитики.
+                            Продолжая пользоваться сайтом, вы соглашаетесь с нашей
+                            <a href="/cookie-policy" class="link link-primary">Политикой куки</a> и
+                            <a href="/privacy-policy" class="link link-primary">Политикой конфиденциальности</a>.
+                        </span>
                     </p>
                     <div class="flex shrink-0 gap-2">
                         <button
                             type="button"
                             class="btn btn-primary btn-sm"
-                            @click="document.cookie='cookie_consent=accepted;path=/;max-age=31536000;SameSite=Lax'; visible=false"
+                            @click="document.cookie='cookie_consent=accepted;path=/;max-age=31536000;SameSite=Lax'; cookieConsent=false; $dispatch('cookie-consent-accepted')"
                         >
                             Принять
                         </button>
@@ -228,8 +242,8 @@
                                 <span class="btm-nav-label">Заявки</span>
                             </a>
                         @elseif ($btmUser->isJudge())
-                            <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/70'])>
-                                <x-app-icon icon="heroicons:clipboard-document-list" class="h-6 w-6" />
+                            <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
+                                <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
                                 <span class="btm-nav-label">Хакатоны</span>
                             </a>
                         @elseif ($btmUser->isModerator())
@@ -305,6 +319,7 @@
                         <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
                         <x-mary-menu-item title="{{ __('ui.nav.hackatons') }}" icon="o-rocket-launch" link="{{ route('hackatons.index') }}" />
                         <x-mary-menu-item title="{{ __('ui.nav.teams') }}" icon="o-user-group" link="{{ route('teams.index') }}" />
+                        <x-mary-menu-item title="{{ __('ui.nav.templates') }}" icon="o-document-duplicate" link="{{ route('templates.index') }}" />
                         <x-marymenu-separator />
                         <x-mary-menu-item title="{{ __('ui.nav.login') }}" icon="o-arrow-right-on-rectangle" link="{{ route('login') }}" />
                         <x-mary-menu-item title="{{ __('ui.nav.register') }}" icon="o-user-plus" link="{{ route('register') }}" />
@@ -319,6 +334,7 @@
                             <x-mary-menu-item title="{{ __('ui.nav.my_teams') }}" icon="o-users" link="{{ route('profile.teams') }}" />
                             <x-mary-menu-item title="{{ __('ui.nav.create_team') }}" icon="o-plus-circle" link="{{ route('teams.create') }}" />
                             <x-mary-menu-item title="{{ __('ui.nav.my_hackatons') }}" icon="o-rectangle-stack" link="{{ route('participant.hackatons') }}" />
+                            <x-mary-menu-item title="{{ __('ui.nav.watches') }}" icon="o-bell-alert" link="{{ route('profile.watches') }}" />
                             <x-mary-menu-item title="{{ __('ui.nav.certificates') }}" icon="o-academic-cap" link="{{ route('profile.certificates') }}" />
                             <x-marymenu-separator />
                             <x-mary-menu-item title="{{ __('ui.nav.profile') }}" icon="o-user-circle" link="{{ route('profile') }}" />

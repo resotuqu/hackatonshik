@@ -14,7 +14,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Mary\Traits\Toast;
 
-#[Layout('layouts::app', ['title' => 'Авторизация'])]
+#[Layout('layouts::app', ['title' => 'Авторизация', 'compactMain' => true])]
 class Login extends Component
 {
     use Toast;

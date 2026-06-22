@@ -14,9 +14,9 @@
     $hasVacancies = $openSlots > 0;
 
     $slotWord = match (true) {
-        $openSlots % 10 === 1 && $openSlots % 100 !== 11 => 'место',
-        in_array($openSlots % 10, [2, 3, 4], true) && ! in_array($openSlots % 100, [12, 13, 14], true) => 'места',
-        default => 'мест',
+        $openSlots % 10 === 1 && $openSlots % 100 !== 11 => __('ui.teams.card.slot_one'),
+        in_array($openSlots % 10, [2, 3, 4], true) && ! in_array($openSlots % 100, [12, 13, 14], true) => __('ui.teams.card.slot_few'),
+        default => __('ui.teams.card.slot_many'),
     };
 
     $participants = $participantUsers ?? collect();
@@ -24,6 +24,10 @@
     // Роли: показываем макс 2, остаток — счётчик
     $visibleRoles = array_slice($vacantRoleNames, 0, 2);
     $extraRoles = max(0, count($vacantRoleNames) - 2);
+
+    $maxVisibleSkillTags = 4;
+    $visibleSkillTags = array_slice($skillTags, 0, $maxVisibleSkillTags);
+    $extraSkillTags = max(0, count($skillTags) - $maxVisibleSkillTags);
 @endphp
 
 <article
@@ -47,16 +51,16 @@
 
         {{-- Описание: ровно 3 строки с резервированием места --}}
         <p class="line-clamp-3 text-sm leading-relaxed text-base-content/70" style="min-height: calc(1.625rem * 3)">
-            {{ \App\Support\SafeMarkdown::toPlainExcerpt($team->description ?? '') ?: 'Описание проекта пока не добавлено. Лидер команды скоро это исправит...' }}
+            {{ \App\Support\SafeMarkdown::toPlainExcerpt($team->description ?? '') ?: __('ui.teams.card.description_placeholder') }}
         </p>
 
         {{-- Ищем в команду: макс 2 роли + "+N", резервируем место --}}
         <div class="min-h-[5.5rem] rounded-lg border border-base-300 bg-base-200/40 p-4">
             <p class="mb-2 text-xs font-medium text-base-content/70">
                 @if ($hasVacancies || ! empty($vacantRoleNames))
-                    Ищем в команду ({{ $openSlots }} {{ $slotWord }}):
+                    {{ __('ui.teams.card.recruiting', ['count' => $openSlots, 'slots' => $slotWord]) }}
                 @else
-                    <span class="text-base-content/40">Набор закрыт</span>
+                    <span class="text-base-content/40">{{ __('ui.teams.card.recruitment_closed') }}</span>
                 @endif
             </p>
             <div class="flex flex-wrap gap-2">
@@ -68,7 +72,7 @@
                     @if (! $hasVacancies)
                         {{-- пустое место для выравнивания --}}
                     @else
-                        <span class="text-sm font-medium text-base-content/70">Любые роли</span>
+                        <span class="text-sm font-medium text-base-content/70">{{ __('ui.teams.card.any_roles') }}</span>
                     @endif
                 @endforelse
                 @if ($extraRoles > 0)
@@ -82,20 +86,25 @@
         {{-- Навыки: макс 2 строки бейджей с резервированием места --}}
         <div class="min-h-[4.5rem]">
             @if (! empty($skillTags))
-                <p class="mb-2 text-xs font-medium text-base-content/50">Навыки</p>
-                <div class="flex flex-wrap gap-2 overflow-hidden" style="max-height: calc(1.75rem * 2 + 0.5rem)">
-                    @foreach ($skillTags as $tag)
+                <p class="mb-2 text-xs font-medium text-base-content/50">{{ __('ui.teams.card.skills') }}</p>
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($visibleSkillTags as $tag)
                         <span class="badge badge-outline border-base-300 bg-base-200/30 px-3 py-3 text-xs font-medium text-base-content/80">
                             {{ $tag }}
                         </span>
                     @endforeach
+                    @if ($extraSkillTags > 0)
+                        <span class="badge badge-outline border-base-300 bg-base-200/50 px-3 py-3 text-xs font-semibold text-base-content/50">
+                            +{{ $extraSkillTags }}
+                        </span>
+                    @endif
                 </div>
             @endif
         </div>
 
         @if ($team->updated_at)
             <p class="text-xs text-base-content/50">
-                обновлено <x-datetime :value="$team->updated_at" mode="relative" />
+                {{ __('ui.teams.card.updated') }} <x-datetime :value="$team->updated_at" mode="relative" />
             </p>
         @endif
 
@@ -104,7 +113,7 @@
 
             @if ($participants->isNotEmpty())
                 <div class="flex flex-col gap-2">
-                    <span class="text-xs font-medium text-base-content/50">Участники</span>
+                    <span class="text-xs font-medium text-base-content/50">{{ __('ui.teams.card.participants') }}</span>
                     <div class="flex -space-x-3">
                         @foreach ($participants->take(5) as $member)
                             @php
@@ -139,7 +148,7 @@
                         @if ($navigate) wire:navigate @endif
                         class="ui-cta-outline w-full sm:w-auto px-6"
                     >
-                        Подробнее
+                        {{ __('ui.teams.card.details') }}
                     </a>
                 @else
                     <button
@@ -147,7 +156,7 @@
                         class="ui-cta-outline w-full sm:w-auto px-6"
                         wire:click="openTeam({{ $team->id }})"
                     >
-                        Подробнее
+                        {{ __('ui.teams.card.details') }}
                     </button>
                 @endif
             </div>
