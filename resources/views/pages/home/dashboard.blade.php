@@ -41,7 +41,7 @@
             <x-marycard title="Хакатонов" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $adminHackatonsCount }}</p>
             </x-marycard>
-            <x-marycard title="Партнёров" class="card border border-base-300 bg-base-100">
+            <x-marycard title="Организаторов" class="card border border-base-300 bg-base-100">
                 <p class="text-3xl font-semibold tabular-nums">{{ $adminPartnersCount }}</p>
             </x-marycard>
             <x-marycard title="Заявок команд на рассмотрении" class="card border border-base-300 bg-base-100">

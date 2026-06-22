@@ -260,10 +260,10 @@
             <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
             <aside
                 id="app-sidebar"
-                class="flex min-h-full w-80 max-h-[100dvh] flex-col overflow-x-visible overflow-y-auto overscroll-y-contain border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/50 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6 lg:max-h-none lg:overflow-y-visible lg:pb-6"
+                class="flex min-h-full w-80 max-h-[100dvh] flex-col overflow-hidden border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/50 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6 lg:max-h-none lg:overflow-visible lg:pb-6"
                 aria-label="Основная навигация"
             >
-                <div class="relative flex shrink-0 flex-col gap-3">
+                <div class="relative flex shrink-0 flex-col gap-3 overflow-visible">
                     <div class="px-1 py-2">
                         <x-app-brand
                             :wide="true"
@@ -283,7 +283,7 @@
                                         <img alt="Аватар пользователя" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
                                     </div>
                                 </div>
-                                <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                                <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
                                     <li><a href="/profile">Профиль</a></li>
                                     <li class="w-full">
                                         <form class="w-full" method="post" action="/logout">
@@ -297,7 +297,7 @@
                     @endauth
                 </div>
 
-                <x-mary-menu activate-by-route class="mt-5 w-full flex-1 px-0" role="navigation" aria-label="Меню сайта">
+                <x-mary-menu activate-by-route class="mt-5 w-full min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-0 lg:overflow-y-visible" role="navigation" aria-label="Меню сайта">
                     @guest
                         <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
                         <x-mary-menu-item title="{{ __('ui.nav.hackatons') }}" icon="o-rocket-launch" link="{{ route('hackatons.index') }}" />
@@ -321,6 +321,7 @@
                             <x-mary-menu-item title="{{ __('ui.nav.profile') }}" icon="o-user-circle" link="{{ route('profile') }}" />
                         @else
                             <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
+                            <x-mary-menu-item title="{{ __('ui.nav.hackatons') }}" icon="o-rocket-launch" link="{{ route('hackatons.index') }}" />
                             @if ($navUser->isOrganizer() || $navUser->isJudge())
                                 <x-marymenu-separator />
                                 @if ($navUser->isOrganizer())
@@ -364,7 +365,7 @@
                     @endguest
                 </x-mary-menu>
 
-                <div class="mt-2 border-t border-base-200 pt-2">
+                <div class="mt-2 shrink-0 border-t border-base-200 pt-2">
                     <label class="sidebar-theme-toggle flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-medium leading-snug text-base-content transition-colors duration-200 hover:bg-base-200">
                         <span class="text-[0.9375rem]">{{ __('ui.nav.dark_theme') }}</span>
                         <input

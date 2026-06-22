@@ -37,7 +37,7 @@
                     @foreach ($judgeHackatonsPreview as $row)
                         <li class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 px-5 py-3 last:border-0">
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('hackatons.show', $row['id']) }}" class="text-sm font-medium transition-colors hover:text-primary" wire:navigate>{{ $row['title'] }}</a>
+                                <a href="{{ route('judge.hackatons.show', $row['id']) }}" class="text-sm font-medium transition-colors hover:text-primary" wire:navigate>{{ $row['title'] }}</a>
                                 @if ($row['start_at'])
                                     <div class="mt-0.5 flex items-center gap-1 text-xs text-base-content/50">
                                         <x-app-icon icon="heroicons:calendar" class="h-3 w-3" />

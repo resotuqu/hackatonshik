@@ -8,6 +8,11 @@ use App\Models\User;
 
 final class ProfileNavigation
 {
+    public static function showsHackatonsTab(User $user): bool
+    {
+        return ! $user->isModerator() && ! $user->isAdmin();
+    }
+
     public static function hackatonsTabLabel(User $user): string
     {
         if ($user->isOrganizer()) {

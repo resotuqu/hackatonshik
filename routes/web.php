@@ -145,6 +145,10 @@ Route::get('/profile/hackatons', function () {
         return redirect()->route('judge.dashboard');
     }
 
+    if ($user->isModerator() || $user->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+
     return redirect()->route('participant.hackatons');
 })->middleware($authMiddleware)->name('profile.hackatons');
 

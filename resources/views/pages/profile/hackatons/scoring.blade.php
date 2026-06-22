@@ -71,12 +71,6 @@
                                             CSV
                                         </a>
                                     @endif
-                                    @if(auth()->user()?->isJudge())
-                                        <a href="{{ route('judge.dashboard') }}" class="btn btn-secondary btn-xs gap-1" wire:navigate>
-                                            <x-app-icon icon="heroicons:scale" class="h-3.5 w-3.5" />
-                                            Судья
-                                        </a>
-                                    @endif
                                 </div>
                             </td>
                         </tr>

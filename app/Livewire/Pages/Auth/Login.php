@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Auth;
 
 use App\Models\User;
+use App\Support\PostLoginRedirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -80,7 +81,7 @@ class Login extends Component
         $this->success('Успешная авторизация !', position: 'toast-center toast-top');
         session()->regenerate();
 
-        return $this->redirect('/');
+        return $this->redirect(PostLoginRedirect::intendedUrl($user));
     }
 
     public function render()

@@ -1,7 +1,7 @@
     @php
-        $publicRoleLabel = $profileUser->role === 'user'
-            ? 'Участник'
-            : ($profileUser->role === 'partner' ? 'Партнёр' : ($profileUser->role === 'judge' ? 'Судья' : 'Администратор'));
+        $publicRoleLabel = $profileUser->role instanceof \App\Enums\UserRole
+            ? $profileUser->role->profileLabel()
+            : (\App\Enums\UserRole::tryFrom((string) $profileUser->role)?->profileLabel() ?? 'Участник');
         $avatarUrl = $profileUser->avatar_path
             ? asset('storage/'.$profileUser->avatar_path)
             : 'https://ui-avatars.com/api/?name='.urlencode($profileUser->publicName()).'&background=random';
@@ -307,7 +307,7 @@
                         @else
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($profileUser->teams as $team)
-                                    <a href="{{ route('teams.show', $team) }}" class="badge badge-outline border-base-300 text-base-content/80 hover:border-primary/50">{{ $team->title }}</a>
+                                    <a href="{{ route('teams.show', $team) }}" class="badge badge-outline max-w-full truncate border-base-300 text-base-content/80 hover:border-primary/50">{{ $team->title }}</a>
                                 @endforeach
                             </div>
                         @endif

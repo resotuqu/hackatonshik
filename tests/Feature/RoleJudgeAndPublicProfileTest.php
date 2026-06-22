@@ -86,7 +86,7 @@ test('judge can open invitation page and accept invitation', function () {
         ->actingAs($judge)
         ->post(route('judges.invitations.accept.store', $invitation->token));
 
-    $acceptResponse->assertRedirect(route('hackatons.show', $hackaton));
+    $acceptResponse->assertRedirect(route('judge.hackatons.show', $hackaton));
     expect($judge->fresh()->role)->toBe(UserRole::JUDGE);
     expect($hackaton->fresh()->judges()->where('users.id', $judge->id)->exists())->toBeTrue();
 });

@@ -3,7 +3,6 @@
 namespace App\Livewire\Pages\Profile;
 
 use App\Enums\ApplicationStatus;
-use App\Enums\UserRole;
 use App\Models\Skill;
 use App\Models\TeamApplication;
 use App\Services\ContactChangeService;
@@ -111,12 +110,7 @@ class Index extends Component
         $user = Auth::user();
         $this->fio = $user->fio;
         $this->nickname = $user->nickname;
-        $this->role = match ($user->role) {
-            UserRole::USER => 'Участник',
-            UserRole::PARTNER => 'Партнёр',
-            UserRole::JUDGE => 'Судья',
-            default => 'Администратор',
-        };
+        $this->role = $user->role->profileLabel();
         $this->date_of_birth = $user->date_of_birth;
         $this->description = $this->normalizedProfileDescription($user->description);
         $this->is_profile_public = (bool) $user->is_profile_public;

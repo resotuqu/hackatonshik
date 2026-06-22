@@ -112,7 +112,7 @@
         @endif
     </x-mary-card>
 
-    <x-mary-card title="Создание партнёра" class="w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
+    <x-mary-card title="Создание организатора" class="w-full lg:w-2/3 justify-self-center card border border-base-300 bg-base-100">
         <x-slot:menu>
             <x-mary-button label="Выйти" class="btn-outline" wire:click="logout" />
         </x-slot:menu>
@@ -129,7 +129,7 @@
             <x-marymarkdown wire:model="description" label="Описание" :config="['toolbar' => ['bold', 'italic', '|', 'preview'], 'uploadImage' => false]" />
 
             <x-slot:actions>
-                <x-mary-button label="Создать партнёра" class="btn-neutral" type="submit" />
+                <x-mary-button label="Создать организатора" class="btn-neutral" type="submit" />
             </x-slot:actions>
         </x-maryform>
     </x-mary-card>

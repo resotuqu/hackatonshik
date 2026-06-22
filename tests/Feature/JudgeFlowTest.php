@@ -49,7 +49,7 @@ test('user can accept judge invitation and become a judge', function () {
 
     $this->actingAs($invitedUser)
         ->post(route('judges.invitations.accept.store', $invitation->token))
-        ->assertRedirect(route('hackatons.show', $hackaton));
+        ->assertRedirect(route('judge.hackatons.show', $hackaton));
 
     $invitedUser->refresh();
     expect($invitedUser->isJudge())->toBeTrue();

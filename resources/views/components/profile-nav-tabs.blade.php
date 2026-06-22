@@ -14,7 +14,9 @@
         @if ($navUser->canParticipate())
             <a @class(['tab', 'tab-active' => $active === 'teams' || ($active === null && request()->routeIs('profile.teams'))]) href="{{ route('profile.teams') }}">Мои команды</a>
         @endif
-        <a @class(['tab', 'tab-active' => $hackatonsActive]) href="{{ $hackatonsHref }}">{{ $hackatonsLabel }}</a>
+        @if (\App\Support\ProfileNavigation::showsHackatonsTab($navUser))
+            <a @class(['tab', 'tab-active' => $hackatonsActive]) href="{{ $hackatonsHref }}">{{ $hackatonsLabel }}</a>
+        @endif
         @if ($navUser->canParticipate())
             <a @class(['tab', 'tab-active' => $active === 'certificates' || ($active === null && request()->routeIs('profile.certificates'))]) href="{{ route('profile.certificates') }}">Сертификаты</a>
         @endif

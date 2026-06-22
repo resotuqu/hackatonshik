@@ -89,8 +89,8 @@ class JudgeManagementController extends Controller
             abort(403);
         }
 
-        if ($user->isOrganizer() || $user->isAdmin()) {
-            abort(403, 'Организаторы и администраторы не могут принимать приглашения судьи.');
+        if ($user->isOrganizer() || $user->isAdmin() || $user->isModerator()) {
+            abort(403, 'Организаторы, модераторы и администраторы не могут принимать приглашения судьи.');
         }
 
         if ($user->isParticipant()) {
@@ -117,7 +117,7 @@ class JudgeManagementController extends Controller
         );
 
         return redirect()
-            ->route('hackatons.show', $hackaton)
+            ->route('judge.hackatons.show', $hackaton)
             ->with('success', 'Вы подтверждены как судья и назначены на хакатон.');
     }
 

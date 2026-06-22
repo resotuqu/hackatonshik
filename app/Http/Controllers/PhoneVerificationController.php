@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\Sms\PlusofonFlashCallSender;
+use App\Support\PostLoginRedirect;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class PhoneVerificationController extends Controller
         abort_if(! $user, 401);
 
         if ($user->phone_verified_at !== null) {
-            return redirect()->route('home')->with('success', 'Телефон уже подтвержден.');
+            return redirect()->to(PostLoginRedirect::intendedUrl($user))->with('success', 'Телефон уже подтвержден.');
         }
 
         $key = "phone-verification-send:{$user->id}";
@@ -83,7 +84,7 @@ class PhoneVerificationController extends Controller
         Cache::forget($cacheKey);
         RateLimiter::clear($attemptsKey);
 
-        return redirect()->route('home')->with('success', 'Номер телефона подтвержден.');
+        return redirect()->to(PostLoginRedirect::intendedUrl($user))->with('success', 'Номер телефона подтвержден.');
     }
 
     private function codeCacheKey(int $userId): string

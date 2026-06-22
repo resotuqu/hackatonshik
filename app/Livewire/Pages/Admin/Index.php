@@ -154,7 +154,7 @@ class Index extends Component
 
         $this->reset(['fio', 'date_of_birth', 'email', 'nickname', 'phone', 'password', 'password_confirmation', 'description']);
 
-        $this->success('Партнёр успешно создан.', position: 'toast-center toast-top');
+        $this->success('Организатор успешно создан.', position: 'toast-center toast-top');
     }
 
     public function render()

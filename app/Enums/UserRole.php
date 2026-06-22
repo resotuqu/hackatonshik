@@ -22,4 +22,12 @@ enum UserRole: string
             self::JUDGE => 'Судья',
         };
     }
+
+    public function profileLabel(): string
+    {
+        return match ($this) {
+            self::USER => 'Участник',
+            default => $this->label(),
+        };
+    }
 }
