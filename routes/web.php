@@ -15,14 +15,11 @@ use App\Http\Controllers\JudgeManagementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizerAnalyticsExportController;
 use App\Http\Controllers\PhoneVerificationController;
+use App\Http\Controllers\Profile\ExportAccountDataController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamController;
 use App\Livewire\Organizer\Dashboard as OrganizerDashboard;
 use App\Livewire\Pages\About\Index as AboutIndex;
-use App\Livewire\Pages\Admin\AvatarPresets as AdminAvatarPresets;
-use App\Livewire\Pages\Admin\Index as AdminIndex;
-use App\Livewire\Pages\Admin\News as AdminNews;
-use App\Livewire\Pages\Admin\Users as AdminUsers;
 use App\Livewire\Pages\Auth\Login as AuthLogin;
 use App\Livewire\Pages\Auth\Register as AuthRegister;
 use App\Livewire\Pages\Contacts\Index as ContactsIndex;
@@ -67,7 +64,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeIndex::class)->name('home');
 
 Route::get('/about', AboutIndex::class);
-Route::get('/news', NewsIndex::class);
+Route::get('/news', NewsIndex::class)->name('news.index');
 Route::get('/news/rss', function (): Response {
     $posts = NewsPost::query()
         ->published()
@@ -118,10 +115,9 @@ Route::get('/cookie-policy', CookiePolicyIndex::class);
 Route::get('/login', AuthLogin::class)->name('login');
 Route::get('/register', AuthRegister::class)->name('register');
 Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified'])->name('profile');
-Route::get('/admin', AdminIndex::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.dashboard');
-Route::get('/admin/avatar-presets', AdminAvatarPresets::class)->middleware(['auth', 'verified', 'can:access-admin']);
-Route::get('/admin/news', AdminNews::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.news');
-Route::get('/admin/users', AdminUsers::class)->middleware(['auth', 'verified', 'can:access-admin'])->name('admin.users');
+Route::get('/profile/export', ExportAccountDataController::class)->middleware(['auth', 'verified'])->name('profile.export');
+// Filament admin panel handles /admin/* (see AdminPanelProvider)
+Route::redirect('/admin/dashboard', '/admin')->name('admin.dashboard');
 Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
 $organizerMiddleware = ['auth', 'verified', 'organizer'];
@@ -192,10 +188,13 @@ Route::get('/hackatons/{hackaton}/edit', HackatonsEdit::class)
     ->middleware($organizerMiddleware)
     ->name('hackatons.edit');
 
-Route::get('/auth/yandex/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'yandex');
+Route::get('/auth/yandex/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'yandex')->name('auth.yandex.redirect');
 Route::get('/auth/yandex/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'yandex');
-Route::get('/auth/vk/redirect', [SocialAuthController::class, 'redirect'])->defaults('provider', 'vk');
-Route::get('/auth/vk/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'vk');
+Route::get('/auth/yandex/token-page', [SocialAuthController::class, 'yandexTokenPage'])->name('auth.yandex.token-page');
+Route::post('/auth/yandex/token', [SocialAuthController::class, 'yandexToken'])->name('auth.yandex.token');
+Route::get('/auth/vk/redirect', [SocialAuthController::class, 'vkRedirect'])->name('auth.vk.redirect');
+Route::get('/auth/vk/callback', [SocialAuthController::class, 'vkCallback'])->name('auth.vk.callback');
+Route::post('/auth/vk/token', [SocialAuthController::class, 'vkToken'])->name('auth.vk.token');
 
 Route::middleware(['auth', 'verified', 'judge'])->group(function () {
     Route::get('/judge', JudgeDashboard::class)->name('judge.dashboard');

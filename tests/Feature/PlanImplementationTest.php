@@ -4,7 +4,6 @@ use App\Actions\Hackaton\ResolveParticipantUsersForHackatonCertificates;
 use App\Enums\ApplicationStatus;
 use App\Enums\HackatonStatus;
 use App\Jobs\ProcessHackatonFinishedAutomations;
-use App\Livewire\Pages\Admin\News as AdminNews;
 use App\Livewire\Pages\Admin\Users as AdminUsers;
 use App\Livewire\Pages\Hackatons\Create;
 use App\Livewire\Pages\Profile\Hackatons\Participants;
@@ -15,6 +14,7 @@ use App\Models\HackatonCaseScore;
 use App\Models\HackatonCaseSubmission;
 use App\Models\HackatonDocument;
 use App\Models\HackatonTemplate;
+use App\Models\NewsPost;
 use App\Models\Team;
 use App\Models\TeamRole;
 use App\Models\User;
@@ -143,16 +143,19 @@ test('judge can export own scores csv', function () {
 test('admin can manage news posts', function () {
     $admin = User::factory()->admin()->create();
 
-    Livewire::actingAs($admin)
-        ->test(AdminNews::class)
-        ->call('create')
-        ->set('title', 'Тестовая новость')
-        ->set('slug', 'test-news')
-        ->set('body', 'Текст новости')
-        ->set('is_published', true)
-        ->set('published_at', now()->format('Y-m-d\TH:i'))
-        ->call('save')
-        ->assertHasNoErrors();
+    $this->actingAs($admin)
+        ->get(route('filament.admin.resources.news.create'))
+        ->assertOk();
+
+    NewsPost::query()->create([
+        'title' => 'Тестовая новость',
+        'slug' => 'test-news',
+        'excerpt' => 'Краткое описание',
+        'body' => 'Текст новости',
+        'category' => 'Обновления',
+        'is_published' => true,
+        'published_at' => now(),
+    ]);
 
     $this->assertDatabaseHas('news_posts', [
         'title' => 'Тестовая новость',

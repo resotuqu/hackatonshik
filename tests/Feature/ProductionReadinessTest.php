@@ -109,9 +109,17 @@ test('security headers are attached to public pages', function () {
     expect($response->headers->get('X-Frame-Options'))->toBe('SAMEORIGIN')
         ->and($response->headers->get('X-Content-Type-Options'))->toBe('nosniff')
         ->and($response->headers->get('Referrer-Policy'))->toBe('strict-origin-when-cross-origin')
-        ->and($response->headers->get('Cross-Origin-Opener-Policy'))->toBe('same-origin')
+        ->and($response->headers->has('Cross-Origin-Opener-Policy'))->toBeFalse()
         ->and($response->headers->get('Cross-Origin-Resource-Policy'))->toBe('same-site')
         ->and($response->headers->get('Cross-Origin-Embedder-Policy'))->toBe('credentialless');
+});
+
+test('cross origin opener policy is set on https requests', function () {
+    $middleware = new SecurityHeaders;
+    $request = Request::create('https://example.com/fake', 'GET');
+    $response = $middleware->handle($request, fn (): Response => response('ok'));
+
+    expect($response->headers->get('Cross-Origin-Opener-Policy'))->toBe('same-origin-allow-popups');
 });
 
 test('content security policy blocks object embedding and frames', function () {
@@ -121,5 +129,8 @@ test('content security policy blocks object embedding and frames', function () {
     $csp = (string) $response->headers->get('Content-Security-Policy');
 
     expect($csp)->toContain("object-src 'none'")
-        ->and($csp)->toContain("frame-ancestors 'none'");
+        ->and($csp)->toContain("frame-ancestors 'none'")
+        ->and($csp)->toContain('https://autofill.yandex.ru')
+        ->and($csp)->toContain('https://yastatic.net')
+        ->and($csp)->toContain("font-src 'self' data: https://yastatic.net");
 });

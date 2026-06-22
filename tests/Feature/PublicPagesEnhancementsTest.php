@@ -1,14 +1,44 @@
 <?php
 
+use App\Livewire\Pages\Contacts\Index as ContactsIndex;
+use App\Models\ContactMessage;
 use App\Models\Hackaton;
 use App\Models\NewsPost;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 
 use function Pest\Laravel\get;
 
 uses(RefreshDatabase::class);
+
+test('contacts page renders feedback form', function () {
+    $response = get('/contacts');
+
+    $response->assertOk();
+    $response->assertSee('Контакты');
+    $response->assertSee('Форма обратной связи');
+    $response->assertSee('Отправить сообщение');
+});
+
+test('contacts form stores a message', function () {
+    Livewire::test(ContactsIndex::class)
+        ->set('name', 'Иван Иванов')
+        ->set('email', 'ivan@example.com')
+        ->set('subject', 'Вопрос по платформе')
+        ->set('message', 'Расскажите, пожалуйста, как зарегистрироваться на хакатон.')
+        ->call('send')
+        ->assertHasNoErrors();
+
+    expect(ContactMessage::query()->count())->toBe(1);
+
+    $message = ContactMessage::query()->first();
+
+    expect($message->name)->toBe('Иван Иванов')
+        ->and($message->email)->toBe('ivan@example.com')
+        ->and($message->subject)->toBe('Вопрос по платформе');
+});
 
 test('home page shows primary cta buttons', function () {
     $response = get('/');
