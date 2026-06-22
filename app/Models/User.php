@@ -12,6 +12,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -115,6 +116,12 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         return $this->hasMany(TeamMessage::class);
     }
 
+    /** @return HasOne<OrganizerApplication, $this> */
+    public function organizerApplication(): HasOne
+    {
+        return $this->hasOne(OrganizerApplication::class);
+    }
+
     /** @return BelongsToMany<Skill, $this> */
     public function skills(): BelongsToMany
     {
@@ -136,10 +143,12 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'fio',
         'date_of_birth',
         'email',
+        'email_verified_at',
         'description',
         'nickname',
         'password',
         'phone',
+        'phone_verified_at',
         'is_profile_public',
         'show_email_on_profile',
         'show_phone_on_profile',
@@ -287,6 +296,34 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     public function hasVerifiedContactChannels(): bool
     {
         return $this->email_verified_at !== null && $this->phone_verified_at !== null;
+    }
+
+    public function needsPhoneOnboarding(): bool
+    {
+        return $this->phone_verified_at === null;
+    }
+
+    public function hasPendingOrganizerApplication(): bool
+    {
+        if ($this->relationLoaded('organizerApplication')) {
+            return $this->organizerApplication?->isPending() ?? false;
+        }
+
+        return $this->organizerApplication()->where('status', 'pending')->exists();
+    }
+
+    public function hasRejectedOrganizerApplication(): bool
+    {
+        if ($this->relationLoaded('organizerApplication')) {
+            return $this->organizerApplication?->isRejected() ?? false;
+        }
+
+        return $this->organizerApplication()->where('status', 'rejected')->exists();
+    }
+
+    public function organizerApplicationNeedsAttention(): bool
+    {
+        return $this->hasPendingOrganizerApplication() || $this->hasRejectedOrganizerApplication();
     }
 
     public function getActivitylogOptions(): LogOptions

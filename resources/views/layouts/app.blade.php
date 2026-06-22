@@ -94,6 +94,9 @@
 
             <main id="main-content" class="flex-1 pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] lg:pb-0" tabindex="-1">
                 <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+                    @auth
+                        <livewire:organizer-application-modal />
+                    @endauth
                     @hasSection('slot')
                         @yield('slot')
                     @elseif (isset($slot))

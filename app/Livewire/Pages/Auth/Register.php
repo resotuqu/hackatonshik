@@ -3,8 +3,10 @@
 namespace App\Livewire\Pages\Auth;
 
 use App\Actions\Fortify\PasswordValidationRules;
-use App\Enums\UserRole;
+use App\Enums\OrganizerEntityType;
+use App\Models\OrganizerApplication;
 use App\Models\User;
+use App\Support\OrganizerApplicationRules;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -39,12 +41,18 @@ class Register extends Component
 
     public bool $pd_consent = false;
 
+    public string $organizerEntityType = 'individual';
+
+    public string $organizerCompanyName = '';
+
+    public string $organizerNote = '';
+
     /**
      * @return array<string, list<\Illuminate\Contracts\Validation\Rule|string>|string>
      */
     protected function rulesForStep(int $step): array
     {
-        return match ($step) {
+        $rules = match ($step) {
             1 => [
                 'accountType' => ['required', 'in:user,partner'],
                 'fio' => ['required', 'string', 'max:255'],
@@ -64,6 +72,15 @@ class Register extends Component
             ],
             default => [],
         };
+
+        if ($step === 1 && $this->accountType === 'partner') {
+            $rules = array_merge(
+                $rules,
+                OrganizerApplicationRules::forFields(entityType: $this->organizerEntityType),
+            );
+        }
+
+        return $rules;
     }
 
     /**
@@ -71,7 +88,7 @@ class Register extends Component
      */
     protected function allRules(): array
     {
-        return [
+        $rules = [
             'fio' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date', 'before:now'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
@@ -81,6 +98,15 @@ class Register extends Component
             'phone' => ['required', 'string', 'min:11', 'max:12', Rule::unique(User::class)],
             'pd_consent' => ['accepted'],
         ];
+
+        if ($this->accountType === 'partner') {
+            $rules = array_merge(
+                $rules,
+                OrganizerApplicationRules::forFields(entityType: $this->organizerEntityType),
+            );
+        }
+
+        return $rules;
     }
 
     public function nextStep(): void
@@ -127,7 +153,14 @@ class Register extends Component
         ]);
 
         if ($this->accountType === 'partner') {
-            $user->forceFill(['role' => UserRole::PARTNER])->save();
+            OrganizerApplication::createPendingForUser(
+                $user,
+                OrganizerEntityType::from($this->organizerEntityType),
+                $this->organizerEntityType === OrganizerEntityType::Company->value
+                    ? $this->organizerCompanyName
+                    : null,
+                $this->organizerNote,
+            );
         }
 
         $user->sendEmailVerificationNotification();
@@ -135,7 +168,11 @@ class Register extends Component
         Auth::login($user);
         session()->regenerate();
 
-        $this->success('Регистрация успешна. Проверьте почту и перейдите по ссылке для подтверждения e-mail.', position: 'toast-center toast-top');
+        if ($this->accountType === 'partner') {
+            $this->success('Регистрация успешна. Заявка на роль организатора отправлена на модерацию.', position: 'toast-center toast-top');
+        } else {
+            $this->success('Регистрация успешна. Проверьте почту и перейдите по ссылке для подтверждения e-mail.', position: 'toast-center toast-top');
+        }
 
         return $this->redirect(route('verification.notice'));
     }

@@ -79,6 +79,50 @@
                 </p>
                 <x-mary-input label="{{ __('ui.auth.register.fio_label') }}" wire:model="fio" placeholder="Владимир" hint="{{ __('ui.auth.register.fio_hint') }}" />
                 <x-marydatetime label="{{ __('ui.auth.register.dob_label') }}" hint="{{ __('ui.auth.register.dob_hint') }}" wire:model="date_of_birth" />
+
+                @if ($accountType === 'partner')
+                    <div class="mt-4 space-y-3 rounded-xl border border-secondary/20 bg-secondary/5 p-4">
+                        <p class="text-sm font-semibold text-base-content">Данные для заявки организатора</p>
+                        <p class="text-xs text-base-content/70">После регистрации заявка будет рассмотрена администратором.</p>
+
+                        <div>
+                            <p class="mb-2 text-sm font-medium text-base-content/80">Тип организатора</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="cursor-pointer">
+                                    <input type="radio" wire:model.live="organizerEntityType" value="individual" class="peer sr-only" />
+                                    <div class="rounded-xl border-2 border-base-300 px-3 py-2 text-center text-sm transition peer-checked:border-secondary peer-checked:bg-secondary/10">
+                                        Физическое лицо
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" wire:model.live="organizerEntityType" value="company" class="peer sr-only" />
+                                    <div class="rounded-xl border-2 border-base-300 px-3 py-2 text-center text-sm transition peer-checked:border-secondary peer-checked:bg-secondary/10">
+                                        Юридическое лицо
+                                    </div>
+                                </label>
+                            </div>
+                            @error('organizerEntityType')
+                                <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        @if ($organizerEntityType === 'company')
+                            <x-mary-input
+                                label="Название компании"
+                                wire:model="organizerCompanyName"
+                                placeholder="ООО «Пример»"
+                            />
+                        @endif
+
+                        <x-marytextarea
+                            label="Примечание"
+                            wire:model="organizerNote"
+                            placeholder="Кто вы как организатор, из какой компании или как физлицо планируете проводить хакатоны"
+                            rows="4"
+                            hint="Минимум 20 символов"
+                        />
+                    </div>
+                @endif
             @endif
 
             @if ($step === 2)

@@ -29,6 +29,7 @@ test('admin can access all filament management resources', function () {
         'filament.admin.resources.platform-settings.index',
         'filament.admin.resources.reports.index',
         'filament.admin.resources.contact-messages.index',
+        'filament.admin.resources.organizer-applications.index',
         'filament.admin.resources.activity-log.activity-logs.index',
     ];
 
