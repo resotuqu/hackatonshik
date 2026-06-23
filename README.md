@@ -4,8 +4,8 @@
 
 ## Стек
 
-- PHP 8.4+, [Laravel 12](https://laravel.com)
-- [Livewire 4](https://livewire.laravel.com) (страницы в `resources/views/pages/**/⚡*.blade.php`)
+- PHP 8.2+, [Laravel 12](https://laravel.com)
+- [Livewire 4](https://livewire.laravel.com) (страницы в `resources/views/pages/**/*.blade.php`, компоненты с ⚡ в `resources/views/components/`)
 - [Mary UI](https://mary-ui.com/) и DaisyUI
 - [Fortify](https://laravel.com/docs/fortify) — аутентификация
 - [Laravel Socialite](https://laravel.com/docs/socialite) + community providers — вход через Yandex и VK
