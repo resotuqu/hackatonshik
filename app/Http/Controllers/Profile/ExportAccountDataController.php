@@ -32,6 +32,12 @@ class ExportAccountDataController extends Controller
 
         $filename = 'account-data-'.str($user->nickname)->slug().'-'.now()->format('Y-m-d').'.pdf';
 
+        activity()
+            ->causedBy($user)
+            ->performedOn($user)
+            ->withProperties(['ip' => $request->ip()])
+            ->log('exported_account_data');
+
         return $pdf->download($filename);
     }
 }

@@ -36,4 +36,5 @@ RUN mkdir -p /tmp/.config/psysh && chmod -R 777 /tmp/.config
 USER nobody
 ENV HOME=/tmp
 EXPOSE 8000 8080
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --silent --fail http://127.0.0.1:8000 || exit 1
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -44,9 +44,8 @@
                                         type="tel"
                                         name="phone"
                                         value="{{ old('phone', auth()->user()?->phone) }}"
-                                        x-mask="(###) ###-##-##"
                                         class="input input-bordered join-item w-full @error('phone') input-error @enderror"
-                                        placeholder="(999) 123-45-67"
+                                        placeholder="9991234567"
                                         autofocus
                                         required
                                     >

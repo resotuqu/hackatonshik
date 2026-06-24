@@ -22,3 +22,7 @@ Schedule::command('horizon:snapshot')->everyFiveMinutes();
 Schedule::command('queue:prune-failed --hours=168')->daily();
 
 Schedule::command('pulse:check')->everyMinute();
+
+Schedule::command('auth:clear-resets')->daily();
+
+Schedule::command('activitylog:clean')->weekly();

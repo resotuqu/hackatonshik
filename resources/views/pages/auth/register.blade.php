@@ -158,7 +158,7 @@
 
             @if ($step === 4)
                 <div class="animate-form-slide-in">
-                <x-mary-input label="{{ __('ui.auth.register.phone_label') }}" wire:model="phone" prefix="+" x-mask="7 (###) ###-##-##" placeholder="7 (999) 123-45-67" />
+                <x-mary-input label="{{ __('ui.auth.register.phone_label') }}" wire:model.blur="phone" placeholder="+79991234567" />
                 <div class="mt-4 space-y-1">
                     <label class="flex cursor-pointer items-start gap-3">
                         <input type="checkbox" wire:model="pd_consent" class="checkbox checkbox-primary mt-0.5 shrink-0" />

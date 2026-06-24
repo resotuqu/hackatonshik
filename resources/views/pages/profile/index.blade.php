@@ -461,7 +461,7 @@
         <div class="space-y-4">
             @if ($phoneChangeStep === 'phone')
                 <p class="text-sm text-base-content/80">Сначала придёт код на вашу текущую почту, затем мы позвоним на новый номер.</p>
-                <x-mary-input label="Новый номер телефона" wire:model="new_phone" x-mask="+7 (###) ###-##-##" placeholder="+7 (999) 123-45-67" hint="Формат: +7 (999) 123-45-67" />
+                <x-mary-input label="Новый номер телефона" wire:model.blur="new_phone" placeholder="+79991234567" />
             @elseif ($phoneChangeStep === 'email')
                 <p class="text-sm text-base-content/80">Введите код из письма, отправленного на <span class="font-medium">{{ auth()->user()->email }}</span>.</p>
                 <x-mary-input label="Код из почты" wire:model="phone_email_code" maxlength="6" />
