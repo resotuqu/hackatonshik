@@ -31,6 +31,9 @@ RUN mkdir -p /var/log/supervisor && chown -R nobody:nobody /var/log/supervisor
 
 RUN echo -e "opcache.enable=1\nopcache.memory_consumption=128\nopcache.max_accelerated_files=4000\nopcache.revalidate_freq=60" > /etc/php85/conf.d/99-laravel.ini
 
+RUN mkdir -p /tmp/.config/psysh && chmod -R 777 /tmp/.config
+
 USER nobody
+ENV HOME=/tmp
 EXPOSE 8000 8080
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
