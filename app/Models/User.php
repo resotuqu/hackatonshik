@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Notifications\VerifyEmailNotification;
 use App\Support\InitialsGenerator;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -355,6 +356,11 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     public function organizerApplicationNeedsAttention(): bool
     {
         return $this->hasPendingOrganizerApplication() || $this->hasRejectedOrganizerApplication();
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
     }
 
     public function getActivitylogOptions(): LogOptions

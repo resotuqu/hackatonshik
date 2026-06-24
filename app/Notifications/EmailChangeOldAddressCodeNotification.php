@@ -8,9 +8,10 @@ use App\Mail\EmailChangeCodeMail;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class EmailChangeOldAddressCodeNotification extends Notification
+class EmailChangeOldAddressCodeNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
