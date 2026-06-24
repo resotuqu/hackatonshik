@@ -9,6 +9,7 @@ services:
       - "8000:8000"
       - "8080:8080"
     volumes:
+      - ./.env:/var/www/html/.env
       - ./storage:/var/www/html/storage
       - ./bootstrap/cache:/var/www/html/bootstrap/cache
     depends_on:
@@ -17,7 +18,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env.prod
+      - .env
     networks:
       - app-network
 
