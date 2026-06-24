@@ -92,3 +92,18 @@ test('saving public hackaton bumps catalog cache version key', function () {
 
     expect(Cache::get('api:v1:catalog:hackatons:version'))->toBe(3);
 });
+
+test('saving public profile user bumps profiles catalog cache version key', function () {
+    Cache::put('api:v1:catalog:profiles:version', 1);
+
+    $user = User::factory()->create([
+        'is_profile_public' => true,
+        'nickname' => 'catalog_nick_before',
+    ]);
+
+    expect(Cache::get('api:v1:catalog:profiles:version'))->toBe(1);
+
+    $user->update(['nickname' => 'catalog_nick_after']);
+
+    expect(Cache::get('api:v1:catalog:profiles:version'))->toBe(2);
+});

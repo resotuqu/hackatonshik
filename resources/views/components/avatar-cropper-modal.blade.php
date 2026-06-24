@@ -18,7 +18,7 @@
 <div
     {{ $attributes->merge(['class' => 'w-full']) }}
     wire:ignore
-    x-data="window.createAvatarCropperModal(@js($cropperConfig))"
+    x-data="avatarCropper(@js($cropperConfig))"
 >
     <input
         x-ref="fileInput"
@@ -31,13 +31,13 @@
 
     <div class="flex flex-col gap-2">
         <button type="button" class="btn btn-outline btn-secondary btn-sm w-fit" @click="pickFiles">
-            Выбрать файл@if ($multiple)ы@endif
+            {{ $multiple ? __('ui.cropper.choose_files') : __('ui.cropper.choose_file') }}
         </button>
         @if (filled($hint))
             <p class="text-sm text-base-content/70">{{ $hint }}</p>
         @endif
         <p x-show="state === 'error'" x-cloak class="text-sm text-error">
-            Не удалось загрузить файл. Попробуйте ещё раз или выберите другое изображение.
+            {{ __('ui.cropper.upload_error') }}
         </p>
     </div>
 
@@ -47,7 +47,7 @@
         @close="onDialogClosed()"
     >
         <div class="modal-box max-w-3xl">
-            <h3 class="text-lg font-bold">Обрезка аватара</h3>
+            <h3 class="text-lg font-bold">{{ __('ui.cropper.title') }}</h3>
             <p
                 x-show="multiple && modalCaption"
                 x-text="modalCaption"
@@ -59,7 +59,7 @@
                     <img x-ref="cropImg" alt="" class="block max-w-full" />
                 </div>
                 <div class="flex flex-col items-center gap-2">
-                    <span class="text-xs text-base-content/50">Предпросмотр</span>
+                    <span class="text-xs text-base-content/50">{{ __('ui.cropper.preview') }}</span>
                     <div class="avatar-crop-preview h-32 w-32 shrink-0 border border-base-300 bg-base-200">
                         <div x-ref="previewBox" class="h-full w-full overflow-hidden"></div>
                     </div>
@@ -67,13 +67,13 @@
             </div>
 
             <p x-show="state === 'loading' || state === 'uploading'" x-cloak class="text-sm text-base-content/70">
-                <span x-show="state === 'loading'">Загрузка редактора…</span>
-                <span x-show="state === 'uploading'">Отправка на сервер…</span>
+                <span x-show="state === 'loading'">{{ __('ui.cropper.loading') }}</span>
+                <span x-show="state === 'uploading'">{{ __('ui.cropper.uploading') }}</span>
             </p>
 
             <div class="modal-action">
                 <button type="button" class="btn btn-ghost" @click="cancelCrop" :disabled="state === 'uploading'">
-                    Отмена
+                    {{ __('ui.cropper.cancel') }}
                 </button>
                 <button
                     type="button"
@@ -81,7 +81,7 @@
                     :disabled="state !== 'cropping'"
                     @click="applyCrop"
                 >
-                    Применить
+                    {{ __('ui.cropper.apply') }}
                 </button>
             </div>
         </div>

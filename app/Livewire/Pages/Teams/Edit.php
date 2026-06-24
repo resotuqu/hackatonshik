@@ -364,6 +364,7 @@ class Edit extends Component
     public $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
         'uploadImage' => false,
+        'autoDownloadFontAwesome' => false,
     ];
 
     public function render()

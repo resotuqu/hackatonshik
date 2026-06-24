@@ -122,6 +122,7 @@ class Create extends Component
     public $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
         'uploadImage' => false,
+        'autoDownloadFontAwesome' => false,
     ];
 
     public function addHackatonDocument(): void
@@ -338,6 +339,61 @@ class Create extends Component
         }
 
         return $options;
+    }
+
+    public function validateStartDate(): void
+    {
+        $this->validate(
+            ['start_at' => ['nullable', 'date', 'after:now']],
+            [
+                'start_at.date' => 'Неверный формат даты',
+                'start_at.after' => 'Дата начала не может быть раньше завтрашнего дня',
+            ]
+        );
+    }
+
+    public function validateEndDate(): void
+    {
+        $this->validate(
+            ['end_at' => ['nullable', 'date', 'after:start_at']],
+            [
+                'end_at.date' => 'Неверный формат даты',
+                'end_at.after' => 'Дата конца не может быть раньше следующего дня после начала',
+            ]
+        );
+    }
+
+    public function validateRegistrationDeadline(): void
+    {
+        $this->validate(
+            ['registration_deadline_at' => ['nullable', 'date', 'before_or_equal:start_at']],
+            [
+                'registration_deadline_at.date' => 'Неверный формат даты',
+                'registration_deadline_at.before_or_equal' => 'Дедлайн регистрации не может быть позже даты начала',
+            ]
+        );
+    }
+
+    public function validatePrizeFund(): void
+    {
+        $this->validate(
+            ['prize_fund' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99']],
+            [
+                'prize_fund.numeric' => 'Призовой фонд должен быть числом',
+                'prize_fund.min' => 'Призовой фонд не может быть отрицательным',
+            ]
+        );
+    }
+
+    public function validatePrizePlaces(): void
+    {
+        $this->validate(
+            ['prize_places_count' => ['nullable', 'integer', 'min:1', 'max:1000']],
+            [
+                'prize_places_count.integer' => 'Количество призовых мест должно быть целым числом',
+                'prize_places_count.min' => 'Призовых мест должно быть минимум 1',
+            ]
+        );
     }
 
     public function render(): View

@@ -34,8 +34,11 @@ return [
     ],
 
     'auth' => [
+        'brand_name' => 'Hackatonshik',
+
         'oauth' => [
             'or' => 'or',
+            'yandex_completing' => 'Completing Yandex ID sign-in…',
         ],
 
         'login' => [
@@ -129,14 +132,25 @@ return [
         'verify_email' => [
             'page_title' => 'Email verification',
             'card_title' => 'Verify your email address',
+            'brand_heading' => 'Check your inbox',
+            'brand_subtitle' => 'We sent a verification link to your address. Click it to activate your account.',
+            'feature_inbox' => 'Email arrives within a few minutes',
+            'feature_spam' => 'Not seeing it? Check your spam folder',
+            'feature_link' => 'After verifying email you can verify your phone',
             'description' => 'A verification link was sent to :email. Click the link in the email to activate your account, then you can verify your phone.',
             'resent' => 'A new link has been sent to your email.',
             'resend' => 'Resend verification email',
+            'back_to_login' => 'Back to sign in',
         ],
 
         'phone_verify' => [
             'page_title' => 'Phone verification',
             'card_title' => 'Phone verification by call',
+            'brand_heading' => 'Verify your number',
+            'brand_subtitle' => 'Verification by incoming call — secure and fast, takes less than a minute.',
+            'feature_call' => 'Request a call — we will ring you automatically',
+            'feature_code' => 'Our assistant will read out a 4-digit code',
+            'feature_auto' => 'Verification completes as soon as you enter the code',
             'enter_phone_description' => 'Enter your phone number to verify it via a call.',
             'phone_label' => 'Phone number',
             'phone_submit' => 'Continue',
@@ -169,12 +183,101 @@ return [
         ],
     ],
 
+    'breadcrumbs' => [
+        'aria_label' => 'Breadcrumbs',
+    ],
+
+    'locale' => [
+        'switcher_aria' => 'Language selection',
+        'switch_to_ru' => 'Switch to Russian',
+        'switch_to_en' => 'Switch to English',
+    ],
+
+    'layout' => [
+        'skip_to_content' => 'Skip to main content',
+        'open_menu' => 'Open menu',
+        'close_menu' => 'Close menu',
+        'bottom_nav' => 'Bottom navigation',
+        'main_nav' => 'Main navigation',
+        'site_menu' => 'Site menu',
+        'user_avatar' => 'User avatar',
+        'logout' => 'Sign out',
+        'theme_toggle' => 'Toggle dark theme',
+        'footer' => [
+            'main_pages' => 'Main pages',
+            'about_app' => 'About the app',
+            'legal' => 'Legal information',
+            'about' => 'About us',
+            'contacts' => 'Contacts',
+            'news' => 'News',
+            'privacy' => 'Privacy policy and personal data processing',
+            'cookies' => 'Cookie policy',
+        ],
+        'cookie' => [
+            'short' => 'Cookies for service operation and analytics.',
+            'more' => 'Learn more',
+            'long_intro' => 'We use cookies for the service to work correctly and for analytics. By continuing to use the site, you agree to our',
+            'cookie_policy' => 'Cookie Policy',
+            'and' => 'and',
+            'privacy_policy' => 'Privacy Policy',
+            'accept' => 'Accept',
+        ],
+        'bottom_nav_labels' => [
+            'home' => 'Home',
+            'admin' => 'Admin',
+            'organizer' => 'Org.',
+            'judge' => 'Judge',
+            'moderator' => 'Mod.',
+            'teams' => 'Teams',
+            'menu' => 'Menu',
+            'hackatons' => 'Hackathons',
+            'applications' => 'Applications',
+            'profile' => 'Profile',
+            'login' => 'Sign in',
+        ],
+    ],
+
+    'cropper' => [
+        'choose_file' => 'Choose file',
+        'choose_files' => 'Choose files',
+        'upload_error' => 'Could not upload the file. Try again or choose a different image.',
+        'title' => 'Crop avatar',
+        'preview' => 'Preview',
+        'loading' => 'Loading editor…',
+        'uploading' => 'Uploading…',
+        'cancel' => 'Cancel',
+        'apply' => 'Apply',
+        'batch_caption' => 'File :current of :total',
+    ],
+
     'hub' => [
         'breadcrumb' => 'My hackathon',
     ],
 
     'dashboard' => [
         'summary' => 'Summary',
+        'greeting' => 'Hello, :name. Good to see you!',
+        'phone_banner' => 'Verify your phone number to use all features.',
+        'phone_verify' => 'Verify',
+        'unread_notifications' => 'Unread notifications: :count (see the header bell).',
+        'organizer' => [
+            'title' => 'Organizer',
+            'subtitle_full' => 'Manage hackathons, applications, and the full event list.',
+            'subtitle_home' => 'Hackathon management',
+            'create_hackaton' => 'Create hackathon',
+            'active_hackatons' => 'Active hackathons',
+            'my_hackatons' => 'My hackathons',
+            'manage' => 'Manage →',
+            'pending_applications' => 'Applications awaiting decision',
+            'review' => 'Review →',
+            'all_applications' => 'All applications →',
+            'all_hackatons_hint' => 'Across all your hackathons',
+            'participants_roles' => 'Participants (roles)',
+            'total_created' => 'Total created',
+            'review_applications' => 'Review applications',
+            'open_dashboard' => 'Open dashboard',
+            'manage_hackatons' => 'Manage hackathons',
+        ],
         'roles' => [
             'participant' => 'Participant',
             'organizer' => 'Organizer',
@@ -187,11 +290,35 @@ return [
     'home' => [
         'hero_title' => 'Find a team. Run a hackathon.',
         'hero_subtitle' => 'Hackatonshik helps participants, teams, and organizers through the full journey — from finding teammates to final demos and certificates.',
+        'hero_alt' => 'Hackatonshik mascot',
         'become_organizer' => 'Become an organizer',
         'find_team' => 'Find a team',
+        'active_hackatons' => 'Active hackathons',
+        'all_hackatons' => 'All hackathons',
+        'stats_title' => 'Platform at a glance',
+        'stats_description' => 'Includes all public hackathons on the platform — current, upcoming, finished, and archived (excluding drafts).',
+        'stats_hackatons' => 'Hackathons',
+        'stats_participants' => 'Participants',
+        'stats_teams' => 'Teams',
+        'brand_home' => 'Hackatonshik — home',
         'featured_empty_title' => 'First hackathons coming soon!',
         'featured_empty_description' => 'Stay tuned — exciting events will appear here soon.',
         'open_catalog' => 'Open catalog',
+    ],
+
+    'notifications' => [
+        'aria_label' => 'Notifications',
+        'title' => 'Notifications',
+        'mark_all_read' => 'Mark all as read',
+        'empty' => 'No notifications yet.',
+        'mark_read' => 'Mark as read',
+        'default_title' => 'New notification',
+    ],
+
+    'pagination' => [
+        'aria_label' => 'Pagination',
+        'showing' => 'Showing :first to :last of :total',
+        'go_to_page' => 'Go to page :page',
     ],
 
     'search' => [
@@ -221,6 +348,7 @@ return [
         'reaction' => 'React',
         'reply' => 'Reply',
         'report' => 'Report',
+        'uploading_file' => 'Uploading file…',
     ],
 
     'hackatons' => [
@@ -230,6 +358,7 @@ return [
     ],
 
     'teams' => [
+        'loading' => 'Loading teams…',
         'empty_title' => 'Nothing found yet',
         'empty_description' => 'Change the filters or create your own team — participants can apply for open roles.',
         'create_team' => 'Create team',
@@ -247,6 +376,53 @@ return [
             'slot_few' => 'slots',
             'slot_many' => 'slots',
         ],
+    ],
+
+    'deleted_account' => 'Deleted account',
+    'deleted_account_description' => 'This account has been deleted by the user. The profile is no longer available.',
+    'back_to_hackatons' => 'Back to hackathons',
+
+    'hackatons' => [
+        'tabs' => [
+            'description' => 'Description',
+            'documents' => 'Documents',
+            'announcements' => 'Announcements',
+            'cases' => 'Cases',
+            'participants' => 'Participants',
+            'organization' => 'Organization',
+        ],
+        'create' => [
+            'step_1' => 'Basic info',
+            'step_2' => 'Settings',
+            'step_3' => 'Cases',
+            'step_4' => 'Review',
+        ],
+    ],
+
+    'teams' => [
+        'create' => [
+            'step_1' => 'Basic info',
+            'step_2' => 'Cover',
+            'step_3' => 'Links',
+            'step_4' => 'Roles',
+        ],
+        'filters' => [
+            'label' => 'Filters',
+            'skill' => 'Skill',
+            'status' => 'Status',
+            'role' => 'Role',
+        ],
+    ],
+
+    'participants' => [
+        'page_title' => 'My applications & hackathons',
+        'section_title' => 'My applications & hackathons',
+    ],
+
+    'forms' => [
+        'validation_error' => 'Please check your form fields.',
+        'loading' => 'Loading…',
+        'submitting' => 'Submitting…',
     ],
 
 ];

@@ -61,7 +61,7 @@ new class extends Component
             ->with([
                 'team:id,title,image_url',
                 'user:id,nickname,email',
-                'scores' => fn (Builder $query) => $query->where('reviewed_by', $userId),
+                'scores' => fn ($query) => $query->where('reviewed_by', $userId),
             ])
             ->latest('submitted_at');
 

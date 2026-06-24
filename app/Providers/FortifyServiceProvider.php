@@ -31,7 +31,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
+        // GET /login is the Livewire AuthLogin page (routes/auth.php). Fortify handles POST /login only.
         Fortify::loginView(fn () => view('pages::auth.login'));
         Fortify::registerView(fn () => view('pages::auth.register'));
         Fortify::verifyEmailView(fn () => view('pages.auth.verify-email'));

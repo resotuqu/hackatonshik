@@ -1,5 +1,5 @@
 <div class="mx-auto w-full max-w-5xl">
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+    <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-5">
         <x-auth-brand-panel
             :heading="__('ui.auth.login.brand_heading')"
             :subtitle="__('ui.auth.login.brand_subtitle')"
@@ -11,7 +11,7 @@
 
         <x-maryform wire:submit="save" class="card border border-base-300 bg-base-100 p-4 sm:p-6 lg:col-span-3">
             <x-mary-header title="{{ __('ui.auth.login.form_title') }}" separator />
-            <div class="space-y-3">
+            <div class="animate-form-slide-in space-y-3">
                 <x-mary-input
                     label="{{ __('ui.auth.login.email_label') }}"
                     wire:model="email"
@@ -29,7 +29,7 @@
             </div>
 
             <x-slot:actions class="w-full">
-                <x-mary-button class="btn-primary w-full" label="{{ __('ui.auth.login.submit') }}" type="submit" wire:loading.attr="disabled" wire:target="save" spinner="save" />
+                <x-mary-button class="btn-primary w-full transition-all duration-200 hover:scale-105 active:scale-95" label="{{ __('ui.auth.login.submit') }}" type="submit" wire:loading.attr="disabled" wire:target="save" spinner="save" />
             </x-slot:actions>
 
             <p class="text-center text-sm text-base-content/70">

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\Profile;
 
+use App\Actions\AnonymizeUserAccount;
 use App\Enums\ApplicationStatus;
 use App\Models\Skill;
 use App\Models\TeamApplication;
@@ -22,6 +23,7 @@ class Index extends Component
     public array $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview', 'side-by-side'],
         'uploadImage' => false,
+        'autoDownloadFontAwesome' => false,
     ];
 
     public string $fio = '';
@@ -404,11 +406,11 @@ class Index extends Component
     public function sendPhoneChangeEmailCode(): void
     {
         $this->validate([
-            'new_phone' => ['required', 'string', 'min:11', 'max:12'],
+            'new_phone' => ['required', 'string', 'min:11', 'max:20'],
         ], [
             'new_phone.required' => 'Укажите новый номер.',
-            'new_phone.min' => 'Номер укажите в формате 11–12 цифр, как при регистрации.',
-            'new_phone.max' => 'Номер укажите в формате 11–12 цифр, как при регистрации.',
+            'new_phone.min' => 'Укажите номер в формате +7 (999) 123-45-67.',
+            'new_phone.max' => 'Укажите номер в формате +7 (999) 123-45-67.',
         ]);
         $user = Auth::user();
         if (! $user) {
@@ -712,8 +714,8 @@ class Index extends Component
             return;
         }
 
+        AnonymizeUserAccount::run($user);
         Auth::logout();
-        $user->delete();
 
         session()->invalidate();
         session()->regenerateToken();

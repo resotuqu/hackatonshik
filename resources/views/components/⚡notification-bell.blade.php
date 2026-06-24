@@ -44,7 +44,7 @@ new #[Poll('15s')] class extends Component
 ?>
 
 <div class="dropdown dropdown-end dropdown-bottom">
-    <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Уведомления">
+    <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="{{ __('ui.notifications.aria_label') }}">
         <div class="indicator">
             <x-app-icon icon="heroicons:bell" class="h-5 w-5" />
             @if($count > 0)
@@ -55,20 +55,23 @@ new #[Poll('15s')] class extends Component
     <div tabindex="-1" class="card card-compact dropdown-content z-50 mt-3 w-[min(20rem,calc(100vw-2rem))] max-w-[min(20rem,calc(100vw-2rem))] border border-base-200 bg-base-100 shadow-xl">
         <div class="card-body gap-2">
             <div class="flex items-center justify-between">
-                <p class="font-medium">Уведомления</p>
+                <p class="font-medium">{{ __('ui.notifications.title') }}</p>
                 @if($count > 0)
-                    <button wire:click="markAllAsRead" class="btn btn-ghost btn-xs">Прочитать все</button>
+                    <button wire:click="markAllAsRead" class="btn btn-ghost btn-xs" wire:loading.attr="disabled" wire:target="markAllAsRead">
+                        <span wire:loading.remove wire:target="markAllAsRead">{{ __('ui.notifications.mark_all_read') }}</span>
+                        <span wire:loading wire:target="markAllAsRead" class="loading loading-spinner loading-xs"></span>
+                    </button>
                 @endif
             </div>
             @if($notifications->isEmpty())
-                <p class="text-sm text-base-content/70">Пока нет уведомлений.</p>
+                <p class="text-sm text-base-content/70">{{ __('ui.notifications.empty') }}</p>
             @else
                 <div class="space-y-2">
                     @foreach($notifications as $notification)
                         @php
                             $data = $notification->data ?? [];
                             $url = $data['url'] ?? route('home');
-                            $title = $data['title'] ?? 'Новое уведомление';
+                            $title = $data['title'] ?? __('ui.notifications.default_title');
                             $message = $data['message'] ?? null;
                         @endphp
                         <div @class([
@@ -77,7 +80,7 @@ new #[Poll('15s')] class extends Component
                             'opacity-80' => $notification->read_at !== null,
                         ])>
                             <a href="{{ $url }}" wire:navigate class="block">
-                                <p class="text-sm font-medium">{{ $title }}</p>
+                                <p class="truncate text-sm font-medium">{{ $title }}</p>
                                 @if(filled($message))
                                     <p class="text-xs text-base-content/70">{{ Str::limit($message, 80) }}</p>
                                 @endif
@@ -89,8 +92,11 @@ new #[Poll('15s')] class extends Component
                                 <button
                                     wire:click="markAsRead('{{ $notification->id }}')"
                                     class="btn btn-ghost btn-xs px-1 mt-1"
+                                    wire:loading.attr="disabled"
+                                    wire:target="markAsRead"
                                 >
-                                    Прочитать
+                                    <span wire:loading.remove wire:target="markAsRead">{{ __('ui.notifications.mark_read') }}</span>
+                                    <span wire:loading wire:target="markAsRead" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             @endif
                         </div>

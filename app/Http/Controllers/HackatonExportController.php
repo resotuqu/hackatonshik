@@ -22,7 +22,7 @@ class HackatonExportController extends Controller
 {
     public function teams(Hackaton $hackaton): StreamedResponse
     {
-        $this->authorizeOrganizer($hackaton);
+        $this->authorize('update', $hackaton);
 
         @set_time_limit(120);
 
@@ -49,7 +49,7 @@ class HackatonExportController extends Controller
 
     public function participants(Hackaton $hackaton): StreamedResponse
     {
-        $this->authorizeOrganizer($hackaton);
+        $this->authorize('update', $hackaton);
 
         @set_time_limit(120);
 
@@ -76,7 +76,7 @@ class HackatonExportController extends Controller
 
     public function documentsZip(Hackaton $hackaton): StreamedResponse|RedirectResponse|BinaryFileResponse
     {
-        $this->authorizeOrganizer($hackaton);
+        $this->authorize('update', $hackaton);
 
         @set_time_limit(300);
 
@@ -111,7 +111,8 @@ class HackatonExportController extends Controller
             $extension = pathinfo($document->file_url, PATHINFO_EXTENSION);
             $filename = "documents/{$user}/{$name}_{$document->id}.{$extension}";
 
-            $zip->addFromString($filename, Storage::disk('public')->get($document->file_url));
+            $storagePath = Storage::disk('public')->path($document->file_url);
+            $zip->addFile($storagePath, $filename);
         }
 
         $zip->close();
@@ -121,7 +122,7 @@ class HackatonExportController extends Controller
 
     public function applications(Hackaton $hackaton): StreamedResponse
     {
-        $this->authorizeOrganizer($hackaton);
+        $this->authorize('update', $hackaton);
 
         @set_time_limit(120);
 
@@ -159,7 +160,7 @@ class HackatonExportController extends Controller
 
     public function results(Hackaton $hackaton): StreamedResponse
     {
-        $this->authorizeOrganizer($hackaton);
+        $this->authorize('update', $hackaton);
 
         @set_time_limit(120);
 
@@ -220,12 +221,5 @@ class HackatonExportController extends Controller
                 'teams_count' => $rows->count(),
             ])
             ->values();
-    }
-
-    private function authorizeOrganizer(Hackaton $hackaton): void
-    {
-        if ((int) $hackaton->user_id !== (int) auth()->id()) {
-            abort(403);
-        }
     }
 }

@@ -10,21 +10,21 @@
     $sidebarOrganizerNav = $isOrganizer && config('hackaton.organizer_show_sidebar');
 
     $hackatonNavTabs = [
-        ['value' => 'description', 'label' => 'Описание', 'controls' => 'hackaton-panel-description'],
-        ['value' => 'documents', 'label' => 'Документы', 'controls' => 'hackaton-panel-documents'],
-        ['value' => 'announcements', 'label' => 'Анонсы', 'controls' => 'hackaton-panel-announcements'],
-        ['value' => 'cases', 'label' => 'Кейсы', 'controls' => 'hackaton-panel-cases'],
-        ['value' => 'participants', 'label' => 'Участники', 'controls' => 'hackaton-panel-participants'],
+        ['value' => 'description', 'label' => __('ui.hackatons.tabs.description'), 'controls' => 'hackaton-panel-description'],
+        ['value' => 'documents', 'label' => __('ui.hackatons.tabs.documents'), 'controls' => 'hackaton-panel-documents'],
+        ['value' => 'announcements', 'label' => __('ui.hackatons.tabs.announcements'), 'controls' => 'hackaton-panel-announcements'],
+        ['value' => 'cases', 'label' => __('ui.hackatons.tabs.cases'), 'controls' => 'hackaton-panel-cases'],
+        ['value' => 'participants', 'label' => __('ui.hackatons.tabs.participants'), 'controls' => 'hackaton-panel-participants'],
     ];
     if ($isOrganizer || $isAssignedJudge) {
-        $hackatonNavTabs[] = ['value' => 'organization', 'label' => 'Организация', 'controls' => 'hackaton-panel-organization'];
+        $hackatonNavTabs[] = ['value' => 'organization', 'label' => __('ui.hackatons.tabs.organization'), 'controls' => 'hackaton-panel-organization'];
     }
 @endphp
 
-<div class="mx-auto w-full max-w-7xl space-y-6">
+<div class="mx-auto w-full max-w-7xl space-y-6" data-tab-init="hackaton" data-tab-fallback="{{ $tabFallback }}">
     <x-breadcrumbs :items="[
-        ['label' => __('ui.nav.home'), 'href' => '/'],
-        ['label' => __('ui.nav.hackatons'), 'href' => '/hackatons'],
+        ['label' => __('ui.nav.home'), 'href' => route('home')],
+        ['label' => __('ui.nav.hackatons'), 'href' => route('hackatons.index')],
         ['label' => $hackaton->title],
     ]" />
 
@@ -132,24 +132,6 @@
 
 <script>
     (function () {
-        const hackatonTabs = window.setupTabGroup('hackaton', @json($tabFallback));
-
-        document.querySelectorAll('[data-organizer-action="tab"]').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const tabValue = btn.getAttribute('data-tab-target');
-                if (tabValue) {
-                    hackatonTabs.setActiveTab(tabValue);
-                }
-                const modalId = btn.getAttribute('data-open-modal');
-                if (modalId) {
-                    const toggle = document.getElementById(modalId);
-                    if (toggle) {
-                        toggle.checked = true;
-                    }
-                }
-            });
-        });
-
         const carousels = document.querySelectorAll('[data-image-carousel]');
 
         carousels.forEach((carousel) => {

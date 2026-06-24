@@ -77,6 +77,14 @@ test('admin can access organizer applications filament resource', function () {
         ->assertOk();
 });
 
+test('moderator can access organizer applications filament resource', function () {
+    $moderator = User::factory()->moderator()->create();
+
+    $this->actingAs($moderator)
+        ->get(route('filament.admin.resources.organizer-applications.index'))
+        ->assertOk();
+});
+
 test('participant cannot access organizer applications filament resource', function () {
     $user = User::factory()->create();
 

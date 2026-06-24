@@ -84,8 +84,11 @@ RUN touch /etc/php85/conf.d/99-laravel.ini
 
 
 USER root
-RUN php vendor/bin/rr get-binary --location /usr/local/bin \
-    && chmod +x /usr/local/bin/rr
+RUN for i in 1 2 3; do \
+    php vendor/bin/rr get-binary --location /usr/local/bin && break; \
+    echo "Retry $i failed, trying again..."; \
+    sleep 5; \
+    done && chmod +x /usr/local/bin/rr
 
 
 # OPcache

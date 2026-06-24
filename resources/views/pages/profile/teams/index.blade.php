@@ -1,7 +1,7 @@
 <div class="mx-auto w-full max-w-6xl space-y-10 pb-12">
 
     {{-- Loading skeletons --}}
-    <div wire:loading class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+    <div wire:loading class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="{{ __('ui.teams.loading') }}">
         @foreach (range(1, 6) as $_)
             <x-team-card-skeleton />
         @endforeach
@@ -10,11 +10,11 @@
     <div wire:loading.remove class="space-y-10">
 
         {{-- Breadcrumbs --}}
-        <nav class="text-sm breadcrumbs" aria-label="Навигация">
+        <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
             <ul>
-                <li><a href="/" class="link link-hover">Главная</a></li>
-                <li><a href="/profile" class="link link-hover">Профиль</a></li>
-                <li class="opacity-70">Мои команды</li>
+                <li><a href="{{ route('home') }}" class="link link-hover">{{ __('ui.nav.home') }}</a></li>
+                <li><a href="{{ route('profile') }}" class="link link-hover">{{ __('ui.nav.profile') }}</a></li>
+                <li class="opacity-70">{{ __('ui.nav.my_teams') }}</li>
             </ul>
         </nav>
 
@@ -24,7 +24,7 @@
             description="Управляйте составом, вакансиями и заявками в одном месте."
         >
             <x-slot:actions>
-                <a href="/teams/create" wire:navigate class="ui-cta-primary btn-sm shrink-0 gap-2">
+                <a href="{{ route('teams.create') }}" wire:navigate class="ui-cta-primary btn-sm shrink-0 gap-2">
                     <x-app-icon icon="heroicons:plus" class="h-4 w-4" />
                     Создать команду
                 </a>
@@ -50,13 +50,13 @@
                             $role = $application->teamRole?->role ?? $application->teamRole;
                         @endphp
                         <div class="flex flex-col gap-3 rounded-panel border border-base-300 bg-base-100 p-5 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <p class="font-medium">{{ $appTeam?->title ?? '—' }}</p>
+                            <div class="min-w-0">
+                                <p class="truncate font-medium">{{ $appTeam?->title ?? '—' }}</p>
                                 @if ($role)
-                                    <p class="text-sm text-base-content/70">Роль: <span class="font-medium">{{ $role->name ?? $role->title }}</span></p>
+                                    <p class="truncate text-sm text-base-content/70">Роль: <span class="font-medium">{{ $role->name ?? $role->title }}</span></p>
                                 @endif
                                 @if ($appTeam?->hackaton)
-                                    <p class="text-sm text-base-content/70">{{ $appTeam->hackaton->title }}</p>
+                                    <p class="truncate text-sm text-base-content/70">{{ $appTeam->hackaton->title }}</p>
                                 @endif
                                 <p class="text-xs text-base-content/50">
                                     Подана <x-datetime :value="$application->created_at" mode="relative" />

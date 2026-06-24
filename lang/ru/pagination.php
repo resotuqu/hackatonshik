@@ -15,6 +15,7 @@ return [
 
     'previous' => '&laquo; Назад',
     'next' => 'Вперёд &raquo;',
-    'Showing' => 'Показано',
+    'showing' => 'Показано с :first по :last из :total',
+    'go_to_page' => 'Перейти на страницу :page',
 
 ];

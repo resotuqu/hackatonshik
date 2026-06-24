@@ -31,6 +31,7 @@ use App\Livewire\Pages\PrivacyPolicy\Index as PrivacyPolicyIndex;
 use App\Livewire\Pages\Profile\Certificates\Index as ProfileCertificatesIndex;
 use App\Livewire\Pages\Profile\Hackatons\Hub as ProfileHackatonsHub;
 use App\Livewire\Pages\Profile\Index as ProfileIndex;
+use App\Livewire\Pages\Profile\PublicProfileDeleted;
 use App\Livewire\Pages\Profile\PublicProfileShow;
 use App\Livewire\Pages\Profile\Teams\Index as ProfileTeamsIndex;
 use App\Livewire\Pages\Profile\Watches\Index as ProfileWatchesIndex;
@@ -45,6 +46,7 @@ use App\Models\NewsPost;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeIndex::class)->name('home');
@@ -52,19 +54,20 @@ Route::get('/', HomeIndex::class)->name('home');
 Route::get('/about', AboutIndex::class);
 Route::get('/news', NewsIndex::class)->name('news.index');
 Route::get('/news/rss', function (): Response {
-    $posts = NewsPost::query()
-        ->published()
-        ->latest('published_at')
-        ->limit(50)
-        ->get(['title', 'slug', 'excerpt', 'published_at']);
+    $xml = Cache::remember('news-rss-feed', now()->addMinutes(10), function (): string {
+        $posts = NewsPost::query()
+            ->published()
+            ->latest('published_at')
+            ->limit(50)
+            ->get(['title', 'slug', 'excerpt', 'published_at']);
 
-    $items = $posts->map(function (NewsPost $post): string {
-        $title = e($post->title);
-        $link = route('news.show', ['post' => $post->slug]);
-        $description = e((string) ($post->excerpt ?? ''));
-        $pubDate = Carbon::parse((string) $post->published_at)->toRfc2822String();
+        $items = $posts->map(function (NewsPost $post): string {
+            $title = e($post->title);
+            $link = route('news.show', ['post' => $post->slug]);
+            $description = e((string) ($post->excerpt ?? ''));
+            $pubDate = Carbon::parse((string) $post->published_at)->toRfc2822String();
 
-        return <<<XML
+            return <<<XML
 <item>
   <title>{$title}</title>
   <link>{$link}</link>
@@ -73,13 +76,13 @@ Route::get('/news/rss', function (): Response {
   <pubDate>{$pubDate}</pubDate>
 </item>
 XML;
-    })->implode("\n");
+        })->implode("\n");
 
-    $channelTitle = e((string) config('app.rss_channel_title'));
-    $channelDescription = e((string) config('app.rss_channel_description'));
-    $channelLink = route('home');
+        $channelTitle = e((string) config('app.rss_channel_title'));
+        $channelDescription = e((string) config('app.rss_channel_description'));
+        $channelLink = route('home');
 
-    $xml = <<<XML
+        return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
@@ -90,8 +93,12 @@ XML;
 </channel>
 </rss>
 XML;
+    });
 
-    return response($xml, 200, ['Content-Type' => 'application/rss+xml; charset=UTF-8']);
+    return response($xml, 200, [
+        'Content-Type' => 'application/rss+xml; charset=UTF-8',
+        'Cache-Control' => 'public, max-age=600',
+    ]);
 })->name('news.rss');
 Route::get('/news/{post:slug}', NewsShow::class)->name('news.show');
 Route::get('/contacts', ContactsIndex::class);
@@ -99,9 +106,12 @@ Route::get('/privacy-policy', PrivacyPolicyIndex::class);
 Route::get('/cookie-policy', CookiePolicyIndex::class);
 
 Route::get('/profile', ProfileIndex::class)->middleware(['auth', 'verified'])->name('profile');
-Route::get('/profile/export', ExportAccountDataController::class)->middleware(['auth', 'verified'])->name('profile.export');
+Route::get('/profile/export', ExportAccountDataController::class)
+    ->middleware(['auth', 'verified', 'throttle:exports'])
+    ->name('profile.export');
 // Filament admin panel handles /admin/* (see AdminPanelProvider)
 Route::redirect('/admin/dashboard', '/admin')->name('admin.dashboard');
+Route::get('/u/deleted/{user}', PublicProfileDeleted::class)->name('profile.public.deleted');
 Route::get('/u/{user:nickname}', PublicProfileShow::class)->name('profile.public.show');
 
 $organizerMiddleware = ['auth', 'verified', 'organizer'];
@@ -165,8 +175,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/phone/verify/send', [PhoneVerificationController::class, 'sendCode'])->name('phone.verify.send');
     Route::post('/phone/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
 
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+        ->middleware('throttle:notifications')
+        ->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->middleware('throttle:notifications')
+        ->name('notifications.read-all');
 
     Route::delete('/teams/{team}/roles/{teamRole}/participant', [TeamController::class, 'destroyParticipant'])
         ->name('teams.participants.destroy');

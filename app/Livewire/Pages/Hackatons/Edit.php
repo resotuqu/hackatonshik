@@ -110,6 +110,7 @@ class Edit extends Component
     public array $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
         'uploadImage' => false,
+        'autoDownloadFontAwesome' => false,
     ];
 
     public function mount(Hackaton $hackaton): void

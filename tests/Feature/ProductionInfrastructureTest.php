@@ -9,13 +9,19 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
 
-test('telescope provider is not registered when package is absent', function () {
+test('telescope provider is registered only outside production when package is present', function () {
     $providers = require base_path('bootstrap/providers.php');
 
-    if (class_exists(TelescopeServiceProvider::class)) {
-        expect($providers)->toContain(TelescopeServiceProvider::class);
-    } else {
+    if (! class_exists(TelescopeServiceProvider::class)) {
         expect($providers)->not->toContain(TelescopeServiceProvider::class);
+
+        return;
+    }
+
+    if (app()->environment('production')) {
+        expect($providers)->not->toContain(TelescopeServiceProvider::class);
+    } else {
+        expect($providers)->toContain(TelescopeServiceProvider::class);
     }
 });
 
@@ -78,6 +84,21 @@ test('telegram log channel resolves in stack configuration', function () {
     Log::channel('telegram');
 
     expect(true)->toBeTrue();
+});
+
+test('validate production config command fails with sqlite database in production', function () {
+    /** @var Application $app */
+    $app = app();
+    $app->detectEnvironment(fn (): string => 'production');
+
+    config(['database.default' => 'sqlite']);
+    config(['mail.default' => 'smtp']);
+    config(['app.trusted_proxies' => '127.0.0.1']);
+
+    $this->artisan('app:validate-production-config')
+        ->assertExitCode(1);
+
+    $app->detectEnvironment(fn (): string => 'testing');
 });
 
 test('validate production config command fails with log mailer in production', function () {

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Pages\Admin\AvatarPresets;
-use App\Livewire\Pages\Admin\Index as AdminIndex;
 use App\Livewire\Pages\Hackatons\Create as HackatonsCreate;
 use App\Livewire\Pages\Hackatons\Edit as HackatonsEdit;
 use App\Livewire\Pages\Teams\Create as TeamsCreate;
@@ -51,42 +49,30 @@ test('non owner cannot save hackaton when livewire mount is bypassed', function 
     expect($hackaton->fresh()->title)->toBe('Original title');
 });
 
-test('non admin cannot create partner when livewire mount is bypassed', function () {
+test('non admin cannot access filament user management when session is swapped', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create();
 
-    actingAs($admin);
+    actingAs($admin)
+        ->get(route('filament.admin.resources.users.create'))
+        ->assertOk();
 
-    $component = Livewire::test(AdminIndex::class)
-        ->set('fio', 'Test Partner')
-        ->set('date_of_birth', '1990-01-01')
-        ->set('email', 'partner-bypass@example.com')
-        ->set('nickname', 'partner_bypass')
-        ->set('phone', '+79001234567')
-        ->set('password', 'password123')
-        ->set('password_confirmation', 'password123');
-
-    Auth::login($user);
-
-    $component->call('savePartner')->assertForbidden();
-
-    expect(User::query()->where('email', 'partner-bypass@example.com')->exists())->toBeFalse();
+    actingAs($user)
+        ->get(route('filament.admin.resources.users.create'))
+        ->assertForbidden();
 });
 
-test('non admin cannot create avatar pack when livewire mount is bypassed', function () {
+test('non admin cannot access filament avatar presets when session is swapped', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create();
 
-    actingAs($admin);
+    actingAs($admin)
+        ->get(route('filament.admin.resources.avatar-presets.index'))
+        ->assertOk();
 
-    $component = Livewire::test(AvatarPresets::class)
-        ->set('new_pack_name', 'Bypass Pack')
-        ->set('new_pack_slug', 'bypass-pack')
-        ->set('new_pack_sort_order', 1);
-
-    Auth::login($user);
-
-    $component->call('createPack')->assertForbidden();
+    actingAs($user)
+        ->get(route('filament.admin.resources.avatar-presets.index'))
+        ->assertForbidden();
 });
 
 test('judge cannot create team when livewire mount is bypassed', function () {
@@ -123,14 +109,14 @@ test('judge cannot quick apply to team when livewire mount is bypassed', functio
     $component->call('quickApplyTeam', $team->id)->assertForbidden();
 });
 
-test('non admin cannot mount admin dashboard livewire component', function () {
-    actingAs(User::factory()->create());
-
-    Livewire::test(AdminIndex::class)->assertForbidden();
-});
-
 test('participant cannot mount hackaton create livewire component', function () {
     actingAs(User::factory()->create());
 
     Livewire::test(HackatonsCreate::class)->assertForbidden();
+});
+
+test('participant cannot access filament admin panel', function () {
+    actingAs(User::factory()->create())
+        ->get('/admin')
+        ->assertForbidden();
 });

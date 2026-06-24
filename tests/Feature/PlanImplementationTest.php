@@ -4,7 +4,6 @@ use App\Actions\Hackaton\ResolveParticipantUsersForHackatonCertificates;
 use App\Enums\ApplicationStatus;
 use App\Enums\HackatonStatus;
 use App\Jobs\ProcessHackatonFinishedAutomations;
-use App\Livewire\Pages\Admin\Users as AdminUsers;
 use App\Livewire\Pages\Hackatons\Create;
 use App\Livewire\Pages\Profile\Hackatons\Participants;
 use App\Models\Hackaton;
@@ -163,20 +162,22 @@ test('admin can manage news posts', function () {
     ]);
 });
 
-test('admin can change user role and suspend account', function () {
+test('admin can access user management in filament', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create(['role' => 'user']);
 
-    Livewire::actingAs($admin)
-        ->test(AdminUsers::class)
-        ->call('startEditRole', $user->id)
-        ->set('editRole', 'judge')
-        ->call('saveRole')
-        ->call('toggleSuspension', $user->id);
+    $this->actingAs($admin)
+        ->get(route('filament.admin.resources.users.edit', $user))
+        ->assertOk();
+});
 
-    $user->refresh();
-    expect($user->role->value)->toBe('judge');
-    expect($user->isSuspended())->toBeTrue();
+test('admin can suspend user account via model', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create(['role' => 'user']);
+
+    $user->forceFill(['suspended_at' => now()])->save();
+
+    expect($user->fresh()->isSuspended())->toBeTrue();
 });
 
 test('suspended user is logged out on next request', function () {

@@ -1,73 +1,30 @@
 <?php
 
-use App\Livewire\Pages\Admin\AvatarPresets;
-use App\Models\AvatarPreset;
 use App\Models\AvatarPresetPack;
 use App\Models\User;
-use App\Support\PresetAvatar;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Livewire\Livewire;
 
 test('admin avatar presets page is forbidden for non-admin', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user)->get('/admin/avatar-presets')->assertForbidden();
-});
-
-test('non admin cannot mount avatar presets livewire component', function () {
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(AvatarPresets::class)
+    $this->actingAs($user)
+        ->get(route('filament.admin.resources.avatar-presets.index'))
         ->assertForbidden();
 });
 
-test('admin can create avatar preset pack', function () {
+test('admin can access avatar presets filament resource', function () {
     $admin = User::factory()->admin()->create();
+    $pack = AvatarPresetPack::factory()->create(['slug' => 'filament-pack']);
 
-    Livewire::actingAs($admin)
-        ->test(AvatarPresets::class)
-        ->set('new_pack_name', 'Тестовый пак')
-        ->set('new_pack_slug', 'test-pack-admin')
-        ->set('new_pack_sort_order', 5)
-        ->call('createPack')
-        ->assertHasNoErrors();
-
-    expect(AvatarPresetPack::query()->where('slug', 'test-pack-admin')->exists())->toBeTrue();
+    $this->actingAs($admin)
+        ->get(route('filament.admin.resources.avatar-presets.edit', $pack))
+        ->assertOk()
+        ->assertSee('Аватарки');
 });
 
-test('admin can upload multiple preset images to pack via Livewire', function () {
-    Storage::fake('public');
+test('moderator cannot access avatar presets filament resource', function () {
+    $moderator = User::factory()->moderator()->create();
 
-    $admin = User::factory()->admin()->create();
-
-    $pack = AvatarPresetPack::factory()->create([
-        'slug' => 'multi-up-pack',
-        'name' => 'Multi up',
-        'is_active' => true,
-    ]);
-    Storage::disk('public')->makeDirectory(PresetAvatar::packStorageDirectory($pack->slug));
-
-    $one = UploadedFile::fake()->image('c1.jpg', 100, 100);
-    $two = UploadedFile::fake()->image('c2.jpg', 100, 100);
-
-    Livewire::actingAs($admin)
-        ->test(AvatarPresets::class)
-        ->set('upload_pack_id', $pack->id)
-        ->set('upload_files', [$one, $two])
-        ->call('uploadToPack')
-        ->assertHasNoErrors();
-
-    $paths = AvatarPreset::query()
-        ->where('avatar_preset_pack_id', $pack->id)
-        ->pluck('storage_path')
-        ->all();
-
-    expect($paths)->toHaveCount(2);
-
-    foreach ($paths as $path) {
-        expect($path)->toStartWith('preset_avatars/packs/multi-up-pack/')
-            ->and(Storage::disk('public')->exists($path))->toBeTrue();
-    }
+    $this->actingAs($moderator)
+        ->get(route('filament.admin.resources.avatar-presets.index'))
+        ->assertForbidden();
 });

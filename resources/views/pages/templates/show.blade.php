@@ -1,10 +1,10 @@
 <div class="mx-auto max-w-3xl space-y-8 px-4 py-8">
-    <div class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
-            <li><a href="{{ route('templates.index') }}" wire:navigate>Шаблоны</a></li>
+            <li><a href="{{ route('templates.index') }}" wire:navigate>{{ __('ui.nav.templates') }}</a></li>
             <li class="opacity-70">{{ $template->title }}</li>
         </ul>
-    </div>
+    </nav>
 
     <header class="space-y-3">
         <h1 class="ui-heading-display text-3xl font-bold">{{ $template->title }}</h1>

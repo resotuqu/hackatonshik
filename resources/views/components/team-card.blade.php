@@ -141,7 +141,7 @@
                 </div>
             @endif
 
-            <div class="mt-2 w-full sm:mt-0 sm:w-auto">
+            <div class="w-full sm:ml-auto sm:w-auto">
                 @if (filled($href))
                     <a
                         href="{{ $href }}"

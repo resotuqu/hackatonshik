@@ -14,6 +14,7 @@ use Mary\Traits\Toast;
 new class extends Component
 {
     use Toast;
+
     public HackatonCaseSubmission $submission;
 
     /**
@@ -32,6 +33,12 @@ new class extends Component
 
     public bool $isSaving = false;
 
+    public int $totalCount = 0;
+
+    public int $currentPosition = 0;
+
+    public int $unratedCount = 0;
+
     public function mount(HackatonCaseSubmission $submission): void
     {
         $this->submission = HackatonCaseSubmission::query()
@@ -40,7 +47,7 @@ new class extends Component
                 'answers.field',
                 'team:id,title',
                 'user:id,nickname,email',
-                'scores' => fn (Builder $query) => $query->where('reviewed_by', auth()->id()),
+                'scores' => fn ($query) => $query->where('reviewed_by', auth()->id()),
             ])
             ->findOrFail($submission->id);
 
@@ -53,6 +60,29 @@ new class extends Component
             $this->generalComment = $existing->general_comment;
             $this->isFinal = (bool) $existing->is_final;
         }
+
+        $userId = (int) auth()->id();
+        $caseId = $this->submission->hackaton_case_id;
+
+        $this->totalCount = HackatonCaseSubmission::query()
+            ->where('hackaton_case_id', $caseId)
+            ->count();
+
+        $this->currentPosition = HackatonCaseSubmission::query()
+            ->where('hackaton_case_id', $caseId)
+            ->where('id', '<=', $this->submission->id)
+            ->count();
+
+        $this->unratedCount = HackatonCaseSubmission::query()
+            ->where('hackaton_case_id', $caseId)
+            ->whereDoesntHave('scores', fn (Builder $query) => $query->where('reviewed_by', $userId)->where('is_final', true))
+            ->count();
+    }
+
+    public function setQuickScore(string $criterionId, int $score): void
+    {
+        $this->criteriaScores[$criterionId]['score'] = $score;
+        $this->saveDraft(app(SaveScoreDraftAction::class));
     }
 
     public function saveDraft(SaveScoreDraftAction $saveDraft): void
@@ -67,7 +97,7 @@ new class extends Component
 
         $this->isSaving = false;
 
-        $this->success('Черновик сохранён', position: \App\Support\FlashToast::POSITION);
+        $this->dispatch('draft-saved');
     }
 
     public function finalize(EvaluateSubmissionAction $evaluate): void
@@ -159,10 +189,20 @@ new class extends Component
 
 <div
     class="mx-auto w-full max-w-7xl space-y-4"
-    x-data
+    x-data="{
+        savedVisible: false,
+        mobileTab: 'solution',
+        isDesktop: window.matchMedia('(min-width: 1024px)').matches,
+        _saveTimer: null
+    }"
+    x-init="
+        let mq = window.matchMedia('(min-width: 1024px)');
+        mq.addEventListener('change', e => isDesktop = e.matches);
+    "
     x-on:keydown.window.prevent.ctrl.s="$wire.saveDraft()"
     x-on:keydown.window.prevent.arrow-right="$wire.goNext()"
     x-on:keydown.window.prevent.arrow-left="$wire.goPrev()"
+    x-on:draft-saved.window="savedVisible = true; clearTimeout(_saveTimer); _saveTimer = setTimeout(() => savedVisible = false, 2000)"
 >
     <section class="ui-page-header">
         <div class="flex flex-col gap-4 pb-5 lg:flex-row lg:items-end lg:justify-between">
@@ -182,39 +222,69 @@ new class extends Component
                     Отправлено: {{ $submission->submitted_at?->format('d.m.Y H:i') }}
                 </p>
             </div>
+
             <div class="flex flex-wrap items-center gap-2">
                 @if($isFinal)
-                    <span class="badge badge-success">Final</span>
+                    <span class="badge badge-success">Готово</span>
                 @else
-                    <span class="badge badge-warning">Draft</span>
+                    <span class="badge badge-warning">Черновик</span>
                 @endif
-                <button class="btn btn-sm btn-outline" wire:click="goPrev">← Пред.</button>
-                <button class="btn btn-sm btn-outline" wire:click="goNext">След. →</button>
-                <button class="btn btn-sm btn-neutral" wire:click="goToNextUnrated">След. неоценённая</button>
+
+                <div class="flex items-center gap-0.5">
+                    <button class="btn btn-xs btn-ghost" wire:click="goPrev" title="Предыдущая (←)">←</button>
+                    <span class="px-2 font-mono text-sm text-base-content/60">{{ $currentPosition }} / {{ $totalCount }}</span>
+                    <button class="btn btn-xs btn-ghost" wire:click="goNext" title="Следующая (→)">→</button>
+                </div>
+
+                <button class="btn btn-sm btn-neutral gap-1.5" wire:click="goToNextUnrated">
+                    Следующая без оценки
+                    @if($unratedCount > 0)
+                        <span class="badge badge-sm badge-neutral">{{ $unratedCount }}</span>
+                    @endif
+                </button>
             </div>
         </div>
     </section>
 
+    {{-- Mobile tab switcher --}}
+    <div class="flex gap-1 lg:hidden">
+        <button
+            @click="mobileTab = 'solution'"
+            class="btn btn-sm flex-1 gap-1.5"
+            :class="mobileTab === 'solution' ? 'btn-primary' : 'btn-ghost'"
+        >
+            <x-app-icon icon="heroicons:document-text" class="h-4 w-4" />
+            Решение
+        </button>
+        <button
+            @click="mobileTab = 'scoring'"
+            class="btn btn-sm flex-1 gap-1.5"
+            :class="mobileTab === 'scoring' ? 'btn-primary' : 'btn-ghost'"
+        >
+            <x-app-icon icon="heroicons:star" class="h-4 w-4" />
+            Оценка
+        </button>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="space-y-4">
+
+        {{-- Left: Solution --}}
+        <div class="space-y-4" x-show="isDesktop || mobileTab === 'solution'" style="display:none">
             <div class="card border border-base-300 bg-base-100">
                 <div class="card-body space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h2 class="card-title text-lg">Решение</h2>
-                        <span class="text-xs text-base-content/50">Side-by-side</span>
-                    </div>
+                    <h2 class="card-title text-lg">Решение</h2>
 
                     @foreach($submission->answers as $answer)
                         <div class="rounded-xl border border-base-300 p-3 bg-base-50/50 space-y-2">
                             <div class="text-xs font-semibold text-base-content/50">{{ $answer->field->label }}</div>
 
                             @if($answer->field->type === 'file' && $answer->file_path)
-                                <a href="{{ asset('storage/' . $answer->file_path) }}" target="_blank" class="link link-primary flex items-center gap-1">
+                                <a href="{{ asset('storage/' . $answer->file_path) }}" target="_blank" rel="noopener noreferrer" class="link link-primary flex items-center gap-1">
                                     <x-app-icon icon="heroicons:document-arrow-down" class="h-4 w-4" />
                                     Скачать файл
                                 </a>
                             @elseif($answer->field->type === 'url' && $answer->value_text)
-                                <a href="{{ $answer->value_text }}" target="_blank" class="link link-primary break-all">
+                                <a href="{{ $answer->value_text }}" target="_blank" rel="noopener noreferrer" class="link link-primary break-all">
                                     {{ $answer->value_text }}
                                 </a>
                             @else
@@ -239,14 +309,24 @@ new class extends Component
             </div>
         </div>
 
-        <div class="space-y-4">
+        {{-- Right: Scoring --}}
+        <div class="space-y-4" x-show="isDesktop || mobileTab === 'scoring'" style="display:none">
             <div class="card border border-base-300 bg-base-100">
                 <div class="card-body space-y-4">
+
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="card-title text-lg">Оценка</h2>
-                        <div class="flex items-center gap-2 text-xs text-base-content/50">
-                            <span x-show="$wire.isSaving" class="loading loading-spinner loading-xs"></span>
-                            <span x-show="!$wire.isSaving">Ctrl+S — сохранить</span>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span x-show="$wire.isSaving" class="flex items-center gap-1 text-base-content/50" style="display:none">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                Сохраняем...
+                            </span>
+                            <span x-show="!$wire.isSaving && savedVisible" class="text-success" style="display:none">
+                                ✓ Сохранено
+                            </span>
+                            <span x-show="!$wire.isSaving && !savedVisible" class="text-base-content/50">
+                                Ctrl+S — сохранить
+                            </span>
                         </div>
                     </div>
 
@@ -254,6 +334,12 @@ new class extends Component
                         $domain = $this->judgeDomain();
                         $rubric = is_array($submission->case->rubric_json) ? $submission->case->rubric_json : [];
                     @endphp
+
+                    {{-- Domain notice --}}
+                    <div class="flex items-center gap-2 rounded-lg border border-base-300 bg-base-200/50 px-3 py-2 text-xs text-base-content/70">
+                        <x-app-icon icon="heroicons:information-circle" class="h-4 w-4 shrink-0 text-base-content/40" />
+                        Вы оцениваете критерии домена: <span class="ml-0.5 font-semibold">{{ $domain->label() }}</span>
+                    </div>
 
                     <div class="space-y-3">
                         @foreach($rubric as $criterion)
@@ -263,17 +349,25 @@ new class extends Component
                                 $max = (int) ($criterion['max'] ?? 0);
                                 $cDomain = (string) ($criterion['domain'] ?? '');
                                 $canEdit = $cDomain === $domain->value;
+                                $criterionDomainLabel = match ($cDomain) {
+                                    'design' => 'Дизайн',
+                                    'dev' => 'Разработка',
+                                    'business' => 'Бизнес',
+                                    default => $cDomain,
+                                };
                             @endphp
 
                             @if($id !== '' && $max > 0)
-                                <div class="rounded-xl border border-base-300 p-3 space-y-2">
+                                <div class="rounded-xl border border-base-300 p-3 space-y-2 @if(!$canEdit) opacity-55 @endif">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
                                             <div class="font-semibold text-sm truncate">{{ $label }}</div>
-                                            <div class="text-[11px] text-base-content/50">Макс: {{ $max }} • Домен: {{ $cDomain }}</div>
+                                            <div class="text-[11px] text-base-content/50">Макс: {{ $max }}</div>
                                         </div>
                                         @if(!$canEdit)
-                                            <span class="badge badge-ghost badge-sm">read-only</span>
+                                            <span class="badge badge-ghost badge-sm shrink-0" title="Этот критерий оценивает судья домена «{{ $criterionDomainLabel }}»">
+                                                Домен: {{ $criterionDomainLabel }}
+                                            </span>
                                         @endif
                                     </div>
 
@@ -287,7 +381,6 @@ new class extends Component
                                             wire:model.live.debounce.500ms="criteriaScores.{{ $id }}.score"
                                             wire:change="saveDraft"
                                         >
-
                                         <div class="flex flex-wrap gap-1">
                                             @foreach([5,7,8,9,10] as $quick)
                                                 @if($quick <= $max)
@@ -295,22 +388,22 @@ new class extends Component
                                                         type="button"
                                                         class="btn btn-xs btn-outline"
                                                         @disabled(!$canEdit)
-                                                        wire:click="$set('criteriaScores.{{ $id }}.score', {{ $quick }})"
-                                                        wire:click.prevent="saveDraft"
+                                                        wire:click="setQuickScore('{{ $id }}', {{ $quick }})"
                                                     >{{ $quick }}</button>
                                                 @endif
                                             @endforeach
                                         </div>
                                     </div>
 
-                                    <textarea
-                                        class="textarea textarea-bordered textarea-sm w-full"
-                                        rows="2"
-                                        @disabled(!$canEdit)
-                                        wire:model.blur="criteriaScores.{{ $id }}.comment"
-                                        wire:change="saveDraft"
-                                        placeholder="Комментарий к критерию (автосохранение)">
-                                    </textarea>
+                                    @if($canEdit)
+                                        <textarea
+                                            class="textarea textarea-bordered textarea-sm w-full"
+                                            rows="2"
+                                            wire:model.blur="criteriaScores.{{ $id }}.comment"
+                                            wire:change="saveDraft"
+                                            placeholder="Комментарий к критерию (автосохранение)">
+                                        </textarea>
+                                    @endif
                                 </div>
                             @endif
                         @endforeach
@@ -329,16 +422,22 @@ new class extends Component
                     </div>
 
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <button class="btn btn-sm btn-outline" wire:click="saveDraft" wire:loading.attr="disabled">
+                        <button class="btn btn-sm btn-ghost" wire:click="saveDraft" wire:loading.attr="disabled">
                             Сохранить черновик
                         </button>
-                        <button class="btn btn-sm btn-neutral" wire:click="finalize" wire:loading.attr="disabled">
-                            Финализировать
+                        <button
+                            class="btn btn-sm btn-primary"
+                            wire:click="finalize"
+                            wire:loading.attr="disabled"
+                            title="После финализации оценка учитывается в итогах хакатона"
+                        >
+                            Отметить как готово
                         </button>
                     </div>
+
                 </div>
             </div>
         </div>
+
     </div>
 </div>
-

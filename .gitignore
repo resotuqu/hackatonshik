@@ -13,6 +13,7 @@
 /database/database.sqlite
 /storage/phpstan
 /storage/framework/phpstan
+/storage/framework/views/
 /storage/logs/*.log
 /storage/logs/*.log.*
 /public/build
@@ -25,6 +26,11 @@
 .env.backup
 .env.production
 .env.dusk.local
+.env.sail
+/test-output.txt
+/_commit_verify.txt
+/tmp/*
+!/tmp/.gitkeep
 .phpactor.json
 .phpunit.result.cache
 Homestead.json

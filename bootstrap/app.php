@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureUserNotSuspended;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Support\TrustedProxiesResolver;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -36,15 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'participant' => EnsureParticipant::class,
         ]);
 
-        $appEnv = (string) env('APP_ENV', 'production');
-        $trusted = env('TRUSTED_PROXIES');
-        $at = match (true) {
-            in_array($appEnv, ['local', 'testing'], true) => '*',
-            $trusted === '*' => '*',
-            is_string($trusted) && $trusted !== '' => array_values(array_filter(array_map('trim', explode(',', $trusted)))),
-            default => [],
-        };
-        $middleware->trustProxies(at: $at);
+        $middleware->trustProxies(at: TrustedProxiesResolver::at());
 
         $middleware->web(append: [
             SecurityHeaders::class,

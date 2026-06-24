@@ -2,13 +2,13 @@
 
 <div class="py-6">
     <div class="mx-auto w-full max-w-6xl space-y-6">
-        <div class="text-sm breadcrumbs">
+        <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
             <ul>
-                <li><a href="{{ route('home') }}">Главная</a></li>
-                <li><a href="{{ route('judge.dashboard') }}">Судья</a></li>
+                <li><a href="{{ route('home') }}">{{ __('ui.nav.home') }}</a></li>
+                <li><a href="{{ route('judge.dashboard') }}">{{ __('ui.nav.judge_panel') }}</a></li>
                 <li class="opacity-70">{{ $hackaton->title }}</li>
             </ul>
-        </div>
+        </nav>
 
         <section class="ui-page-header">
             <div class="flex flex-col items-start gap-4 pb-5 sm:flex-row sm:items-end sm:justify-between">

@@ -3,19 +3,18 @@
 namespace App\Livewire\Pages\Teams;
 
 use App\Actions\Hackaton\SuggestTeamsForUser;
-use App\Enums\ApplicationStatus;
+use App\Actions\Team\QuickApplyToTeam;
 use App\Models\Hackaton;
 use App\Models\ListAnalyticsEvent;
 use App\Models\Role;
 use App\Models\SavedListFilter;
 use App\Models\Skill;
 use App\Models\Team;
-use App\Models\TeamApplication;
-use App\Models\TeamRole;
 use App\Models\User;
 use App\Support\FlashToast;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -306,44 +305,27 @@ class Index extends Component
         $this->trackListEvent('filter_apply', $this->currentFilters());
     }
 
-    public function quickApplyTeam(int $teamId): void
+    public function quickApplyTeam(int $teamId, QuickApplyToTeam $quickApply): void
     {
-        if (! Auth::check()) {
-            return;
-        }
-
         $user = Auth::user();
-        abort_unless($user instanceof User && $user->canParticipate(), 403);
 
-        if ($user->isOrganizer()) {
-            $this->warning('Организатор не может подавать заявки в команды.', position: FlashToast::POSITION);
+        if (! $user instanceof User) {
+            return;
+        }
+
+        try {
+            $application = $quickApply->handle($user, $teamId);
+        } catch (ValidationException $exception) {
+            $message = collect($exception->errors())->flatten()->first() ?? 'Не удалось отправить заявку.';
+            $this->warning($message, position: FlashToast::POSITION);
 
             return;
         }
 
-        $team = Team::query()->with('roles')->find($teamId);
-        if (! $team || $team->user_id === Auth::id()) {
-            return;
-        }
-
-        $role = $team->roles->first(fn (TeamRole $candidate): bool => $candidate->user_id === null);
-        if ($role === null) {
-            return;
-        }
-
-        $application = TeamApplication::query()->firstOrNew([
-            'user_id' => Auth::id(),
-            'team_role_id' => $role->id,
+        $this->trackListEvent('quick_apply_click', [
+            'team_id' => $teamId,
+            'team_role_id' => $application->team_role_id,
         ]);
-        $application->fill([
-            'status' => ApplicationStatus::PENDING,
-            'message' => null,
-            'reviewed_at' => null,
-            'reviewed_by' => null,
-        ]);
-        $application->save();
-
-        $this->trackListEvent('quick_apply_click', ['team_id' => $teamId, 'team_role_id' => $role->id]);
         $this->success('Быстрый отклик отправлен.', position: FlashToast::POSITION);
     }
 

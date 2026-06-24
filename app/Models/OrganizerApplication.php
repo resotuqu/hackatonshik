@@ -89,12 +89,18 @@ class OrganizerApplication extends Model
 
     public function reject(User $reviewer, ?string $adminNote = null): void
     {
-        $this->update([
-            'status' => OrganizerApplicationStatus::Rejected,
-            'reviewed_by' => $reviewer->id,
-            'reviewed_at' => now(),
-            'admin_note' => $adminNote,
-        ]);
+        DB::transaction(function () use ($reviewer, $adminNote): void {
+            $locked = self::query()->lockForUpdate()->findOrFail($this->id);
+
+            $locked->update([
+                'status' => OrganizerApplicationStatus::Rejected,
+                'reviewed_by' => $reviewer->id,
+                'reviewed_at' => now(),
+                'admin_note' => $adminNote,
+            ]);
+        });
+
+        $this->refresh();
     }
 
     public function resubmit(OrganizerEntityType $entityType, ?string $companyName, string $note): void

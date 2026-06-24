@@ -24,7 +24,8 @@ class HackatonCertificateController extends Controller
 
         $createdCount = 0;
         DB::transaction(function () use ($request, $hackaton, $validated, $userIds, &$createdCount): void {
-            $filePath = $request->file('file')->store('hackaton_certificates', 'local');
+            $sourcePath = $request->file('file')->store('hackaton_certificates', 'local');
+            $sourceContents = Storage::disk('local')->get($sourcePath);
 
             foreach ($userIds as $userId) {
                 $alreadyExists = HackatonCertificate::query()
@@ -37,16 +38,21 @@ class HackatonCertificateController extends Controller
                     continue;
                 }
 
+                $userFilePath = 'hackaton_certificates/'.uniqid("{$hackaton->id}_{$userId}_", true).'.'.pathinfo($sourcePath, PATHINFO_EXTENSION);
+                Storage::disk('local')->put($userFilePath, $sourceContents);
+
                 $hackaton->certificates()->create([
                     'user_id' => $userId,
                     'uploaded_by' => $request->user()->id,
                     'title' => $validated['title'],
-                    'file_path' => $filePath,
+                    'file_path' => $userFilePath,
                     'issued_at' => $validated['issued_at'] ?? now(),
                 ]);
 
                 $createdCount++;
             }
+
+            Storage::disk('local')->delete($sourcePath);
         });
 
         return back()->with('success', "Сертификаты загружены: {$createdCount} шт.");
@@ -64,8 +70,16 @@ class HackatonCertificateController extends Controller
         abort_unless($certificate->hackaton_id === $hackaton->id, 404);
         Gate::authorize('delete', $certificate);
 
-        Storage::disk('local')->delete($certificate->file_path);
+        $filePath = $certificate->file_path;
         $certificate->delete();
+
+        $stillReferenced = HackatonCertificate::query()
+            ->where('file_path', $filePath)
+            ->exists();
+
+        if (! $stillReferenced) {
+            Storage::disk('local')->delete($filePath);
+        }
 
         return back()->with('success', 'Сертификат удалён.');
     }

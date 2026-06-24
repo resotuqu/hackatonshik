@@ -234,6 +234,18 @@ test('hackatons status group filter hides non-matching statuses', function () {
         ->assertDontSee('ActiveStatusHack');
 });
 
+test('hackatons status tab switch resets pagination', function () {
+    Hackaton::factory()->count(12)->create([
+        'is_public' => true,
+        'status' => HackatonStatus::FINISHED,
+    ]);
+
+    Livewire::test(HackatonsIndex::class)
+        ->set('page', 2)
+        ->call('setStatusGroup', 'finished')
+        ->assertSet('page', 1);
+});
+
 test('clearFilters resets filters', function () {
     Livewire::test(HackatonsIndex::class)
         ->set('q', 'something')

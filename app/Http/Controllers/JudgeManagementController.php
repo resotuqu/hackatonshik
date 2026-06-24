@@ -32,6 +32,7 @@ class JudgeManagementController extends Controller
             'invited_user_id' => $invitedUser?->id,
             'token' => Str::random(64),
             'status' => JudgeInvitation::STATUS_PENDING,
+            'expires_at' => now()->addDays(7),
         ]);
 
         $acceptUrl = route('judges.invitations.accept', ['token' => $invitation->token], absolute: true);
@@ -129,6 +130,10 @@ class JudgeManagementController extends Controller
             ->where('token', $token)
             ->where('status', JudgeInvitation::STATUS_PENDING)
             ->firstOrFail();
+
+        if ($invitation->isExpired()) {
+            abort(410, 'Срок действия приглашения истёк.');
+        }
 
         return $invitation;
     }

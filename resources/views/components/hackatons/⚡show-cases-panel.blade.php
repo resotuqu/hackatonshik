@@ -113,7 +113,7 @@ new #[Lazy] class extends Component
                                             </h4>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 @foreach($case->resources_json as $resource)
-                                                    <a href="{{ $resource['url'] }}" target="_blank" class="flex items-center gap-2 p-2 rounded-lg bg-base-100 border border-info/10 hover:border-info/30 transition-colors">
+                                                    <a href="{{ $resource['url'] }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 p-2 rounded-lg bg-base-100 border border-info/10 hover:border-info/30 transition-colors">
                                                         <x-app-icon icon="heroicons:chat-bubble-left-right" class="h-4 w-4 text-info" />
                                                         <span class="text-sm font-medium">{{ $resource['label'] ?? 'Ссылка на чат/ресурс' }}</span>
                                                     </a>
@@ -278,7 +278,7 @@ new #[Lazy] class extends Component
                                                                     @if($ans && $ans->file_path)
                                                                         <div class="mt-1 flex items-center gap-2 text-xs text-success">
                                                                             <x-app-icon icon="heroicons:check-circle" class="h-4 w-4" />
-                                                                            <span>Файл загружен: <a href="{{ asset('storage/' . $ans->file_path) }}" target="_blank" class="link">Посмотреть</a></span>
+                                                                            <span>Файл загружен: <a href="{{ asset('storage/' . $ans->file_path) }}" target="_blank" rel="noopener noreferrer" class="link">Посмотреть</a></span>
                                                                         </div>
                                                                     @endif
                                                                 @elseif($field->type === 'textarea')
@@ -343,7 +343,7 @@ new #[Lazy] class extends Component
                                                                             @if($ans && $ans->file_path)
                                                                                 <div class="mt-1 flex items-center gap-1 text-[10px] text-success">
                                                                                     <x-app-icon icon="heroicons:check" class="h-3 w-3" />
-                                                                                    <span>Файл есть: <a href="{{ asset('storage/' . $ans->file_path) }}" target="_blank" class="link">Просмотр</a></span>
+                                                                                    <span>Файл есть: <a href="{{ asset('storage/' . $ans->file_path) }}" target="_blank" rel="noopener noreferrer" class="link">Просмотр</a></span>
                                                                                 </div>
                                                                             @endif
                                                                         @elseif($field->type === 'textarea')

@@ -46,12 +46,19 @@ class PhoneVerificationController extends Controller
             return redirect()->to(PostLoginRedirect::intendedUrl($user));
         }
 
+        $rateLimitKey = "phone-verification-store:{$user->id}";
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+            return back()->with('error', 'Слишком много попыток. Попробуйте позже.');
+        }
+
+        RateLimiter::hit($rateLimitKey, 60);
+
         $validated = $request->validate([
             'phone' => [
                 'required',
                 'string',
                 'min:10',
-                'max:12',
+                'max:20',
                 Rule::unique(User::class, 'phone')->ignore($user->id),
             ],
         ], [

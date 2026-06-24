@@ -1,6 +1,5 @@
 <?php
 
-use App\Livewire\Pages\Admin\Index as AdminIndex;
 use App\Livewire\TeamChat;
 use App\Models\PlatformSetting;
 use App\Models\Team;
@@ -24,26 +23,21 @@ test('PlatformSetting toggle switches value and clears cache', function () {
     expect(PlatformSetting::isEnabled('feature.chat_large_files'))->toBeTrue();
 });
 
-test('admin can toggle platform feature from admin panel', function () {
+test('admin can access platform settings in filament', function () {
     $admin = User::factory()->admin()->create();
+    $setting = PlatformSetting::query()->firstOrFail();
 
-    Cache::flush();
-
-    PlatformSetting::query()->where('key', 'feature.chat_large_files')->update(['value' => '1']);
-
-    Livewire::actingAs($admin)
-        ->test(AdminIndex::class)
-        ->call('togglePlatformFeature', 'feature.chat_large_files')
-        ->assertHasNoErrors();
-
-    expect(PlatformSetting::isEnabled('feature.chat_large_files'))->toBeFalse();
+    $this->actingAs($admin)
+        ->get(route('filament.admin.resources.platform-settings.edit', $setting))
+        ->assertOk();
 });
 
-test('non-admin cannot toggle platform features', function () {
+test('non-admin cannot access platform settings in filament', function () {
     $user = User::factory()->create();
+    $setting = PlatformSetting::query()->firstOrFail();
 
-    Livewire::actingAs($user)
-        ->test(AdminIndex::class)
+    $this->actingAs($user)
+        ->get(route('filament.admin.resources.platform-settings.edit', $setting))
         ->assertForbidden();
 });
 

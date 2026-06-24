@@ -30,20 +30,21 @@
             <x-mary-header title="{{ __('ui.auth.register.form_title') }}" separator />
 
             <ul class="steps steps-horizontal mb-6 w-full max-w-full flex-wrap justify-start gap-y-2 text-[0.65rem] sm:text-xs">
-                <li class="step {{ $step >= 1 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_personal') }}</li>
-                <li class="step {{ $step >= 2 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_account') }}</li>
-                <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_password') }}</li>
-                <li class="step {{ $step >= 4 ? 'step-primary' : '' }}">{{ __('ui.auth.register.step_phone') }}</li>
+                <li class="step {{ $step >= 1 ? 'step-primary animate-step-active' : '' }}">{{ __('ui.auth.register.step_personal') }}</li>
+                <li class="step {{ $step >= 2 ? 'step-primary animate-step-active' : '' }}">{{ __('ui.auth.register.step_account') }}</li>
+                <li class="step {{ $step >= 3 ? 'step-primary animate-step-active' : '' }}">{{ __('ui.auth.register.step_password') }}</li>
+                <li class="step {{ $step >= 4 ? 'step-primary animate-step-active' : '' }}">{{ __('ui.auth.register.step_phone') }}</li>
             </ul>
             <div class="mb-6">
                 <div class="mb-1 flex items-center justify-between text-xs text-base-content/70">
                     <span>{{ __('ui.auth.register.progress_label') }}</span>
                     <span class="tabular-nums">{{ $progressPercent }}%</span>
                 </div>
-                <progress class="progress progress-primary h-2 w-full" value="{{ $progressPercent }}" max="100"></progress>
+                <progress class="progress progress-primary h-2 w-full transition-all duration-300" value="{{ $progressPercent }}" max="100" aria-label="{{ __('ui.auth.register.progress_label') }}"></progress>
             </div>
 
             @if ($step === 1)
+                <div class="animate-form-slide-in">
                 {{-- Account type picker --}}
                 <div class="mb-4">
                     <p class="mb-2 text-sm font-medium text-base-content/80">{{ __('ui.auth.register.account_type_label') }}</p>
@@ -123,15 +124,19 @@
                         />
                     </div>
                 @endif
+                </div>
             @endif
 
             @if ($step === 2)
+                <div class="animate-form-slide-in">
                 <x-mary-input label="{{ __('ui.auth.register.email_label') }}" wire:model="email" placeholder="example@mail.com"
                     hint="{{ __('ui.auth.register.email_hint') }}" />
                 <x-mary-input label="{{ __('ui.auth.register.nickname_label') }}" wire:model="nickname" placeholder="vova_vlad_123" hint="{{ __('ui.auth.register.nickname_hint') }}" />
+                </div>
             @endif
 
             @if ($step === 3)
+                <div class="animate-form-slide-in">
                 <div x-data="{ password: @entangle('password').live }" class="space-y-2">
                     <x-marypassword label="{{ __('ui.auth.register.password_label') }}" wire:model="password" />
                     <div class="space-y-1">
@@ -148,10 +153,12 @@
                     </div>
                 </div>
                 <x-marypassword label="{{ __('ui.auth.register.password_confirm_label') }}" wire:model="password_confirmation" />
+                </div>
             @endif
 
             @if ($step === 4)
-                <x-mary-input label="{{ __('ui.auth.register.phone_label') }}" wire:model="phone" prefix="+" />
+                <div class="animate-form-slide-in">
+                <x-mary-input label="{{ __('ui.auth.register.phone_label') }}" wire:model="phone" prefix="+" x-mask="7 (###) ###-##-##" placeholder="7 (999) 123-45-67" />
                 <div class="mt-4 space-y-1">
                     <label class="flex cursor-pointer items-start gap-3">
                         <input type="checkbox" wire:model="pd_consent" class="checkbox checkbox-primary mt-0.5 shrink-0" />
@@ -161,17 +168,18 @@
                         <p class="text-xs text-error">{{ __('ui.auth.register.pd_consent_error') }}</p>
                     @enderror
                 </div>
+                </div>
             @endif
 
             <x-slot:actions class="w-full">
                 <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
                     @if ($step > 1)
-                        <x-marybutton class="btn-outline w-full sm:w-auto" label="{{ __('ui.auth.register.btn_back') }}" type="button" wire:click="previousStep" />
+                        <x-marybutton class="btn-outline w-full sm:w-auto transition-all duration-200 hover:scale-105 active:scale-95" label="{{ __('ui.auth.register.btn_back') }}" type="button" wire:click="previousStep" wire:loading.attr="disabled" wire:target="previousStep,nextStep,save" />
                     @endif
                     @if ($step < 4)
-                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="{{ __('ui.auth.register.btn_next') }}" type="submit" />
+                        <x-marybutton class="btn-primary w-full sm:min-w-40 transition-all duration-200 hover:scale-105 active:scale-95" label="{{ __('ui.auth.register.btn_next') }}" type="submit" wire:loading.attr="disabled" wire:target="nextStep,save" />
                     @else
-                        <x-marybutton class="btn-primary w-full sm:min-w-40" label="{{ __('ui.auth.register.btn_submit') }}" type="submit" />
+                        <x-marybutton class="btn-primary w-full sm:min-w-40 transition-all duration-200 hover:scale-105 active:scale-95" label="{{ __('ui.auth.register.btn_submit') }}" type="submit" wire:loading.attr="disabled" wire:target="save" spinner="save" />
                     @endif
                 </div>
             </x-slot:actions>

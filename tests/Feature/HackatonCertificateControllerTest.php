@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Models\Hackaton;
 use App\Models\HackatonCertificate;
+use App\Models\Team;
+use App\Models\TeamRole;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +18,7 @@ test('organizer can issue a certificate to single user', function () {
     $organizer = User::factory()->partner()->create();
     $recipient = User::factory()->create();
     $hackaton = Hackaton::factory()->for($organizer)->create();
+    Team::factory()->for($hackaton)->create(['user_id' => $recipient->id]);
 
     actingAs($organizer)
         ->from(route('hackatons.show', $hackaton))
@@ -42,6 +45,9 @@ test('organizer can issue certificates to multiple users at once', function () {
     $b = User::factory()->create();
     $c = User::factory()->create();
     $hackaton = Hackaton::factory()->for($organizer)->create();
+    $teamA = Team::factory()->for($hackaton)->create(['user_id' => $a->id]);
+    TeamRole::factory()->create(['team_id' => $teamA->id, 'user_id' => $b->id]);
+    Team::factory()->for($hackaton)->create(['user_id' => $c->id]);
 
     actingAs($organizer)
         ->from(route('hackatons.show', $hackaton))
@@ -65,6 +71,7 @@ test('certificate creation is idempotent on hackaton+user+title triple', functio
     $organizer = User::factory()->partner()->create();
     $recipient = User::factory()->create();
     $hackaton = Hackaton::factory()->for($organizer)->create();
+    Team::factory()->for($hackaton)->create(['user_id' => $recipient->id]);
 
     HackatonCertificate::factory()->create([
         'hackaton_id' => $hackaton->id,
@@ -86,6 +93,53 @@ test('certificate creation is idempotent on hackaton+user+title triple', functio
         ->where('user_id', $recipient->id)
         ->where('title', 'Duplicate Title')
         ->count())->toBe(1);
+});
+
+test('organizer cannot issue certificate to non participant', function () {
+    Storage::fake('local');
+
+    $organizer = User::factory()->partner()->create();
+    $outsider = User::factory()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+
+    actingAs($organizer)
+        ->from(route('hackatons.show', $hackaton))
+        ->post(route('hackatons.certificates.store', $hackaton), [
+            'user_id' => $outsider->id,
+            'title' => 'No way',
+            'file' => UploadedFile::fake()->create('cert.pdf', 100, 'application/pdf'),
+        ])
+        ->assertSessionHasErrors('user_ids');
+});
+
+test('bulk certificates store separate files per recipient', function () {
+    Storage::fake('local');
+
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->for($organizer)->create();
+    $team = Team::factory()->for($hackaton)->create();
+    $a = User::factory()->create();
+    $b = User::factory()->create();
+    $team->update(['user_id' => $a->id]);
+    TeamRole::factory()->create(['team_id' => $team->id, 'user_id' => $b->id]);
+
+    actingAs($organizer)
+        ->from(route('hackatons.show', $hackaton))
+        ->post(route('hackatons.certificates.store', $hackaton), [
+            'user_id' => $a->id,
+            'user_ids' => [$a->id, $b->id],
+            'title' => 'Separate Files',
+            'file' => UploadedFile::fake()->create('cert.pdf', 100, 'application/pdf'),
+        ])
+        ->assertRedirect();
+
+    $paths = HackatonCertificate::query()
+        ->where('hackaton_id', $hackaton->id)
+        ->where('title', 'Separate Files')
+        ->pluck('file_path');
+
+    expect($paths)->toHaveCount(2)
+        ->and($paths->unique())->toHaveCount(2);
 });
 
 test('non organizer cannot issue certificate', function () {

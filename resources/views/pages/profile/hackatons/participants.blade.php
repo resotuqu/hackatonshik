@@ -1,13 +1,13 @@
 <div>
     <x-mary-card class="card border border-base-300 bg-base-100">
-        <div class="text-sm breadcrumbs mb-4">
+        <nav class="text-sm breadcrumbs mb-4" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
             <ul>
-                <li><a href="/">Главная</a></li>
-                <li><a href="/profile">Профиль</a></li>
-                <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
-                <li class="opacity-70">Участники</li>
+                <li><a href="/">{{ __('ui.nav.home') }}</a></li>
+                <li><a href="/profile">{{ __('ui.nav.profile') }}</a></li>
+                <li><a href="{{ route('organizer.dashboard') }}">{{ __('ui.nav.my_hackatons') }}</a></li>
+                <li class="opacity-70">{{ __('ui.hackatons.tabs.participants') }}</li>
             </ul>
-        </div>
+        </nav>
 
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>

@@ -25,7 +25,7 @@ use App\Policies\HackatonPolicy;
 use App\Policies\TeamApplicationPolicy;
 use App\Policies\TeamPolicy;
 use App\Policies\UserPolicy;
-use App\ViewModels\PartnerSidebarCounts;
+use App\Support\OAuthRedirectUris;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -96,9 +96,10 @@ class AppServiceProvider extends ServiceProvider
             $url,
         ))->locale('ru'));
 
-        Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:51200']);
+        Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:10240']);
 
         $this->configureDefaults();
+        $this->configureOAuthRedirectUris();
         $this->configureRateLimiting();
         $this->configureCatalogCacheInvalidation();
         $this->configureHealthChecks();
@@ -161,6 +162,14 @@ class AppServiceProvider extends ServiceProvider
         );
     }
 
+    protected function configureOAuthRedirectUris(): void
+    {
+        $this->app->booted(function (): void {
+            Config::set('services.yandex.redirect', OAuthRedirectUris::yandexCallback());
+            Config::set('services.vkontakte.redirect', OAuthRedirectUris::vkCallback());
+        });
+    }
+
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
@@ -178,6 +187,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('judge-management', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
+
+        RateLimiter::for('notifications', fn (Request $request) => Limit::perMinute(30)->by($request->user()?->id ?: $request->ip()));
     }
 
     protected function configureHealthChecks(): void
@@ -187,11 +198,7 @@ class AppServiceProvider extends ServiceProvider
                 Redis::connection()->ping();
             }
 
-            if (config('queue.default') === 'redis') {
-                Redis::connection(config('queue.connections.redis.connection', 'default'))->ping();
-            } elseif (config('queue.default') === 'database') {
-                Queue::connection('database')->size();
-            }
+            // Queue workers are monitored separately (Horizon); liveness should not depend on them.
 
             if (app()->isProduction() && config('broadcasting.default') === 'reverb') {
                 $reverb = config('reverb.apps.apps.0', []);
@@ -242,13 +249,15 @@ class AppServiceProvider extends ServiceProvider
         Team::deleted(static function () use ($bumpCatalogVersion): void {
             $bumpCatalogVersion();
         });
-        User::saved(static function (User $user) use ($cache): void {
+        User::saved(static function (User $user) use ($cache, $bumpCatalogVersion): void {
             if ($user->wasChanged(['nickname', 'role', 'description', 'is_profile_public'])) {
                 $cache->forget("profile:public-show:{$user->id}:v2");
+                $bumpCatalogVersion();
             }
         });
-        User::deleted(static function (User $user) use ($cache): void {
+        User::deleted(static function (User $user) use ($cache, $bumpCatalogVersion): void {
             $cache->forget("profile:public-show:{$user->id}:v2");
+            $bumpCatalogVersion();
         });
     }
 

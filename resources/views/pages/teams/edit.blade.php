@@ -14,13 +14,13 @@
     @endphp
 
     {{-- Breadcrumbs --}}
-    <div class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="/profile/teams">Мои команды</a></li>
-            <li class="opacity-70">Редактирование команды</li>
+            <li><a href="/">{{ __('ui.nav.home') }}</a></li>
+            <li><a href="/profile/teams">{{ __('ui.nav.my_teams') }}</a></li>
+            <li class="opacity-70">{{ __('ui.nav.create_team') }}</li>
         </ul>
-    </div>
+    </nav>
 
     {{-- Header --}}
     <div class="card border border-base-300 bg-base-100">

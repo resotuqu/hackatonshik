@@ -1,13 +1,13 @@
 <div class="mx-auto w-full max-w-7xl space-y-6">
-    <div class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
-            <li><a href="/">Главная</a></li>
+            <li><a href="/">{{ __('ui.nav.home') }}</a></li>
             <li><a href="{{ route('hackatons.show', $hackaton) }}">{{ $hackaton->title }}</a></li>
-            <li class="opacity-70">Итоги</li>
+            <li class="opacity-70">{{ __('ui.nav.hackatons') }}</li>
         </ul>
-    </div>
+    </nav>
 
-    <x-page-header title="Итоги хакатона" :description="$hackaton->title">
+    <x-page-header title="{{ __('ui.home.active_hackatons') }}" :description="$hackaton->title">
         <x-slot:lead>
             <x-marybadge class="{{ $hackaton->status->badgeClass() }}" value="{{ $hackaton->status->label() }}" />
         </x-slot:lead>

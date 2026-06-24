@@ -1,12 +1,12 @@
 <div class="mx-auto w-full max-w-5xl space-y-6">
-    <div class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="{{ route('profile') }}">Профиль</a></li>
-            <li><a href="{{ route('organizer.dashboard') }}">Мои хакатоны</a></li>
-            <li class="opacity-70">Оценка работ</li>
+            <li><a href="/">{{ __('ui.nav.home') }}</a></li>
+            <li><a href="{{ route('profile') }}">{{ __('ui.nav.profile') }}</a></li>
+            <li><a href="{{ route('organizer.dashboard') }}">{{ __('ui.nav.my_hackatons') }}</a></li>
+            <li class="opacity-70">{{ __('ui.nav.scoring_summary') }}</li>
         </ul>
-    </div>
+    </nav>
 
     <x-organizer-nav-tabs active="scoring" />
 

@@ -69,8 +69,8 @@
 
     <section>
         <h2 class="mb-4 font-display text-2xl font-bold">История проекта</h2>
-        <x-marycard class="card border border-base-300 bg-base-100">
-            <ul class="timeline timeline-vertical">
+        <x-marycard class="card overflow-x-clip border border-base-300 bg-base-100">
+            <ul class="about-history-timeline timeline timeline-vertical max-w-full">
                 @foreach ($history as $item)
                     <li>
                         @if (! $loop->first)
@@ -98,8 +98,8 @@
             публикуйте хакатон и управляйте заявками в одном месте.
         </p>
         <div class="mt-4 flex flex-wrap gap-3">
-            <a href="/teams" class="ui-cta-primary">Смотреть команды</a>
-            <a href="/hackatons" class="ui-cta-outline">Смотреть хакатоны</a>
+            <a href="{{ route('teams.index') }}" class="ui-cta-primary">Смотреть команды</a>
+            <a href="{{ route('hackatons.index') }}" class="ui-cta-outline">Смотреть хакатоны</a>
         </div>
     </section>
 </div>

@@ -29,6 +29,8 @@ return [
     'env' => env('APP_ENV', 'production'),
 
     'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    'trusted_proxies_at' => \App\Support\TrustedProxiesResolver::at(),
     'vite_reverb' => [
         'app_key' => env('VITE_REVERB_APP_KEY'),
         'host' => env('VITE_REVERB_HOST'),

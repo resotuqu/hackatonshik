@@ -1,9 +1,60 @@
 <?php
 
 use App\Models\User;
+use App\Support\OAuthRedirectUris;
 use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 use Laravel\Socialite\Facades\Socialite;
+
+test('yandex token page preserves oauth session nonce from login', function () {
+    session([
+        'oauth_token_nonce' => 'existing-nonce-value',
+        'oauth_token_nonce_at' => now()->timestamp,
+    ]);
+
+    $this->get(route('auth.yandex.token-page'));
+
+    expect(session('oauth_token_nonce'))->toBe('existing-nonce-value');
+});
+
+test('yandex token page submits access token to backend', function () {
+    Http::fake([
+        'login.yandex.ru/*' => Http::response([
+            'id' => '42',
+            'default_email' => 'token-page@example.com',
+            'real_name' => 'Token Page User',
+        ], 200),
+    ]);
+
+    $this->get(route('auth.yandex.token-page'));
+    $nonce = (string) session('oauth_token_nonce');
+
+    $response = $this->post(route('auth.yandex.token'), [
+        'oauth_token_nonce' => $nonce,
+        'access_token' => 'hash-flow-token',
+    ]);
+
+    $response->assertRedirect(route('auth.oauth.consent'));
+    $this->assertAuthenticated();
+    $this->assertDatabaseHas('users', [
+        'email' => 'token-page@example.com',
+        'fio' => 'Token Page User',
+    ]);
+});
+
+test('yandex token page includes token handoff script', function () {
+    $response = $this->get(route('auth.yandex.token-page'));
+
+    $response->assertOk();
+    $response->assertSee('YaSendSuggestToken', false);
+    $response->assertSee(route('auth.yandex.token'), false);
+    $response->assertSee('parseHashAccessToken', false);
+});
+
+test('oauth redirect uris are derived from app url routes', function () {
+    expect(config('services.yandex.redirect'))->toBe(OAuthRedirectUris::yandexCallback())
+        ->and(config('services.vkontakte.redirect'))->toBe(OAuthRedirectUris::vkCallback());
+});
 
 test('yandex callback creates local user and logs in', function () {
     $socialiteUser = mock(SocialiteUserContract::class);
@@ -75,16 +126,20 @@ test('vk redirect initiates oauth flow', function () {
     $response = $this->get(route('auth.vk.redirect'));
 
     $response->assertRedirect();
-    expect($response->headers->get('Location'))->toContain('id.vk.com/oauth2/auth');
+    expect($response->headers->get('Location'))->toContain('id.vk.ru/authorize');
+    expect($response->headers->get('Location'))->toContain('code_challenge=');
     $this->assertGuest();
 });
 
 test('vk callback creates local user and logs in', function () {
-    session(['vk_oauth_state' => 'test-state-123']);
+    session([
+        'vk_oauth_state' => 'test-state-123',
+        'vk_oauth_code_verifier' => 'test-code-verifier-that-is-long-enough-for-pkce-123456',
+    ]);
 
     Http::fake([
-        'id.vk.com/oauth2/auth' => Http::response(['access_token' => 'fake-access-token'], 200),
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/auth' => Http::response(['access_token' => 'fake-access-token'], 200),
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => [
                 'user_id' => '999',
                 'first_name' => 'VK',
@@ -123,7 +178,7 @@ test('vk callback redirects to login on invalid state', function () {
 
 test('vk token endpoint creates local user and logs in', function () {
     Http::fake([
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => [
                 'user_id' => '999',
                 'first_name' => 'VK',
@@ -155,7 +210,7 @@ test('vk token endpoint redirects to login when access_token is missing', functi
 
 test('vk token endpoint redirects to login when vk api fails', function () {
     Http::fake([
-        'id.vk.com/oauth2/user_info' => Http::response([], 500),
+        'id.vk.ru/oauth2/user_info' => Http::response([], 500),
     ]);
 
     $response = $this->post(route('auth.vk.token'), [
@@ -169,7 +224,7 @@ test('vk token endpoint redirects to login when vk api fails', function () {
 
 test('vk token endpoint redirects to login when email is missing', function () {
     Http::fake([
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => [
                 'user_id' => '999',
                 'first_name' => 'No',
@@ -234,7 +289,7 @@ test('vk token endpoint blocks login when email belongs to a password-only user'
     User::factory()->create(['email' => 'existing@example.com']);
 
     Http::fake([
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => [
                 'user_id' => '777',
                 'first_name' => 'Attacker',
@@ -339,7 +394,7 @@ test('vk token redirects to 2fa challenge when user has 2fa enabled', function (
     ]);
 
     Http::fake([
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => [
                 'user_id' => '555',
                 'first_name' => '2FA',
@@ -372,7 +427,7 @@ test('yandex token endpoint is rate limited', function () {
 
 test('vk token endpoint is rate limited', function () {
     Http::fake([
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => ['user_id' => '1', 'email' => 'a@example.com', 'first_name' => 'A', 'last_name' => 'B'],
         ], 200),
     ]);

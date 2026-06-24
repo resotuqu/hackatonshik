@@ -22,7 +22,11 @@ class NotificationController extends Controller
 
     public function markAllAsRead(): RedirectResponse
     {
-        auth()->user()?->unreadNotifications->markAsRead();
+        $user = auth()->user();
+
+        if ($user !== null) {
+            $user->unreadNotifications()->update(['read_at' => now()]);
+        }
 
         return back();
     }

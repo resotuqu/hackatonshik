@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\AvatarPreset\DeleteAvatarPresetImage;
 use App\Actions\AvatarPreset\StoreAvatarPresetImages;
 use App\Enums\ReportStatus;
+use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\AvatarPreset;
 use App\Models\AvatarPresetPack;
 use App\Models\ContactMessage;
@@ -15,6 +16,7 @@ use App\Models\TeamMessage;
 use App\Models\User;
 use App\Support\PresetAvatar;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 
 test('admin can access all filament management resources', function () {
@@ -166,6 +168,140 @@ test('store avatar preset images action creates preset records', function () {
     expect($created)->toBe(2);
 
     expect(AvatarPreset::query()->where('avatar_preset_pack_id', $pack->id)->count())->toBe(2);
+});
+
+test('admin edit user page loads with verification section', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'email_verified_at' => now(),
+        'phone' => '+79001234567',
+        'phone_verified_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('filament.admin.resources.users.edit', $user))
+        ->assertOk()
+        ->assertSee('Верификация');
+});
+
+test('saving with changed email invalidates email verification', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'email' => 'old@example.com',
+        'email_verified_at' => now(),
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->fillForm(['email' => 'new@example.com'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($user->fresh())
+        ->email->toBe('new@example.com')
+        ->email_verified_at->toBeNull();
+});
+
+test('saving with unchanged email keeps email verification intact', function () {
+    $admin = User::factory()->admin()->create();
+    $verifiedAt = now()->subDay();
+    $user = User::factory()->create([
+        'email' => 'same@example.com',
+        'email_verified_at' => $verifiedAt,
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->fillForm(['email' => 'same@example.com', 'fio' => 'Новое Имя Тест'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($user->fresh()->email_verified_at)->not->toBeNull();
+});
+
+test('saving with changed phone invalidates phone verification', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'phone' => '+79001111111',
+        'phone_verified_at' => now(),
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->fillForm(['phone' => '+79002222222'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($user->fresh())
+        ->phone->toBe('+79002222222')
+        ->phone_verified_at->toBeNull();
+});
+
+test('clearing phone field invalidates phone verification', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'phone' => '+79001111111',
+        'phone_verified_at' => now(),
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->fillForm(['phone' => null])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($user->fresh())
+        ->phone->toBeNull()
+        ->phone_verified_at->toBeNull();
+});
+
+test('admin can revoke email verification via header action', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->callAction('revokeEmailVerification');
+
+    expect($user->fresh()->email_verified_at)->toBeNull();
+});
+
+test('admin can revoke phone verification via header action', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'phone' => '+79001234567',
+        'phone_verified_at' => now(),
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->callAction('revokePhoneVerification');
+
+    expect($user->fresh()->phone_verified_at)->toBeNull();
+    expect($user->fresh()->phone)->toBe('+79001234567');
+});
+
+test('admin can clear phone via header action', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'phone' => '+79001234567',
+        'phone_verified_at' => now(),
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, ['record' => $user->getRouteKey()])
+        ->callAction('clearPhone');
+
+    expect($user->fresh())
+        ->phone->toBeNull()
+        ->phone_verified_at->toBeNull();
 });
 
 test('delete avatar preset image action removes file and record', function () {

@@ -27,6 +27,10 @@ class ValidateProductionConfig extends Command
             $errors[] = 'MAIL_MAILER must not be log/array in production.';
         }
 
+        if (config('database.default') === 'sqlite') {
+            $errors[] = 'DB_CONNECTION must not be sqlite in production.';
+        }
+
         if (blank(config('app.trusted_proxies'))) {
             $errors[] = 'TRUSTED_PROXIES must be set behind a reverse proxy.';
         }

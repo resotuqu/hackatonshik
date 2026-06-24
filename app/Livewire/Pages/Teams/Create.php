@@ -45,6 +45,7 @@ class Create extends Component
     public $config = [
         'toolbar' => ['heading', 'bold', 'italic', '|', 'preview'],
         'uploadImage' => false,
+        'autoDownloadFontAwesome' => false,
     ];
 
     /**
@@ -158,6 +159,45 @@ class Create extends Component
     public function fillCaptainRoleTitle(string $title): void
     {
         $this->captainRole['title'] = $title;
+    }
+
+    public function validateTitle(): void
+    {
+        $this->validate(
+            ['title' => 'required'],
+            ['title.required' => 'Название команды должно быть заполнено']
+        );
+    }
+
+    public function validateDescription(): void
+    {
+        $this->validate(
+            ['description' => 'required'],
+            ['description.required' => 'Описание команды должно быть заполнено']
+        );
+    }
+
+    public function validatePhoto(): void
+    {
+        $this->validate(
+            ['photo' => ['required', 'image', 'max:4096']],
+            [
+                'photo.required' => 'Изображение обязательно',
+                'photo.image' => 'Файл должен быть валидным изображением',
+                'photo.max' => 'Размер изображения не может быть больше 4 Мбайт',
+            ]
+        );
+    }
+
+    public function validateHackatonId(): void
+    {
+        $this->validate(
+            ['hackaton_id' => ['required', 'exists:hackatons,id']],
+            [
+                'hackaton_id.required' => 'Выберите хакатон',
+                'hackaton_id.exists' => 'Указанный хакатон не найден',
+            ]
+        );
     }
 
     public function nextStep(): void

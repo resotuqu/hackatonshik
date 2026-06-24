@@ -4,8 +4,8 @@
 
 <div class="mx-auto mt-8 w-full max-w-4xl space-y-6 sm:mt-12">
     <x-breadcrumbs :items="[
-        ['label' => 'Главная', 'href' => '/'],
-        ['label' => 'Новости', 'href' => route('news.index')],
+        ['label' => __('ui.nav.home'), 'href' => '/'],
+        ['label' => __('ui.nav.hackatons'), 'href' => route('news.index')],
         ['label' => $post->title],
     ]" />
 

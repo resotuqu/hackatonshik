@@ -33,13 +33,7 @@ class HackatonPolicy
             return true;
         }
 
-        return $hackaton->teams()
-            ->where(function ($query) use ($user): void {
-                $query
-                    ->where('teams.user_id', $user->id)
-                    ->orWhereHas('roles', fn ($rolesQuery) => $rolesQuery->where('user_id', $user->id));
-            })
-            ->exists();
+        return $hackaton->isJudge($user) || $user->participatesInHackaton($hackaton);
     }
 
     public function update(User $user, Hackaton $hackaton): bool

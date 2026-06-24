@@ -21,10 +21,10 @@
         @section('og_image', $teamImage)
     @endif
 
-    <div class="team-page mx-auto w-full max-w-7xl space-y-6" data-testid="team-page-root">
+    <div class="team-page mx-auto w-full max-w-7xl space-y-6" data-testid="team-page-root" data-tab-init="team" data-tab-fallback="overview">
         <x-breadcrumbs :items="[
-            ['label' => __('ui.nav.home'), 'href' => '/'],
-            ['label' => __('ui.nav.teams'), 'href' => '/teams'],
+            ['label' => __('ui.nav.home'), 'href' => route('home')],
+            ['label' => __('ui.nav.teams'), 'href' => route('teams.index')],
             ['label' => $team->title],
         ]" />
 
@@ -78,7 +78,7 @@
                                 </a>
                             @endif
                             @guest
-                                <a href="/login" class="btn btn-ghost btn-sm gap-2 border border-base-300">
+                                <a href="{{ route('login') }}" class="btn btn-ghost btn-sm gap-2 border border-base-300">
                                     <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
                                     Войти
                                 </a>
@@ -220,7 +220,7 @@
                                                                 <p class="py-4 text-sm text-base-content/70">Заявка будет удалена. Вы сможете подать её повторно.</p>
                                                                 <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
                                                                     <label for="confirm-cancel-app-{{ $myApplication->id }}" class="btn btn-ghost w-full sm:w-auto">Нет, оставить</label>
-                                                                    <form method="POST" action="{{ route('team.applications.destroy', $myApplication) }}">
+                                                                    <form method="POST" action="{{ route('team.applications.destroy', $myApplication) }}" class="w-full sm:w-auto">
                                                                         @csrf
                                                                         @method('DELETE')
                                                                         <button type="submit" class="btn btn-error w-full sm:w-auto">Отменить заявку</button>
@@ -275,7 +275,7 @@
                         @guest
                             <div role="alert" class="alert border border-primary/25 bg-primary/10 text-base-content">
                                 <x-app-icon icon="heroicons:lock-closed" class="h-6 w-6 text-primary" />
-                                <span>Чтобы откликнуться на роль, <a class="link font-semibold link-primary" href="/login">войдите в аккаунт</a>.</span>
+                                <span>Чтобы откликнуться на роль, <a class="link font-semibold link-primary" href="{{ route('login') }}">войдите в аккаунт</a>.</span>
                             </div>
                         @endguest
                     </div>
@@ -357,7 +357,7 @@
                                                 </p>
                                                 <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
                                                     <label for="confirm-remove-member-{{ $role->id }}" class="btn btn-ghost w-full sm:w-auto">Отмена</label>
-                                                    <form method="POST" action="{{ route('teams.participants.destroy', ['team' => $team, 'teamRole' => $role]) }}">
+                                                    <form method="POST" action="{{ route('teams.participants.destroy', ['team' => $team, 'teamRole' => $role]) }}" class="w-full sm:w-auto">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-error w-full sm:w-auto">Удалить</button>
@@ -395,7 +395,7 @@
                                         </p>
                                         <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
                                             <label for="confirm-reject-app-{{ $app->id }}" class="btn btn-ghost w-full sm:w-auto">Отмена</label>
-                                            <form method="POST" action="{{ route('team.applications.update', $app) }}">
+                                            <form method="POST" action="{{ route('team.applications.update', $app) }}" class="w-full sm:w-auto">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="rejected">
@@ -469,8 +469,8 @@
                                     <tbody>
                                         @foreach ($team->applications as $app)
                                             <tr>
-                                                <td class="font-medium">{{ $app->user->fio ?? $app->user->nickname ?? $app->user->email }}</td>
-                                                <td>{{ $app->teamRole->title }}</td>
+                                                <td class="max-w-[10rem] truncate font-medium">{{ $app->user->fio ?? $app->user->nickname ?? $app->user->email }}</td>
+                                                <td class="max-w-[8rem] truncate">{{ $app->teamRole->title }}</td>
                                                 <td class="max-w-xs truncate">{{ $app->message }}</td>
                                                 <td class="whitespace-nowrap text-sm">{{ $app->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                                 <td>
@@ -557,9 +557,3 @@
             </section>
         @endif
     </div>
-
-    <script>
-        (function () {
-            window.setupTabGroup('team', 'overview');
-        })();
-    </script>

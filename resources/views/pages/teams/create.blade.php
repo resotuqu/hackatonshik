@@ -1,16 +1,21 @@
 @php
-    $wizardLabels = [1 => 'Основное', 2 => 'Обложка', 3 => 'Ссылки', 4 => 'Роли'];
+    $wizardLabels = [
+        1 => __('ui.teams.create.step_1'),
+        2 => __('ui.teams.create.step_2'),
+        3 => __('ui.teams.create.step_3'),
+        4 => __('ui.teams.create.step_4'),
+    ];
     $progressPercent = (int) round((($step - 1) / 3) * 100);
 @endphp
 
 <div class="mx-auto w-full max-w-6xl space-y-6 pb-8">
-    <div class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="/profile/teams">Мои команды</a></li>
-            <li class="opacity-70">Создание команды</li>
+            <li><a href="/">{{ __('ui.nav.home') }}</a></li>
+            <li><a href="/profile/teams">{{ __('ui.nav.my_teams') }}</a></li>
+            <li class="opacity-70">{{ __('ui.nav.create_team') }}</li>
         </ul>
-    </div>
+    </nav>
 
     <x-mary-card
         class="card border border-base-300 bg-base-100"
@@ -39,12 +44,13 @@
     <x-mary-card
         class="card w-full justify-self-center border border-base-300 bg-base-100"
     >
-        <x-maryform wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}" class="space-y-8">
-            <div class="space-y-4">
+        <x-maryform wire:submit.prevent="{{ $step < 4 ? 'nextStep' : 'save' }}" class="space-y-8" aria-label="Team creation wizard">
+            <div class="space-y-4" role="region" aria-live="polite" aria-label="Form progress">
                 <progress
-                    class="progress h-2 w-full"
+                    class="progress h-2 w-full transition-all duration-300"
                     max="100"
                     value="{{ $progressPercent }}"
+                    aria-label="Progress: {{ $step }} of 4"
                 ></progress>
 
                 <div class="-mx-1 overflow-x-auto pb-1">
@@ -76,7 +82,7 @@
                 </div>
             </div>
 
-            <div wire:key="wizard-step-{{ $step }}" class="space-y-6">
+            <div wire:key="wizard-step-{{ $step }}" class="animate-form-slide-in space-y-6">
                 @if ($step === 1)
                     <div
                         class="card border border-base-300 bg-base-100/60 p-5 shadow-inner shadow-base-300/20 sm:p-7"
@@ -87,18 +93,27 @@
                         </div>
 
                         <div class="space-y-5 pt-6">
-                            <x-mary-input
-                                wire:model="title"
-                                label="Название команды"
-                                placeholder="Например, Team Phoenix"
-                            />
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <label class="label p-0">Название команды</label>
+                                    <div class="tooltip tooltip-right cursor-help" data-tip="Название, которое будут видеть другие участники. Выберите что-то яркое и запоминающееся!">
+                                        <x-mary-icon name="o-question-mark-circle" class="h-4 w-4 text-base-content/50 hover:text-base-content/70" />
+                                    </div>
+                                </div>
+                                <x-mary-input
+                                    wire:model.live="title"
+                                    wire:blur="validateTitle"
+                                    placeholder="Например, Team Phoenix"
+                                />
+                            </div>
 
                             <div class="space-y-2">
                                 <div
                                     class="[&_.CodeMirror]:min-h-[12.5rem] [&_.EasyMDEContainer]:min-h-[12.5rem] [&_.editor-toolbar]:rounded-t-xl"
                                 >
                                     <x-marymarkdown
-                                        wire:model="description"
+                                        wire:model.live="description"
+                                        wire:blur="validateDescription"
                                         label="Описание команды"
                                         :config="$this->config"
                                     />
@@ -129,13 +144,21 @@
                         </div>
 
                         <div class="space-y-6 pt-6">
-                            <x-maryfile
-                                class="rounded-panel border-2 border-dashed border-base-300 bg-base-200/30 p-4 transition motion-safe:duration-200 hover:border-primary/35 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 sm:p-5"
-                                label="Обложка команды"
-                                wire:model="photo"
-                                accept="image/png, image/jpeg, image/webp"
-                                hint="PNG / JPEG / WebP, до 4 МБ. Перетащите файл или нажмите для выбора."
-                            />
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <label class="label p-0">Обложка команды</label>
+                                    <div class="tooltip tooltip-right cursor-help" data-tip="Яркая обложка помогает вашей команде выделиться в каталоге. Рекомендуется горизонтальное изображение (16:9).">
+                                        <x-mary-icon name="o-question-mark-circle" class="h-4 w-4 text-base-content/50 hover:text-base-content/70" />
+                                    </div>
+                                </div>
+                                <x-maryfile
+                                    class="rounded-panel border-2 border-dashed border-base-300 bg-base-200/30 p-4 transition motion-safe:duration-200 hover:border-primary/35 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 sm:p-5"
+                                    wire:model.live="photo"
+                                    wire:blur="validatePhoto"
+                                    accept="image/png, image/jpeg, image/webp"
+                                    hint="PNG / JPEG / WebP, до 4 МБ. Перетащите файл или нажмите для выбора."
+                                />
+                            </div>
 
                             @if ($photo)
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -161,9 +184,17 @@
                                 </div>
                             @endif
 
-                            <div class="divider my-0 text-xs text-base-content/50">Хакатон</div>
+                            <div class="divider my-0 text-xs text-base-content/50">Выбор хакатона</div>
 
-                            <x-maryselect label="Хакатон" wire:model="hackaton_id" :options="$this->hackatons" />
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <label class="label p-0">Хакатон</label>
+                                    <div class="tooltip tooltip-right cursor-help" data-tip="Выберите хакатон, в котором будет участвовать ваша команда. Это поле нельзя изменить после создания команды.">
+                                        <x-mary-icon name="o-question-mark-circle" class="h-4 w-4 text-base-content/50 hover:text-base-content/70" />
+                                    </div>
+                                </div>
+                                <x-maryselect wire:model.live="hackaton_id" wire:blur="validateHackatonId" :options="$this->hackatons" />
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -174,9 +205,14 @@
                     >
                         <div class="flex flex-col gap-4 border-b border-base-300 pb-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="min-w-0 space-y-1">
-                                <h2 class="text-xl font-semibold tracking-tight">Социальные ссылки</h2>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-xl font-semibold tracking-tight">Социальные ссылки</h2>
+                                    <div class="tooltip tooltip-right cursor-help" data-tip="Добавьте ссылки на контакты вашей команды. Это поможет участникам найти и связаться с вами.">
+                                        <x-mary-icon name="o-question-mark-circle" class="h-4 w-4 text-base-content/50 hover:text-base-content/70" />
+                                    </div>
+                                </div>
                                 <p class="text-sm text-base-content/70">
-                                    Добавьте контакты — с пресетами или вручную. Иконка подставится по ссылке.
+                                    Добавьте контакты — с пресетами или вручную. Иконка подставится автоматически.
                                 </p>
                             </div>
                             <x-mary-button
@@ -266,9 +302,14 @@
     <div class="rounded-panel border border-base-300 bg-base-100 p-6 sm:p-8">
         
         {{-- Шапка секции --}}
-        <div class="flex flex-col gap-5 border-b border-base-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-5 border-b border-base-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0 space-y-1.5">
-                <h2 class="text-xl font-bold tracking-tight text-base-content">Роли и вакансии</h2>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-xl font-bold tracking-tight text-base-content">Роли и вакансии</h2>
+                    <div class="tooltip tooltip-right cursor-help" data-tip="Определите роли в команде и какие навыки нужны. Другие участники смогут подать заявку на вакансии.">
+                        <x-mary-icon name="o-question-mark-circle" class="h-4 w-4 text-base-content/50 hover:text-base-content/70" />
+                    </div>
+                </div>
                 <p class="text-sm text-base-content/70">
                     Определите свою зону ответственности и откройте вакансии для новых участников команды.
                 </p>
@@ -357,7 +398,7 @@
                         <x-mary-button
                             type="button"
                             label="Назад"
-                            class="btn-outline order-2 min-h-11 motion-safe:transition-transform motion-safe:active:scale-[0.98]"
+                            class="btn-outline order-2 min-h-11 transition-all duration-200 hover:scale-105 motion-safe:active:scale-[0.98]"
                             wire:click="previousStep"
                             icon="o-arrow-left"
                         />
@@ -366,14 +407,14 @@
                         <x-mary-button
                             type="submit"
                             label="Далее"
-                            class="btn-primary order-1 min-h-11 shadow-lg shadow-primary/20 motion-safe:transition-transform motion-safe:active:scale-[0.98] sm:order-3 sm:min-w-40"
+                            class="btn-primary order-1 min-h-11 shadow-lg shadow-primary/20 transition-all duration-200 hover:scale-105 motion-safe:active:scale-[0.98] sm:order-3 sm:min-w-40"
                             icon-right="o-arrow-right"
                         />
                     @else
                         <x-mary-button
                             type="submit"
                             label="Создать команду"
-                            class="btn-primary order-1 min-h-11 shadow-lg shadow-primary/20 motion-safe:transition-transform motion-safe:active:scale-[0.98] sm:order-3 sm:min-w-40"
+                            class="btn-primary order-1 min-h-11 shadow-lg shadow-primary/20 transition-all duration-200 hover:scale-105 motion-safe:active:scale-[0.98] sm:order-3 sm:min-w-40"
                             spinner="save"
                             wire:loading.attr="disabled"
                             icon="o-sparkles"

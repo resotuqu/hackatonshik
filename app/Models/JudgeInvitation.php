@@ -26,13 +26,20 @@ class JudgeInvitation extends Model
         'token',
         'status',
         'accepted_at',
+        'expires_at',
     ];
 
     protected function casts(): array
     {
         return [
             'accepted_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast();
     }
 
     public function hackaton(): BelongsTo

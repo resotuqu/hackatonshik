@@ -58,7 +58,8 @@ Production-образ (Octane): `docker compose -f compose.prod.yaml up --build`
 ## Production runbook (кратко)
 
 1. `php artisan migrate --force`
-2. `php artisan config:cache && php artisan route:cache && php artisan view:cache`
+2. Before applying phone-unique migration on production data: `php artisan users:merge-duplicate-phones --dry-run`, then without `--dry-run` if duplicates exist.
+3. `php artisan config:cache && php artisan route:cache && php artisan view:cache`
 3. Запустить Horizon (`php artisan horizon`) и Reverb (`php artisan reverb:start`) — или контейнеры `horizon` / `reverb` из `compose.prod.yaml`
 4. Проверить `/up` (health) и очереди в Horizon
 5. Убедиться, что `APP_URL` HTTPS и OAuth redirect URI совпадают с production-доменом

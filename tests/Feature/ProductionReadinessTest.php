@@ -111,7 +111,7 @@ test('security headers are attached to public pages', function () {
         ->and($response->headers->get('Referrer-Policy'))->toBe('strict-origin-when-cross-origin')
         ->and($response->headers->has('Cross-Origin-Opener-Policy'))->toBeFalse()
         ->and($response->headers->get('Cross-Origin-Resource-Policy'))->toBe('same-site')
-        ->and($response->headers->get('Cross-Origin-Embedder-Policy'))->toBe('credentialless');
+        ->and($response->headers->has('Cross-Origin-Embedder-Policy'))->toBeFalse();
 });
 
 test('cross origin opener policy is set on https requests', function () {
@@ -130,7 +130,39 @@ test('content security policy blocks object embedding and frames', function () {
 
     expect($csp)->toContain("object-src 'none'")
         ->and($csp)->toContain("frame-ancestors 'none'")
+        ->and($csp)->toContain("img-src 'self' data: blob: https:")
         ->and($csp)->toContain('https://autofill.yandex.ru')
         ->and($csp)->toContain('https://yastatic.net')
         ->and($csp)->toContain("font-src 'self' data: https://yastatic.net");
+});
+
+test('export routes are rate limited', function () {
+    $routes = app('router')->getRoutes();
+
+    expect($routes->getByName('hackatons.export.teams')?->gatherMiddleware())->toContain('throttle:exports')
+        ->and($routes->getByName('profile.export')?->gatherMiddleware())->toContain('throttle:exports');
+});
+
+test('notification mark routes are rate limited', function () {
+    $routes = app('router')->getRoutes();
+
+    expect($routes->getByName('notifications.read')?->gatherMiddleware())->toContain('throttle:notifications')
+        ->and($routes->getByName('notifications.read-all')?->gatherMiddleware())->toContain('throttle:notifications');
+});
+
+test('oauth routes use login throttle', function () {
+    $routes = app('router')->getRoutes();
+
+    expect($routes->getByName('auth.yandex.redirect')?->gatherMiddleware())->toContain('throttle:login')
+        ->and($routes->getByName('auth.vk.callback')?->gatherMiddleware())->toContain('throttle:login');
+});
+
+test('external links in team chat include noopener noreferrer', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->for($owner)->create();
+
+    $this->actingAs($owner)
+        ->get(route('teams.show', $team))
+        ->assertOk()
+        ->assertSee('rel="noopener noreferrer"', false);
 });

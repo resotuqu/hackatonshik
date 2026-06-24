@@ -21,11 +21,11 @@
     @endphp
     <script type="application/ld+json">{!! $jsonLdScript !!}</script>
 
-    <nav {{ $attributes->class(['text-sm breadcrumbs']) }} aria-label="Хлебные крошки">
+    <nav {{ $attributes->class(['text-sm breadcrumbs']) }} aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
             @foreach ($items as $i => $item)
                 @php $isLast = $i === count($items) - 1; @endphp
-                <li @class(['opacity-70' => $isLast])>
+                <li @class(['opacity-70' => $isLast, 'max-w-[12rem] truncate sm:max-w-none' => $isLast])>
                     @if (!$isLast && isset($item['href']))
                         <a href="{{ $item['href'] }}" wire:navigate>{{ $item['label'] }}</a>
                     @else

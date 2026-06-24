@@ -157,11 +157,14 @@ test('yandex token auto verifies phone when default phone is present', function 
 });
 
 test('vk callback auto verifies phone when provider returns phone', function () {
-    session(['vk_oauth_state' => 'test-state-456']);
+    session([
+        'vk_oauth_state' => 'test-state-456',
+        'vk_oauth_code_verifier' => 'test-code-verifier-that-is-long-enough-for-pkce-123456',
+    ]);
 
     Http::fake([
-        'id.vk.com/oauth2/auth' => Http::response(['access_token' => 'fake-access-token'], 200),
-        'id.vk.com/oauth2/user_info' => Http::response([
+        'id.vk.ru/oauth2/auth' => Http::response(['access_token' => 'fake-access-token'], 200),
+        'id.vk.ru/oauth2/user_info' => Http::response([
             'user' => [
                 'user_id' => '888',
                 'first_name' => 'VK',

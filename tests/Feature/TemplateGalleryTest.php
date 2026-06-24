@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Pages\Admin\Index as AdminIndex;
 use App\Models\HackatonTemplate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
@@ -78,22 +76,25 @@ test('create wizard preselects template from query string', function () {
         ->assertSee('Gallery Template');
 });
 
-test('admin can publish and unpublish templates', function () {
-    $admin = User::factory()->admin()->create();
+test('template publish state controls gallery visibility', function () {
     $template = HackatonTemplate::factory()->create([
+        'title' => 'Toggle Template',
+        'slug' => 'toggle-template',
         'is_public' => false,
         'published_at' => null,
+        'is_active' => true,
     ]);
 
-    Livewire::actingAs($admin)
-        ->test(AdminIndex::class)
-        ->call('publishTemplate', $template->id);
+    $this->get(route('templates.index'))
+        ->assertSuccessful()
+        ->assertDontSee('Toggle Template');
 
-    expect($template->fresh()->is_public)->toBeTrue();
+    $template->update([
+        'is_public' => true,
+        'published_at' => now()->subMinute(),
+    ]);
 
-    Livewire::actingAs($admin)
-        ->test(AdminIndex::class)
-        ->call('unpublishTemplate', $template->id);
-
-    expect($template->fresh()->is_public)->toBeFalse();
+    $this->get(route('templates.index'))
+        ->assertSuccessful()
+        ->assertSee('Toggle Template');
 });

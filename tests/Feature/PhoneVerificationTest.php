@@ -63,6 +63,27 @@ test('authenticated user can store phone before flash call verification', functi
     expect($user->fresh()->phone)->toBe('+79991234567');
 });
 
+test('store phone is rate limited after too many attempts', function () {
+    $user = User::factory()->create([
+        'phone_verified_at' => null,
+        'phone' => null,
+    ]);
+
+    $key = "phone-verification-store:{$user->id}";
+    RateLimiter::clear($key);
+    for ($i = 0; $i < 5; $i++) {
+        RateLimiter::hit($key, 60);
+    }
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('phone.verify.phone'), [
+            'phone' => '9991234567',
+        ]);
+
+    $response->assertSessionHas('error', 'Слишком много попыток. Попробуйте позже.');
+});
+
 test('verified phone notice redirects to home', function () {
     $user = User::factory()->create([
         'phone_verified_at' => now(),

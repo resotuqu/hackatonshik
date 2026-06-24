@@ -29,7 +29,7 @@
                 <div class="grid grid-cols-1 gap-2 text-sm">
                     <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
                         <span class="text-base-content/70">Организатор</span>
-                        <span class="font-medium">{{ $hackaton->user->nickname ?? $hackaton->user->name ?? $hackaton->user->email }}</span>
+                        <span class="font-medium">{{ $hackaton->user->nickname ?? $hackaton->user->fio ?? $hackaton->user->email }}</span>
                     </div>
                     <div class="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
                         <span class="text-base-content/70">Обновлено</span>

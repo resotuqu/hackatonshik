@@ -80,11 +80,18 @@ class SocialAuthController extends Controller
 
     public function yandexTokenPage(): View
     {
-        return view('auth.yandex-token-page');
+        return view('auth.yandex-token-page', [
+            'oauthTokenNonce' => $this->ensureOAuthTokenNonceInSession(),
+            'suggestOrigin' => rtrim((string) config('app.url'), '/'),
+        ]);
     }
 
     public function yandexToken(Request $request): RedirectResponse
     {
+        if (! $this->validateOAuthTokenNonce($request)) {
+            return redirect()->route('login')->with('error', 'Сессия OAuth истекла. Повторите вход.');
+        }
+
         $accessToken = $request->string('access_token')->toString();
 
         if (blank($accessToken)) {
@@ -129,7 +136,12 @@ class SocialAuthController extends Controller
     public function vkRedirect(): RedirectResponse
     {
         $state = Str::random(40);
-        session(['vk_oauth_state' => $state]);
+        $codeVerifier = $this->generatePkceCodeVerifier();
+
+        session([
+            'vk_oauth_state' => $state,
+            'vk_oauth_code_verifier' => $codeVerifier,
+        ]);
 
         $query = http_build_query([
             'response_type' => 'code',
@@ -137,9 +149,11 @@ class SocialAuthController extends Controller
             'redirect_uri' => route('auth.vk.callback'),
             'scope' => 'email phone',
             'state' => $state,
+            'code_challenge' => $this->generatePkceCodeChallenge($codeVerifier),
+            'code_challenge_method' => 'S256',
         ]);
 
-        return redirect('https://id.vk.com/oauth2/auth?'.$query);
+        return redirect('https://id.vk.ru/authorize?'.$query);
     }
 
     public function vkCallback(Request $request): RedirectResponse
@@ -155,13 +169,20 @@ class SocialAuthController extends Controller
             return redirect()->route('login')->with('error', 'Не удалось выполнить вход через VK ID.');
         }
 
-        $tokenResponse = Http::asForm()->post('https://id.vk.com/oauth2/auth', [
+        $codeVerifier = (string) session()->pull('vk_oauth_code_verifier', '');
+
+        if (blank($codeVerifier)) {
+            return redirect()->route('login')->with('error', 'Не удалось выполнить вход через VK ID.');
+        }
+
+        $tokenResponse = Http::asForm()->post('https://id.vk.ru/oauth2/auth', [
             'grant_type' => 'authorization_code',
             'code' => $code,
             'device_id' => $deviceId,
             'redirect_uri' => route('auth.vk.callback'),
             'client_id' => config('services.vkontakte.client_id'),
-            'client_secret' => config('services.vkontakte.client_secret'),
+            'code_verifier' => $codeVerifier,
+            'state' => (string) $request->query('state', ''),
         ]);
 
         if ($tokenResponse->failed() || blank($tokenResponse->json('access_token'))) {
@@ -173,6 +194,10 @@ class SocialAuthController extends Controller
 
     public function vkToken(Request $request): RedirectResponse
     {
+        if (! $this->validateOAuthTokenNonce($request)) {
+            return redirect()->route('login')->with('error', 'Сессия OAuth истекла. Повторите вход.');
+        }
+
         $accessToken = $request->string('access_token')->toString();
 
         if (blank($accessToken)) {
@@ -184,7 +209,7 @@ class SocialAuthController extends Controller
 
     private function loginVkUser(string $accessToken, Request $request): RedirectResponse
     {
-        $response = Http::asForm()->post('https://id.vk.com/oauth2/user_info', [
+        $response = Http::asForm()->post('https://id.vk.ru/oauth2/user_info', [
             'access_token' => $accessToken,
             'client_id' => config('services.vkontakte.client_id'),
         ]);
@@ -231,31 +256,100 @@ class SocialAuthController extends Controller
         array $rawPayload,
     ): User {
         /** @var User $user */
-        $user = User::query()->firstOrCreate(
-            ['email' => $email],
-            [
-                'fio' => $name,
-                'nickname' => "{$provider}_".Str::lower(Str::random(10)),
-                'date_of_birth' => null,
-                'password' => Hash::make(Str::random(40)),
-                'email_verified_at' => now(),
-                'oauth_provider' => $provider,
-                'oauth_provider_id' => $providerId,
-                'pd_consent_accepted_at' => null,
-            ],
-        );
+        $user = $this->createOAuthUser($email, $name, $provider, $providerId);
 
         if (! $user->wasRecentlyCreated) {
-            $user->forceFill([
-                'oauth_provider' => $provider,
-                'oauth_provider_id' => $providerId,
-            ])->save();
+            $updates = [];
+
+            if ($user->oauth_provider === null || $user->oauth_provider === $provider) {
+                $updates['oauth_provider'] = $provider;
+                $updates['oauth_provider_id'] = $providerId;
+            }
+
+            if ($updates !== []) {
+                $user->forceFill($updates)->save();
+            }
         }
 
         $oauthPhone = $this->oauthPhoneResolver->extractPhone($provider, $rawPayload);
         $this->oauthPhoneResolver->applyToUser($user->fresh(), $oauthPhone);
 
         return $user->fresh();
+    }
+
+    private function createOAuthUser(string $email, string $name, string $provider, string $providerId): User
+    {
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            try {
+                /** @var User $user */
+                $user = User::query()->firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'fio' => $name,
+                        'nickname' => "{$provider}_".Str::lower(Str::random(10)),
+                        'date_of_birth' => null,
+                        'password' => Hash::make(Str::random(40)),
+                        'pd_consent_accepted_at' => null,
+                    ],
+                );
+
+                if ($user->wasRecentlyCreated) {
+                    $user->forceFill([
+                        'email_verified_at' => now(),
+                        'oauth_provider' => $provider,
+                        'oauth_provider_id' => $providerId,
+                    ])->save();
+                }
+
+                return $user;
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $exception) {
+                if ($attempt === 2) {
+                    throw $exception;
+                }
+            }
+        }
+
+        throw new \RuntimeException('Unable to create OAuth user.');
+    }
+
+    private function generatePkceCodeVerifier(): string
+    {
+        return Str::random(64);
+    }
+
+    private function generatePkceCodeChallenge(string $codeVerifier): string
+    {
+        return rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '=');
+    }
+
+    private function ensureOAuthTokenNonceInSession(): string
+    {
+        $nonce = (string) session('oauth_token_nonce', '');
+        $issuedAt = (int) session('oauth_token_nonce_at', 0);
+        $expired = $issuedAt <= 0 || (now()->timestamp - $issuedAt) > 300;
+
+        if ($nonce === '' || $expired) {
+            $nonce = Str::random(40);
+            session([
+                'oauth_token_nonce' => $nonce,
+                'oauth_token_nonce_at' => now()->timestamp,
+            ]);
+        }
+
+        return $nonce;
+    }
+
+    private function validateOAuthTokenNonce(Request $request): bool
+    {
+        $nonce = $request->string('oauth_token_nonce')->toString();
+        $sessionNonce = (string) $request->session()->pull('oauth_token_nonce', '');
+        $issuedAt = (int) $request->session()->pull('oauth_token_nonce_at', 0);
+
+        if ($nonce === '' || $sessionNonce === '' || ! hash_equals($sessionNonce, $nonce)) {
+            return false;
+        }
+
+        return $issuedAt > 0 && (now()->timestamp - $issuedAt) <= 300;
     }
 
     private function ensureOAuthLinkAllowed(string $email, string $provider, string $providerId): ?RedirectResponse

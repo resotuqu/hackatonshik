@@ -69,6 +69,26 @@
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
         ],
+        "sail": "docker compose exec laravel.test",
+        "sail:up": [
+            "docker compose up -d"
+        ],
+        "sail:down": [
+            "docker compose down"
+        ],
+        "sail:setup": [
+            "@php -r \"copy('.env.sail', '.env');\"",
+            "docker compose up -d",
+            "docker compose exec -T laravel.test composer install",
+            "docker compose exec -T laravel.test php artisan key:generate --force",
+            "docker compose exec -T laravel.test php artisan migrate --seed --force",
+            "docker compose exec -T laravel.test npm install",
+            "docker compose exec -T laravel.test npm run build"
+        ],
+        "sail:dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"docker compose exec -T laravel.test php artisan horizon\" \"docker compose exec -T laravel.test php artisan reverb:start\" \"docker compose exec -T laravel.test npm run dev -- --host\" --names=horizon,reverb,vite --kill-others"
+        ],
         "lint": [
             "pint --parallel"
         ],
@@ -76,7 +96,7 @@
             "pint --parallel --test"
         ],
         "analyse": [
-            "phpstan analyse --memory-limit=1G"
+            "vendor/bin/phpstan analyse --memory-limit=512M"
         ],
         "precommit:quick": [
             "@lint:check",

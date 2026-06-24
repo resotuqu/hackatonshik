@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class HackatonCaseSubmissionController extends Controller
 {
@@ -118,6 +119,11 @@ class HackatonCaseSubmissionController extends Controller
                     ? $uploadedFiles[$field->id]->store('hackaton_case_answers', 'local')
                     : null;
 
+                $existingAnswer = HackatonCaseAnswer::query()
+                    ->where('hackaton_case_submission_id', $submission->id)
+                    ->where('hackaton_case_field_id', $field->id)
+                    ->first();
+
                 $payload = [
                     'value_text' => $field->type === HackatonCaseField::TYPE_FILE ? null : ($rawAnswer !== '' ? $rawAnswer : null),
                 ];
@@ -133,6 +139,10 @@ class HackatonCaseSubmissionController extends Controller
                     ],
                     $payload,
                 );
+
+                if ($newFilePath !== null && $existingAnswer?->file_path && $existingAnswer->file_path !== $newFilePath) {
+                    Storage::disk('local')->delete($existingAnswer->file_path);
+                }
             }
         });
 

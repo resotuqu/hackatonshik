@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Judge\BuildJudgeHackatonScoringSummary;
 use App\Models\Hackaton;
 use App\Support\PublicStorageUrl;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,16 +12,30 @@ new class extends Component {
      */
     public $hackatons;
 
-    public function mount(): void
+    /**
+     * @var array<int, array{total: int, rated: int}>
+     */
+    public array $progress = [];
+
+    public function mount(BuildJudgeHackatonScoringSummary $summary): void
     {
         $user = auth()->user();
         abort_unless($user, 403);
 
         $this->hackatons = Hackaton::query()
-            ->whereHas('judgeAssignments', fn(Builder $query) => $query->where('user_id', $user->id))
+            ->whereHas('judgeAssignments', fn (Builder $query) => $query->where('user_id', $user->id))
             ->withCount(['cases'])
             ->latest('start_at')
             ->get(['id', 'title', 'image_url', 'status', 'start_at', 'end_at']);
+
+        $this->progress = $this->hackatons->mapWithKeys(function ($hackaton) use ($summary, $user) {
+            $data = $summary->handle($hackaton, $user);
+
+            return [$hackaton->id => [
+                'total' => $data['totalSubmissions'],
+                'rated' => $data['ratedSubmissions'],
+            ]];
+        })->all();
     }
 };
 
@@ -70,6 +85,20 @@ new class extends Component {
                             @endif
                         </div>
                     </div>
+
+                    @php
+                        $p = $progress[$hackaton->id] ?? ['total' => 0, 'rated' => 0];
+                    @endphp
+
+                    @if($p['total'] > 0)
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs text-base-content/50">
+                                <span>Оценено</span>
+                                <span>{{ $p['rated'] }} / {{ $p['total'] }}</span>
+                            </div>
+                            <progress class="progress progress-primary w-full" value="{{ $p['rated'] }}" max="{{ $p['total'] }}"></progress>
+                        </div>
+                    @endif
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">

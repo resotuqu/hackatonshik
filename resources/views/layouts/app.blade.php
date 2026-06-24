@@ -68,10 +68,20 @@
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <script>
+        window.__cropperI18n = @json([
+            'batch_caption' => __('ui.cropper.batch_caption'),
+        ]);
+    </script>
+    @if (is_file(resource_path('js/avatar-cropper-modal.js')))
+        <script>
+            {!! file_get_contents(resource_path('js/avatar-cropper-modal.js')) !!}
+        </script>
+    @endif
 </head>
 <body class="min-h-screen overflow-x-hidden bg-base-300 font-sans antialiased" x-data="{ cookieConsent: !document.cookie.split(';').some(c => c.trim().startsWith('cookie_consent=')) }" @cookie-consent-accepted.window="cookieConsent = false">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:shadow">
-        Перейти к основному контенту
+        {{ __('ui.layout.skip_to_content') }}
     </a>
     <div class="drawer lg:drawer-open min-h-screen">
         <input id="main-nav-drawer" type="checkbox" class="drawer-toggle" />
@@ -79,7 +89,7 @@
         <div class="drawer-content flex min-h-screen flex-col">
             <header class="navbar min-h-12 border-b border-base-200 bg-base-100 px-3 sm:min-h-14 sm:px-4 lg:hidden">
                 <div class="flex w-full min-w-0 flex-1 items-center gap-2">
-                    <label for="main-nav-drawer" class="btn btn-ghost btn-square min-h-12 min-w-12 shrink-0 drawer-button" aria-label="Открыть меню">
+                    <label for="main-nav-drawer" class="btn btn-ghost btn-square min-h-12 min-w-12 shrink-0 drawer-button" aria-label="{{ __('ui.layout.open_menu') }}">
                         <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
                     </label>
                     <div class="flex h-10 min-h-0 min-w-0 flex-1 items-stretch sm:h-11">
@@ -118,21 +128,21 @@
 
             <footer class="footer sm:footer-horizontal mt-auto border-t border-base-300 bg-base-200 text-base-content px-6 py-8 sm:px-10 sm:py-10 gap-6">
                 <nav>
-                    <h6 class="footer-title">Основные страницы</h6>
-                    <a href="/" class="link link-hover">Главная</a>
-                    <a href="/teams" class="link link-hover">Команды</a>
-                    <a href="/hackatons" class="link link-hover">Хакатоны</a>
+                    <h6 class="footer-title">{{ __('ui.layout.footer.main_pages') }}</h6>
+                    <a href="{{ route('home') }}" class="link link-hover">{{ __('ui.nav.home') }}</a>
+                    <a href="{{ route('teams.index') }}" class="link link-hover">{{ __('ui.nav.teams') }}</a>
+                    <a href="{{ route('hackatons.index') }}" class="link link-hover">{{ __('ui.nav.hackatons') }}</a>
                 </nav>
                 <nav>
-                    <h6 class="footer-title">О веб-приложении</h6>
-                    <a href="/about" class="link link-hover">О нас</a>
-                    <a href="/contacts" class="link link-hover">Контакты</a>
-                    <a href="/news" class="link link-hover">Новости</a>
+                    <h6 class="footer-title">{{ __('ui.layout.footer.about_app') }}</h6>
+                    <a href="{{ url('/about') }}" class="link link-hover">{{ __('ui.layout.footer.about') }}</a>
+                    <a href="{{ url('/contacts') }}" class="link link-hover">{{ __('ui.layout.footer.contacts') }}</a>
+                    <a href="{{ route('news.index') }}" class="link link-hover">{{ __('ui.layout.footer.news') }}</a>
                 </nav>
                 <nav>
-                    <h6 class="footer-title">Правовая информация</h6>
-                    <a href="/privacy-policy" class="link link-hover">Политика конфиденциальности и обработки персональных данных</a>
-                    <a href="/cookie-policy" class="link link-hover">Политика куки файлов</a>
+                    <h6 class="footer-title">{{ __('ui.layout.footer.legal') }}</h6>
+                    <a href="{{ url('/privacy-policy') }}" class="link link-hover">{{ __('ui.layout.footer.privacy') }}</a>
+                    <a href="{{ url('/cookie-policy') }}" class="link link-hover">{{ __('ui.layout.footer.cookies') }}</a>
                 </nav>
             </footer>
 
@@ -150,14 +160,13 @@
                 <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 sm:py-4 lg:px-8">
                     <p class="text-xs text-base-content/80 sm:text-sm">
                         <span class="sm:hidden">
-                            Cookie для работы сервиса и аналитики.
-                            <a href="/cookie-policy" class="link link-primary">Подробнее</a>.
+                            {{ __('ui.layout.cookie.short') }}
+                            <a href="{{ url('/cookie-policy') }}" class="link link-primary">{{ __('ui.layout.cookie.more') }}</a>.
                         </span>
                         <span class="hidden sm:inline">
-                            Мы используем файлы cookie для корректной работы сервиса и аналитики.
-                            Продолжая пользоваться сайтом, вы соглашаетесь с нашей
-                            <a href="/cookie-policy" class="link link-primary">Политикой куки</a> и
-                            <a href="/privacy-policy" class="link link-primary">Политикой конфиденциальности</a>.
+                            {{ __('ui.layout.cookie.long_intro') }}
+                            <a href="{{ url('/cookie-policy') }}" class="link link-primary">{{ __('ui.layout.cookie.cookie_policy') }}</a> {{ __('ui.layout.cookie.and') }}
+                            <a href="{{ url('/privacy-policy') }}" class="link link-primary">{{ __('ui.layout.cookie.privacy_policy') }}</a>.
                         </span>
                     </p>
                     <div class="flex shrink-0 gap-2">
@@ -166,20 +175,20 @@
                             class="btn btn-primary btn-sm"
                             @click="document.cookie='cookie_consent=accepted;path=/;max-age=31536000;SameSite=Lax'; cookieConsent=false; $dispatch('cookie-consent-accepted')"
                         >
-                            Принять
+                            {{ __('ui.layout.cookie.accept') }}
                         </button>
-                        <a href="/cookie-policy" class="btn btn-ghost btn-sm">Подробнее</a>
+                        <a href="{{ url('/cookie-policy') }}" class="btn btn-ghost btn-sm">{{ __('ui.layout.cookie.more') }}</a>
                     </div>
                 </div>
             </div>
 
             <nav
                 class="btm-nav btm-nav-touch lg:hidden z-60 border-t border-base-200 bg-base-100 pb-[env(safe-area-inset-bottom)]"
-                aria-label="Нижняя навигация"
+                aria-label="{{ __('ui.layout.bottom_nav') }}"
             >
                 <a href="{{ route('home') }}" wire:navigate @class([request()->routeIs('home') ? 'active text-primary' : 'text-base-content/70'])>
                     <x-app-icon icon="heroicons:home" class="h-6 w-6" />
-                    <span class="btm-nav-label">Главная</span>
+                    <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.home') }}</span>
                 </a>
                 @auth
                     @php
@@ -190,95 +199,95 @@
                         @if ($btmUser->isAdmin())
                             <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:shield-check" class="h-6 w-6" />
-                                <span class="btm-nav-label">Админ</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.admin') }}</span>
                             </a>
                         @elseif ($btmUser->isOrganizer())
                             <a href="{{ route('organizer.dashboard') }}" wire:navigate @class([request()->routeIs('organizer.dashboard', 'profile.organizer') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:squares-2x2" class="h-6 w-6" />
-                                <span class="btm-nav-label">Орг.</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.organizer') }}</span>
                             </a>
                         @elseif ($btmUser->isJudge())
                             <a href="{{ route('judge.dashboard') }}" wire:navigate @class([request()->is('judge*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:scale" class="h-6 w-6" />
-                                <span class="btm-nav-label">Судья</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.judge') }}</span>
                             </a>
                         @elseif ($btmUser->isModerator())
                             <a href="{{ route('admin.dashboard') }}" wire:navigate @class([request()->is('admin*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:shield-exclamation" class="h-6 w-6" />
-                                <span class="btm-nav-label">Модер.</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.moderator') }}</span>
                             </a>
                         @endif
                     @else
                         <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/70'])>
                             <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
-                            <span class="btm-nav-label">Команды</span>
+                            <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.teams') }}</span>
                         </a>
                     @endif
                 @else
                     <a href="{{ route('teams.index') }}" wire:navigate @class([request()->is('teams*') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:user-group" class="h-6 w-6" />
-                        <span class="btm-nav-label">Команды</span>
+                        <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.teams') }}</span>
                     </a>
                 @endauth
                 <label for="main-nav-drawer" class="flex min-h-14 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-base-content/70">
                     <x-app-icon icon="heroicons:bars-3" class="h-6 w-6" />
-                    <span class="btm-nav-label">Меню</span>
+                    <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.menu') }}</span>
                 </label>
                 @guest
                     <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                        <span class="btm-nav-label">Хакатоны</span>
+                        <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.hackatons') }}</span>
                     </a>
                 @else
                     @if ($btmStaff)
                         @if ($btmUser->isAdmin())
                             <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                                <span class="btm-nav-label">Хакатоны</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.hackatons') }}</span>
                             </a>
                         @elseif ($btmUser->isOrganizer())
                             <a href="{{ route('organizer.applications') }}" wire:navigate @class([request()->routeIs('organizer.applications', 'profile.hackatons.applications') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                                <span class="btm-nav-label">Заявки</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.applications') }}</span>
                             </a>
                         @elseif ($btmUser->isJudge())
                             <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                                <span class="btm-nav-label">Хакатоны</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.hackatons') }}</span>
                             </a>
                         @elseif ($btmUser->isModerator())
                             <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                                 <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                                <span class="btm-nav-label">Хакатоны</span>
+                                <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.hackatons') }}</span>
                             </a>
                         @endif
                     @else
                         <a href="{{ route('hackatons.index') }}" wire:navigate @class([request()->is('hackatons*') ? 'active text-primary' : 'text-base-content/70'])>
                             <x-app-icon icon="heroicons:rocket-launch" class="h-6 w-6" />
-                            <span class="btm-nav-label">Хакатоны</span>
+                            <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.hackatons') }}</span>
                         </a>
                     @endif
                 @endguest
                 @auth
                     <a href="{{ route('profile') }}" wire:navigate @class([request()->is('profile*') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:user-circle" class="h-6 w-6" />
-                        <span class="btm-nav-label">Профиль</span>
+                        <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.profile') }}</span>
                     </a>
                 @else
                     <a href="{{ route('login') }}" wire:navigate @class([request()->is('login') ? 'active text-primary' : 'text-base-content/70'])>
                         <x-app-icon icon="heroicons:arrow-right-on-rectangle" class="h-6 w-6" />
-                        <span class="btm-nav-label">Войти</span>
+                        <span class="btm-nav-label">{{ __('ui.layout.bottom_nav_labels.login') }}</span>
                     </a>
                 @endauth
             </nav>
         </div>
 
         <div class="drawer-side z-40">
-            <label for="main-nav-drawer" aria-label="Закрыть меню" class="drawer-overlay lg:hidden"></label>
+            <label for="main-nav-drawer" aria-label="{{ __('ui.layout.close_menu') }}" class="drawer-overlay lg:hidden"></label>
             <aside
                 id="app-sidebar"
                 class="flex min-h-full w-80 max-h-[100dvh] flex-col overflow-hidden border-r border-base-200 bg-base-100 bg-linear-to-b from-base-100 to-base-200/50 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6 lg:max-h-none lg:overflow-visible lg:pb-6"
-                aria-label="Основная навигация"
+                aria-label="{{ __('ui.layout.main_nav') }}"
             >
                 <div class="relative flex shrink-0 flex-col gap-3 overflow-visible">
                     <div class="px-1 py-2">
@@ -294,18 +303,26 @@
                             <div class="ml-auto">
                                 <livewire:notification-bell />
                             </div>
-                            <div class="dropdown dropdown-start order-first">
-                                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                            <div class="dropdown dropdown-start order-first" x-data="{ open: false }">
+                                <div
+                                    tabindex="0"
+                                    role="button"
+                                    class="btn btn-ghost btn-circle avatar"
+                                    aria-haspopup="menu"
+                                    :aria-expanded="open ? 'true' : 'false'"
+                                    @click="open = !open"
+                                    @keydown.escape.window="open = false"
+                                >
                                     <div class="w-10 rounded-full">
-                                        <img alt="Аватар пользователя" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
+                                        <img alt="{{ __('ui.layout.user_avatar') }}" src="{{ Auth::user()?->avatar_path ? asset('storage/'.Auth::user()->avatar_path) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->fio ?? 'U').'&background=random' }}" />
                                     </div>
                                 </div>
-                                <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
-                                    <li><a href="/profile">Профиль</a></li>
+                                <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow" @click.outside="open = false">
+                                    <li><a href="{{ route('profile') }}">{{ __('ui.nav.profile') }}</a></li>
                                     <li class="w-full">
-                                        <form class="w-full" method="post" action="/logout">
+                                        <form class="w-full" method="post" action="{{ url('/logout') }}">
                                             @csrf
-                                            <button class="w-full text-left" type="submit">Выйти</button>
+                                            <button class="w-full text-left" type="submit">{{ __('ui.layout.logout') }}</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -314,7 +331,7 @@
                     @endauth
                 </div>
 
-                <x-mary-menu activate-by-route class="mt-5 w-full min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-0 lg:overflow-y-visible" role="navigation" aria-label="Меню сайта">
+                <x-mary-menu activate-by-route class="mt-5 w-full min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-0 lg:overflow-y-visible" role="navigation" aria-label="{{ __('ui.layout.site_menu') }}">
                     @guest
                         <x-mary-menu-item title="{{ __('ui.nav.home') }}" icon="o-home" link="{{ route('home') }}" exact />
                         <x-mary-menu-item title="{{ __('ui.nav.hackatons') }}" icon="o-rocket-launch" link="{{ route('hackatons.index') }}" />
@@ -392,7 +409,7 @@
                             class="toggle toggle-primary shrink-0"
                             data-theme-toggle
                             role="switch"
-                            aria-label="Переключить тёмную тему"
+                            aria-label="{{ __('ui.layout.theme_toggle') }}"
                             aria-checked="false"
                         />
                     </label>

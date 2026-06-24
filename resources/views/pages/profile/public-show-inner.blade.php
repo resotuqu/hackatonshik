@@ -43,10 +43,10 @@
     @section('og_image', $avatarUrl)
 
     <div class="mx-auto w-full max-w-6xl space-y-6">
-        <nav class="text-sm breadcrumbs">
+        <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
             <ul>
-                <li><a href="/">Главная</a></li>
-                <li class="opacity-70">Публичный профиль</li>
+                <li><a href="/">{{ __('ui.nav.home') }}</a></li>
+                <li class="opacity-70">{{ __('ui.nav.profile') }}</li>
             </ul>
         </nav>
 
@@ -110,7 +110,7 @@
             <div class="space-y-6 lg:col-span-2">
 
                 @if (filled($profileUser->description))
-                    <section class="card border border-base-300 bg-base-100">
+                    <section class="card rounded-card border border-base-300 bg-base-100">
                         <div class="card-body gap-4">
                             <h2 class="card-title text-base">
                                 <x-app-icon icon="heroicons:document-text" class="h-5 w-5 text-primary" />
@@ -124,7 +124,7 @@
                 @endif
 
                 {{-- SKILLS --}}
-                <section class="card border border-base-300 bg-base-100">
+                <section class="card rounded-card border border-base-300 bg-base-100">
                     <div class="card-body gap-4">
                         <h2 class="card-title text-base">
                             <x-app-icon icon="heroicons:sparkles" class="h-5 w-5 text-primary" />
@@ -170,7 +170,7 @@
 
                 {{-- HACKATON HISTORY --}}
                 @if ($profileUser->hackatons->isNotEmpty() || $participatedHackatons->isNotEmpty())
-                    <section class="card border border-base-300 bg-base-100">
+                    <section class="card rounded-card border border-base-300 bg-base-100">
                         <div class="card-body gap-4">
                             <h2 class="card-title text-base">
                                 <x-app-icon icon="heroicons:flag" class="h-5 w-5 text-primary" />
@@ -233,7 +233,7 @@
                         </div>
                     </section>
                 @else
-                    <section class="card border border-base-300 bg-base-100">
+                    <section class="card rounded-card border border-base-300 bg-base-100">
                         <div class="card-body gap-4">
                             <h2 class="card-title text-base">
                                 <x-app-icon icon="heroicons:flag" class="h-5 w-5 text-primary" />
@@ -254,7 +254,7 @@
             <aside class="space-y-4 lg:sticky lg:top-20">
 
                 {{-- Stats --}}
-                <div class="card border border-base-300 bg-base-100">
+                <div class="card rounded-card border border-base-300 bg-base-100">
                     <div class="card-body gap-3 p-4">
                         <dl class="grid grid-cols-3 divide-x divide-base-300 text-center">
                             <div class="px-3">
@@ -275,7 +275,7 @@
 
                 {{-- Contacts --}}
                 @if ($profileUser->show_email_on_profile || ($profileUser->show_phone_on_profile && filled($profileUser->phone)))
-                    <section class="card border border-base-300 bg-base-100">
+                    <section class="card rounded-card border border-base-300 bg-base-100">
                         <div class="card-body gap-3 p-4">
                             <h2 class="flex items-center gap-2 text-sm font-semibold">
                                 <x-app-icon icon="heroicons:envelope" class="h-4 w-4 text-primary" />
@@ -296,7 +296,7 @@
                 @endif
 
                 {{-- Teams --}}
-                <section class="card border border-base-300 bg-base-100">
+                <section class="card rounded-card border border-base-300 bg-base-100">
                     <div class="card-body gap-3 p-4">
                         <h2 class="flex items-center gap-2 text-sm font-semibold">
                             <x-app-icon icon="heroicons:user-group" class="h-4 w-4 text-primary" />
@@ -315,7 +315,7 @@
                 </section>
 
                 {{-- Certificates --}}
-                <section class="card border border-base-300 bg-base-100">
+                <section class="card rounded-card border border-base-300 bg-base-100">
                     <div class="card-body gap-3 p-4">
                         <h2 class="flex items-center gap-2 text-sm font-semibold">
                             <x-app-icon icon="heroicons:academic-cap" class="h-4 w-4 text-primary" />

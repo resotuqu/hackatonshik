@@ -1,5 +1,5 @@
 <div
-    class="ui-surface-card flex flex-col h-[560px] !overflow-visible"
+    class="ui-surface-card flex flex-col h-[min(560px,calc(100dvh-12rem))] min-h-[20rem] !overflow-visible"
     x-data="{
         allowedEmoji: @js(\App\Livewire\TeamChat::ALLOWED_EMOJI),
         pickerFor: null,
@@ -114,13 +114,13 @@
                         'bg-base-200 text-base-content' => ! $isMine,
                     ])>
                         @if($msg->type === 'image')
-                            <a href="{{ asset('storage/' . $msg->content) }}" target="_blank" class="block">
+                            <a href="{{ asset('storage/' . $msg->content) }}" target="_blank" rel="noopener noreferrer" class="block">
                                 <img src="{{ asset('storage/' . $msg->content) }}" class="max-w-full rounded-lg shadow-sm hover:opacity-90 transition-opacity" />
                             </a>
                         @elseif($msg->type === 'file')
                             <div class="flex items-center gap-2">
                                 <x-app-icon icon="heroicons:document" class="w-5 h-5 shrink-0" />
-                                <a href="{{ asset('storage/' . $msg->content) }}" target="_blank" class="link link-hover break-all text-sm">
+                                <a href="{{ asset('storage/' . $msg->content) }}" target="_blank" rel="noopener noreferrer" class="link link-hover break-all text-sm">
                                     {{ basename($msg->content) }}
                                 </a>
                             </div>
@@ -283,12 +283,15 @@
                         </label>
                     @endif
                 </div>
-                <button type="submit" class="btn btn-primary btn-sm btn-square" wire:loading.attr="disabled">
-                    <x-app-icon icon="heroicons:paper-airplane" class="w-4 h-4" />
+                <button type="submit" class="btn btn-primary btn-sm btn-square" wire:loading.attr="disabled" wire:target="sendMessage,files">
+                    <span wire:loading.remove wire:target="sendMessage,files">
+                        <x-app-icon icon="heroicons:paper-airplane" class="w-4 h-4" />
+                    </span>
+                    <span wire:loading wire:target="sendMessage,files" class="loading loading-spinner loading-xs"></span>
                 </button>
             </form>
             @if($fileUploadEnabled)
-                <div wire:loading wire:target="files" class="text-[10px] text-primary mt-1">Загрузка файла...</div>
+                <div wire:loading wire:target="files" class="text-[10px] text-primary mt-1">{{ __('ui.chat.uploading_file') }}</div>
             @endif
         </div>
     </div>

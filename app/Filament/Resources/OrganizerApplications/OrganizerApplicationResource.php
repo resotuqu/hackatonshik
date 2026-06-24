@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\OrganizerApplications;
 
-use App\Filament\Concerns\RequiresAdmin;
+use App\Filament\Concerns\RequiresStaff;
 use App\Filament\Resources\OrganizerApplications\Pages\ListOrganizerApplications;
 use App\Filament\Resources\OrganizerApplications\Pages\ViewOrganizerApplication;
 use App\Filament\Resources\OrganizerApplications\Schemas\OrganizerApplicationInfolist;
@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 
 class OrganizerApplicationResource extends Resource
 {
-    use RequiresAdmin;
+    use RequiresStaff;
 
     protected static ?string $model = OrganizerApplication::class;
 

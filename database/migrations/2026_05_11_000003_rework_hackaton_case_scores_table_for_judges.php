@@ -53,7 +53,7 @@ return new class extends Migration
                 score,
                 max_score,
                 comment,
-                1,
+                true,
                 reviewed_at,
                 created_at,
                 updated_at

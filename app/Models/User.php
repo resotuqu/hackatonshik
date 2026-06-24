@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -35,12 +35,6 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, LogsActivity, Notifiable, TwoFactorAuthenticatable;
-
-    protected static function booted(): void
-    {
-        static::saved(fn () => Cache::increment('api:v1:catalog:profiles:version'));
-        static::deleted(fn () => Cache::increment('api:v1:catalog:profiles:version'));
-    }
 
     /** @return HasMany<Team, $this> */
     public function teams(): HasMany
@@ -143,7 +137,6 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'fio',
         'date_of_birth',
         'email',
-        'email_verified_at',
         'description',
         'nickname',
         'password',
@@ -157,8 +150,6 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'avatar_path',
         'locale',
         'pd_consent_accepted_at',
-        'oauth_provider',
-        'oauth_provider_id',
     ];
 
     /**
@@ -191,6 +182,7 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
             'show_skills_on_profile' => 'boolean',
             'phone_verified_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'account_deleted_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'pd_consent_accepted_at' => 'datetime',
         ];
@@ -204,12 +196,26 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         return InitialsGenerator::generate($this->fio);
     }
 
+    public function isAccountDeleted(): bool
+    {
+        return $this->account_deleted_at !== null;
+    }
+
+    public function getDeletedDisplayName(): string
+    {
+        return "☠️ @deleted_{$this->id}";
+    }
+
     /**
      * Get the user's anonymized display name: "Имя О.Ф."
      * Used for public-facing displays to protect privacy.
      */
     public function publicName(): string
     {
+        if ($this->isAccountDeleted()) {
+            return $this->getDeletedDisplayName();
+        }
+
         if (! filled($this->fio)) {
             return $this->nickname ?? 'Участник';
         }
@@ -286,6 +292,31 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     public function canParticipate(): bool
     {
         return $this->isParticipant() && ! $this->isSuspended();
+    }
+
+    /**
+     * @return Collection<int, int>
+     */
+    public function participatingHackatonIds(): Collection
+    {
+        return once(function (): Collection {
+            $owned = $this->teams()->whereNotNull('hackaton_id')->pluck('hackaton_id');
+            $member = TeamRole::query()
+                ->where('user_id', $this->id)
+                ->whereHas('team', fn ($query) => $query->whereNotNull('hackaton_id'))
+                ->with('team:id,hackaton_id')
+                ->get()
+                ->pluck('team.hackaton_id');
+
+            return $owned->merge($member)->filter()->unique()->values();
+        });
+    }
+
+    public function participatesInHackaton(Hackaton|int $hackaton): bool
+    {
+        $hackatonId = $hackaton instanceof Hackaton ? $hackaton->id : $hackaton;
+
+        return $this->participatingHackatonIds()->contains($hackatonId);
     }
 
     public function isSuspended(): bool

@@ -103,4 +103,28 @@ describe('Localized UI rendering', function () {
         $response->assertSuccessful();
         $response->assertSee(__('ui.search.placeholder', locale: 'en'), false);
     });
+
+    it('renders home hero copy in english when locale is en', function () {
+        $response = $this->withCookie('locale', 'en')->get(route('home'));
+
+        $response->assertSuccessful();
+        $response->assertSee(__('ui.home.hero_title', locale: 'en'), false);
+        $response->assertSee(__('ui.home.stats_title', locale: 'en'), false);
+    });
+
+    it('renders login form copy in english when locale is en', function () {
+        $response = $this->withCookie('locale', 'en')->get(route('login'));
+
+        $response->assertSuccessful();
+        $response->assertSee(__('ui.auth.login.form_title', locale: 'en'), false);
+        $response->assertSee(__('ui.auth.login.submit', locale: 'en'), false);
+    });
+
+    it('renders layout footer copy in english when locale is en', function () {
+        $response = $this->withCookie('locale', 'en')->get(route('home'));
+
+        $response->assertSuccessful();
+        $response->assertSee(__('ui.layout.footer.main_pages', locale: 'en'), false);
+        $response->assertSee(__('ui.layout.cookie.accept', locale: 'en'), false);
+    });
 });

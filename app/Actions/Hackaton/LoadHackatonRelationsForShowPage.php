@@ -13,7 +13,7 @@ final class LoadHackatonRelationsForShowPage
     public function handle(Hackaton $hackaton, ?User $user, bool $isOrganizer, bool $isAssignedJudge): void
     {
         $hackaton->load([
-            'user:id,nickname,name,email',
+            'user:id,nickname,fio,email',
             'documents',
             'teams:id,hackaton_id,user_id,title',
             'teams.roles:id,team_id,user_id',

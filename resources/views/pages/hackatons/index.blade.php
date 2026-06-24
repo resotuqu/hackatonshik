@@ -40,7 +40,7 @@
                 @foreach ($statusGroupOptions as $value => $label)
                     <button
                         type="button"
-                        wire:click="$set('statusGroup', '{{ $value }}')"
+                        wire:click="setStatusGroup('{{ $value }}')"
                         role="tab"
                         aria-selected="{{ $statusGroup === $value ? 'true' : 'false' }}"
                         class="btn btn-sm {{ $statusGroup === $value ? 'btn-primary' : 'btn-ghost border border-base-300' }}"

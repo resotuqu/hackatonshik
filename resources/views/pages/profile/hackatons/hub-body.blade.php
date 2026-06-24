@@ -1,3 +1,8 @@
+<div wire:loading.delay.shortest class="flex justify-center py-8" aria-live="polite" aria-busy="true">
+    <span class="loading loading-spinner loading-md text-primary"></span>
+</div>
+
+<div wire:loading.remove>
 @if($hackatons->isEmpty())
     <section class="ui-surface-soft">
         <div class="card-body space-y-4 py-10 sm:py-12">
@@ -48,7 +53,7 @@
     @endif
 
     @unless ($hideSummaryHeader ?? false)
-    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="ui-heading-display text-2xl font-bold sm:text-3xl lg:text-4xl">Дашборд организатора</h1>
             <p class="mt-1 max-w-xl text-sm text-base-content/70">
@@ -223,7 +228,7 @@
                             <tbody>
                                 @foreach($funnel['hackatons'] as $row)
                                     <tr wire:key="funnel-row-{{ $row['hackaton_id'] }}">
-                                        <td>{{ $row['title'] }}</td>
+                                        <td class="max-w-[14rem] truncate">{{ $row['title'] }}</td>
                                         <td class="text-right tabular-nums">{{ $row['views'] }}</td>
                                         <td class="text-right tabular-nums">{{ $row['applications'] }}</td>
                                         <td class="text-right tabular-nums">{{ $row['accepted'] }}</td>
@@ -246,7 +251,7 @@
     @endif
 
     @if($featuredHackaton)
-        <section class="ui-surface-card ui-surface-card--hackaton-active shadow-lg" aria-label="Текущий хакатон">
+        <section class="ui-surface-card ui-surface-card--hackaton-active !overflow-visible shadow-lg" aria-label="Текущий хакатон">
             <div class="card-body gap-6">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:gap-4">
@@ -298,32 +303,32 @@
                             </dl>
                         </div>
                     </div>
-                    <div class="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap lg:w-auto lg:max-w-sm lg:flex-col">
-                        <a href="{{ route('hackatons.show', $featuredHackaton) }}" class="ui-cta-outline btn-sm w-full gap-2 sm:flex-1 lg:flex-none" wire:navigate>
+                    <div class="flex w-full flex-col gap-2 sm:grid sm:grid-cols-3 lg:flex lg:w-auto lg:max-w-sm lg:flex-col">
+                        <a href="{{ route('hackatons.show', $featuredHackaton) }}" class="ui-cta-outline btn-sm w-full gap-2 lg:flex-none" wire:navigate>
                             <x-app-icon icon="heroicons:eye" class="h-4 w-4" />
                             Страница хакатона
                         </a>
-                        <a href="{{ route('hackatons.edit', $featuredHackaton) }}" class="ui-cta-secondary btn-sm w-full gap-2 sm:flex-1 lg:flex-none" wire:navigate>
+                        <a href="{{ route('hackatons.edit', $featuredHackaton) }}" class="ui-cta-secondary btn-sm w-full gap-2 lg:flex-none" wire:navigate>
                             <x-app-icon icon="heroicons:pencil-square" class="h-4 w-4" />
                             Редактировать
                         </a>
                         <a
                             href="{{ route('hackatons.show', $featuredHackaton) }}?applications_status=pending#hackaton-tab-participants"
-                            class="ui-cta-outline btn-sm w-full gap-2 border-error/30 sm:flex-1 lg:flex-none"
+                            class="ui-cta-outline btn-sm w-full gap-2 border-error/30 lg:flex-none"
                             wire:navigate
                         >
                             <x-app-icon icon="heroicons:inbox" class="h-4 w-4 text-error" />
                             Заявки
                         </a>
-                        <a href="{{ route('organizer.scoring') }}" class="ui-cta-outline btn-sm w-full gap-2 sm:flex-1 lg:flex-none" wire:navigate>
+                        <a href="{{ route('organizer.scoring') }}" class="ui-cta-outline btn-sm w-full gap-2 lg:flex-none" wire:navigate>
                             <x-app-icon icon="heroicons:clipboard-document-check" class="h-4 w-4" />
                             Оценка
                         </a>
-                        <button type="button" class="ui-cta-outline btn-sm w-full gap-2 sm:flex-1 lg:flex-none" wire:click="participantsHackaton({{ $featuredHackaton->id }})">
+                        <button type="button" class="ui-cta-outline btn-sm w-full gap-2 lg:flex-none" wire:click="participantsHackaton({{ $featuredHackaton->id }})">
                             <x-app-icon icon="heroicons:user-group" class="h-4 w-4" />
                             Участники
                         </button>
-                        <div class="dropdown dropdown-end sm:flex-1 lg:flex-none">
+                        <div class="dropdown dropdown-end lg:flex-none">
                             <div tabindex="0" role="button" class="ui-cta-outline btn-sm w-full gap-2">
                                 <x-app-icon icon="heroicons:arrow-down-tray" class="h-4 w-4" />
                                 Экспорт
@@ -409,7 +414,7 @@
                 </div>
                 <div class="mt-2 space-y-2">
                     <div class="flex flex-wrap items-center gap-2">
-                        <p class="card-title flex-1 leading-tight">{{ $hackaton->title }}</p>
+                        <p class="card-title min-w-0 flex-1 truncate leading-tight">{{ $hackaton->title }}</p>
                         <span class="badge {{ $hackaton->status->badgeClass() }} badge-sm shrink-0">{{ $hackaton->status->label() }}</span>
                     </div>
                     @if($hackaton->pending_applications_count > 0)
@@ -442,3 +447,4 @@
         @endforeach
     </div>
 @endif
+</div>

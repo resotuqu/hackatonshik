@@ -375,7 +375,7 @@ class ContactChangeService
                     'required',
                     'string',
                     'min:11',
-                    'max:12',
+                    'max:20',
                     Rule::unique(User::class, 'phone')->ignore($userId),
                 ],
             ],

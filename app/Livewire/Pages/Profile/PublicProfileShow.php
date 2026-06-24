@@ -18,6 +18,10 @@ class PublicProfileShow extends Component
 
     public function mount(User $user): void
     {
+        if ($user->isAccountDeleted()) {
+            $this->redirect(route('profile.public.deleted', $user->id));
+        }
+
         abort_unless($user->is_profile_public, 404);
         $cacheKey = "profile:public-show:{$user->id}:v2";
         $cache = Cache::supportsTags()
@@ -74,7 +78,7 @@ class PublicProfileShow extends Component
     #[Layout('layouts::app')]
     public function render(): View
     {
-        $title = $this->profileUser->fio ?? $this->profileUser->nickname;
+        $title = $this->profileUser->publicName();
 
         return view('pages.profile.public-show-inner', [
             'profileUser' => $this->profileUser,

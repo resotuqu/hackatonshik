@@ -30,21 +30,31 @@ class HackatonApplicationController extends Controller
         $validated = $request->validated();
         $hackaton = Hackaton::query()->findOrFail($validated['hackaton_id']);
 
-        $application = HackatonApplication::query()->firstOrNew([
-            'team_id' => $validated['team_id'],
-            'hackaton_id' => $hackaton->id,
-        ]);
+        $application = DB::transaction(function () use ($validated, $hackaton, $request): HackatonApplication {
+            Team::query()
+                ->whereKey($validated['team_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $casesCountWhenApplied = $hackaton->cases()->count();
+            $application = HackatonApplication::query()->firstOrNew([
+                'team_id' => $validated['team_id'],
+                'hackaton_id' => $hackaton->id,
+            ]);
 
-        $application->fill([
-            'message' => $validated['message'] ?? null,
-            'hackaton_cases_count_when_applied' => $casesCountWhenApplied,
-            'status' => ApplicationStatus::PENDING,
-            'reviewed_at' => null,
-            'reviewed_by' => null,
-        ]);
-        $application->save();
+            $casesCountWhenApplied = $hackaton->cases()->count();
+
+            $application->fill([
+                'message' => $validated['message'] ?? null,
+                'hackaton_cases_count_when_applied' => $casesCountWhenApplied,
+                'status' => ApplicationStatus::PENDING,
+                'reviewed_at' => null,
+                'reviewed_by' => null,
+            ]);
+            $application->save();
+
+            return $application;
+        });
+
         $recordEvent->handle($hackaton, 'application_submitted', $request->user(), [
             'team_id' => $application->team_id,
             'application_id' => $application->id,
@@ -174,8 +184,9 @@ class HackatonApplicationController extends Controller
         $status = ApplicationStatus::from($validated['status']);
         /** @var User $reviewer */
         $reviewer = $request->user();
+        $processedApplicationIds = [];
 
-        DB::transaction(function () use ($hackaton, $applicationIds, $status, $reviewer): void {
+        DB::transaction(function () use ($hackaton, $applicationIds, $status, $reviewer, &$processedApplicationIds): void {
             $applications = HackatonApplication::query()
                 ->where('hackaton_id', $hackaton->id)
                 ->whereIn('id', $applicationIds)
@@ -186,31 +197,35 @@ class HackatonApplicationController extends Controller
             foreach ($applications as $application) {
                 if ($status === ApplicationStatus::ACCEPTED) {
                     $this->acceptApplication($application, $reviewer);
-
-                    $this->notifyTeamAboutStatus(
-                        HackatonApplication::query()->with(['hackaton', 'team'])->findOrFail($application->id)
-                    );
-                    event(new HackatonApplicationChanged(
-                        teamId: (int) $application->team_id,
-                        hackatonId: (int) $application->hackaton_id,
-                        organizerId: (int) $hackaton->user_id,
-                        invalidateHomeFeatured: true,
-                    ));
-
-                    continue;
+                } else {
+                    $application->markAsRejected($reviewer);
                 }
 
-                $application->markAsRejected($reviewer);
-                $this->notifyTeamAboutStatus(
-                    HackatonApplication::query()->with(['hackaton', 'team'])->findOrFail($application->id)
-                );
-                event(new HackatonApplicationChanged(
-                    teamId: (int) $application->team_id,
-                    hackatonId: (int) $application->hackaton_id,
-                    organizerId: (int) $hackaton->user_id,
-                ));
+                $processedApplicationIds[] = (int) $application->id;
             }
         });
+
+        $processedApplications = HackatonApplication::query()
+            ->with(['hackaton', 'team'])
+            ->whereIn('id', $processedApplicationIds)
+            ->get()
+            ->keyBy('id');
+
+        foreach ($processedApplicationIds as $applicationId) {
+            $application = $processedApplications->get($applicationId);
+
+            if (! $application) {
+                continue;
+            }
+
+            $this->notifyTeamAboutStatus($application);
+            event(new HackatonApplicationChanged(
+                teamId: (int) $application->team_id,
+                hackatonId: (int) $application->hackaton_id,
+                organizerId: (int) $hackaton->user_id,
+                invalidateHomeFeatured: $status === ApplicationStatus::ACCEPTED,
+            ));
+        }
 
         return back()->with('success', 'Групповая модерация выполнена.');
     }

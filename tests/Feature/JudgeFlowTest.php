@@ -62,6 +62,25 @@ test('user can accept judge invitation and become a judge', function () {
     expect($invitation->refresh()->status)->toBe(JudgeInvitation::STATUS_ACCEPTED);
 });
 
+test('expired judge invitation cannot be accepted', function () {
+    $organizer = User::factory()->partner()->create();
+    $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);
+    $invitedUser = User::factory()->create(['email' => 'expired-judge@gmail.com']);
+
+    $invitation = JudgeInvitation::factory()->create([
+        'hackaton_id' => $hackaton->id,
+        'invited_email' => 'expired-judge@gmail.com',
+        'invited_by' => $organizer->id,
+        'status' => JudgeInvitation::STATUS_PENDING,
+        'token' => Str::random(64),
+        'expires_at' => now()->subMinute(),
+    ]);
+
+    $this->actingAs($invitedUser)
+        ->post(route('judges.invitations.accept.store', $invitation->token))
+        ->assertStatus(410);
+});
+
 test('judge can grade a team submission', function () {
     $organizer = User::factory()->partner()->create();
     $hackaton = Hackaton::factory()->create(['user_id' => $organizer->id]);

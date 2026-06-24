@@ -1,12 +1,13 @@
+/** @type {Map<string, { setActiveTab: (tabValue: string, replace?: boolean) => void }>} */
+const tabControllers = new Map();
+
+let delegationBound = false;
+
 /**
  * Sets up an accessible tab group driven by data attributes.
  *
  * Triggers: [data-tab-trigger="<group>"][data-tab-value="<value>"]
  * Panels:   [data-tab-panel="<group>"][data-tab-value="<value>"]
- *
- * Supports two trigger styles:
- *   - DaisyUI `.tab` — toggles `tab-active`
- *   - Button group — toggles `btn-primary` / `btn-ghost`
  *
  * @param {string} groupName
  * @param {string} fallbackTab
@@ -43,7 +44,7 @@ export function setupTabGroup(groupName, fallbackTab) {
     let activeTab = requestedTab && availableTabs.has(requestedTab) ? requestedTab : fallbackTab;
 
     if (!availableTabs.has(activeTab)) {
-        activeTab = primaryTriggers[0].dataset.tabValue;
+        activeTab = primaryTriggers[0]?.dataset.tabValue ?? fallbackTab;
     }
 
     const setActiveTab = (tabValue, replace = false) => {
@@ -68,18 +69,20 @@ export function setupTabGroup(groupName, fallbackTab) {
         });
 
         const nextHash = `${hashPrefix}${tabValue}`;
+        const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
         if (replace) {
-            history.replaceState(null, '', nextHash);
+            history.replaceState(null, '', nextUrl);
         } else {
-            history.pushState(null, '', nextHash);
+            history.pushState(null, '', nextUrl);
         }
     };
 
-    allTriggers.forEach((trigger) => {
-        trigger.addEventListener('click', () => setActiveTab(trigger.dataset.tabValue));
-    });
-
     primaryTriggers.forEach((trigger) => {
+        if (trigger.dataset.tabKeybound === 'true') {
+            return;
+        }
+
+        trigger.dataset.tabKeybound = 'true';
         trigger.addEventListener('keydown', (event) => {
             if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) {
                 return;
@@ -108,4 +111,83 @@ export function setupTabGroup(groupName, fallbackTab) {
     setActiveTab(activeTab, true);
 
     return { setActiveTab };
+}
+
+/**
+ * Binds organizer shortcut buttons that switch tabs and optionally open modals.
+ *
+ * @param {ParentNode} root
+ * @param {{ setActiveTab: (tabValue: string, replace?: boolean) => void }} controller
+ */
+function bindOrganizerTabActions(root, controller) {
+    root.querySelectorAll('[data-organizer-action="tab"]:not([data-organizer-tab-bound])').forEach((btn) => {
+        btn.dataset.organizerTabBound = 'true';
+        btn.addEventListener('click', () => {
+            const tabValue = btn.getAttribute('data-tab-target');
+            if (tabValue) {
+                controller.setActiveTab(tabValue);
+            }
+
+            const modalId = btn.getAttribute('data-open-modal');
+            if (modalId) {
+                const toggle = document.getElementById(modalId);
+                if (toggle) {
+                    toggle.checked = true;
+                }
+            }
+        });
+    });
+}
+
+/**
+ * Initializes tab groups declared via data-tab-init on a root element.
+ *
+ * @param {ParentNode} [root=document]
+ */
+export function initTabGroups(root = document) {
+    root.querySelectorAll('[data-tab-init]:not([data-tabs-initialized])').forEach((el) => {
+        const groupName = el.getAttribute('data-tab-init');
+        const fallback = el.getAttribute('data-tab-fallback') ?? '';
+
+        if (!groupName) {
+            return;
+        }
+
+        el.setAttribute('data-tabs-initialized', 'true');
+
+        const controller = setupTabGroup(groupName, fallback);
+        tabControllers.set(groupName, controller);
+        bindOrganizerTabActions(el, controller);
+    });
+}
+
+/**
+ * Registers delegated click handlers once for all tab groups.
+ */
+export function bootstrapTabSystem() {
+    if (delegationBound) {
+        return;
+    }
+
+    delegationBound = true;
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const trigger = target.closest('[data-tab-trigger]');
+        if (!trigger) {
+            return;
+        }
+
+        const groupName = trigger.getAttribute('data-tab-trigger');
+        const tabValue = trigger.getAttribute('data-tab-value');
+        const controller = groupName ? tabControllers.get(groupName) : undefined;
+
+        if (controller && tabValue) {
+            controller.setActiveTab(tabValue);
+        }
+    });
 }

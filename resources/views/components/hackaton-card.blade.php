@@ -165,11 +165,11 @@
         <div class="pt-1">
             @if (filled($href))
                 <a href="{{ $href }}" @if ($navigate) wire:navigate @endif
-                    class="ui-cta-outline btn-sm w-full sm:btn-md">
+                    class="ui-cta-outline w-full">
                     Подробнее
                 </a>
             @else
-                <button type="button" class="ui-cta-outline btn-sm w-full sm:btn-md"
+                <button type="button" class="ui-cta-outline w-full"
                     wire:click="openHackaton({{ $hackaton->id }})" wire:loading.attr="disabled"
                     wire:target="openHackaton({{ $hackaton->id }})">
                     <span wire:loading.remove wire:target="openHackaton({{ $hackaton->id }})">Подробнее</span>

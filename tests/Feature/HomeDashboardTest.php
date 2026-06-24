@@ -114,5 +114,5 @@ test('admin sees extended kpi cards on home', function () {
         ->assertSee('Пользователей', false)
         ->assertSee('Хакатонов', false)
         ->assertSee('Организаторов', false)
-        ->assertSee('Заявок команд на рассмотрении', false);
+        ->assertSee('Заявок на рассмотрении', false);
 });

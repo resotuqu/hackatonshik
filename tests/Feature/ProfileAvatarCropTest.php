@@ -29,3 +29,15 @@ test('uploaded avatar persists when file is set on component', function () {
 
     expect(Storage::disk('public')->exists($fresh->avatar_path))->toBeTrue();
 });
+
+test('profile page includes avatar cropper bootstrap when bundle is stale', function () {
+    $user = User::factory()->create([
+        'email_verified_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('profile'))
+        ->assertOk()
+        ->assertSee('x-data="avatarCropper(', false)
+        ->assertSee('window.createAvatarCropperModal = function createAvatarCropperModal', false);
+});

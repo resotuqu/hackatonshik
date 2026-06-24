@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Pages\Hackatons;
 
-use App\Enums\ApplicationStatus;
+use App\Actions\Hackaton\QuickApplyToHackaton;
 use App\Enums\HackatonStatus;
 use App\Models\Hackaton;
-use App\Models\HackatonApplication;
 use App\Models\ListAnalyticsEvent;
 use App\Models\SavedListFilter;
 use App\Models\Team;
@@ -14,6 +13,7 @@ use App\Support\FlashToast;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -147,41 +147,37 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function quickApplyHackaton(int $hackatonId): void
+    public function setStatusGroup(string $group): void
     {
-        if (! Auth::check()) {
+        if (! in_array($group, ['all', 'upcoming', 'active', 'finished'], true)) {
             return;
         }
 
-        $teamId = Cache::remember(
-            "quick-hackaton-team-{$hackatonId}-".Auth::id(),
-            now()->addMinutes(5),
-            fn () => Team::query()
-                ->where('user_id', Auth::id())
-                ->where('hackaton_id', $hackatonId)
-                ->value('id')
-        );
+        $this->statusGroup = $group;
+        $this->resetPage();
+    }
 
-        if (! $teamId) {
-            $this->warning('Нет доступной команды для быстрой заявки.', position: FlashToast::POSITION);
+    public function quickApplyHackaton(int $hackatonId, QuickApplyToHackaton $quickApply): void
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return;
+        }
+
+        try {
+            $application = $quickApply->handle($user, $hackatonId);
+        } catch (ValidationException $exception) {
+            $message = collect($exception->errors())->flatten()->first() ?? 'Не удалось отправить заявку.';
+            $this->warning($message, position: FlashToast::POSITION);
 
             return;
         }
 
-        $application = HackatonApplication::query()->firstOrNew([
+        $this->trackListEvent('quick_apply_click', [
             'hackaton_id' => $hackatonId,
-            'team_id' => (int) $teamId,
+            'team_id' => $application->team_id,
         ]);
-
-        $application->fill([
-            'status' => ApplicationStatus::PENDING,
-            'reviewed_at' => null,
-            'reviewed_by' => null,
-            'message' => null,
-        ]);
-        $application->save();
-
-        $this->trackListEvent('quick_apply_click', ['hackaton_id' => $hackatonId, 'team_id' => (int) $teamId]);
         $this->success('Быстрая заявка отправлена.', position: FlashToast::POSITION);
     }
 

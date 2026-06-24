@@ -1,9 +1,9 @@
 <div class="mx-auto w-full max-w-6xl space-y-6">
 
-    <nav class="text-sm breadcrumbs">
+    <nav class="text-sm breadcrumbs" aria-label="{{ __('ui.breadcrumbs.aria_label') }}">
         <ul>
-            <li><a href="/">Главная</a></li>
-            <li class="opacity-70">Профиль</li>
+            <li><a href="/">{{ __('ui.nav.home') }}</a></li>
+            <li class="opacity-70">{{ __('ui.nav.profile') }}</li>
         </ul>
     </nav>
 
@@ -421,38 +421,38 @@
         </aside>
     </div>
 
-    {{-- Data export (152-ФЗ, ст. 14) --}}
+    {{-- Data management --}}
     <section class="card border border-base-300 bg-base-100">
-        <div class="card-body gap-3">
+        <div class="card-body gap-6">
             <h2 class="card-title text-base">
-                <x-app-icon icon="heroicons:arrow-down-tray" class="h-5 w-5 text-base-content/70" />
-                Скачать мои данные
+                <x-app-icon icon="heroicons:cog-6-tooth" class="h-5 w-5 text-base-content/70" />
+                Управление данными
             </h2>
-            <p class="text-sm text-base-content/70">
-                В соответствии с ФЗ-152 (ст.&nbsp;14) вы вправе получить копию всех персональных данных,
-                которые хранятся о вас в системе. Файл формируется в формате PDF.
-            </p>
-            <div>
-                <a href="{{ route('profile.export') }}" class="btn btn-outline btn-sm" target="_blank">
-                    <x-app-icon icon="heroicons:document-arrow-down" class="h-4 w-4" />
-                    Скачать PDF с данными аккаунта
-                </a>
-            </div>
-        </div>
-    </section>
 
-    {{-- Danger zone --}}
-    <section class="card border border-error/30 bg-base-100">
-        <div class="card-body gap-3">
-            <h2 class="card-title text-base text-error">
-                <x-app-icon icon="heroicons:exclamation-triangle" class="h-5 w-5" />
-                Опасная зона
-            </h2>
-            <p class="text-sm text-base-content/70">
-                Удаление аккаунта повлечёт безвозвратное уничтожение всех ваших данных: профиля, команд, заявок и переписки. Восстановление невозможно.
-            </p>
-            <div>
-                <x-mary-button label="Удалить аккаунт" class="btn-error btn-outline btn-sm" type="button" wire:click="$set('deleteAccountModal', true)" />
+            {{-- Data export --}}
+            <div class="space-y-3 border-b border-base-300 pb-6 last:border-0 last:pb-0">
+                <h3 class="text-sm font-semibold text-base-content">Скачать мои данные</h3>
+                <p class="text-sm text-base-content/70">
+                    В соответствии с ФЗ-152 (ст.&nbsp;14) вы вправе получить копию всех персональных данных,
+                    которые хранятся о вас в системе. Файл формируется в формате PDF.
+                </p>
+                <div>
+                    <a href="{{ route('profile.export') }}" class="btn btn-outline btn-sm" target="_blank">
+                        <x-app-icon icon="heroicons:document-arrow-down" class="h-4 w-4" />
+                        Скачать PDF с данными аккаунта
+                    </a>
+                </div>
+            </div>
+
+            {{-- Account deletion --}}
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-error">Удаление аккаунта</h3>
+                <p class="text-sm text-base-content/70">
+                    Удаление аккаунта повлечёт безвозвратное уничтожение всех ваших данных: профиля, команд, заявок и переписки. Восстановление невозможно.
+                </p>
+                <div>
+                    <x-mary-button label="Удалить аккаунт" class="btn-error btn-outline btn-sm" type="button" wire:click="$set('deleteAccountModal', true)" />
+                </div>
             </div>
         </div>
     </section>
@@ -461,7 +461,7 @@
         <div class="space-y-4">
             @if ($phoneChangeStep === 'phone')
                 <p class="text-sm text-base-content/80">Сначала придёт код на вашу текущую почту, затем мы позвоним на новый номер.</p>
-                <x-mary-input label="Новый номер телефона" wire:model="new_phone" hint="11–12 символов, как при регистрации" />
+                <x-mary-input label="Новый номер телефона" wire:model="new_phone" x-mask="+7 (###) ###-##-##" placeholder="+7 (999) 123-45-67" hint="Формат: +7 (999) 123-45-67" />
             @elseif ($phoneChangeStep === 'email')
                 <p class="text-sm text-base-content/80">Введите код из письма, отправленного на <span class="font-medium">{{ auth()->user()->email }}</span>.</p>
                 <x-mary-input label="Код из почты" wire:model="phone_email_code" maxlength="6" />

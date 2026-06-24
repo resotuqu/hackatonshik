@@ -13,7 +13,10 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 test('guest can open public hackaton show page', function () {
-    $organizer = User::factory()->partner()->create();
+    $organizer = User::factory()->partner()->create([
+        'nickname' => 'OrganizerShowNickUnique',
+        'fio' => 'Организатор ФИО Уникальный',
+    ]);
     $hackaton = Hackaton::factory()->for($organizer)->create([
         'is_public' => true,
         'title' => 'PublicShowHackUnique',
@@ -21,7 +24,8 @@ test('guest can open public hackaton show page', function () {
 
     get(route('hackatons.show', $hackaton))
         ->assertOk()
-        ->assertSee('PublicShowHackUnique', false);
+        ->assertSee('PublicShowHackUnique', false)
+        ->assertSee('OrganizerShowNickUnique', false);
 });
 
 test('guest cannot open private hackaton show page', function () {

@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Actions\Hackaton\ResolveParticipantUsersForHackatonCertificates;
 use App\Models\Hackaton;
 use App\Models\HackatonCertificate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreHackatonCertificateRequest extends FormRequest
 {
@@ -26,5 +28,37 @@ class StoreHackatonCertificateRequest extends FormRequest
             'file' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:10240'],
             'issued_at' => ['nullable', 'date'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            /** @var Hackaton $hackaton */
+            $hackaton = $this->route('hackaton');
+            $participantIds = app(ResolveParticipantUsersForHackatonCertificates::class)
+                ->handle($hackaton)
+                ->pluck('id')
+                ->all();
+
+            $recipientIds = collect($this->input('user_ids', []))
+                ->filter()
+                ->whenEmpty(fn () => collect([(int) $this->input('user_id')]))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+
+            $invalidIds = $recipientIds->diff($participantIds);
+
+            if ($invalidIds->isNotEmpty()) {
+                $validator->errors()->add(
+                    'user_ids',
+                    'Сертификаты можно выдавать только участникам хакатона.',
+                );
+            }
+        });
     }
 }
